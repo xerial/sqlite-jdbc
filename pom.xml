@@ -11,7 +11,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>v037</version>
+  <version>${sqlite.os}-v037</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -33,24 +33,37 @@
   <!--  OS dependent settings for GWT compiler -->
   <profiles>
     <profile>
-      <id>windows</id>
+      <id>win</id>
       <properties>
-        <sqlite.lib>win</sqlite.lib>
+        <sqlite.os>win</sqlite.os>
       </properties>
     </profile>
     <profile>
       <id>linux</id>
       <properties>
-        <sqlite.lib>linux</sqlite.lib>
+        <sqlite.os>linux</sqlite.os>
       </properties>
     </profile>
     <profile>
       <id>mac</id>
       <properties>
-        <sqlite.lib>mac</sqlite.lib>
+        <sqlite.os>mac</sqlite.os>
       </properties>
     </profile>
   </profiles>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>native/${sqlite.os}/**</include>
+          <include>org/**</include>
+        </includes> 
+      </resource>
+    </resources>
+  </build>  
+  
 
 
 </project>
