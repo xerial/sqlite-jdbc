@@ -30,6 +30,28 @@
     </repository>
   </repositories>
 
+  <!--  OS dependent settings for GWT compiler -->
+  <profiles>
+    <profile>
+      <id>windows</id>
+      <properties>
+        <sqlite.lib>win</sqlite.lib>
+      </properties>
+    </profile>
+    <profile>
+      <id>linux</id>
+      <properties>
+        <sqlite.lib>linux</sqlite.lib>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac</id>
+      <properties>
+        <sqlite.lib>mac</sqlite.lib>
+      </properties>
+    </profile>
+  </profiles>
+
 
 </project>
 
