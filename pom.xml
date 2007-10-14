@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <artifactId>xerial-base</artifactId>
+    <groupId>org.xerial</groupId>
+    <version>1.1</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.xerial</groupId>
+  <artifactId>sqlite-jdbc</artifactId>
+  <version>v037</version>
+  <name>SQLite JDBC</name>
+  <description>SQLite JDBC library</description>
+
+  <distributionManagement>
+    <site>
+      <id>xerial.local</id>
+      <url>file://${basedir}/../maven/site/${project.artifactId}</url>
+    </site>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>xerial</id>
+      <name>Xerial Artifact Repository</name>
+      <url>http://www.xerial.org/svn/project/XerialJ/trunk/maven/artifact</url>
+    </repository>
+  </repositories>
+
+
+</project>
+
