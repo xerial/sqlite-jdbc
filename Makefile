@@ -3,7 +3,10 @@ CURRENT_DIR = $(shell cygpath -w `pwd`)
 
 all: package 
 
-package: win mac linux
+package: compile win mac linux
+	
+compile:
+	mvn compile	
 	
 win:
 	mvn -P win package

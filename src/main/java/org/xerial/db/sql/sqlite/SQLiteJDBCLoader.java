@@ -94,17 +94,20 @@ public class SQLiteJDBCLoader {
         if (sqliteNativeLibraryName == null)
             sqliteNativeLibraryName = System.mapLibraryName("sqlitejdbc");
 
-        if (setNativeLibraryPath(sqliteNativeLibraryPath, sqliteNativeLibraryName))
+        if(sqliteNativeLibraryPath != null)
         {
-            extracted = true;
-            return;
+            if (setNativeLibraryPath(sqliteNativeLibraryPath, sqliteNativeLibraryName))
+            {
+                extracted = true;
+                return;
+            }
         }
 
         // Load the os-dependent library from a jar file
         String osName = System.getProperty("os.name");
         if (osName.contains("Windows"))
         {
-            sqliteNativeLibraryPath = "/native/win32";
+            sqliteNativeLibraryPath = "/native/win";
         }
         else if (osName.contains("Mac"))
         {
