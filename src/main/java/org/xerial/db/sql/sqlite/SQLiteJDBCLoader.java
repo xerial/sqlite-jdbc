@@ -21,7 +21,7 @@ import java.io.InputStream;
  * 
  * The library files are automatically extracted from this project's package (JAR).
  *
- * usage: call {@link #setSQLiteNativeLibraryPath()} before using SQLite JDBC driver.
+ * usage: call {@link #initialize()} before using SQLite JDBC driver.
  * 
  * @author leo
  *
@@ -29,6 +29,11 @@ import java.io.InputStream;
 public class SQLiteJDBCLoader {
 
     private static boolean extracted = false;
+    
+    public static void initialize()
+    {
+        setSQLiteNativeLibraryPath();
+    }
     
     private static boolean extractLibraryFile(String libraryName, String outputFileName)
     {
@@ -78,7 +83,7 @@ public class SQLiteJDBCLoader {
             return false;
     }
 
-    public static void setSQLiteNativeLibraryPath()
+    private static void setSQLiteNativeLibraryPath()
     {
         if (extracted)
             return;
