@@ -3,25 +3,17 @@ CURRENT_DIR = $(shell cygpath -w `pwd`)
 
 all: package 
 
-package: compile win mac linux
-	
-compile:
-	mvn compile	
-	
+package: win mac linux
+
 win:
-	mvn -P win package
+	mvn -P win clean package deploy -Dmaven.test.skip=true 
 	
 mac:
-	mvn -P mac package
+	mvn -P mac clean package deploy -Dmaven.test.skip=true 
 	
 linux:
-	mvn -P linux package
-	
+	mvn -P linux clean package deploy -Dmaven.test.skip=true 
 
-deploy: 
-	mvn -P win deploy
-	mvn -P mac deploy
-	mvn -P linux deploy
 
 clean:
 	mvn clean
