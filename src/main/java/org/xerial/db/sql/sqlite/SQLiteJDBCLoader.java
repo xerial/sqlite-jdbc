@@ -104,16 +104,16 @@ public class SQLiteJDBCLoader {
         String osName = System.getProperty("os.name");
         if (osName.contains("Windows"))
         {
-            sqliteNativeLibraryPath = "/sqlite/win32";
+            sqliteNativeLibraryPath = "/native/win32";
         }
         else if (osName.contains("Mac"))
         {
-            sqliteNativeLibraryPath = "/sqlite/mac";
+            sqliteNativeLibraryPath = "/native/mac";
         }
-        /*
-         * else if (osName.contains("Linux")) { sqliteNativeLibraryPath =
-         * "/sqlite/linux"; }
-         */
+        else if (osName.contains("Linux")) 
+        {
+            sqliteNativeLibraryPath = "/native/linux"; 
+        }
         else
             throw new UnsupportedOperationException("unsupported OS for SQLite-JDBC driver: " + osName);
 
