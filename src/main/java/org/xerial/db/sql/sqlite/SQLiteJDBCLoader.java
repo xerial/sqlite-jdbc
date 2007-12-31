@@ -35,14 +35,14 @@ public class SQLiteJDBCLoader {
         setSQLiteNativeLibraryPath();
     }
     
-    private static boolean extractLibraryFile(String libraryName, String outputFileName)
+    private static boolean extractLibraryFile(String libraryResourcePath, String libraryFolder, String libraryFileName)
     {
-        File libFile = new File(outputFileName);
+        File libFile = new File(libraryFolder, libraryFileName);
 
         try
         {
             // extract file into the current directory
-            InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(libraryName);
+            InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(libraryResourcePath);
             FileOutputStream writer = new FileOutputStream(libFile);
             byte[] buffer = new byte[1024];
             int bytesRead = 0;
@@ -57,11 +57,11 @@ public class SQLiteJDBCLoader {
             if(!System.getProperty("os.name").contains("Windows"))
             {
                 try {
-                    Runtime.getRuntime ().exec (new String []{"chmod", "755", outputFileName}).waitFor(); 
+                    Runtime.getRuntime ().exec (new String []{"chmod", "755", libFile.getAbsolutePath()}).waitFor(); 
                 } catch (Throwable e) {}
             }
             
-            return setNativeLibraryPath(null, outputFileName);
+            return setNativeLibraryPath(libraryFolder, libraryFileName);
         }
         catch (IOException e)
         {
@@ -120,8 +120,10 @@ public class SQLiteJDBCLoader {
         else
             throw new UnsupportedOperationException("unsupported OS for SQLite-JDBC driver: " + osName);
 
-        /* Try extracting and loading library from jar */
-        if (extractLibraryFile(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName,
+        // temporary library folder
+        String libraryFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
+        /* Try extracting thelibrary from jar */
+        if (extractLibraryFile(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName, libraryFolder, 
                 sqliteNativeLibraryName))
         {
             extracted = true;
