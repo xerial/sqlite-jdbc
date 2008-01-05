@@ -27,7 +27,7 @@
   <parent>
     <artifactId>xerial-base</artifactId>
     <groupId>org.xerial</groupId>
-    <version>1.1</version>
+    <version>2.0</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -37,23 +37,12 @@
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
-  <distributionManagement>
-    <site>
-      <id>xerial.local</id>
-      <url>file://${basedir}/../maven/site/${project.artifactId}</url>
-    </site>
-    <repository>
-      <id>xerial.local</id>
-      <name>Xerial Maven Repository managed by Subversion</name>
-      <url>file://${basedir}/../maven/artifact</url>
-    </repository>
-  </distributionManagement>
 
   <repositories>
     <repository>
       <id>xerial</id>
       <name>Xerial Artifact Repository</name>
-      <url>http://www.xerial.org/svn/project/XerialJ/trunk/maven/artifact</url>
+      <url>http://maven.xerial.org/repository/artifact</url>
     </repository>
   </repositories>
 
