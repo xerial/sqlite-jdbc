@@ -1,9 +1,12 @@
 
 CURRENT_DIR = $(shell cygpath -w `pwd`)
 
+.phony: all package win mac linux 
+
 all: package 
 
-package: win mac linux
+package: 
+	mvn clean package deploy -Dmaven.test.skip=true
 
 win:
 	mvn -P win clean package deploy -Dmaven.test.skip=true 

@@ -2,27 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <!--  OS dependent settings for GWT compiler -->
-  <profiles>
-    <profile>
-      <id>win</id>
-      <properties>
-        <sqlite.os>win</sqlite.os>
-      </properties>
-    </profile>
-    <profile>
-      <id>linux</id>
-      <properties>
-        <sqlite.os>linux</sqlite.os>
-      </properties>
-    </profile>
-    <profile>
-      <id>mac</id>
-      <properties>
-        <sqlite.os>mac</sqlite.os>
-      </properties>
-    </profile>
-  </profiles>
 
   <parent>
     <artifactId>xerial-base</artifactId>
@@ -33,10 +12,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>${sqlite.os}-v038</version>
+  <version>v038</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
-
 
   <repositories>
     <repository>
@@ -52,14 +30,13 @@
       <resource>
         <directory>src/main/resources</directory>
         <includes>
-          <include>native/${sqlite.os}/**</include>
+          <include>native/**</include>
           <include>org/**</include>
         </includes> 
       </resource>
     </resources>
   </build>  
   
-
 
 </project>
 
