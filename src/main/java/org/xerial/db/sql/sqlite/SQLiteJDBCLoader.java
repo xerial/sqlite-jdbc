@@ -30,30 +30,34 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name, appropriately 
- * so that the SQLite JDBC driver can find *.dll, *.jnilib and *.so files, according   
- * to the current OS (win, linux, mac).
+ * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name,
+ * appropriately so that the SQLite JDBC driver can find *.dll, *.jnilib and
+ * *.so files, according to the current OS (win, linux, mac).
  * 
- * The library files are automatically extracted from this project's package (JAR).
- *
+ * The library files are automatically extracted from this project's package
+ * (JAR).
+ * 
  * usage: call {@link #initialize()} before using SQLite JDBC driver.
  * 
  * @author leo
- *
+ * 
  */
-public class SQLiteJDBCLoader {
+public class SQLiteJDBCLoader
+{
 
     private static boolean extracted = false;
-    
+
     public static void initialize()
     {
         setSQLiteNativeLibraryPath();
     }
-    
+
     private static boolean extractLibraryFile(String libraryResourcePath, String libraryFolder, String libraryFileName)
     {
         File libFile = new File(libraryFolder, libraryFileName);
 
+        if (libFile.exists())
+            return true;
         try
         {
             // extract file into the current directory
@@ -65,21 +69,25 @@ public class SQLiteJDBCLoader {
             {
                 writer.write(buffer, 0, bytesRead);
             }
-            
+
             writer.close();
             reader.close();
-            
-            if(!System.getProperty("os.name").contains("Windows"))
+
+            if (!System.getProperty("os.name").contains("Windows"))
             {
-                try {
-                    Runtime.getRuntime ().exec (new String []{"chmod", "755", libFile.getAbsolutePath()}).waitFor(); 
-                } catch (Throwable e) {}
+                try
+                {
+                    Runtime.getRuntime().exec(new String[] { "chmod", "755", libFile.getAbsolutePath() }).waitFor();
+                }
+                catch (Throwable e)
+                {}
             }
-            
+
             return setNativeLibraryPath(libraryFolder, libraryFileName);
         }
         catch (IOException e)
         {
+            System.err.println(e.getMessage());
             return false;
         }
 
@@ -88,7 +96,7 @@ public class SQLiteJDBCLoader {
     private static boolean setNativeLibraryPath(String path, String name)
     {
         File libPath = new File(path, name);
-        if(libPath.exists())
+        if (libPath.exists())
         {
             System.setProperty("org.sqlite.lib.path", path == null ? "./" : path);
             System.setProperty("org.sqlite.lib.name", name);
@@ -109,7 +117,7 @@ public class SQLiteJDBCLoader {
         if (sqliteNativeLibraryName == null)
             sqliteNativeLibraryName = System.mapLibraryName("sqlitejdbc");
 
-        if(sqliteNativeLibraryPath != null)
+        if (sqliteNativeLibraryPath != null)
         {
             if (setNativeLibraryPath(sqliteNativeLibraryPath, sqliteNativeLibraryName))
             {
@@ -128,9 +136,9 @@ public class SQLiteJDBCLoader {
         {
             sqliteNativeLibraryPath = "/native/mac";
         }
-        else if (osName.contains("Linux")) 
+        else if (osName.contains("Linux"))
         {
-            sqliteNativeLibraryPath = "/native/linux"; 
+            sqliteNativeLibraryPath = "/native/linux";
         }
         else
             throw new UnsupportedOperationException("unsupported OS for SQLite-JDBC driver: " + osName);
@@ -138,7 +146,7 @@ public class SQLiteJDBCLoader {
         // temporary library folder
         String libraryFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
         /* Try extracting thelibrary from jar */
-        if (extractLibraryFile(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName, libraryFolder, 
+        if (extractLibraryFile(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName, libraryFolder,
                 sqliteNativeLibraryName))
         {
             extracted = true;
