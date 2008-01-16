@@ -56,31 +56,32 @@ public class SQLiteJDBCLoader
     {
         File libFile = new File(libraryFolder, libraryFileName);
 
-        if (libFile.exists())
-            return true;
         try
         {
-            // extract file into the current directory
-            InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(libraryResourcePath);
-            FileOutputStream writer = new FileOutputStream(libFile);
-            byte[] buffer = new byte[1024];
-            int bytesRead = 0;
-            while ((bytesRead = reader.read(buffer)) != -1)
+            if (!libFile.exists())
             {
-                writer.write(buffer, 0, bytesRead);
-            }
-
-            writer.close();
-            reader.close();
-
-            if (!System.getProperty("os.name").contains("Windows"))
-            {
-                try
+                // extract file into the current directory
+                InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(libraryResourcePath);
+                FileOutputStream writer = new FileOutputStream(libFile);
+                byte[] buffer = new byte[1024];
+                int bytesRead = 0;
+                while ((bytesRead = reader.read(buffer)) != -1)
                 {
-                    Runtime.getRuntime().exec(new String[] { "chmod", "755", libFile.getAbsolutePath() }).waitFor();
+                    writer.write(buffer, 0, bytesRead);
                 }
-                catch (Throwable e)
-                {}
+
+                writer.close();
+                reader.close();
+
+                if (!System.getProperty("os.name").contains("Windows"))
+                {
+                    try
+                    {
+                        Runtime.getRuntime().exec(new String[] { "chmod", "755", libFile.getAbsolutePath() }).waitFor();
+                    }
+                    catch (Throwable e)
+                    {}
+                }
             }
 
             return setNativeLibraryPath(libraryFolder, libraryFileName);
