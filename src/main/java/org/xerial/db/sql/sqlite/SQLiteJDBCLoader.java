@@ -103,7 +103,7 @@ public class SQLiteJDBCLoader
 
     }
 
-    private static boolean loadNativeLibrary(String path, String name)
+    private static synchronized boolean loadNativeLibrary(String path, String name)
     {
         File libPath = new File(path, name);
         if (libPath.exists())
