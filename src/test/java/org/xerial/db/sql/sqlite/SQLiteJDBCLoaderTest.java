@@ -52,7 +52,7 @@ public class SQLiteJDBCLoaderTest
     @Test
     public void query() throws ClassNotFoundException
     {
-        SQLiteJDBCLoader.initialize();
+        // SQLiteJDBCLoader.initialize();
 
         // load the sqlite-JDBC driver into the current class loader
         Class.forName("org.sqlite.JDBC");

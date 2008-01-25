@@ -52,6 +52,13 @@ public class SQLiteJDBCLoader
         setSQLiteNativeLibraryPath();
     }
 
+    public static void initialize(boolean forceReload)
+    {
+        if (forceReload)
+            extracted = false;
+        setSQLiteNativeLibraryPath();
+    }
+
     private static boolean extractLibraryFile(String libraryResourcePath, String libraryFolder, String libraryFileName)
     {
         File libFile = new File(libraryFolder, libraryFileName);
