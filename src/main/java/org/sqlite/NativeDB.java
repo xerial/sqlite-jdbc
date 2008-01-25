@@ -13,10 +13,11 @@ final class NativeDB extends DB
 
     static boolean load()
     {
+        loaded = SQLiteJDBCLoader.initialize();
+        return loaded;
+        /*
         if (loaded != null)
             return loaded == Boolean.TRUE;
-
-        SQLiteJDBCLoader.initialize(true);
 
         String libpath = System.getProperty("org.sqlite.lib.path");
         String libname = System.getProperty("org.sqlite.lib.name");
@@ -37,7 +38,8 @@ final class NativeDB extends DB
         }
 
         loaded = Boolean.TRUE;
-        return true;
+        */
+        //return true;
     }
 
     /** linked list of all instanced UDFDatas */

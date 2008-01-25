@@ -47,16 +47,18 @@ public class SQLiteJDBCLoader
 
     private static boolean extracted = false;
 
-    public static void initialize()
+    public static boolean initialize()
     {
-        setSQLiteNativeLibraryPath();
+        loadSQLiteNativeLibrary();
+        return extracted;
     }
 
-    public static void initialize(boolean forceReload)
+    public static boolean initialize(boolean forceReload)
     {
         if (forceReload)
             extracted = false;
-        setSQLiteNativeLibraryPath();
+        loadSQLiteNativeLibrary();
+        return extracted;
     }
 
     private static boolean extractLibraryFile(String libraryResourcePath, String libraryFolder, String libraryFileName)
@@ -91,7 +93,7 @@ public class SQLiteJDBCLoader
                 }
             }
 
-            return setNativeLibraryPath(libraryFolder, libraryFileName);
+            return loadNativeLibrary(libraryFolder, libraryFileName);
         }
         catch (IOException e)
         {
@@ -101,20 +103,32 @@ public class SQLiteJDBCLoader
 
     }
 
-    private static boolean setNativeLibraryPath(String path, String name)
+    private static boolean loadNativeLibrary(String path, String name)
     {
         File libPath = new File(path, name);
         if (libPath.exists())
         {
-            System.setProperty("org.sqlite.lib.path", path == null ? "./" : path);
-            System.setProperty("org.sqlite.lib.name", name);
-            return true;
+            // System.setProperty("org.sqlite.lib.path", path == null ? "./" :
+            // path);
+            // System.setProperty("org.sqlite.lib.name", name);
+
+            try
+            {
+                System.load(new File(path, name).getAbsolutePath());
+                return true;
+            }
+            catch (UnsatisfiedLinkError e)
+            {
+                System.err.println(e);
+                return false;
+            }
+
         }
         else
             return false;
     }
 
-    private static void setSQLiteNativeLibraryPath()
+    private static void loadSQLiteNativeLibrary()
     {
         if (extracted)
             return;
@@ -127,7 +141,7 @@ public class SQLiteJDBCLoader
 
         if (sqliteNativeLibraryPath != null)
         {
-            if (setNativeLibraryPath(sqliteNativeLibraryPath, sqliteNativeLibraryName))
+            if (loadNativeLibrary(sqliteNativeLibraryPath, sqliteNativeLibraryName))
             {
                 extracted = true;
                 return;
