@@ -346,91 +346,76 @@ class Conn implements Connection
         throw new SQLException("unsupported by SQLite: savepoints");
     }
 
-    @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
     }
 
-    @Override
     public Blob createBlob() throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
     }
 
-    @Override
     public Clob createClob() throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
 
     }
 
-    @Override
     public NClob createNClob() throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
 
     }
 
-    @Override
     public SQLXML createSQLXML() throws SQLException
     {
-        throw new SQLException("not yet implemented");
-
+        throw new SQLException("unimplemented");
     }
 
-    @Override
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
 
     }
 
-    @Override
     public Properties getClientInfo() throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
 
     }
 
-    @Override
     public String getClientInfo(String name) throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
 
     }
 
-    @Override
     public boolean isValid(int timeout) throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
 
     }
 
-    @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException
     {
         throw new SQLClientInfoException();
     }
 
-    @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException
     {
         throw new SQLClientInfoException();
     }
 
-    @Override
     public boolean isWrapperFor(Class< ? > iface) throws SQLException
     {
-        throw new SQLException("not yet implemented");
+        throw new SQLException("unimplemented");
 
     }
 
-    @Override
     public <T> T unwrap(Class<T> iface) throws SQLException
     {
-        throw new SQLException("not yet implemented");
-
+        throw new SQLException("unimplemented");
     }
 
 }

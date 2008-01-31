@@ -768,7 +768,8 @@ class MetaData implements DatabaseMetaData
     {
         return true;
     } // TODO:
-                                                                    // check
+
+    // check
 
     public boolean supportsSubqueriesInIns()
     {
@@ -1171,62 +1172,53 @@ class MetaData implements DatabaseMetaData
         return buf.toString();
     }
 
-    @Override
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException
     {
         throw new SQLException("not yet implemented");
     }
 
-    @Override
     public ResultSet getClientInfoProperties() throws SQLException
     {
         throw new SQLException("not yet implemented");
 
     }
 
-    @Override
     public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern,
             String columnNamePattern) throws SQLException
     {
         throw new SQLException("not yet implemented");
     }
 
-    @Override
     public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException
     {
         throw new SQLException("not yet implemented");
 
     }
 
-    @Override
     public RowIdLifetime getRowIdLifetime() throws SQLException
     {
         throw new SQLException("not yet implemented");
 
     }
 
-    @Override
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException
     {
         throw new SQLException("not yet implemented");
 
     }
 
-    @Override
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException
     {
         throw new SQLException("not yet implemented");
 
     }
 
-    @Override
     public boolean isWrapperFor(Class< ? > iface) throws SQLException
     {
         throw new SQLException("not yet implemented");
 
     }
 
-    @Override
     public <T> T unwrap(Class<T> iface) throws SQLException
     {
         throw new SQLException("not yet implemented");
