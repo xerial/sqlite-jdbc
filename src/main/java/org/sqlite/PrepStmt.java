@@ -1,16 +1,11 @@
 /* Copyright 2006 David Crawshaw, see LICENSE file for licensing [BSD]. */
 package org.sqlite;
 
-import java.io.InputStream;
-import java.io.Reader;
 import java.sql.Date;
-import java.sql.NClob;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.RowId;
 import java.sql.SQLException;
-import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -322,465 +317,514 @@ final class PrepStmt extends RS implements PreparedStatement, ParameterMetaData,
         return new SQLException("not supported by PreparedStatment");
     }
 
-    public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-    }
-
-    public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setClob(int parameterIndex, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setClob(int parameterIndex, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setNClob(int parameterIndex, NClob value) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setNClob(int parameterIndex, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setNString(int parameterIndex, String value) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setRowId(int parameterIndex, RowId x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public boolean isClosed() throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public boolean isPoolable() throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public void setPoolable(boolean poolable) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public boolean isWrapperFor(Class< ? > iface) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public <T> T unwrap(Class<T> iface) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public int getHoldability() throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public Reader getNCharacterStream(int columnIndex) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public Reader getNCharacterStream(String columnLabel) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public NClob getNClob(int columnIndex) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public NClob getNClob(String columnLabel) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public String getNString(int columnIndex) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public String getNString(String columnLabel) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public RowId getRowId(int columnIndex) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public RowId getRowId(String columnLabel) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public SQLXML getSQLXML(int columnIndex) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public SQLXML getSQLXML(String columnLabel) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public void updateAsciiStream(int columnIndex, InputStream x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateAsciiStream(String columnLabel, InputStream x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateAsciiStream(int columnIndex, InputStream x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateAsciiStream(String columnLabel, InputStream x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBinaryStream(int columnIndex, InputStream x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBinaryStream(String columnLabel, InputStream x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBlob(int columnIndex, InputStream inputStream) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBlob(String columnLabel, InputStream inputStream) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBlob(int columnIndex, InputStream inputStream, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateBlob(String columnLabel, InputStream inputStream, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateCharacterStream(int columnIndex, Reader x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateCharacterStream(int columnIndex, Reader x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateCharacterStream(String columnLabel, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateClob(int columnIndex, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateClob(String columnLabel, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateClob(int columnIndex, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateClob(String columnLabel, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNCharacterStream(int columnIndex, Reader x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNCharacterStream(String columnLabel, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNCharacterStream(String columnLabel, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNClob(int columnIndex, NClob clob) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNClob(String columnLabel, NClob clob) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNClob(int columnIndex, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNClob(String columnLabel, Reader reader) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNClob(int columnIndex, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNClob(String columnLabel, Reader reader, long length) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNString(int columnIndex, String string) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateNString(String columnLabel, String string) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateRowId(int columnIndex, RowId x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateRowId(String columnLabel, RowId x) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException
-    {
-        // TODO Auto-generated method stub
-        throw new SQLException("not yet implemented");
-
-    }
+    // public void setAsciiStream(int parameterIndex, InputStream x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public void setAsciiStream(int parameterIndex, InputStream x, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setBinaryStream(int parameterIndex, InputStream x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setBinaryStream(int parameterIndex, InputStream x, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setBlob(int parameterIndex, InputStream inputStream) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setBlob(int parameterIndex, InputStream inputStream, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setCharacterStream(int parameterIndex, Reader reader) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setCharacterStream(int parameterIndex, Reader reader, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setClob(int parameterIndex, Reader reader) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setClob(int parameterIndex, Reader reader, long length)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setNCharacterStream(int parameterIndex, Reader value) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setNCharacterStream(int parameterIndex, Reader value, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setNClob(int parameterIndex, NClob value) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setNClob(int parameterIndex, Reader reader) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setNClob(int parameterIndex, Reader reader, long length)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setNString(int parameterIndex, String value) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setRowId(int parameterIndex, RowId x) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public boolean isClosed() throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public boolean isPoolable() throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public void setPoolable(boolean poolable) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public boolean isWrapperFor(Class< ? > iface) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public <T> T unwrap(Class<T> iface) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public int getHoldability() throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public Reader getNCharacterStream(int columnIndex) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public Reader getNCharacterStream(String columnLabel) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public NClob getNClob(int columnIndex) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public NClob getNClob(String columnLabel) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public String getNString(int columnIndex) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public String getNString(String columnLabel) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public RowId getRowId(int columnIndex) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public RowId getRowId(String columnLabel) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public SQLXML getSQLXML(int columnIndex) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public SQLXML getSQLXML(String columnLabel) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public void updateAsciiStream(int columnIndex, InputStream x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateAsciiStream(String columnLabel, InputStream x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateAsciiStream(int columnIndex, InputStream x, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateAsciiStream(String columnLabel, InputStream x, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBinaryStream(int columnIndex, InputStream x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBinaryStream(String columnLabel, InputStream x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBinaryStream(int columnIndex, InputStream x, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBinaryStream(String columnLabel, InputStream x, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBlob(int columnIndex, InputStream inputStream) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBlob(String columnLabel, InputStream inputStream)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBlob(int columnIndex, InputStream inputStream, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateBlob(String columnLabel, InputStream inputStream, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateCharacterStream(int columnIndex, Reader x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateCharacterStream(String columnLabel, Reader reader)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateCharacterStream(int columnIndex, Reader x, long length)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateCharacterStream(String columnLabel, Reader reader, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateClob(int columnIndex, Reader reader) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateClob(String columnLabel, Reader reader) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateClob(int columnIndex, Reader reader, long length)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateClob(String columnLabel, Reader reader, long length)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNCharacterStream(int columnIndex, Reader x) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNCharacterStream(String columnLabel, Reader reader)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNCharacterStream(int columnIndex, Reader x, long
+    // length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNCharacterStream(String columnLabel, Reader reader,
+    // long length) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNClob(int columnIndex, NClob clob) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNClob(String columnLabel, NClob clob) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNClob(int columnIndex, Reader reader) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNClob(String columnLabel, Reader reader) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNClob(int columnIndex, Reader reader, long length)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNClob(String columnLabel, Reader reader, long length)
+    // throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNString(int columnIndex, String string) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateNString(String columnLabel, String string) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateRowId(int columnIndex, RowId x) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateRowId(String columnLabel, RowId x) throws SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws
+    // SQLException
+    // {
+    // // TODO Auto-generated method stub
+    // throw new SQLException("not yet implemented");
+    //
+    // }
 }

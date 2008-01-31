@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -1172,56 +1171,60 @@ class MetaData implements DatabaseMetaData
         return buf.toString();
     }
 
-    public boolean autoCommitFailureClosesAllResultSets() throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public ResultSet getClientInfoProperties() throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern,
-            String columnNamePattern) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-    }
-
-    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public RowIdLifetime getRowIdLifetime() throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public boolean isWrapperFor(Class< ? > iface) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
-
-    public <T> T unwrap(Class<T> iface) throws SQLException
-    {
-        throw new SQLException("not yet implemented");
-
-    }
+    // public boolean autoCommitFailureClosesAllResultSets() throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public ResultSet getClientInfoProperties() throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public ResultSet getFunctionColumns(String catalog, String schemaPattern,
+    // String functionNamePattern,
+    // String columnNamePattern) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    // }
+    //
+    // public ResultSet getFunctions(String catalog, String schemaPattern,
+    // String functionNamePattern) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public RowIdLifetime getRowIdLifetime() throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public ResultSet getSchemas(String catalog, String schemaPattern) throws
+    // SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public boolean supportsStoredFunctionsUsingCallSyntax() throws
+    // SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public boolean isWrapperFor(Class< ? > iface) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
+    //
+    // public <T> T unwrap(Class<T> iface) throws SQLException
+    // {
+    // throw new SQLException("not yet implemented");
+    //
+    // }
 }
