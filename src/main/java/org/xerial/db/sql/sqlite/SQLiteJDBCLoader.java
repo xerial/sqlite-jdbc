@@ -24,10 +24,16 @@
 //--------------------------------------
 package org.xerial.db.sql.sqlite;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name,
@@ -61,41 +67,90 @@ public class SQLiteJDBCLoader
         return extracted;
     }
 
-    private static boolean extractLibraryFile(String libraryResourcePath, String libraryFolder, String libraryFileName)
+    private static String md5sum(InputStream input) throws IOException, NoSuchAlgorithmException
     {
-        File libFile = new File(libraryFolder, libraryFileName);
+        BufferedInputStream in = new BufferedInputStream(input);
 
         try
         {
-            if (!libFile.exists())
+            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            DigestInputStream digestInputStream = new DigestInputStream(in, digest);
+            for (; digestInputStream.read() >= 0;)
             {
-                // extract file into the current directory
-                InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(libraryResourcePath);
-                FileOutputStream writer = new FileOutputStream(libFile);
-                byte[] buffer = new byte[1024];
-                int bytesRead = 0;
-                while ((bytesRead = reader.read(buffer)) != -1)
+
+            }
+            ByteArrayOutputStream md5out = new ByteArrayOutputStream();
+            md5out.write(digest.digest());
+            return md5out.toString();
+        }
+        finally
+        {
+            in.close();
+        }
+    }
+
+    private static boolean extractLibraryFile(String libFolderForCurrentOS, String libraryFileName, String targetFolder)
+    {
+        String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
+
+        File extractedLibFile = new File(targetFolder, libraryFileName);
+
+        try
+        {
+            if (extractedLibFile.exists())
+            {
+                // test md5sum value
+                String md5sum1 = md5sum(SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath));
+                String md5sum2 = md5sum(new FileInputStream(extractedLibFile));
+
+                if (md5sum1.equals(md5sum2))
                 {
-                    writer.write(buffer, 0, bytesRead);
+                    return loadNativeLibrary(targetFolder, libraryFileName);
                 }
-
-                writer.close();
-                reader.close();
-
-                if (!System.getProperty("os.name").contains("Windows"))
+                else
                 {
-                    try
+                    // remove old native library file
+                    boolean deletionSucceeded = extractedLibFile.delete();
+                    if (!deletionSucceeded)
                     {
-                        Runtime.getRuntime().exec(new String[] { "chmod", "755", libFile.getAbsolutePath() }).waitFor();
+                        throw new IOException("failed to remove existing native library file: "
+                                + extractedLibFile.getAbsolutePath());
                     }
-                    catch (Throwable e)
-                    {}
                 }
             }
 
-            return loadNativeLibrary(libraryFolder, libraryFileName);
+            // extract file into the current directory
+            InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath);
+            FileOutputStream writer = new FileOutputStream(extractedLibFile);
+            byte[] buffer = new byte[1024];
+            int bytesRead = 0;
+            while ((bytesRead = reader.read(buffer)) != -1)
+            {
+                writer.write(buffer, 0, bytesRead);
+            }
+
+            writer.close();
+            reader.close();
+
+            if (!System.getProperty("os.name").contains("Windows"))
+            {
+                try
+                {
+                    Runtime.getRuntime().exec(new String[] { "chmod", "755", extractedLibFile.getAbsolutePath() })
+                            .waitFor();
+                }
+                catch (Throwable e)
+                {}
+            }
+
+            return loadNativeLibrary(targetFolder, libraryFileName);
         }
         catch (IOException e)
+        {
+            System.err.println(e.getMessage());
+            return false;
+        }
+        catch (NoSuchAlgorithmException e)
         {
             System.err.println(e.getMessage());
             return false;
@@ -166,10 +221,9 @@ public class SQLiteJDBCLoader
             throw new UnsupportedOperationException("unsupported OS for SQLite-JDBC driver: " + osName);
 
         // temporary library folder
-        String libraryFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
+        String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
         /* Try extracting thelibrary from jar */
-        if (extractLibraryFile(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName, libraryFolder,
-                sqliteNativeLibraryName))
+        if (extractLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder))
         {
             extracted = true;
             return;
