@@ -2,6 +2,8 @@ ifndef JAVA_HOME
 $(error Set JAVA_HOME environment variable)
 endif
 
+jni_md := $(shell find "$(JAVA_HOME)" -name jni_md.h)
+
 ifeq ($(os),)
 	ifeq ($(shell uname),Darwin)
 		os := Darwin
@@ -11,8 +13,16 @@ ifeq ($(os),)
 	endif
 	ifeq ($(findstring MINGW,$(shell uname)),MINGW)
 		os := Win
+		ifneq ($(jni_md),)
+		jni_include := $(shell cygpath -w `dirname "$(jni_md)"`)
+		endif
 	endif
 endif
+
+ifneq ($(jni_md),)
+jni_include := $(shell dirname "$(jni_md)")
+endif
+
 ifeq ($(os),)
 	os := Default
 endif
@@ -33,10 +43,6 @@ sqlite := sqlite-$(sqlite_version)
 
 sqlitejdbc := sqlitejdbc-v$(shell cat VERSION)
 
-jni_md := $(shell find "$(JAVA_HOME)" -name jni_md.h)
-ifneq ($(jni_md),)
-jni_include := $(shell dirname "$(jni_md)")
-endif
 
 libs := build$(sep)$(subst  ,$(sep),$(wildcard lib/*.jar))
 
@@ -63,8 +69,8 @@ Darwin_CFLAGS    := -I$(JAVA_HOME)/include -O3 -fPIC
 Darwin_LINKFLAGS := -dynamiclib
 Darwin_LIBNAME   := libsqlitejdbc.jnilib
 
-Win_CC           := $(arch)-mingw32-gcc
-Win_STRIP        := $(arch)-mingw32-strip
+Win_CC           := mingw32-gcc
+Win_STRIP        := strip
 Win_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O3
 Win_LINKFLAGS    := -Wl,--kill-at -shared
 Win_LIBNAME      := sqlitejdbc.dll
@@ -77,5 +83,5 @@ LIBNAME   := $($(os)_LIBNAME)
 
 CFLAGS := $(CFLAGS) -Ibuild/$(sqlite)-$(target) -Ibuild
 ifneq ($(jni_include),)
-CFLAGS := $(CFLAGS) -I$(jni_include)
+CFLAGS := $(CFLAGS) -I"$(jni_include)"
 endif
