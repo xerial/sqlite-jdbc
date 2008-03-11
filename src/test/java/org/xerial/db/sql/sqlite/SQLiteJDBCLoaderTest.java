@@ -24,6 +24,8 @@
 //--------------------------------------
 package org.xerial.db.sql.sqlite;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Connection;
@@ -35,33 +37,34 @@ import java.sql.Statement;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.sqlite.Function;
 
 public class SQLiteJDBCLoaderTest
 {
 
+    private Connection connection = null;
+
     @Before
     public void setUp() throws Exception
     {
-
+        connection = null;
+        Class.forName("org.sqlite.JDBC");
+        // create a database connection
+        connection = DriverManager.getConnection("jdbc:sqlite::memory:");
     }
 
     @After
     public void tearDown() throws Exception
-    {}
+    {
+        if (connection != null)
+            connection.close();
+    }
 
     @Test
     public void query() throws ClassNotFoundException
     {
-        // SQLiteJDBCLoader.initialize();
-
-        // load the sqlite-JDBC driver into the current class loader
-        Class.forName("org.sqlite.JDBC");
-
-        Connection connection = null;
         try
         {
-            // create a database connection
-            connection = DriverManager.getConnection("jdbc:sqlite::memory:");
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30); // set timeout to 30 sec.
 
@@ -83,18 +86,25 @@ public class SQLiteJDBCLoaderTest
             // database file is found
             fail(e.getMessage());
         }
-        finally
-        {
-            try
-            {
-                if (connection != null)
-                    connection.close();
-            }
-            catch (SQLException e)
-            {
-                // connection close failed.
-                fail(e.getMessage());
-            }
-        }
     }
+
+    @Test
+    public void function() throws SQLException
+    {
+        Function.create(connection, "total", new Function() {
+            @Override
+            protected void xFunc() throws SQLException
+            {
+                int sum = 0;
+                for (int i = 0; i < args(); i++)
+                    sum += value_int(i);
+                result(sum);
+            }
+        });
+
+        ResultSet rs = connection.createStatement().executeQuery("select total(1, 2, 3, 4, 5)");
+        assertTrue(rs.next());
+        assertEquals(rs.getInt(1), 1 + 2 + 3 + 4 + 5);
+    }
+
 }
