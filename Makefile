@@ -64,5 +64,6 @@ native: $(LIB_FOLDER)/$(LIBNAME)
 
 clean:
 	cd sqlitejdbc && make clean
+	rm -rf sqlitejdbc/dl
 	mvn clean
 
