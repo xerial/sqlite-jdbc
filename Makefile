@@ -53,10 +53,10 @@ deploy:
 #	$(shell md5sum -b $< | cut -f 1 -d ' ' > $(LIBDIR)/linux/md5sum)
 
 
-$(LIB_FOLDER)/$(LIBNAME):
+sqlitejdbc/build/$(target)/$(LIBNAME):
 	cd sqlitejdbc && make native 
 
-native: $(LIB_FOLDER)/$(LIBNAME)
+native: sqlitejdbc/build/$(target)/$(LIBNAME)
 	mkdir -p $(LIB_FOLDER)
 	cp sqlitejdbc/build/$(target)/$(LIBNAME) $(LIB_FOLDER) 
 	mvn package
