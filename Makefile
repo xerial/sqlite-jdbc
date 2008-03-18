@@ -1,27 +1,27 @@
 # use JDK1.5 to build native libraries
- 
 
 CURRENT_DIR = $(shell cygpath -w `pwd`)
 RESOURCE_DIR = src/main/resources/native
 
-OS_NAME:=$(shell uname) 
 
-ifeq ($(findstring CYGWIN,$(OS_NAME)),CYGWIN)
+ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
   LIB_FOLDER := $(RESOURCE_DIR)/win
   OS := Win
 endif
-ifeq ($(findstring MINGW,$(OS_NAME)),MINGW)
+ifeq ($(findstring MINGW,$(shell uname)),MINGW)
   LIB_FOLDER := $(RESOURCE_DIR)/win
   OS := Win
 endif
-ifeq ($(OS_NAME),Darwin)
+ifeq ($(shell uname),Darwin)
   LIB_FOLDER := $(RESOURCE_DIR)/mac
   OS := Darwin
 endif
+
 ifeq ($(OS),)
   LIB_FOLDER := $(RESOURCE_DIR)/linux
   OS := Default
 endif
+
 
 ifeq ($(arch),)
 arch := $(shell uname -m)
