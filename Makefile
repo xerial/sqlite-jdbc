@@ -4,7 +4,7 @@
 CURRENT_DIR = $(shell cygpath -w `pwd`)
 RESOURCE_DIR = src/main/resources/native
 
-OS_NAME = $(shell uname) 
+OS_NAME:=$(shell uname) 
 
 ifeq ($(findstring CYGWIN,$(OS_NAME)),CYGWIN)
   LIB_FOLDER := $(RESOURCE_DIR)/win
