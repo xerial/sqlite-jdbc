@@ -3,19 +3,18 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-
-  <parent>
-    <artifactId>xerial-base</artifactId>
-    <groupId>org.xerial</groupId>
-    <version>2.0</version>
-  </parent>
-
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.5.7</version>
+  <version>3.5.7.1</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
+
+  <parent>
+    <groupId>org.xerial</groupId>
+    <artifactId>xerial</artifactId>
+    <version>1</version>
+  </parent>
 
   <repositories>
     <repository>
