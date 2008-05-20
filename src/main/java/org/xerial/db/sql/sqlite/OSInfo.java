@@ -32,6 +32,15 @@ package org.xerial.db.sql.sqlite;
  */
 public class OSInfo
 {
+    public static void main(String[] args)
+    {
+        System.out.print(getNativeLibFolderPathForCurrentOS());
+    }
+
+    public static String getNativeLibFolderPathForCurrentOS()
+    {
+        return getOSName() + "/" + getArchName();
+    }
 
     public static String getOSName()
     {
@@ -40,7 +49,7 @@ public class OSInfo
 
     public static String getArchName()
     {
-        return translateArchNameToFolderName(System.getProperty("arch.name"));
+        return translateArchNameToFolderName(System.getProperty("os.arch"));
     }
 
     public static String translateOSNameToFolderName(String osName)

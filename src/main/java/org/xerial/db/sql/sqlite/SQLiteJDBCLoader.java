@@ -204,21 +204,14 @@ public class SQLiteJDBCLoader
         }
 
         // Load the os-dependent library from a jar file
-        String osName = System.getProperty("os.name");
-        if (osName.contains("Windows"))
+        sqliteNativeLibraryPath = "/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
+
+        if (SQLiteJDBCLoader.class.getResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName) == null)
         {
-            sqliteNativeLibraryPath = "/native/win";
+            throw new UnsupportedOperationException(String.format(
+                    "SQLite for current OS %s(%s) is not supported in this sqlite-jdbc driver", OSInfo.getOSName(),
+                    OSInfo.getArchName()));
         }
-        else if (osName.contains("Mac"))
-        {
-            sqliteNativeLibraryPath = "/native/mac";
-        }
-        else if (osName.contains("Linux"))
-        {
-            sqliteNativeLibraryPath = "/native/linux";
-        }
-        else
-            throw new UnsupportedOperationException("unsupported OS for SQLite-JDBC driver: " + osName);
 
         // temporary library folder
         String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
@@ -235,34 +228,9 @@ public class SQLiteJDBCLoader
 
     private static void getNativeLibraryFolderForTheCurrentOS()
     {
-        String osName = System.getProperty("os.name");
-        String archName = System.getProperty("os.arch");
+        String osName = OSInfo.getOSName();
+        String archName = OSInfo.getArchName();
 
-        String osFolder = translateOSNameToFolderName(osName);
     }
 
-    public static String translateOSNameToFolderName(String osName)
-    {
-        if (osName.contains("Windows"))
-        {
-            return "Windows";
-        }
-        else if (osName.contains("Mac"))
-        {
-            return "Mac";
-        }
-        else if (osName.contains("Linux"))
-        {
-            return "Linux";
-        }
-        else
-        {
-            return osName.replaceAll("\\W", "").replaceAll("/", "-");
-        }
-    }
-
-    public static String translateArchNameToFolderName(String archName)
-    {
-        return archName.replaceAll("\\W", "").replaceAll("/", "-");
-    }
 }

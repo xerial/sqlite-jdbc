@@ -23,6 +23,9 @@ import org.xerial.db.sql.sqlite.SQLiteJDBCLoader;
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 final class NativeDB extends DB
 {
+    /** SQLite connection handle. */
+    long pointer = 0;
+
     private static Boolean loaded = null;
 
     static boolean load()
@@ -44,7 +47,7 @@ final class NativeDB extends DB
 
     native synchronized void busy_timeout(int ms);
 
-    // native synchronized void exec(String sql) throws SQLException;
+    //native synchronized void exec(String sql) throws SQLException;
     protected native synchronized long prepare(String sql) throws SQLException;
 
     native synchronized String errmsg();

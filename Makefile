@@ -4,21 +4,18 @@ CURRENT_DIR = $(shell cygpath -w `pwd`)
 RESOURCE_DIR = src/main/resources/native
 
 
+
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
-  LIB_FOLDER := $(RESOURCE_DIR)/win
   OS := Win
 endif
 ifeq ($(findstring MINGW,$(shell uname)),MINGW)
-  LIB_FOLDER := $(RESOURCE_DIR)/win
   OS := Win
 endif
 ifeq ($(shell uname),Darwin)
-  LIB_FOLDER := $(RESOURCE_DIR)/mac
   OS := Darwin
 endif
 
 ifeq ($(OS),)
-  LIB_FOLDER := $(RESOURCE_DIR)/linux
   OS := Default
 endif
 
@@ -43,20 +40,20 @@ deploy:
 	mvn deploy 
 
 
-#win: $(LIBDIR)/win/sqlitejdbc.dll
-#	$(shell md5sum -b $< | cut -f 1 -d ' ' > $(LIBDIR)/win/md5sum)
-
-#mac: $(LIBDIR)/win/sqlitejdbc.dll
-#	$(shell md5sum -b $< | cut -f 1 -d ' ' > $(LIBDIR)/mac/md5sum)
-
-#linux: $(LIBDIR)/linux/libsqlitejdbc.so
-#	$(shell md5sum -b $< | cut -f 1 -d ' ' > $(LIBDIR)/linux/md5sum)
+OSInfoClass=org/xerial/db/sql/sqlite/OSInfo
 
 
-sqlitejdbc/build/$(target)/$(LIBNAME):
+target/sqlitejdbc/$(OSInfoClass).class:
+	mkdir -p target/sqlitejdbc
+	javac src/main/java/$(OSInfoClass).java -d target/sqlitejdbc
+	
+
+sqlitejdbc/build/$(target)/$(LIBNAME): 
 	cd sqlitejdbc && make native 
 
-native: sqlitejdbc/build/$(target)/$(LIBNAME)
+LIB_FOLDER = $(RESOURCE_DIR)/$(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
+
+native: sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
 	mkdir -p $(LIB_FOLDER)
 	cp sqlitejdbc/build/$(target)/$(LIBNAME) $(LIB_FOLDER) 
 	mvn package
