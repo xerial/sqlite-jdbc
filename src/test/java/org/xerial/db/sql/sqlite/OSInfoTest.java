@@ -52,4 +52,5 @@ public class OSInfoTest
         assertEquals(OSInfo.getOSName(), component[0]);
         assertEquals(OSInfo.getArchName(), component[1]);
     }
+
 }
