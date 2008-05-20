@@ -107,4 +107,32 @@ public class SQLiteJDBCLoaderTest
         assertEquals(rs.getInt(1), 1 + 2 + 3 + 4 + 5);
     }
 
+    @Test
+    public void osName()
+    {
+        assertEquals("Windows", SQLiteJDBCLoader.translateOSNameToFolderName("Windows XP"));
+        assertEquals("Windows", SQLiteJDBCLoader.translateOSNameToFolderName("Windows 2000"));
+        assertEquals("Windows", SQLiteJDBCLoader.translateOSNameToFolderName("Windows Vista"));
+        assertEquals("Windows", SQLiteJDBCLoader.translateOSNameToFolderName("Windows 98"));
+        assertEquals("Windows", SQLiteJDBCLoader.translateOSNameToFolderName("Windows 95"));
+
+        assertEquals("Mac", SQLiteJDBCLoader.translateOSNameToFolderName("Mac OS"));
+        assertEquals("Mac", SQLiteJDBCLoader.translateOSNameToFolderName("Mac OS X"));
+
+        assertEquals("AIX", SQLiteJDBCLoader.translateOSNameToFolderName("AIX"));
+
+        assertEquals("Linux", SQLiteJDBCLoader.translateOSNameToFolderName("Linux"));
+        assertEquals("OS-2", SQLiteJDBCLoader.translateOSNameToFolderName("OS/2"));
+
+        assertEquals("HP UX", SQLiteJDBCLoader.translateOSNameToFolderName("HP UX"));
+    }
+
+    @Test
+    public void archName()
+    {
+        assertEquals("i386", SQLiteJDBCLoader.translateArchNameToFolderName("i386"));
+        assertEquals("x86", SQLiteJDBCLoader.translateArchNameToFolderName("x86"));
+        assertEquals("ppc", SQLiteJDBCLoader.translateArchNameToFolderName("ppc"));
+        assertEquals("amd64", SQLiteJDBCLoader.translateArchNameToFolderName("amd64"));
+    }
 }

@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 
 /**
  * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name,
@@ -234,31 +233,36 @@ public class SQLiteJDBCLoader
         return;
     }
 
-    private static HashMap<String, String> osGroup = new HashMap<String, String>();
-
-    static
-    {
-        osGroup
-    }
-
     private static void getNativeLibraryFolderForTheCurrentOS()
     {
         String osName = System.getProperty("os.name");
         String archName = System.getProperty("os.arch");
 
-        String osFolder = null;
+        String osFolder = translateOSNameToFolderName(osName);
+    }
+
+    public static String translateOSNameToFolderName(String osName)
+    {
         if (osName.contains("Windows"))
         {
-            osFolder = "Windows";
+            return "Windows";
         }
         else if (osName.contains("Mac"))
         {
-            osFolder = "Mac";
+            return "Mac";
         }
         else if (osName.contains("Linux"))
         {
-            osFolder = "Linux";
+            return "Linux";
         }
+        else
+        {
+            return osName.replaceAll("\\W", "").replaceAll("/", "-");
+        }
+    }
 
+    public static String translateArchNameToFolderName(String archName)
+    {
+        return archName.replaceAll("\\W", "").replaceAll("/", "-");
     }
 }
