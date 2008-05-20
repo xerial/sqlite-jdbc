@@ -28,7 +28,7 @@ ifeq ($(arch),)
 arch := $(shell uname -m)
 endif
 
-sqlite_version := 3.5.8
+sqlite_version := 3.5.9
 sqlite := sqlite-$(sqlite_version)
 
 sqlitejdbc := sqlitejdbc-v$(shell cat VERSION)
