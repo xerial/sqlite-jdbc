@@ -61,17 +61,9 @@ public class SQLiteJDBCLoader
 
     public static boolean isNativeMode()
     {
-        try
-        {
-            // load the driver
-            Class.forName("org.sqlite.JDBC");
-
-            return extracted;
-        }
-        catch (ClassNotFoundException e)
-        {
-            return false;
-        }
+        // load the driver
+        initialize();
+        return extracted;
     }
 
     /**
@@ -118,7 +110,8 @@ public class SQLiteJDBCLoader
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
         final String prefix = "sqlite-3.5.9-";
 
-        File extractedLibFile = new File(targetFolder, prefix + libraryFileName);
+        String extractedLibFileName = prefix + libraryFileName;
+        File extractedLibFile = new File(targetFolder, extractedLibFileName);
 
         try
         {
@@ -130,7 +123,7 @@ public class SQLiteJDBCLoader
 
                 if (md5sum1.equals(md5sum2))
                 {
-                    return loadNativeLibrary(targetFolder, libraryFileName);
+                    return loadNativeLibrary(targetFolder, extractedLibFileName);
                 }
                 else
                 {
@@ -168,7 +161,7 @@ public class SQLiteJDBCLoader
                 {}
             }
 
-            return loadNativeLibrary(targetFolder, libraryFileName);
+            return loadNativeLibrary(targetFolder, extractedLibFileName);
         }
         catch (IOException e)
         {
