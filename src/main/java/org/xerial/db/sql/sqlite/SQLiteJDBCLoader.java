@@ -206,6 +206,13 @@ public class SQLiteJDBCLoader
         if (extracted)
             return;
 
+        boolean runInPureJavaMode = Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
+        if (runInPureJavaMode)
+        {
+            extracted = false;
+            return;
+        }
+
         // Try loading library from org.sqlite.lib.path library path */
         String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
         String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
