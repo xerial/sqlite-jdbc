@@ -2,8 +2,6 @@ ifndef JAVA_HOME
 $(error Set JAVA_HOME environment variable)
 endif
 
-jni_md := $(shell find "$(JAVA_HOME)" -name jni_md.h)
-
 ifeq ($(os),)
 	ifeq ($(shell uname),Darwin)
 		os := Darwin
@@ -13,16 +11,8 @@ ifeq ($(os),)
 	endif
 	ifeq ($(findstring MINGW,$(shell uname)),MINGW)
 		os := Win
-		ifneq ($(jni_md),)
-		jni_include := $(shell cygpath -w `dirname "$(jni_md)"`)
-		endif
 	endif
 endif
-
-ifneq ($(jni_md),)
-jni_include := $(shell dirname "$(jni_md)")
-endif
-
 ifeq ($(os),)
 	os := Default
 endif
@@ -38,13 +28,24 @@ ifeq ($(arch),)
 arch := $(shell uname -m)
 endif
 
-sqlite_version := 3.5.7
+
+sqlite_version := 3.5.9
+
 sqlite := sqlite-$(sqlite_version)
 
 sqlitejdbc := sqlitejdbc-v$(shell cat VERSION)
 
+jni_md := $(shell find -L "$(JAVA_HOME)" -name jni_md.h)
+ifneq ($(jni_md),)
+jni_include := $(shell dirname "$(jni_md)")
+endif
 
-libs := build$(sep)$(subst  ,$(sep),$(wildcard lib/*.jar))
+libjdbc  := $(wildcard lib/jdbc-*.jar)
+libjunit := $(wildcard lib/junit-*.jar)
+
+JAVA  := "$$JAVA_HOME/bin/java"
+JAVAC := "$$JAVA_HOME/bin/javac" -Xbootclasspath/p:$(libjdbc)
+JAVAH := "$$JAVA_HOME/bin/javah"
 
 java_sources = $(wildcard src/org/sqlite/*.java)
 java_classes = $(java_sources:src/%.java=build/%.class)
@@ -59,19 +60,23 @@ target     := $(os)-$(arch)
 # os=Default is meant to be generic unix/linux
 Default_CC        := gcc
 Default_STRIP     := strip
-Default_CFLAGS    := -I$(JAVA_HOME)/include -O3 -fPIC
+Default_CFLAGS    := -I$(JAVA_HOME)/include -Os -fPIC
 Default_LINKFLAGS := -shared
 Default_LIBNAME   := libsqlitejdbc.so
 
-Darwin_CC        := gcc -arch $(arch)
+Support10_4 := -isysroot /Developer/SDKs/MacOSX10.4u.sdk
+#Darwin_CC        := gcc -arch $(arch) -mmacosx-version-min=10.4 $(Support10_4)
+Darwin_CC        := gcc -arch $(arch) 
 Darwin_STRIP     := strip -x
-Darwin_CFLAGS    := -I$(JAVA_HOME)/include -O3 -fPIC
-Darwin_LINKFLAGS := -dynamiclib
+Darwin_CFLAGS    := -I$(JAVA_HOME)/include -Os -fPIC
+Darwin_LINKFLAGS := -dynamiclib $(Support10_4)
 Darwin_LIBNAME   := libsqlitejdbc.jnilib
 
+#Win_CC           := $(arch)-mingw32msvc-gcc
+#Win_STRIP        := $(arch)-mingw32msvc-strip
 Win_CC           := mingw32-gcc
 Win_STRIP        := strip
-Win_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O3
+Win_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O
 Win_LINKFLAGS    := -Wl,--kill-at -shared
 Win_LIBNAME      := sqlitejdbc.dll
 

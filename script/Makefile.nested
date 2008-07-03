@@ -5,40 +5,37 @@ nestedvm := nestedvm-$(nestedvm_version)
 
 default: test
 
+test: dist/$(sqlitejdbc)-pure.jar $(test_classes)
+	$(JAVA) -cp "dist/$(sqlitejdbc)-pure.jar$(sep)build$(sep)$(libjunit)" \
+	    org.junit.runner.JUnitCore $(tests)
+
+dist/$(sqlitejdbc)-pure.jar: build/org/sqlite/SQLite.class $(java_classes)
+	@mkdir -p dist
+	cd build && jar cf ../$@ \
+	    org/sqlite/SQLite.class $(java_classlist) \
+	    -C ../$(nestedvm)/build org/ibex
+
 build/org/%.class: src/org/%.java
 	@mkdir -p build
-	javac -source 1.2 -target 1.2 -classpath "$(nestedvm)/build" \
+	$(JAVAC) -source 1.2 -target 1.2 -classpath "$(nestedvm)/build" \
 	    -sourcepath src -d build $<
 
 build/test/%.class: src/test/%.java
 	@mkdir -p build
-	javac -target 1.5 -classpath "$(libs)" -sourcepath src/test -d build $<
-
-nested: build/org/sqlite/SQLite.class $(java_classes)
-	cd build && jar cf $(sqlitejdbc)-nested.jar \
-	    org/sqlite/SQLite.class $(java_classlist) \
-	    -C ../$(nestedvm)/build org/ibex
-
-dist/$(sqlitejdbc)-nested.tgz: nested
-	@mkdir -p dist
-	tar cfz dist/$(sqlitejdbc)-nested.tgz \
-	    README -C build $(sqlitejdbc)-nested.jar
-
-test: nested $(test_classes)
-	java -cp "build/$(sqlitejdbc)-nested.jar$(sep)$(libs)" \
-	    org.junit.runner.JUnitCore $(tests)
+	$(JAVAC) -target 1.5 -classpath "build$(sep)$(libjunit)" \
+	    -sourcepath src/test -d build $<
 
 $(nestedvm)/%:
 	$(MAKE) -C $(nestedvm) $*
 
+dl/$(nestedvm).tgz:
+	@mkdir -p dl
+	curl -odl/$(nestedvm).tgz http://files.zentus.com/sqlitejdbc/$(nestedvm).tgz
+
 dl/$(sqlite)-amal.zip:
 	@mkdir -p dl
 	curl -odl/$(sqlite)-amal.zip \
-	    http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(sqlite_version)).zip
-
-dl/$(nestedvm).tgz:
-	@mkdir -p dl
-	curl -odl/$(nestedvm).tgz http://zentus.com/sqlitejdbc/dist/$(nestedvm).tgz
+	http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(sqlite_version)).zip
 
 $(nestedvm)/Makefile: dl/$(nestedvm).tgz
 	tar xfz dl/$(nestedvm).tgz
@@ -47,7 +44,7 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	@mkdir -p build
 	@mkdir -p build/$(sqlite)-nestedvm
 	unzip -qo dl/$(sqlite)-amal.zip -d build/$(sqlite)-nestedvm
-	cp src/org/sqlite/NestedDB.c build/$(sqlite)-nestedvm
+	cp src/org/sqlite/Nested*.c build/$(sqlite)-nestedvm
 	perl -pi -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
 	    build/$(sqlite)-nestedvm/sqlite3ext.h
 
@@ -62,7 +59,7 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	    -DSQLITE_ENABLE_FTS3 \
 	    -DSQLITE_OMIT_LOAD_EXTENSION \
 		sqlite3.c; \
-	$$CC -c $$CFLAGS -o NestedDB.o NestedDB.c)
+	$$CC -c $$CFLAGS -o NestedDB.o Nested*.c)
 
 	./$(nestedvm)/upstream/install/bin/mips-unknown-elf-gcc \
 	        -march=mips1 --static \
