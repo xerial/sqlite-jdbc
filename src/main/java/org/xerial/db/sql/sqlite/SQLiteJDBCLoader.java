@@ -59,6 +59,21 @@ public class SQLiteJDBCLoader
         return extracted;
     }
 
+    public static boolean isNativeMode()
+    {
+        try
+        {
+            // load the driver
+            Class.forName("org.sqlite.JDBC");
+
+            return extracted;
+        }
+        catch (ClassNotFoundException e)
+        {
+            return false;
+        }
+    }
+
     /**
      * Computes the MD5 value of the input stream
      * 
