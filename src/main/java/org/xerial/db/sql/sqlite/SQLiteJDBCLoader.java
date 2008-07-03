@@ -59,14 +59,14 @@ public class SQLiteJDBCLoader
         return extracted;
     }
 
-    public static boolean initialize(boolean forceReload)
-    {
-        if (forceReload)
-            extracted = false;
-        loadSQLiteNativeLibrary();
-        return extracted;
-    }
-
+    /**
+     * Computes the MD5 value of the input stream
+     * 
+     * @param input
+     * @return
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
     private static String md5sum(InputStream input) throws IOException, NoSuchAlgorithmException
     {
         BufferedInputStream in = new BufferedInputStream(input);
@@ -89,6 +89,14 @@ public class SQLiteJDBCLoader
         }
     }
 
+    /**
+     * Extract the specified library file to the target folder
+     * 
+     * @param libFolderForCurrentOS
+     * @param libraryFileName
+     * @param targetFolder
+     * @return
+     */
     private static boolean extractLibraryFile(String libFolderForCurrentOS, String libraryFileName, String targetFolder)
     {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
