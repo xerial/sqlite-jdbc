@@ -35,24 +35,61 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <compilerArgument>-Xbootclasspath/p:${basedir}/lib/jdbc-api-1.4.jar</compilerArgument>
+          <compilerArgument>
+            -Xbootclasspath/p:${basedir}/lib/jdbc-api-1.4.jar
+          </compilerArgument>
           <source>1.5</source>
           <target>1.5</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-dependency</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.xerial.thirdparty</groupId>
+                  <artifactId>nestedvm</artifactId>
+                  <version>1.0-SNAPSHOT</version>
+                  <type>jar</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.xerial.thirdparty</groupId>
+                  <artifactId>sqlitejdbc-nested</artifactId>
+                  <version>3.5.9-SNAPSHOT</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>target/classes</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
+
   </build>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.xerial.thirdparty</groupId>
       <artifactId>nestedvm</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.xerial.thirdparty</groupId>
       <artifactId>sqlitejdbc-nested</artifactId>
       <version>3.5.9-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.xerial.thirdparty</groupId>
@@ -61,6 +98,6 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
- 
+
 </project>
 
