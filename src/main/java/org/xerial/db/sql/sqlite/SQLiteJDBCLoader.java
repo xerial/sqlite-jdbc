@@ -97,11 +97,13 @@ public class SQLiteJDBCLoader
      * @param targetFolder
      * @return
      */
-    private static boolean extractLibraryFile(String libFolderForCurrentOS, String libraryFileName, String targetFolder)
+    private static boolean extractAndLoadLibraryFile(String libFolderForCurrentOS, String libraryFileName,
+            String targetFolder)
     {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
+        final String prefix = "sqlite-3.5.9-";
 
-        File extractedLibFile = new File(targetFolder, libraryFileName);
+        File extractedLibFile = new File(targetFolder, prefix + libraryFileName);
 
         try
         {
@@ -216,15 +218,14 @@ public class SQLiteJDBCLoader
 
         if (SQLiteJDBCLoader.class.getResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName) == null)
         {
-            throw new UnsupportedOperationException(String.format(
-                    "SQLite for current OS %s(%s) is not supported in this sqlite-jdbc driver", OSInfo.getOSName(),
-                    OSInfo.getArchName()));
+            // use nested VM version
+            return;
         }
 
         // temporary library folder
         String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
-        /* Try extracting thelibrary from jar */
-        if (extractLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder))
+        /* Try extracting the library from jar */
+        if (extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder))
         {
             extracted = true;
             return;

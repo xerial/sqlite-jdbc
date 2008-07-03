@@ -170,6 +170,9 @@ public class DBMetaDataTest
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "sn");
         assertFalse(rs.next());
+
+        rs = meta.getColumns(null, null, "doesnotexist", "%");
+        assertFalse(rs.next());
     }
 
     @Test
@@ -432,16 +435,15 @@ public class DBMetaDataTest
         rs.close();
     }
 
-    /*
-     * TODO @Test public void columnOrderOfgetImportedKeys() throws SQLException {
-     * @Test public void columnOrderOfgetExportedKeys() throws SQLException {
-     * @Test public void columnOrderOfgetCrossReference() throws SQLException {
-     * @Test public void columnOrderOfgetTypeInfo() throws SQLException { @Test
-     * public void columnOrderOfgetIndexInfo() throws SQLException { @Test
-     * public void columnOrderOfgetSuperTypes() throws SQLException { @Test
-     * public void columnOrderOfgetSuperTables() throws SQLException { @Test
-     * public void columnOrderOfgetAttributes() throws SQLException {
-     */
+    /* TODO
+    @Test public void columnOrderOfgetImportedKeys() throws SQLException {
+    @Test public void columnOrderOfgetExportedKeys() throws SQLException {
+    @Test public void columnOrderOfgetCrossReference() throws SQLException {
+    @Test public void columnOrderOfgetTypeInfo() throws SQLException {
+    @Test public void columnOrderOfgetIndexInfo() throws SQLException {
+    @Test public void columnOrderOfgetSuperTypes() throws SQLException {
+    @Test public void columnOrderOfgetSuperTables() throws SQLException {
+    @Test public void columnOrderOfgetAttributes() throws SQLException {*/
 
     @Test
     public void columnOrderOfgetUDTs() throws SQLException
@@ -457,5 +459,11 @@ public class DBMetaDataTest
         assertEquals(rsmeta.getColumnName(5), "DATA_TYPE");
         assertEquals(rsmeta.getColumnName(6), "REMARKS");
         assertEquals(rsmeta.getColumnName(7), "BASE_TYPE");
+    }
+
+    @Test
+    public void version() throws SQLException
+    {
+        assertNotNull(meta.getDatabaseProductVersion());
     }
 }

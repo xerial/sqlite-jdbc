@@ -295,11 +295,9 @@ public class PrepStmtTest
     @Test
     public void tokens() throws SQLException
     {
-        /*
-         * checks for a bug where a substring is read by the driver as the full
-         * original string, caused by my idiocyin assuming the pascal-style
-         * string was null terminated. Thanks Oliver Randschau.
-         */
+        /* checks for a bug where a substring is read by the driver as the
+         * full original string, caused by my idiocyin assuming the
+         * pascal-style string was null terminated. Thanks Oliver Randschau. */
         StringTokenizer st = new StringTokenizer("one two three");
         st.nextToken();
         String substr = st.nextToken();
@@ -433,11 +431,9 @@ public class PrepStmtTest
         assertEquals(meta.getColumnName(1), "col1");
         assertEquals(meta.getColumnName(2), "col2");
         assertEquals(meta.getColumnName(3), "delta");
-        /*
-         * assertEquals(meta.getColumnType(1), Types.INTEGER);
-         * assertEquals(meta.getColumnType(2), Types.INTEGER);
-         * assertEquals(meta.getColumnType(3), Types.INTEGER);
-         */
+        /*assertEquals(meta.getColumnType(1), Types.INTEGER);
+        assertEquals(meta.getColumnType(2), Types.INTEGER);
+        assertEquals(meta.getColumnType(3), Types.INTEGER);*/
 
         meta = prep.executeQuery().getMetaData();
         assertEquals(meta.getColumnCount(), 3);
@@ -485,6 +481,34 @@ public class PrepStmtTest
         prep.setInt(1, 1000);
         prep.execute();
         prep.executeUpdate();
+    }
+
+    @Test
+    public void reusingSetValues() throws SQLException
+    {
+        PreparedStatement prep = conn.prepareStatement("select ?,?;");
+        prep.setInt(1, 9);
+
+        for (int i = 0; i < 10; i++)
+        {
+            prep.setInt(2, i);
+            ResultSet rs = prep.executeQuery();
+            assertTrue(rs.next());
+            assertEquals(rs.getInt(1), 9);
+            assertEquals(rs.getInt(2), i);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            prep.setInt(2, i);
+            ResultSet rs = prep.executeQuery();
+            assertTrue(rs.next());
+            assertEquals(rs.getInt(1), 9);
+            assertEquals(rs.getInt(2), i);
+            rs.close();
+        }
+
+        prep.close();
     }
 
     @Test(expected = SQLException.class)
