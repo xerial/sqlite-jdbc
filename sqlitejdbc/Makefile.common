@@ -29,7 +29,7 @@ arch := $(shell uname -m)
 endif
 
 
-sqlite_version := 3.5.9
+sqlite_version := 3.6.0
 
 sqlite := sqlite-$(sqlite_version)
 
