@@ -64,7 +64,7 @@
                 <artifactItem>
                   <groupId>org.xerial.thirdparty</groupId>
                   <artifactId>sqlitejdbc-nested</artifactId>
-                  <version>3.6.0</version>
+                  <version>3.6.2</version>
                   <type>jar</type>
                 </artifactItem>
               </artifactItems>
