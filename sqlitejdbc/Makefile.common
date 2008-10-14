@@ -1,3 +1,5 @@
+include ../Makefile.version
+
 ifndef JAVA_HOME
 $(error Set JAVA_HOME environment variable)
 endif

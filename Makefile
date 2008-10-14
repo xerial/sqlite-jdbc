@@ -1,5 +1,7 @@
 # use JDK1.5 to build native libraries
 
+include Makefile.version
+
 #CURRENT_DIR = $(shell cygpath -w `pwd`)
 RESOURCE_DIR = src/main/resources
 
@@ -44,15 +46,17 @@ OSInfoClass=org/xerial/db/sql/sqlite/OSInfo
 target/sqlitejdbc/$(OSInfoClass).class:
 	mkdir -p target/sqlitejdbc
 	javac src/main/java/$(OSInfoClass).java -d target/sqlitejdbc
-	
 
 sqlitejdbc/build/$(target)/$(LIBNAME): 
 	cd sqlitejdbc && make native 
 
+sqlitejdbc/build/$(sqlite)-$(target):
+	cd sqlitejdbc && make native
+
 LIB_FOLDER = $(RESOURCE_DIR)/native/$(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
 
 #native: sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
-native: target/sqlitejdbc/$(OSInfoClass).class
+native: sqlitejdbc/build/$(sqlite)-$(target) sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
 	mkdir -p $(LIB_FOLDER)
 	cp sqlitejdbc/build/$(target)/$(LIBNAME) $(LIB_FOLDER) 
 	mvn package
