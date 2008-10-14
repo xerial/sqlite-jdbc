@@ -51,7 +51,7 @@ sqlitejdbc/build/$(target)/$(LIBNAME):
 
 LIB_FOLDER = $(RESOURCE_DIR)/native/$(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
 
-native: sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
+native: sqlitejdbc/Makefile.common sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
 	mkdir -p $(LIB_FOLDER)
 	cp sqlitejdbc/build/$(target)/$(LIBNAME) $(LIB_FOLDER) 
 	mvn package

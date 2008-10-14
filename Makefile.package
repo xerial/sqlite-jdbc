@@ -1,7 +1,34 @@
+RESOURCE_DIR=src/main/resources/native
+RSYNC=rsync -av -e ssh --exclude=".svn"
 
+
+WIN_SERVER=192.168.11.7
+WIN_WORK=work/eclipse/workspace/xerial/sqlite-jdbc
+
+MAC_SERVER=192.168.11.8
+MAC_WORK=work/eclipse/workspace/xerial/sqlite-jdbc
+
+LINUX_SERVER=sprite
+LINUX_WORK=work/eclipse/xerial/sqlite-jdbc
+
+AMD_SERVER=utgb01
+AMD_WORK=work/eclipse/xerial/sqlite-jdbc
+
+all: win mac linux linux-amd
 
 win:
-	ssh 192.168.11.7 "cd work/eclipse/workspace/xerial/sqlite-jdbc && svn update && make && svn commit -m 'win binary'"
+	ssh $(WIN_SERVER) "source .zprofile && cd $(WIN_WORK) && svn update && make" 
+	$(RSYNC)  $(WIN_SERVER):./$(WIN_WORK)/$(RESOURCE_DIR)/Windows/ $(RESOURCE_DIR)/Windows/
 
 mac: 	
-	ssh 192.168.11.8 "cd work/eclipse/workspace/xerial/sqlite-jdbc && svn update && make & svn commit -m 'mac binary'"
+	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && svn update && make" 
+	$(RSYNC)  $(MAC_SERVER):./$(MAC_WORK)/$(RESOURCE_DIR)/Mac/ $(RESOURCE_DIR)/Mac/
+
+linux: 	
+	ssh $(LINUX_SERVER) "source .zprofile && source /etc/profile.d/java.sh && cd $(LINUX_WORK) && svn update && make" 
+	$(RSYNC)  $(LINUX_SERVER):./$(LINUX_WORK)/$(RESOURCE_DIR)/Linux/i386/ $(RESOURCE_DIR)/Linux/i386/
+
+linux-amd: 	
+	ssh $(AMD_SERVER) "source .zprofile && cd $(AMD_WORK) && svn update && make" 
+	$(RSYNC)  $(AMD_SERVER):./$(AMD_WORK)/$(RESOURCE_DIR)/Linux/amd64/ $(RESOURCE_DIR)/Linux/amd64/
+
