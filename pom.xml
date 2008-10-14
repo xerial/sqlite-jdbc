@@ -87,12 +87,6 @@
     </dependency>
     <dependency>
       <groupId>org.xerial.thirdparty</groupId>
-      <artifactId>sqlitejdbc-nested</artifactId>
-      <version>3.6.2</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.xerial.thirdparty</groupId>
       <artifactId>jdbc-api</artifactId>
       <version>1.4</version>
       <scope>provided</scope>
