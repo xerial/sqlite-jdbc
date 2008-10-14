@@ -2,3 +2,6 @@
 
 win:
 	ssh 192.168.11.7 "cd work/eclipse/workspace/xerial/sqlite-jdbc && svn update && make && svn commit -m 'win binary'"
+
+mac: 	
+	ssh 192.168.11.8 "cd work/eclipse/workspace/xerial/sqlite-jdbc && svn update && make & svn commit -m 'mac binary'"
