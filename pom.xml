@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.6.3-SNAPSHOT</version>
+  <version>3.6.3</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -59,12 +59,6 @@
                   <groupId>org.xerial.thirdparty</groupId>
                   <artifactId>nestedvm</artifactId>
                   <version>1.0</version>
-                  <type>jar</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>org.xerial.thirdparty</groupId>
-                  <artifactId>sqlitejdbc-nested</artifactId>
-                  <version>3.6.2</version>
                   <type>jar</type>
                 </artifactItem>
               </artifactItems>
