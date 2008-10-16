@@ -35,31 +35,49 @@ LIBNAME   := $($(OS)_LIBNAME)
 
 .phony: all package win mac linux native deploy
 
-all: native
+all: package
 
 deploy: 
 	mvn deploy 
 
 
 OSInfoClass=org/xerial/db/sql/sqlite/OSInfo
+OSINFO_PROG=target/sqlitejdbc/$(OSInfoClass).class
+SQLITE_DLL=sqlitejdbc/build/$(target)/$(LIBNAME)
+SQLITE_BUILD_DIR=sqlitejdbc/build/$(sqlite)-$(target)
 
+LIB_FOLDER = $(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
+WORK_DIR=target/dll/native
 
-target/sqlitejdbc/$(OSInfoClass).class:
+UPDATE_FLAG=$(WORK_DIR)/UPDATE
+
+$(OSINFO_PROG): src/main/java/$(OSInfoClass).java
 	mkdir -p target/sqlitejdbc
-	javac src/main/java/$(OSInfoClass).java -d target/sqlitejdbc
+	javac $< -d target/sqlitejdbc
 
-sqlitejdbc/build/$(target)/$(LIBNAME): 
-	cd sqlitejdbc && make native 
+$(SQLITE_DLL): $(SQLITE_BUILD_DIR)
 
-sqlitejdbc/build/$(sqlite)-$(target):
+$(SQLITE_BUILD_DIR): Makefile sqlitejdbc/Makefile 
 	cd sqlitejdbc && make native
 
-LIB_FOLDER = $(RESOURCE_DIR)/native/$(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
+#$(NATIVE_DLL): $(OSINFO_PROG) $(SQLITE_DLL)
+#	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
+#	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
 
 #native: sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
-native: sqlitejdbc/build/$(sqlite)-$(target) sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
-	mkdir -p $(LIB_FOLDER)
-	cp sqlitejdbc/build/$(target)/$(LIBNAME) $(LIB_FOLDER) 
+
+$(UPDATE_FLAG): $(OS_INFO_PROG)
+	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
+	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
+	touch $(UPDATE_FLAG)
+
+native: $(OSINFO_PROG) $(UPDATE_FLAG)
+
+NATIVE_DLL=$(WORK_DIR)/$(LIB_FOLDER)/$(LIBNAME)
+
+package: $(OSINFO_PROG) $(UPDATE_FLAG)
+	mkdir -p $(RESOURCE_DIR)/native/$(LIB_FOLDER)
+	cp $(NATIVE_DLL) $(RESOURCE_DIR)/native/$(LIB_FOLDER)
 	mvn package
 
 clean-native:
