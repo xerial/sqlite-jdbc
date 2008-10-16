@@ -48,8 +48,7 @@ SQLITE_BUILD_DIR=sqlitejdbc/build/$(sqlite)-$(target)
 
 LIB_FOLDER = $(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
 WORK_DIR=target/dll/native
-
-UPDATE_FLAG=$(WORK_DIR)/UPDATE
+UPDATE_FLAG=target/dll/UPDATE
 
 $(OSINFO_PROG): src/main/java/$(OSInfoClass).java
 	mkdir -p target/sqlitejdbc
