@@ -61,6 +61,9 @@ native: sqlitejdbc/build/$(sqlite)-$(target) sqlitejdbc/build/$(target)/$(LIBNAM
 	cp sqlitejdbc/build/$(target)/$(LIBNAME) $(LIB_FOLDER) 
 	mvn package
 
+clean-native:
+	rm -rf sqlitejdbc/build/$(sqlite)-$(target)
+
 purejava: 
 	cd sqlitejdbc && make -f Makefile.nested
 	mkdir -p $(RESOURCE_DIR)/org/sqlite
