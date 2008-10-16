@@ -65,16 +65,16 @@ $(SQLITE_BUILD_DIR): Makefile sqlitejdbc/Makefile
 
 #native: sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
 
-$(UPDATE_FLAG): $(OS_INFO_PROG)
+$(UPDATE_FLAG): $(OS_INFO_PROG) $(SQLITE_DLL)
 	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
 	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
 	touch $(UPDATE_FLAG)
 
-native: $(OSINFO_PROG) $(UPDATE_FLAG)
+native: $(UPDATE_FLAG)
 
 NATIVE_DLL=$(WORK_DIR)/$(LIB_FOLDER)/$(LIBNAME)
 
-package: $(OSINFO_PROG) $(UPDATE_FLAG)
+package: $(UPDATE_FLAG)
 	mkdir -p $(RESOURCE_DIR)/native/$(LIB_FOLDER)
 	cp $(NATIVE_DLL) $(RESOURCE_DIR)/native/$(LIB_FOLDER)
 	mvn package
