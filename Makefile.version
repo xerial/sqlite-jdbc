@@ -1,2 +1,0 @@
-sqlite_version := 3.6.4
-sqlite := sqlite-$(sqlite_version)

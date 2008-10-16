@@ -1,4 +1,4 @@
-include ../Makefile.version
+include ../VERSION
 
 ifndef JAVA_HOME
 $(error Set JAVA_HOME environment variable)

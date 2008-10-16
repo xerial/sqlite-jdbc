@@ -1,6 +1,7 @@
 # use JDK1.5 to build native libraries
 
-include Makefile.version
+include VERSION
+sqlite := sqlite-$(sqlite_version)
 
 #CURRENT_DIR = $(shell cygpath -w `pwd`)
 RESOURCE_DIR = src/main/resources
