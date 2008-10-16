@@ -28,6 +28,12 @@
           <include>org/**</include>
         </includes>
       </resource>
+      <resource>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>VERSION</include>
+        </includes>
+      </resource>
     </resources>
 
     <plugins>

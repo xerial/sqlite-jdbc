@@ -31,9 +31,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Properties;
 
 /**
  * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name,
@@ -108,7 +110,7 @@ public class SQLiteJDBCLoader
             String targetFolder)
     {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
-        final String prefix = "sqlite-3.6.4-";
+        final String prefix = String.format("sqlite-%s-", getVersion());
 
         String extractedLibFileName = prefix + libraryFileName;
         File extractedLibFile = new File(targetFolder, extractedLibFileName);
@@ -255,6 +257,28 @@ public class SQLiteJDBCLoader
         String osName = OSInfo.getOSName();
         String archName = OSInfo.getArchName();
 
+    }
+
+    public static String getVersion()
+    {
+        URL versionFile = SQLiteJDBCLoader.class.getResource("/VERSION");
+
+        String version = "unknown";
+        try
+        {
+            if (versionFile != null)
+            {
+                Properties versionData = new Properties();
+                versionData.load(versionFile.openStream());
+                version = versionData.getProperty("sqlite_version", version);
+                version = version.trim().replaceAll("[^0-9\\.]", "");
+            }
+        }
+        catch (IOException e)
+        {
+            System.err.println(e);
+        }
+        return version;
     }
 
 }

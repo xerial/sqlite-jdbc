@@ -1,0 +1,13 @@
+
+= How to compile new version of SQLiteJDBC 
+* Edit the VERSION file, and the version number in pom.xml file.
+* Then, run make 
+
+
+= How to build pure-java and native libraries
+* Type, make -fMakefile.package 
+
+= How to deploy to the maven repository
+* mvn deploy
+* mvn deploy -Psourceforge  (for uploading Sourceforge.jp repository, which are synchronized with the Maven central repository)
+
