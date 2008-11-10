@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.6.4</version>
+  <version>3.6.4.1</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -83,7 +83,6 @@
       <groupId>org.xerial.thirdparty</groupId>
       <artifactId>nestedvm</artifactId>
       <version>1.0</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.xerial.thirdparty</groupId>
