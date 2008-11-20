@@ -30,8 +30,9 @@ public class StatementTest
         assertEquals(stat.executeUpdate("insert into s1 values (1);"), 1);
         assertEquals(stat.executeUpdate("insert into s1 values (2);"), 1);
         assertEquals(stat.executeUpdate("update s1 set c1 = 5;"), 3);
-        assertEquals(stat.executeUpdate("delete from s1;"), 0);
-        assertEquals(stat.executeUpdate("drop table s1;"), 0);
+		// count_changes_pgrama. truncate_optimization
+        assertEquals(stat.executeUpdate("delete from s1;"), 3); 
+        assertEquals(stat.executeUpdate("drop table s1;"), 3);
     }
 
     @Test public void emptyRS() throws SQLException {
