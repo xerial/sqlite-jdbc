@@ -18,7 +18,10 @@ BUILD_CMD = svn update && make native
 
 all: compile
 
-LIB_DIR=target/dll
+include VERSION
+sqlite-version := sqlite-$(sqlite_version)
+
+LIB_DIR=target/dll/$(sqlite-version)
 DLL_DIR=$(LIB_DIR)/native
 
 DLL_WIN=$(DLL_DIR)/Windows/x86/sqlitejdbc.dll
