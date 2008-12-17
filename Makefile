@@ -50,7 +50,7 @@ LIB_FOLDER = $(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
 WORK_DIR=target/dll/$(sqlite)/native
 UPDATE_FLAG=target/dll/$(sqlite)/UPDATE
 
-$(OS_INFO_PROG): src/main/java/$(OSInfoClass).java
+$(OSINFO_PROG): src/main/java/$(OSInfoClass).java
 	mkdir -p target/sqlitejdbc
 	javac $< -d target/sqlitejdbc
 
@@ -65,7 +65,7 @@ $(SQLITE_BUILD_DIR): Makefile sqlitejdbc/Makefile
 
 #native: sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
 
-$(UPDATE_FLAG): $(OS_INFO_PROG) $(SQLITE_DLL)
+$(UPDATE_FLAG): $(OSINFO_PROG) $(SQLITE_DLL)
 	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
 	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
 	touch $(UPDATE_FLAG)
