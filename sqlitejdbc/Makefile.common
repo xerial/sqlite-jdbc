@@ -81,8 +81,8 @@ Win_LIBNAME      := sqlitejdbc.dll
 
 CC        := $($(os)_CC)
 STRIP     := $($(os)_STRIP)
-CFLAGS    := $($(os)_CFLAGS)
-LINKFLAGS := $($(os)_LINKFLAGS)
+CFLAGS    := $($(os)_CFLAGS) 
+LINKFLAGS := $($(os)_LINKFLAGS) 
 LIBNAME   := $($(os)_LIBNAME)
 
 CFLAGS := $(CFLAGS) -Ibuild/$(sqlite)-$(target) -Ibuild

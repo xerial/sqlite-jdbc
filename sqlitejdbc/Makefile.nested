@@ -30,7 +30,8 @@ $(nestedvm)/%:
 
 dl/$(nestedvm).tgz:
 	@mkdir -p dl
-	curl -odl/$(nestedvm).tgz http://files.zentus.com/sqlitejdbc/$(nestedvm).tgz
+	cp archive/$(nestedvm).tgz $@
+#	curl -odl/$(nestedvm).tgz http://files.zentus.com/sqlitejdbc/$(nestedvm).tgz
 
 dl/$(sqlite)-amal.zip:
 	@mkdir -p dl
@@ -39,6 +40,7 @@ dl/$(sqlite)-amal.zip:
 
 $(nestedvm)/Makefile: dl/$(nestedvm).tgz
 	tar xfz dl/$(nestedvm).tgz
+
 
 build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	@mkdir -p build
@@ -50,6 +52,8 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 
 	# we need a dummy main
 	echo 'int main() { return 0; }' >> build/$(sqlite)-nestedvm/sqlite3.c
+	# remove utimes
+	perl -npe '$$_ =~ s/utimes.*//g;' -i build/$(sqlite)-nestedvm/sqlite3.c 
 
 	(. ./$(nestedvm)/env.sh; cd build/$(sqlite)-nestedvm; \
 	$$CC -c $$CFLAGS -o sqlite3.o \
@@ -64,7 +68,7 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	$$CC -c $$CFLAGS -o NestedDB.o Nested*.c)
 
 	./$(nestedvm)/upstream/install/bin/mips-unknown-elf-gcc \
-	        -march=mips1 --static \
+	        -march=mips1 --static -lc\
 	        -o $@ build/$(sqlite)-nestedvm/sqlite3.o \
 			      build/$(sqlite)-nestedvm/NestedDB.o
 
