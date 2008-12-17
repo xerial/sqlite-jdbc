@@ -50,7 +50,7 @@ LIB_FOLDER = $(shell java -cp target/sqlitejdbc org.xerial.db.sql.sqlite.OSInfo)
 WORK_DIR=target/dll/$(sqlite)/native
 UPDATE_FLAG=target/dll/$(sqlite)/UPDATE
 
-$(OSINFO_PROG): src/main/java/$(OSInfoClass).java
+$(OS_INFO_PROG): src/main/java/$(OSInfoClass).java
 	mkdir -p target/sqlitejdbc
 	javac $< -d target/sqlitejdbc
 
