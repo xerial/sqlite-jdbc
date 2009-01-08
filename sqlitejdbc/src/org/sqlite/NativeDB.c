@@ -282,6 +282,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 
 // WRAPPERS for sqlite_* functions //////////////////////////////////
 
+JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_shared_1cache(
+        JNIEnv *env, jobject this, jboolean enable)
+{
+    return sqlite3_enable_shared_cache(enable ? 1 : 0);
+}
+
 JNIEXPORT void JNICALL Java_org_sqlite_NativeDB__1open(
         JNIEnv *env, jobject this, jstring file)
 {
