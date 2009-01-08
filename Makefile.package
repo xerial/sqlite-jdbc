@@ -14,7 +14,7 @@ LINUX_WORK=work/eclipse/xerial/sqlite-jdbc
 AMD_SERVER=utgb01
 AMD_WORK=work/eclipse/xerial/sqlite-jdbc
 
-BUILD_CMD = svn update && make native
+BUILD_CMD = svn update && make clean-native && make native
 
 all: compile
 
