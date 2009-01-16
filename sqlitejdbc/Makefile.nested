@@ -15,7 +15,7 @@ dist/$(sqlitejdbc)-pure.jar: build/org/sqlite/SQLite.class $(java_classes)
 	    org/sqlite/SQLite.class $(java_classlist) \
 	    -C ../$(nestedvm)/build org/ibex
 
-build/org/%.class: src/org/%.java
+build/org/%.class: ../src/main/java/org/sqlite/%.java
 	@mkdir -p build
 	$(JAVAC) -source 1.2 -target 1.2 -classpath "$(nestedvm)/build" \
 	    -sourcepath src -d build $<
