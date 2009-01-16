@@ -28,6 +28,7 @@ class Conn implements Connection
     private boolean autoCommit = true;
     private int transactionIsolation = TRANSACTION_SERIALIZABLE; 
     private int timeout = 0;
+    private int transactionIsolation = TRANSACTION_SERIALIZABLE;
 
     public Conn(String url, String filename, boolean sharedCache)
             throws SQLException {
