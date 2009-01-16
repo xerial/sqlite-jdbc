@@ -26,6 +26,7 @@ class Conn implements Connection
     private DB db = null;
     private MetaData meta = null;
     private boolean autoCommit = true;
+    private int transactionIsolation = TRANSACTION_SERIALIZABLE; 
     private int timeout = 0;
 
     public Conn(String url, String filename, boolean sharedCache)
@@ -126,10 +127,21 @@ class Conn implements Connection
             "SQLite only supports CLOSE_CURSORS_AT_COMMIT");
     }
 
-    public int getTransactionIsolation() { return TRANSACTION_SERIALIZABLE; }
+    public int getTransactionIsolation() { 
+        return transactionIsolation; 
+    } 
     public void setTransactionIsolation(int level) throws SQLException {
-        if (level != TRANSACTION_SERIALIZABLE) throw new SQLException(
-            "SQLite supports only TRANSACTION_SERIALIZABLE");
+        switch (level) { 
+        case TRANSACTION_SERIALIZABLE: 
+            db.exec("PRAGMA read_uncommitted = false;"); 
+            break; 
+        case TRANSACTION_READ_UNCOMMITTED: 
+            db.exec("PRAGMA read_uncommitted = true;"); 
+            break; 
+        default: 
+            throw new SQLException("SQLite supports only TRANSACTION_SERIALIZABLE and TRANSACTION_READ_UNCOMMITTED."); 
+        } 
+        transactionIsolation = level; 
     }
 
     public Map getTypeMap() throws SQLException
