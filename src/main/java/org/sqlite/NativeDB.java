@@ -24,14 +24,15 @@ final class NativeDB extends DB
     /** SQLite connection handle. */
     long pointer = 0;
 
-    private static Boolean loaded = null;
+    private static boolean isLoaded = false;
+    private static boolean loadSucceeded = false;
 
     static boolean load()
     {
-        if (loaded != null)
-            return loaded == Boolean.TRUE;
+        if (!isLoaded)
+            return loadSucceeded == true;
 
-        return loaded = new Boolean(SQLiteJDBCLoader.initialize());
+        return loadSucceeded = SQLiteJDBCLoader.initialize();
 
         //        String libpath = System.getProperty("org.sqlite.lib.path");
         //        String libname = System.getProperty("org.sqlite.lib.name");
