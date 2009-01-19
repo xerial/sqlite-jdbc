@@ -18,7 +18,6 @@ package org.sqlite;
 
 import java.sql.SQLException;
 
-import org.xerial.db.sql.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 final class NativeDB extends DB

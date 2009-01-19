@@ -22,7 +22,7 @@
 // $URL$ 
 // $Author$
 //--------------------------------------
-package org.xerial.db.sql.sqlite;
+package org.sqlite;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -38,6 +38,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sqlite.Function;
+import org.sqlite.SQLiteJDBCLoader;
 import org.xerial.util.log.Logger;
 
 public class SQLiteJDBCLoaderTest

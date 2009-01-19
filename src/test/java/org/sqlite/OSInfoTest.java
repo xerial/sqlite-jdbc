@@ -7,11 +7,12 @@
 // $URL$ 
 // $Author$
 //--------------------------------------
-package org.xerial.db.sql.sqlite;
+package org.sqlite;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.sqlite.OSInfo;
 
 public class OSInfoTest
 {

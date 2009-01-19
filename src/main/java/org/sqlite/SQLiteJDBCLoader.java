@@ -22,7 +22,7 @@
 // $URL$ 
 // $Author$
 //--------------------------------------
-package org.xerial.db.sql.sqlite;
+package org.sqlite;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
