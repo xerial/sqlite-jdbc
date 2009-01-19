@@ -17,6 +17,8 @@
 
 include Makefile.common
 
+SRC_FOLDER=../src/main/java/org/sqlite/
+
 default: test
 
 test: native $(test_classes)
@@ -33,7 +35,7 @@ build/$(target)/$(LIBNAME): build/$(sqlite)-$(target)/sqlite3.o build/org/sqlite
 	@mkdir -p build/$(target)
 	$(JAVAH) -classpath build -jni -o build/NativeDB.h org.sqlite.NativeDB
 	$(CC) $(CFLAGS) -c -o build/$(target)/NativeDB.o \
-		src/org/sqlite/NativeDB.c
+		../src/main/java/org/sqlite/NativeDB.c
 	$(CC) $(CFLAGS) $(LINKFLAGS) -o build/$(target)/$(LIBNAME) \
 		build/$(target)/NativeDB.o build/$(sqlite)-$(target)/*.o
 	$(STRIP) build/$(target)/$(LIBNAME)
@@ -51,14 +53,14 @@ build/$(sqlite)-%/sqlite3.o: dl/$(sqlite)-amal.zip
 		-DSQLITE_ENABLE_RTREE \
 	    -DSQLITE_OMIT_LOAD_EXTENSION sqlite3.c)
 
-build/org/%.class: src/org/%.java
+build/org/sqlite/%.class: ../src/main/java/org/sqlite/%.java
 	@mkdir -p build
-	$(JAVAC) -source 1.2 -target 1.2 -sourcepath src -d build $<
+	$(JAVAC) -source 1.2 -target 1.2 -sourcepath ../src/main/java -d build $<
 
-build/test/%.class: src/test/%.java
-	@mkdir -p build
+build/test/org/sqlite/%.class: ../src/test/java/org/sqlite/%.java
+	@mkdir -p build/test
 	$(JAVAC) -target 1.5 -classpath "build$(sep)$(libjunit)" \
-	    -sourcepath src/test -d build $<
+	    -sourcepath ../src/test/java -d build/test $<
 
 dl/$(sqlite)-amal.zip:
 	@mkdir -p dl

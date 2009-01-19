@@ -46,13 +46,13 @@ JAVA  := "$$JAVA_HOME/bin/java"
 JAVAC := "$$JAVA_HOME/bin/javac" -Xbootclasspath/p:$(libjdbc)
 JAVAH := "$$JAVA_HOME/bin/javah"
 
-java_sources = $(wildcard src/org/sqlite/*.java)
-java_classes = $(java_sources:src/%.java=build/%.class)
+java_sources = $(wildcard ../src/main/java/org/sqlite/*.java)
+java_classes = $(java_sources:../src/main/java/org/sqlite/%.java=build/org/sqlite/%.class)
 native_classes = $(filter-out %NestedDB.class,$(java_classes))
 java_classlist = $(subst $$,\$$,$(patsubst build/%, %, $(wildcard $(java_classes:%.class=%*))))
-test_sources = $(wildcard src/test/*.java)
-test_classes = $(test_sources:src/%.java=build/%.class)
-tests        = $(subst /,.,$(patsubst build/%.class,%,$(test_classes)))
+test_sources = $(wildcard ../src/test/java/org/sqlite/*.java)
+test_classes = $(test_sources:../src/test/java/org/sqlite/%.java=build/test/org/sqlite/%.class)
+tests        = $(subst /,.,$(patsubst build/test/org/sqlite/%.class,org/sqlite/%,$(test_classes)))
 
 target     := $(os)-$(arch)
 

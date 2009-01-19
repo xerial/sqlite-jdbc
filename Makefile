@@ -41,7 +41,7 @@ deploy:
 	mvn deploy 
 
 
-OSInfoClass=org/xerial/db/sql/sqlite/OSInfo
+OSInfoClass=org/sqlite/OSInfo
 OSINFO_PROG=target/sqlitejdbc/$(OSInfoClass).class
 SQLITE_DLL=sqlitejdbc/build/$(target)/$(LIBNAME)
 SQLITE_BUILD_DIR=sqlitejdbc/build/$(sqlite)-$(target)
@@ -57,7 +57,7 @@ $(OSINFO_PROG): src/main/java/$(OSInfoClass).java
 $(SQLITE_DLL): $(SQLITE_BUILD_DIR)
 
 $(SQLITE_BUILD_DIR): Makefile sqlitejdbc/Makefile 
-	cd sqlitejdbc && make native
+	cd sqlitejdbc && make native 
 
 #$(NATIVE_DLL): $(OSINFO_PROG) $(SQLITE_DLL)
 #	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)

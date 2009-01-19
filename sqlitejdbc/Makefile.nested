@@ -15,15 +15,15 @@ dist/$(sqlitejdbc)-pure.jar: build/org/sqlite/SQLite.class $(java_classes)
 	    org/sqlite/SQLite.class $(java_classlist) \
 	    -C ../$(nestedvm)/build org/ibex
 
-build/org/%.class: ../src/main/java/org/sqlite/%.java
+build/org/sqlite/%.class: ../src/main/java/org/sqlite/%.java
 	@mkdir -p build
 	$(JAVAC) -source 1.2 -target 1.2 -classpath "$(nestedvm)/build" \
-	    -sourcepath src -d build $<
+	    -sourcepath ../src/main/java -d build $<
 
-build/test/%.class: src/test/%.java
+build/test/org/sqlite/%.class: ../src/test/java/org/sqlite/%.java
 	@mkdir -p build
 	$(JAVAC) -target 1.5 -classpath "build$(sep)$(libjunit)" \
-	    -sourcepath src/test -d build $<
+	    -sourcepath ../src/test/java -d build/test $<
 
 $(nestedvm)/%:
 	$(MAKE) -C $(nestedvm) $*
@@ -46,7 +46,7 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	@mkdir -p build
 	@mkdir -p build/$(sqlite)-nestedvm
 	unzip -qo dl/$(sqlite)-amal.zip -d build/$(sqlite)-nestedvm
-	cp src/org/sqlite/Nested*.c build/$(sqlite)-nestedvm
+	cp ../src/main/java/org/sqlite/Nested*.c build/$(sqlite)-nestedvm
 	perl -pi -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
 	    build/$(sqlite)-nestedvm/sqlite3ext.h
 
