@@ -31,7 +31,7 @@ final class NativeDB extends DB
         if (loaded != null)
             return loaded == Boolean.TRUE;
 
-        return loaded = Boolean.valueOf(SQLiteJDBCLoader.initialize());
+        return loaded = new Boolean(SQLiteJDBCLoader.initialize());
 
         //        String libpath = System.getProperty("org.sqlite.lib.path");
         //        String libname = System.getProperty("org.sqlite.lib.name");
