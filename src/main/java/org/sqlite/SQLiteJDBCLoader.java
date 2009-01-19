@@ -110,7 +110,7 @@ public class SQLiteJDBCLoader
             String targetFolder)
     {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
-        final String prefix = String.format("sqlite-%s-", getVersion());
+        final String prefix = "sqlite-" + getVersion() + "-";
 
         String extractedLibFileName = prefix + libraryFileName;
         File extractedLibFile = new File(targetFolder, extractedLibFileName);
