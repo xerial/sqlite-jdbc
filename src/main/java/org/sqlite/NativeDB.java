@@ -29,10 +29,12 @@ final class NativeDB extends DB
 
     static boolean load()
     {
-        if (!isLoaded)
+        if (isLoaded)
             return loadSucceeded == true;
 
-        return loadSucceeded = SQLiteJDBCLoader.initialize();
+        loadSucceeded = SQLiteJDBCLoader.initialize();
+        isLoaded = true;
+        return loadSucceeded;
 
         //        String libpath = System.getProperty("org.sqlite.lib.path");
         //        String libname = System.getProperty("org.sqlite.lib.name");
