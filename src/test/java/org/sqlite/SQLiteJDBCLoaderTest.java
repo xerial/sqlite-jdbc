@@ -37,13 +37,9 @@ import java.sql.Statement;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.sqlite.Function;
-import org.sqlite.SQLiteJDBCLoader;
-import org.xerial.util.log.Logger;
 
 public class SQLiteJDBCLoaderTest
 {
-    private static Logger _logger = Logger.getLogger(SQLiteJDBCLoaderTest.class);
 
     private Connection connection = null;
 
@@ -66,7 +62,7 @@ public class SQLiteJDBCLoaderTest
     @Test
     public void query() throws ClassNotFoundException
     {
-        _logger.debug(String.format("running in %s mode", SQLiteJDBCLoader.isNativeMode() ? "native" : "nested"));
+        //System.out.println(String.format("running in %s mode", SQLiteJDBCLoader.isNativeMode() ? "native" : "nested"));
 
         try
         {
@@ -115,7 +111,7 @@ public class SQLiteJDBCLoaderTest
     @Test
     public void version()
     {
-        _logger.debug(SQLiteJDBCLoader.getVersion());
+    // System.out.println(SQLiteJDBCLoader.getVersion());
     }
 
 }

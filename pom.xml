@@ -90,12 +90,6 @@
       <version>1.4</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.xerial</groupId>
-      <artifactId>xerial-core</artifactId>
-      <version>0.8.0</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
 </project>
