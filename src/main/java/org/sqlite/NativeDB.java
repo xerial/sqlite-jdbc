@@ -18,7 +18,6 @@ package org.sqlite;
 
 import java.sql.SQLException;
 
-
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 final class NativeDB extends DB
 {
@@ -32,7 +31,7 @@ final class NativeDB extends DB
         if (loaded != null)
             return loaded == Boolean.TRUE;
 
-        return loaded = SQLiteJDBCLoader.initialize();
+        return loaded = Boolean.valueOf(SQLiteJDBCLoader.initialize());
 
         //        String libpath = System.getProperty("org.sqlite.lib.path");
         //        String libname = System.getProperty("org.sqlite.lib.name");
