@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,7 +34,9 @@ public class ReadUncommittedTest
     @Before
     public void connect() throws Exception
     {
-        conn = DriverManager.getConnection("jdbc:sqlite:");
+        Properties prop = new Properties();
+        prop.setProperty("shared_cache", "true");
+        conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
         stat.executeUpdate("create table test (id integer primary key, fn, sn);");
         stat.executeUpdate("create view testView as select * from test;");
