@@ -396,7 +396,7 @@ public class PrepStmtTest
         rs.next();
         assertEquals("a", rs.getString(1));
         rs.next();
-        assertEquals("a", rs.getString(1));
+        assertEquals("b", rs.getString(1));
     }
 
     @Test
