@@ -378,6 +378,28 @@ public class PrepStmtTest
     }
 
     @Test
+    public void testExecuteBatch() throws Exception
+    {
+        stat.executeUpdate("create table t (c text);");
+        PreparedStatement prep = conn.prepareStatement("insert into t values (?);");
+        prep.setString(1, "a");
+        prep.addBatch();
+        int call1_length = prep.executeBatch().length;
+        prep.setString(1, "b");
+        prep.addBatch();
+        int call2_length = prep.executeBatch().length;
+
+        assertEquals(1, call1_length);
+        assertEquals(1, call2_length);
+
+        ResultSet rs = stat.executeQuery("select * from t");
+        rs.next();
+        assertEquals("a", rs.getString(1));
+        rs.next();
+        assertEquals("a", rs.getString(1));
+    }
+
+    @Test
     public void dblock() throws SQLException
     {
         stat.executeUpdate("create table test (c1);");
@@ -407,7 +429,7 @@ public class PrepStmtTest
             prep.setInt(1, Integer.MIN_VALUE + i);
             prep.addBatch();
         }
-        assertArrayEq(prep.executeBatch(), new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
+        assertArrayEq(new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, prep.executeBatch());
         prep.close();
         ResultSet rs = stat.executeQuery("select count(*) from test;");
         assertTrue(rs.next());
