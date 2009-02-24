@@ -1,7 +1,7 @@
 package org.sqlite;
 
+import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
@@ -12,26 +12,17 @@ import java.sql.Statement;
 import javax.swing.JApplet;
 
 /**
- * <p>
- * Title: UnsignedApplet
- * </p>
- * <p>
- * Description: Demo of an Unsigned applet's unsuccessfull attempt to retrieve
- * an image stored on a remote server
- * </p>
- * <p>
- * Copyright: Copyright (c) 2003 Raditha Dissanayake
- * </p>
- * <p>
- * Company: Raditha Dissanayake
- * </p>
+ * A demo for using SQLite JDBC inside a Java Applet.
  * 
- * @author Raditha Dissanayake
- * @version 1.0
+ * @author leo
+ * 
  */
 public class AppletTest extends JApplet
 {
-    Image img;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     public AppletTest()
     {
@@ -81,7 +72,8 @@ public class AppletTest extends JApplet
             stmt.close();
             conn.close();
 
-            //g.drawImage(img, 10, 10, 50, 50, this);
+            g.setColor(Color.DARK_GRAY);
+            g.drawRect(5, 5, 180, 180);
 
         }
         catch (Exception ex)
