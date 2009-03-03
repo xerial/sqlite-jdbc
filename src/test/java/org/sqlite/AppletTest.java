@@ -11,6 +11,9 @@ import java.sql.Statement;
 
 import javax.swing.JApplet;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 /**
  * A demo for using SQLite JDBC inside a Java Applet.
  * 
@@ -80,5 +83,12 @@ public class AppletTest extends JApplet
         {
             ex.printStackTrace();
         }
+    }
+
+    @Ignore
+    @Test
+    public void test()
+    {
+
     }
 }
