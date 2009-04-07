@@ -211,8 +211,8 @@ public class InsertQueryTest
     @Test(expected = SQLException.class)
     public void reproduceDatabaseLocked() throws SQLException
     {
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:tmp.db");
-        Connection conn2 = DriverManager.getConnection("jdbc:sqlite:tmp.db");
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbName);
+        Connection conn2 = DriverManager.getConnection("jdbc:sqlite:" + dbName);
         Statement stat = conn.createStatement();
         Statement stat2 = conn2.createStatement();
 
