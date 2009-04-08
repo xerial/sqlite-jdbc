@@ -51,7 +51,7 @@ build/$(sqlite)-%/sqlite3.o: dl/$(sqlite)-amal.zip
 	    -DSQLITE_CORE \
 	    -DSQLITE_ENABLE_FTS3 \
 		-DSQLITE_ENABLE_RTREE \
-	    -DSQLITE_OMIT_LOAD_EXTENSION sqlite3.c)
+	    sqlite3.c)
 
 build/org/sqlite/%.class: ../src/main/java/org/sqlite/%.java
 	@mkdir -p build

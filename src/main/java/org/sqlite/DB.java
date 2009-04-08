@@ -60,6 +60,8 @@ abstract class DB implements Codes
 
     abstract int shared_cache(boolean enable) throws SQLException;
 
+    abstract int enable_load_extension(boolean enable) throws SQLException;
+
     final synchronized void exec(String sql) throws SQLException
     {
         long pointer = 0;

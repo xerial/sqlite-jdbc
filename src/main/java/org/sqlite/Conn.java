@@ -27,6 +27,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
+import java.util.Properties;
 
 class Conn implements Connection
 {
@@ -37,10 +38,15 @@ class Conn implements Connection
     private int transactionIsolation = TRANSACTION_SERIALIZABLE;
     private int timeout = 0;
 
-    public Conn(String url, String filename, boolean sharedCache) throws SQLException
+    public Conn(String url, String filename, Properties prop) throws SQLException
     {
         this(url, filename);
-        db.shared_cache(sharedCache);
+
+        boolean enableSharedCache = Boolean.parseBoolean(prop.getProperty("shared_cache", "false"));
+        boolean enableLoadExtension = Boolean.parseBoolean(prop.getProperty("enable_load_extension", "false"));
+
+        db.shared_cache(enableSharedCache);
+        db.enable_load_extension(enableLoadExtension);
     }
 
     public Conn(String url, String filename) throws SQLException

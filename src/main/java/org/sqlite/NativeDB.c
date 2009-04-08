@@ -288,6 +288,14 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_shared_1cache(
     return sqlite3_enable_shared_cache(enable ? 1 : 0);
 }
 
+
+JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_enable_1load_1extension(
+        JNIEnv *env, jobject this, jboolean enable)
+{
+	return sqlite3_enable_load_extension(gethandle(env, this), enable ? 1 : 0);
+}
+
+
 JNIEXPORT void JNICALL Java_org_sqlite_NativeDB__1open(
         JNIEnv *env, jobject this, jstring file)
 {

@@ -16,54 +16,68 @@
 
 package org.sqlite;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.util.Properties;
 
 public class JDBC implements Driver
 {
     private static final String PREFIX = "jdbc:sqlite:";
 
-    static {
-        try {
+    static
+    {
+        try
+        {
             DriverManager.registerDriver(new JDBC());
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
         }
     }
 
-    public int getMajorVersion() { return 1; }
-    public int getMinorVersion() { return 1; }
+    public int getMajorVersion()
+    {
+        return 1;
+    }
 
-    public boolean jdbcCompliant() { return false; }
+    public int getMinorVersion()
+    {
+        return 1;
+    }
 
-    public boolean acceptsURL(String url) {
+    public boolean jdbcCompliant()
+    {
+        return false;
+    }
+
+    public boolean acceptsURL(String url)
+    {
         return url != null && url.toLowerCase().startsWith(PREFIX);
     }
 
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
-            throws SQLException {
-        DriverPropertyInfo sharedCache = new DriverPropertyInfo(
-            "shared_cache", "false");
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
+    {
+        DriverPropertyInfo sharedCache = new DriverPropertyInfo("shared_cache", "false");
         sharedCache.choices = new String[] { "true", "false" };
-        sharedCache.description =
-            "Enable SQLite Shared-Cache mode, native driver only.";
+        sharedCache.description = "Enable SQLite Shared-Cache mode, native driver only.";
         sharedCache.required = false;
 
         return new DriverPropertyInfo[] { sharedCache };
     }
 
-    public Connection connect(String url, Properties info) throws SQLException {
-        if (!acceptsURL(url)) return null;
+    public Connection connect(String url, Properties info) throws SQLException
+    {
+        if (!acceptsURL(url))
+            return null;
         url = url.trim();
 
         // if no file name is given use a memory database
-        String file = PREFIX.equalsIgnoreCase(url) ?
-            ":memory:" : url.substring(PREFIX.length());
+        String file = PREFIX.equalsIgnoreCase(url) ? ":memory:" : url.substring(PREFIX.length());
 
-        if (info.getProperty("shared_cache") == null)
-            return new Conn(url, file);
-        else
-            return new Conn(url, file,
-                Boolean.parseBoolean(info.getProperty("shared_cache")));
+        return new Conn(url, file, info);
     }
 }
