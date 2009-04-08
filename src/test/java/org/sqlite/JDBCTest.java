@@ -36,8 +36,8 @@ public class JDBCTest
         {
             conn = DriverManager.getConnection("jdbc:sqlite:", prop);
             Statement stat = conn.createStatement();
-            stat.executeUpdate("create table test (id integer primary key, fn, sn);");
-            stat.executeUpdate("create view testView as select * from test;");
+            stat.executeQuery("select load_extension('')");
+
         }
         finally
         {
