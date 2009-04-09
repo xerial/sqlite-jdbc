@@ -47,6 +47,7 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	@mkdir -p build/$(sqlite)-nestedvm
 	unzip -qo dl/$(sqlite)-amal.zip -d build/$(sqlite)-nestedvm
 	cp ../src/main/java/org/sqlite/Nested*.c build/$(sqlite)-nestedvm
+	cp lib/inc_mac/*.h build/$(sqlite)-nestedvm
 	perl -pi -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
 	    build/$(sqlite)-nestedvm/sqlite3ext.h
 
@@ -56,7 +57,7 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	perl -npe '$$_ =~ s/utimes.*//g;' -i build/$(sqlite)-nestedvm/sqlite3.c 
 
 	(. ./$(nestedvm)/env.sh; cd build/$(sqlite)-nestedvm; \
-	$$CC -c $$CFLAGS -Ilib/inc_mac -o sqlite3.o \
+	$$CC -c $$CFLAGS -o sqlite3.o \
 	    -DSQLITE_THREADSAFE=0 \
 		-DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
