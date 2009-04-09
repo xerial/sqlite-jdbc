@@ -36,6 +36,11 @@ public class JDBCTest
         {
             conn = DriverManager.getConnection("jdbc:sqlite:", prop);
             Statement stat = conn.createStatement();
+
+            // How to build shared lib in Windows
+            // # mingw32-gcc -fPIC -c extension-function.c
+            // # mingw32-gcc -shared -Wl -o extension-function.dll extension-function.o
+
             //            stat.executeQuery("select load_extension('extension-function.dll')");
             //
             //            ResultSet rs = stat.executeQuery("select sqrt(4)");
