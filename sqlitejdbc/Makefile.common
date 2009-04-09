@@ -59,7 +59,7 @@ target     := $(os)-$(arch)
 # os=Default is meant to be generic unix/linux
 Default_CC        := gcc
 Default_STRIP     := strip
-Default_CFLAGS    := -I$(JAVA_HOME)/include -Os -fPIC
+Default_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
 Default_LINKFLAGS := -shared
 Default_LIBNAME   := libsqlitejdbc.so
 
