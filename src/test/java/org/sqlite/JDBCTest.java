@@ -11,12 +11,10 @@ package org.sqlite;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class JDBCTest
@@ -27,9 +25,8 @@ public class JDBCTest
         Class.forName("org.sqlite.JDBC");
     }
 
-    @Ignore
     @Test
-    public void enableLoadExtensionTestForWin() throws Exception
+    public void enableLoadExtensionTest() throws Exception
     {
         Properties prop = new Properties();
         prop.setProperty("enable_load_extension", "true");
@@ -39,10 +36,10 @@ public class JDBCTest
         {
             conn = DriverManager.getConnection("jdbc:sqlite:", prop);
             Statement stat = conn.createStatement();
-            stat.executeQuery("select load_extension('extension-function.dll')");
-
-            ResultSet rs = stat.executeQuery("select sqrt(4)");
-            System.out.println(rs.getDouble(1));
+            //            stat.executeQuery("select load_extension('extension-function.dll')");
+            //
+            //            ResultSet rs = stat.executeQuery("select sqrt(4)");
+            //            System.out.println(rs.getDouble(1));
 
         }
         finally
