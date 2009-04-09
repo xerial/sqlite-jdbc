@@ -55,9 +55,8 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	# remove utimes
 	perl -npe '$$_ =~ s/utimes.*//g;' -i build/$(sqlite)-nestedvm/sqlite3.c 
 
-	echo $$CFLAGS;
 	(. ./$(nestedvm)/env.sh; cd build/$(sqlite)-nestedvm; \
-	$$CC -c $$CFLAGS -o sqlite3.o \
+	$$CC -c $$CFLAGS -Ilib/inc_mac -o sqlite3.o \
 	    -DSQLITE_THREADSAFE=0 \
 		-DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
