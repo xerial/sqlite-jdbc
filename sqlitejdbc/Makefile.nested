@@ -68,7 +68,7 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	$$CC -c $$CFLAGS -o NestedDB.o Nested*.c)
 
 	./$(nestedvm)/upstream/install/bin/mips-unknown-elf-gcc \
-	        -march=mips1 --static -lc\
+	        -march=mips1 --static -lc -ldl \
 	        -o $@ build/$(sqlite)-nestedvm/sqlite3.o \
 			      build/$(sqlite)-nestedvm/NestedDB.o
 
