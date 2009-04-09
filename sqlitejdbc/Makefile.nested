@@ -21,7 +21,7 @@ build/org/sqlite/%.class: ../src/main/java/org/sqlite/%.java
 	    -sourcepath ../src/main/java -d build $<
 
 build/test/org/sqlite/%.class: ../src/test/java/org/sqlite/%.java
-	@mkdir -p build
+	@mkdir -p build/test
 	$(JAVAC) -target 1.5 -classpath "build$(sep)$(libjunit)" \
 	    -sourcepath ../src/test/java -d build/test $<
 
