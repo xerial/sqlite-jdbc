@@ -253,6 +253,8 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
             batch(pos, value);
         else if (value instanceof Integer)
             batch(pos, value);
+        else if (value instanceof Short)
+            batch(pos, ((Short) value).intValue());
         else if (value instanceof Float)
             batch(pos, value);
         else if (value instanceof Double)
