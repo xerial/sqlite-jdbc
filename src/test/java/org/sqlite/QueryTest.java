@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -73,6 +74,26 @@ public class QueryTest
         assertTrue(rs.next());
         float f2 = rs.getFloat(1);
         assertEquals(f, f2, 0.0000001);
+
+    }
+
+    @Test
+    public void dateTimeTest() throws Exception
+    {
+        String url = "jdbc:sqlite::memory:";
+
+        float f = 3.141597f;
+        Connection conn = DriverManager.getConnection(url);
+        conn.createStatement().execute("create table sample (start_time datetime)");
+
+        Date now = new Date();
+        //String date = "2000-01-01 16:45:00";
+        conn.createStatement().execute(String.format("insert into sample values(%s)", now.getTime()));
+
+        ResultSet rs = conn.createStatement().executeQuery("select * from sample");
+        assertTrue(rs.next());
+
+        assertEquals(now, rs.getDate(1));
 
     }
 
