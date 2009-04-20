@@ -97,4 +97,20 @@ public class QueryTest
 
     }
 
+    @Test
+    public void viewTest() throws Exception
+    {
+        Connection conn = DriverManager.getConnection("jdbc:sqlite::memory:");
+        Statement st1 = conn.createStatement();
+        // drop table if it already exists
+
+        String tableName = "sample";
+        st1.execute("DROP TABLE IF EXISTS " + tableName);
+        st1.close();
+        Statement st2 = conn.createStatement();
+        st2.execute("DROP VIEW IF EXISTS " + tableName);
+        st2.close();
+
+    }
+
 }
