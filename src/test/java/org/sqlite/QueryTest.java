@@ -92,7 +92,6 @@ public class QueryTest
 
         ResultSet rs = conn.createStatement().executeQuery("select * from sample");
         assertTrue(rs.next());
-
         assertEquals(now, rs.getDate(1));
 
     }

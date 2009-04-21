@@ -214,7 +214,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
 
     public void setFloat(int pos, float value) throws SQLException
     {
-        setDouble(pos, value);
+        batch(pos, new Float(value));
     }
 
     public void setInt(int pos, int value) throws SQLException
@@ -254,7 +254,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
         else if (value instanceof Integer)
             batch(pos, value);
         else if (value instanceof Short)
-            batch(pos, ((Short) value).intValue());
+            batch(pos, new Integer(((Short) value).intValue()));
         else if (value instanceof Float)
             batch(pos, value);
         else if (value instanceof Double)

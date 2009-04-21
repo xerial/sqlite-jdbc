@@ -380,6 +380,12 @@ abstract class DB implements Codes
         throw new SQLException(errmsg());
     }
 
+    final void throwex(int errorCode) throws SQLException
+    {
+        SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
+        throw new SQLException(String.format("%s (%s)", code, errmsg()));
+    }
+
     /*
      * SQLite and the JDBC API have very different ideas about the meaning
      * of auto-commit. Under JDBC, when executeUpdate() returns in
