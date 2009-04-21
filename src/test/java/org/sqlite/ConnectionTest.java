@@ -62,7 +62,7 @@ public class ConnectionTest
         prep.clearParameters();
     }
 
-    @Test
+    @Test(expected = SQLException.class)
     public void openInvalidLocation() throws SQLException
     {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:/");
