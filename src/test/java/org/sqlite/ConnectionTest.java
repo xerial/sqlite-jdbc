@@ -82,4 +82,18 @@ public class ConnectionTest
         conn.close();
 
     }
+
+    @Test
+    public void openHttpResource() throws SQLException
+    {
+        Connection conn = DriverManager
+                .getConnection("jdbc:sqlite::resource:http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc/src/test/java/org/sqlite/sample.db");
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery("select * from coordinate");
+        assertTrue(rs.next());
+        rs.close();
+        stat.close();
+        conn.close();
+
+    }
 }

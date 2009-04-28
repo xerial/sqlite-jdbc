@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.CallableStatement;
@@ -65,10 +66,20 @@ class Conn implements Connection
             {
                 String resourceName = filename.substring(RESOURCE_NAME_PREFIX.length());
 
+                // search the class path
                 ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
                 URL resourceAddr = contextCL.getResource(resourceName);
                 if (resourceAddr == null)
-                    throw new SQLException(String.format("resource not found: %s", resourceName));
+                {
+                    try
+                    {
+                        resourceAddr = new URL(resourceName);
+                    }
+                    catch (MalformedURLException e)
+                    {
+                        throw new SQLException(String.format("resource %s not found: %s", resourceName, e));
+                    }
+                }
 
                 try
                 {
