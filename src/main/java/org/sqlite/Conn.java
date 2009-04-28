@@ -16,6 +16,11 @@
 package org.sqlite;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -49,45 +54,69 @@ class Conn implements Connection
         db.enable_load_extension(enableLoadExtension);
     }
 
+    private static final String RESOURCE_NAME_PREFIX = ":resource:";
+
     public Conn(String url, String filename) throws SQLException
     {
         // check the path to the file exists
         if (!":memory:".equals(filename))
         {
-            File file = new File(filename).getAbsoluteFile();
-            File parent = file.getParentFile();
-            if (parent != null && !parent.exists())
+            if (filename.startsWith(RESOURCE_NAME_PREFIX))
             {
-                for (File up = parent; up != null && !up.exists();)
-                {
-                    parent = up;
-                    up = up.getParentFile();
-                }
-                throw new SQLException("path to '" + filename + "': '" + parent + "' does not exist");
-            }
+                String resourceName = filename.substring(RESOURCE_NAME_PREFIX.length());
 
-            // check write access if file does not exist
-            try
-            {
-                // The extra check to exists() is necessary as createNewFile()
-                // does not follow the JavaDoc when used on read-only shares.
-                if (!file.exists() && file.createNewFile())
-                    file.delete();
+                ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+                URL resourceAddr = contextCL.getResource(resourceName);
+                if (resourceAddr == null)
+                    throw new SQLException(String.format("resource not found: %s", resourceName));
+
+                try
+                {
+                    filename = extractResource(resourceAddr).getAbsolutePath();
+                }
+                catch (IOException e)
+                {
+                    throw new SQLException(String.format("failed to load %s: %s", resourceName, e));
+                }
             }
-            catch (Exception e)
+            else
             {
-                throw new SQLException("opening db: '" + filename + "': " + e.getMessage());
+                File file = new File(filename).getAbsoluteFile();
+                File parent = file.getParentFile();
+                if (parent != null && !parent.exists())
+                {
+                    for (File up = parent; up != null && !up.exists();)
+                    {
+                        parent = up;
+                        up = up.getParentFile();
+                    }
+                    throw new SQLException("path to '" + filename + "': '" + parent + "' does not exist");
+                }
+
+                // check write access if file does not exist
+                try
+                {
+                    // The extra check to exists() is necessary as createNewFile()
+                    // does not follow the JavaDoc when used on read-only shares.
+                    if (!file.exists() && file.createNewFile())
+                        file.delete();
+                }
+                catch (Exception e)
+                {
+                    throw new SQLException("opening db: '" + filename + "': " + e.getMessage());
+                }
+                filename = file.getAbsolutePath();
             }
-            filename = file.getAbsolutePath();
         }
 
-        // TODO: library variable to explicitly control load type
-        // attempt to use the Native library first
+        // tries to load native library first
         try
         {
-            Class nativedb = Class.forName("org.sqlite.NativeDB");
-            if (((Boolean) nativedb.getDeclaredMethod("load", null).invoke(null, null)).booleanValue())
+            Class< ? > nativedb = Class.forName("org.sqlite.NativeDB");
+            if (((Boolean) nativedb.getDeclaredMethod("load", (Class< ? >[]) null).invoke((Object) null,
+                    (Object[]) null)).booleanValue())
                 db = (DB) nativedb.newInstance();
+
         }
         catch (Exception e)
         {} // fall through to nested library
@@ -108,6 +137,77 @@ class Conn implements Connection
         this.url = url;
         db.open(this, filename);
         setTimeout(3000);
+    }
+
+    /**
+     * @param resourceAddr
+     * @return extracted file name
+     * @throws IOException
+     */
+    private File extractResource(URL resourceAddr) throws IOException
+    {
+        if (resourceAddr.getProtocol().equals("file"))
+        {
+            try
+            {
+                return new File(resourceAddr.toURI());
+            }
+            catch (URISyntaxException e)
+            {
+                throw new IOException(e.getMessage());
+            }
+        }
+
+        String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
+        String dbFileName = String.format("sqlite-jdbc-tmp-%d.db", resourceAddr.hashCode());
+        File dbFile = new File(tempFolder, dbFileName);
+
+        if (dbFile.exists())
+        {
+            long resourceLastModified = resourceAddr.openConnection().getLastModified();
+            long tmpFileLastModified = dbFile.lastModified();
+            if (resourceLastModified < tmpFileLastModified)
+            {
+                return dbFile;
+            }
+            else
+            {
+                // remove the old DB file
+                boolean deletionSucceeded = dbFile.delete();
+                if (!deletionSucceeded)
+                {
+                    throw new IOException("failed to remove existing DB file: " + dbFile.getAbsolutePath());
+                }
+            }
+
+            //            String md5sum1 = SQLiteJDBCLoader.md5sum(resourceAddr.openStream());
+            //            String md5sum2 = SQLiteJDBCLoader.md5sum(new FileInputStream(dbFile));
+            //
+            //            if (md5sum1.equals(md5sum2))
+            //                return dbFile; // no need to extract the DB file
+            //            else
+            //            {
+            //            }
+        }
+
+        byte[] buffer = new byte[8192]; // 8K buffer
+        FileOutputStream writer = new FileOutputStream(dbFile);
+        InputStream reader = resourceAddr.openStream();
+        try
+        {
+            int bytesRead = 0;
+            while ((bytesRead = reader.read(buffer)) != -1)
+            {
+                writer.write(buffer, 0, bytesRead);
+            }
+            return dbFile;
+        }
+        finally
+        {
+            writer.close();
+            reader.close();
+        }
+
     }
 
     int getTimeout()

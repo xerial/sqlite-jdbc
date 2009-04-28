@@ -76,7 +76,7 @@ public class SQLiteJDBCLoader
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    private static String md5sum(InputStream input) throws IOException, NoSuchAlgorithmException
+    static String md5sum(InputStream input) throws IOException
     {
         BufferedInputStream in = new BufferedInputStream(input);
 
@@ -91,6 +91,10 @@ public class SQLiteJDBCLoader
             ByteArrayOutputStream md5out = new ByteArrayOutputStream();
             md5out.write(digest.digest());
             return md5out.toString();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new IllegalStateException("MD5 algorithm is not available: " + e);
         }
         finally
         {
@@ -166,11 +170,6 @@ public class SQLiteJDBCLoader
             return loadNativeLibrary(targetFolder, extractedLibFileName);
         }
         catch (IOException e)
-        {
-            System.err.println(e.getMessage());
-            return false;
-        }
-        catch (NoSuchAlgorithmException e)
         {
             System.err.println(e.getMessage());
             return false;

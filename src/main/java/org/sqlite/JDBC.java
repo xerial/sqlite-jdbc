@@ -66,7 +66,12 @@ public class JDBC implements Driver
         sharedCache.description = "Enable SQLite Shared-Cache mode, native driver only.";
         sharedCache.required = false;
 
-        return new DriverPropertyInfo[] { sharedCache };
+        DriverPropertyInfo loadExt = new DriverPropertyInfo("enable_load_extension", "false");
+        loadExt.choices = new String[] { "true", "false" };
+        loadExt.description = "Enable SQLite load_extension() functionality";
+        loadExt.required = false;
+
+        return new DriverPropertyInfo[] { sharedCache, loadExt };
     }
 
     public Connection connect(String url, Properties info) throws SQLException

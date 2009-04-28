@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.6.13</version>
+  <version>3.6.13-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -55,7 +55,7 @@
         <executions>
           <execution>
             <id>unpack-dependency</id>
-            <phase>generate-sources</phase>
+            <phase>package</phase>
             <goals>
               <goal>unpack</goal>
             </goals>
@@ -68,6 +68,7 @@
                   <type>jar</type>
                 </artifactItem>
               </artifactItems>
+              <overWrite>true</overWrite>
               <outputDirectory>target/classes</outputDirectory>
             </configuration>
           </execution>

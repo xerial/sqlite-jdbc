@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,5 +68,18 @@ public class ConnectionTest
     {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:/");
         conn.close();
+    }
+
+    @Test
+    public void openResource() throws SQLException
+    {
+        Connection conn = DriverManager.getConnection("jdbc:sqlite::resource:org/sqlite/sample.db");
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery("select * from coordinate");
+        assertTrue(rs.next());
+        rs.close();
+        stat.close();
+        conn.close();
+
     }
 }

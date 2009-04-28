@@ -71,12 +71,14 @@ $(UPDATE_FLAG): $(OSINFO_PROG) $(SQLITE_DLL)
 	touch $(UPDATE_FLAG)
 
 native: $(UPDATE_FLAG)
+	mvn test
 
 NATIVE_DLL=$(WORK_DIR)/$(LIB_FOLDER)/$(LIBNAME)
 
 package: $(UPDATE_FLAG)
 	mkdir -p $(RESOURCE_DIR)/native/$(LIB_FOLDER)
 	cp $(NATIVE_DLL) $(RESOURCE_DIR)/native/$(LIB_FOLDER)
+	rm -rf target/dependency-maven-plugin-markers
 	mvn package
 
 clean-native:
