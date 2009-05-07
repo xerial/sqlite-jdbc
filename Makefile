@@ -89,6 +89,9 @@ purejava:
 	mkdir -p $(RESOURCE_DIR)/org/sqlite
 	cp sqlitejdbc/build/org/sqlite/SQLite.class $(RESOURCE_DIR)/org/sqlite/
 
+test-purejava:
+	mvn -Dsqlite.purejava=true test	
+
 clean:
 	cd sqlitejdbc && make clean
 	rm -rf sqlitejdbc/dl
