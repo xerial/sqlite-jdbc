@@ -61,8 +61,16 @@ public class SQLiteJDBCLoader
         return extracted;
     }
 
+    static boolean getPureJavaFlag()
+    {
+        return Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
+    }
+
     public static boolean isNativeMode()
     {
+        if (getPureJavaFlag())
+            return false;
+
         // load the driver
         initialize();
         return extracted;
@@ -207,7 +215,7 @@ public class SQLiteJDBCLoader
         if (extracted)
             return;
 
-        boolean runInPureJavaMode = Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
+        boolean runInPureJavaMode = getPureJavaFlag();
         if (runInPureJavaMode)
         {
             extracted = false;

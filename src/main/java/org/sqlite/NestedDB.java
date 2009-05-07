@@ -113,7 +113,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
 
     int enable_load_extension(boolean enable) throws SQLException
     {
-        return call("sqlite3_enable_load_extension", handle, enable ? 1 : 0);
+        // TODO enable_load_extension is not supported  in pure-java mode
+        //return call("sqlite3_enable_load_extension", handle, enable ? 1 : 0);
+        return 1;
     }
 
     synchronized void interrupt() throws SQLException

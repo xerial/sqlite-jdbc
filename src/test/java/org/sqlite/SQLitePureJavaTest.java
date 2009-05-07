@@ -9,9 +9,7 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -50,6 +48,8 @@ public class SQLitePureJavaTest
     {
         //_logger.debug(String.format("running in %s mode", SQLiteJDBCLoader.isNativeMode() ? "native" : "nested"));
 
+        assertTrue(SQLiteJDBCLoader.isNativeMode() == false);
+
         try
         {
             Statement statement = connection.createStatement();
@@ -78,6 +78,8 @@ public class SQLitePureJavaTest
     @Test
     public void function() throws SQLException
     {
+        assertTrue(SQLiteJDBCLoader.isNativeMode() == false);
+
         Function.create(connection, "total", new Function() {
             @Override
             protected void xFunc() throws SQLException

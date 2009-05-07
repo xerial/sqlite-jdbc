@@ -132,7 +132,7 @@ class Conn implements Connection
         catch (Exception e)
         {} // fall through to nested library
 
-        // load nested library
+        // load nested library (pure-java SQLite)
         if (db == null)
         {
             try
