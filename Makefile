@@ -68,10 +68,10 @@ $(SQLITE_BUILD_DIR): Makefile sqlitejdbc/Makefile
 $(UPDATE_FLAG): $(OSINFO_PROG) $(SQLITE_DLL)
 	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
 	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
+	cp $(NATIVE_DLL) $(RESOURCE_DIR)/native/$(LIB_FOLDER)
 	touch $(UPDATE_FLAG)
 
 native: $(UPDATE_FLAG)
-	mvn test
 
 NATIVE_DLL=$(WORK_DIR)/$(LIB_FOLDER)/$(LIBNAME)
 

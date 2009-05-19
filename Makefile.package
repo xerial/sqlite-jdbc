@@ -15,8 +15,9 @@ AMD_SERVER=utgb01
 AMD_WORK=work/eclipse/xerial/sqlite-jdbc
 
 BUILD_CMD = svn update && make clean-native && make native
+TEST_CMD = mvn test
 
-all: compile
+all: compile test
 
 include VERSION
 sqlite-version := sqlite-$(sqlite_version)
@@ -63,3 +64,10 @@ compile: $(DLL_DIR) $(LIB_PUREJAVA) $(DLL_WIN) $(DLL_MAC) $(DLL_LINUX) $(DLL_AMD
 	cp $(LIB_PUREJAVA) $(RESOURCE_DIR)/org/sqlite
 	cp -r $(DLL_DIR)/ $(RESOURCE_DIR)/native/
 
+test:
+	ssh $(WIN_SERVER) "source .zprofile && cd $(WIN_WORK) && $(TEST_CMD)"
+	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD)"
+	ssh $(LINUX_SERVER) "source .zprofile && source /etc/profile.d/java.sh && cd $(LINUX_WORK) && $(TEST_CMD)"
+	ssh $(AMD_SERVER) "source .zprofile && cd $(AMD_WORK) && $(TEST_CMD)"
+
+	
