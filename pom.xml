@@ -75,6 +75,14 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <!--  do not run site-deploy goal, included in the default settings  -->
+          <goals>deploy</goals>
+        </configuration>
+      </plugin>
+
     </plugins>
 
   </build>
