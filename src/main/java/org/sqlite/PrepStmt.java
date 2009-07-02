@@ -259,6 +259,8 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
             batch(pos, value);
         else if (value instanceof Double)
             batch(pos, value);
+        else if (value instanceof Boolean)
+            setBoolean(pos, ((Boolean) value).booleanValue());
         else
             batch(pos, value.toString());
     }
