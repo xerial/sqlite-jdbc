@@ -3,7 +3,7 @@ NATIVE_DIR=$(RESOURCE_DIR)/native
 RSYNC=rsync -av -e ssh --exclude=".svn"
 
 WIN_SERVER=192.168.131.10
-WIN_WORK=work/eclipse/workspace/xerial/sqlite-jdbc
+WIN_WORK=work/eclipse/xerial/sqlite-jdbc
 
 MAC_SERVER=192.168.131.9
 MAC_WORK=work/eclipse/workspace/xerial/sqlite-jdbc
