@@ -148,7 +148,6 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
             row++;
             return true;
         case SQLITE_BUSY:
-            throw new SQLException("database locked");
         default:
             db.throwex(statusCode);
             return false;

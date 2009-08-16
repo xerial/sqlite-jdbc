@@ -323,11 +323,9 @@ abstract class DB implements Codes {
         case SQLITE_ROW:
             return true;
         case SQLITE_BUSY:
-            throw new SQLException("The database file is locked");
         case SQLITE_LOCKED:
-            throw new SQLException("A table in the database is locked");
         case SQLITE_MISUSE:
-            throw new SQLException(errmsg());
+            throw newSQLException(statusCode);
         default:
             finalize(stmt);
             throw newSQLException(statusCode);
