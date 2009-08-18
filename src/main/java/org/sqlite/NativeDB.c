@@ -381,7 +381,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB__1exec(
 
     if (status != SQLITE_OK) {
         throwexmsg(env, errorMsg);
-        sqlite3_free(&errorMsg);
+        sqlite3_free(errorMsg);
     }
     return status;
 }
