@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -17,6 +17,8 @@
 package org.sqlite;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 class MetaData implements DatabaseMetaData
 {
@@ -34,6 +36,8 @@ class MetaData implements DatabaseMetaData
         getSuperTables = null,
         getTablePrivileges = null,
         getExportedKeys = null,
+        getImportedKeys = null,
+        getIndexInfo = null,
         getProcedures = null,
         getProcedureColumns = null,
         getAttributes = null,
@@ -65,6 +69,8 @@ class MetaData implements DatabaseMetaData
             if (getSuperTables != null) getSuperTables.close();
             if (getTablePrivileges != null) getTablePrivileges.close();
             if (getExportedKeys != null) getExportedKeys.close();
+            if (getImportedKeys != null) getImportedKeys.close();
+            if (getIndexInfo != null) getIndexInfo.close();
             if (getProcedures != null) getProcedures.close();
             if (getProcedureColumns != null) getProcedureColumns.close();
             if (getAttributes != null) getAttributes.close();
@@ -85,6 +91,8 @@ class MetaData implements DatabaseMetaData
             getSuperTables = null;
             getTablePrivileges = null;
             getExportedKeys = null;
+            getImportedKeys = null;
+            getIndexInfo = null;
             getProcedures = null;
             getProcedureColumns = null;
             getAttributes = null;
@@ -500,10 +508,136 @@ class MetaData implements DatabaseMetaData
     }
 
     public ResultSet getImportedKeys(String c, String s, String t)
-        throws SQLException { throw new SQLException("not yet implemented"); }
+            throws SQLException {
+        String sql;
+        ResultSet rs = null;
+        Statement stat = conn.createStatement();
+
+        sql = "select "
+            + "null as PKTABLE_CAT, "
+            + "null as PKTABLE_SCHEM, "
+            + "ptn as PKTABLE_NAME, "
+            + "pcn as PKCOLUMN_NAME, "
+            + "null as FKTABLE_CAT, "
+            + "null as FKTABLE_SCHEM, "
+            + "'" + escape(t) + "' as FKTABLE_NAME, "
+            + "fcn as FKCOLUMN_NAME, "
+            + "ks as KEY_SEQ, "
+            + "ur as UPDATE_RULE, "
+            + "dr as DELETE_RULE, "
+            + "null as FK_NAME, "
+            + "null as PK_NAME, "
+            + Integer.toString (importedKeyInitiallyDeferred) +  " as DEFERRABILITY from (";
+
+        // Use a try catch block to avoid "query does not return ResultSet" error
+        try {
+            rs = stat.executeQuery("pragma foreign_key_list('"+escape(t)+"');");
+            int i;
+            for (i=0; rs.next(); i++) {
+                int keySeq = rs.getInt(2)+1;
+                String PKTabName = rs.getString(3);
+                String FKColName = rs.getString(4);
+                String PKColName = rs.getString(5);
+                String updateRule = rs.getString(6);
+                String deleteRule = rs.getString(7);
+
+                if (i > 0) sql += " union all ";
+
+                sql += "select "
+                     + Integer.toString (keySeq) + " as ks,"
+                     + "'" + escape(PKTabName) + "' as ptn,"
+                     + "'" + escape(FKColName) + "' as fcn,"
+                     + "'" + escape(PKColName) + "' as pcn,"
+                     + "case '" + escape(updateRule) + "'"
+                     + " when 'CASCADE' then " + Integer.toString (importedKeyCascade)
+                     + " when 'RESTRICT' then " + Integer.toString (importedKeyRestrict)
+                     + " when 'SET NULL' then " + Integer.toString (importedKeySetNull)
+                     + " when 'SET DEFAULT' then " + Integer.toString (importedKeySetDefault)
+                     + " end as ur,"
+                     + "case '" + escape(deleteRule) + "'"
+                     + " when 'CASCADE' then " + Integer.toString (importedKeyCascade)
+                     + " when 'RESTRICT' then " + Integer.toString (importedKeyRestrict)
+                     + " when 'SET NULL' then " + Integer.toString (importedKeySetNull)
+                     + " when 'SET DEFAULT' then " + Integer.toString (importedKeySetDefault)
+                     + " end as dr";
+            }
+            sql += ");";
+            rs.close();
+        } catch (SQLException e) {
+            sql += "select null as ks, null as ptn, null as fcn, null as pcn, null as ur, null as dr) limit 0;";
+        }
+
+        return stat.executeQuery(sql);
+    }
+
     public ResultSet getIndexInfo(String c, String s, String t,
                                   boolean u, boolean approximate)
-        throws SQLException { throw new SQLException("not yet implemented"); }
+            throws SQLException {
+        String sql;
+        ResultSet rs = null;
+        Statement stat = conn.createStatement();
+
+        sql = "select "
+            + "null as TABLE_CAT, "
+            + "null as TABLE_SCHEM, "
+            + "'" + escape(t) + "' as TABLE_NAME, "
+            + "un as NON_UNIQUE, "
+            + "null as INDEX_QUALIFIER, "
+            + "n as INDEX_NAME, "
+            + Integer.toString (tableIndexOther) + " as TYPE, "
+            + "op as ORDINAL_POSITION, "
+            + "cn as COLUMN_NAME, "
+            + "null as ASC_OR_DESC, "
+            + "0 as CARDINALITY, "
+            + "0 as PAGES, "
+            + "null as FILTER_CONDITION from (";
+
+        // Use a try catch block to avoid "query does not return ResultSet" error
+        try {
+            ArrayList<ArrayList> indexList = new ArrayList<ArrayList>();
+
+            rs = stat.executeQuery("pragma index_list('"+escape(t)+"');");
+            while (rs.next()) {
+                indexList.add(new ArrayList());
+                indexList.get(indexList.size()-1).add(rs.getString(2));
+                indexList.get(indexList.size()-1).add(rs.getInt(3));
+            }
+            rs.close();
+
+            int i=0;
+            Iterator indexIterator = indexList.iterator();
+            ArrayList currentIndex;
+            while (indexIterator.hasNext ()) {
+				currentIndex = (ArrayList) indexIterator.next();
+                String indexName = currentIndex.get(0).toString();
+                int unique = (Integer) currentIndex.get(1);
+
+                rs = stat.executeQuery("pragma index_info('"+escape(indexName)+"');");
+                for (; rs.next(); i++) {
+
+                    int ordinalPosition = rs.getInt(1)+1;
+                    String colName = rs.getString(3);
+
+                    if (i > 0) sql += " union all ";
+
+                    sql += "select "
+                         + Integer.toString (1 - unique) + " as un,"
+                         + "'" + escape(indexName) + "' as n,"
+                         + Integer.toString (ordinalPosition) + " as op,"
+                         + "'" + escape(colName) + "' as cn";
+                    i++;
+                }
+                rs.close();
+            }
+            sql += ");";
+        } catch (SQLException e) {
+            sql += "select null as un, null as n, null as op, null as cn) limit 0;";
+        }
+
+        System.out.println (sql);
+        return stat.executeQuery(sql);
+    }
+
     public ResultSet getProcedureColumns(String c, String s, String p,
                                          String colPat)
             throws SQLException {

@@ -74,6 +74,26 @@ class Stmt extends Unused implements Statement, Codes
         return db.column_count(pointer) != 0;
     }
 
+    protected boolean exec(String sql) throws SQLException
+    {
+        if (sql == null)
+            throw new SQLException("SQLiteJDBC internal error: sql==null");
+        if (rs.isOpen())
+            throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
+
+        boolean rc = false;
+        try
+        {
+            rc = db.execute(sql);
+        }
+        finally
+        {
+            resultsWaiting = rc;
+        }
+
+        return db.column_count(pointer) != 0;
+    }
+
     // PUBLIC INTERFACE /////////////////////////////////////////////
 
     public void close() throws SQLException

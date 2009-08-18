@@ -364,5 +364,6 @@ public class StatementTest
                 .executeUpdate("create table person (id integer, name string); insert into person values(1, 'leo'); insert into person values(2, 'yui');");
         ResultSet rs = stat.executeQuery("select * from person");
         assertTrue(rs.next());
+        assertTrue(rs.next());
     }
 }

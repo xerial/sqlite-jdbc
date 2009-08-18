@@ -369,6 +369,23 @@ abstract class DB implements Codes
 
     }
 
+    final synchronized boolean execute(String sql) throws SQLException
+    {
+        int statusCode = _exec(sql);
+        switch (statusCode)
+        {
+        case SQLITE_OK:
+            return false;
+        case SQLITE_DONE:
+            ensureAutoCommit();
+            return false;
+        case SQLITE_ROW:
+            return true;
+        default:
+            throw newSQLException(statusCode);
+        }
+    }
+
     final synchronized int executeUpdate(Stmt stmt, Object[] vals) throws SQLException
     {
         if (execute(stmt, vals))

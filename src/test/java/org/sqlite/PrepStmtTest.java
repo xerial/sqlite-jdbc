@@ -1,10 +1,6 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -504,6 +500,19 @@ public class PrepStmtTest
         prep.execute();
         prep.executeUpdate();
     }
+
+    //    @Ignore
+    //    @Test
+    //    public void multipleStatements() throws SQLException
+    //    {
+    //        PreparedStatement prep = conn
+    //                .prepareStatement("create table person (id integer, name string); insert into person values(1, 'leo'); insert into person values(2, 'yui');");
+    //        prep.executeUpdate();
+    //
+    //        ResultSet rs = conn.createStatement().executeQuery("select * from person");
+    //        assertTrue(rs.next());
+    //        assertTrue(rs.next());
+    //    }
 
     @Test
     public void reusingSetValues() throws SQLException
