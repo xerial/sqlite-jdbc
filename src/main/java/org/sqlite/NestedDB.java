@@ -137,7 +137,7 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         if (ret != SQLITE_OK)
         {
             rt.free(passback);
-            throwex();
+            throwex(ret);
         }
         int pointer = deref(passback);
         rt.free(passback);
@@ -157,6 +157,23 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
     synchronized int changes() throws SQLException
     {
         return call("sqlite3_changes", handle);
+    }
+
+    @Override
+    protected int _exec(String sql) throws SQLException
+    {
+        int passback = rt.malloc(4);
+        int str = rt.strdup(sql);
+        int status = call("sqlite3_exec", handle, str, 0, 0, passback);
+        if (status != SQLITE_OK)
+        {
+            String errorMessage = cstring(passback);
+            call("sqlite3_free", passback);
+            rt.free(passback);
+            throwex(status, errorMessage);
+        }
+        rt.free(passback);
+        return status;
     }
 
     protected synchronized int finalize(long stmt) throws SQLException

@@ -367,6 +367,27 @@ JNIEXPORT jlong JNICALL Java_org_sqlite_NativeDB_prepare(
     return fromref(stmt);
 }
 
+JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB__1exec(
+        JNIEnv *env, jobject this, jstring sql)
+{
+    sqlite3* db = gethandle(env, this);
+    sqlite3_stmt* stmt;
+
+    const char *strsql = (*env)->GetStringUTFChars(env, sql, 0);
+    char* errorMsg;
+    int status = sqlite3_exec(db, strsql, 0, 0, &errorMsg);
+    
+    (*env)->ReleaseStringUTFChars(env, sql, strsql);
+
+    if (status != SQLITE_OK) {
+        throwexmsg(env, errorMsg);
+        sqlite3_free(&errorMsg);
+    }
+    return status;
+}
+
+
+
 JNIEXPORT jstring JNICALL Java_org_sqlite_NativeDB_errmsg(JNIEnv *env, jobject this)
 {
     return (*env)->NewStringUTF(env, sqlite3_errmsg(gethandle(env, this)));
