@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.sql.Connection;
@@ -36,6 +34,7 @@ public class TransactionTest
     public static void forName() throws Exception
     {
         Class.forName("org.sqlite.JDBC");
+        System.out.println("running in " + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java") + " mode");
     }
 
     @Before

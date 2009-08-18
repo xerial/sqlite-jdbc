@@ -160,15 +160,15 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
     }
 
     @Override
-    protected int _exec(String sql) throws SQLException
+    protected synchronized int _exec(String sql) throws SQLException
     {
-        int passback = rt.malloc(4);
+        int passback = rt.xmalloc(4);
         int str = rt.strdup(sql);
         int status = call("sqlite3_exec", handle, str, 0, 0, passback);
         if (status != SQLITE_OK)
         {
             String errorMessage = cstring(passback);
-            call("sqlite3_free", passback);
+            call("sqlite3_free", deref(passback));
             rt.free(passback);
             throwex(status, errorMessage);
         }
