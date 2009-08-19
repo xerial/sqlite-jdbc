@@ -72,3 +72,10 @@ test:
 	ssh $(WIN_SERVER) "source .zprofile && cd $(WIN_WORK) && $(TEST_CMD) -DargLine='-Dsqlite.purejava=true'"
 
 	
+release:
+	mvn release:prepare
+	mvn release:perform
+
+release-sourceforge:
+	mvn release:perform -Darguments="-P sourceforge" -DconnectionUrl=scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-$(sqlite_version)
+	
