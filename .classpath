@@ -8,5 +8,5 @@
   <classpathentry kind="var" path="M2_REPO/org/xerial/thirdparty/jdbc-api/1.4/jdbc-api-1.4.jar"/>
   <classpathentry kind="var" path="M2_REPO/junit/junit/4.1/junit-4.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/xerial/thirdparty/nestedvm/1.0/nestedvm-1.0.jar"/>
-  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 </classpath>
