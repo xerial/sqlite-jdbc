@@ -52,11 +52,12 @@
         <executions>
           <execution>
             <id>unpack-dependency</id>
-            <phase>package</phase>
+            <phase>generate-sources</phase>
             <goals>
               <goal>unpack</goal>
             </goals>
             <configuration>
+              <excludes>META-INF,META-INF/**</excludes>
               <artifactItems>
                 <artifactItem>
                   <groupId>org.xerial.thirdparty</groupId>
@@ -66,7 +67,7 @@
                 </artifactItem>
               </artifactItems>
               <overWrite>true</overWrite>
-              <outputDirectory>target/classes</outputDirectory>
+              <outputDirectory>src/main/resources</outputDirectory>
             </configuration>
           </execution>
         </executions>
