@@ -68,7 +68,7 @@ $(SQLITE_BUILD_DIR): Makefile sqlitejdbc/Makefile
 $(UPDATE_FLAG): $(OSINFO_PROG) $(SQLITE_DLL)
 	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
 	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
-	mkdir -p $(RESOUCE_DIR)/native/$(LIB_FOLDER)
+	mkdir -p $(RESOURCE_DIR)/native/$(LIB_FOLDER)
 	cp $(NATIVE_DLL) $(RESOURCE_DIR)/native/$(LIB_FOLDER)
 	touch $(UPDATE_FLAG)
 
