@@ -45,6 +45,10 @@ build/$(sqlite)-%/sqlite3.o: dl/$(sqlite)-amal.zip
 	unzip -qo dl/$(sqlite)-amal.zip -d build/$(sqlite)-$*
 	perl -pi -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
 	    build/$(sqlite)-$*/sqlite3ext.h
+# insert a code for loading extension functions
+	perl -pi -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
+	    build/$(sqlite)-$*/sqlite3.c
+	cat ext/*.c >> build/$(sqlite)-$*/sqlite3.c
 	(cd build/$(sqlite)-$*; $(CC) -o sqlite3.o -c $(CFLAGS) \
 		-DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
