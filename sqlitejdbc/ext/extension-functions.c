@@ -98,7 +98,7 @@ Original code 2006 June 05 by relicoder.
 
 //#include "config.h"
 
-#define COMPILE_SQLITE_EXTENSIONS_AS_LOADABLE_MODULE 1
+//#define COMPILE_SQLITE_EXTENSIONS_AS_LOADABLE_MODULE 1
 #define HAVE_ACOSH 1
 #define HAVE_ASINH 1
 #define HAVE_ATANH 1
@@ -130,7 +130,7 @@ SQLITE_EXTENSION_INIT1
 #ifndef _MAP_H_
 #define _MAP_H_
 
-#include <stdint.h>
+//#include <stdint.h>
 
 /*
 ** Simple binary tree implementation to use in median, mode and quartile calculations
@@ -138,13 +138,13 @@ SQLITE_EXTENSION_INIT1
 */
 
 typedef int(*cmp_func)(const void *, const void *);
-typedef void(*map_iterator)(void*, int64_t, void*);
+typedef void(*map_iterator)(void*, sqlite_int64, void*);
 
 typedef struct node{
   struct node *l;
   struct node *r;
   void* data;
-  int64_t count;
+  sqlite_int64 count;
 } node;
 
 typedef struct map{
@@ -1882,8 +1882,8 @@ void map_destroy(map *m){
 }
 
 int int_cmp(const void *a, const void *b){
-  int64_t aa = *(int64_t *)(a);
-  int64_t bb = *(int64_t *)(b);
+  sqlite_int64 aa = *(sqlite_int64 *)(a);
+  sqlite_int64 bb = *(sqlite_int64 *)(b);
   /* printf("cmp %d <=> %d\n",aa,bb); */
   if(aa==bb)
     return 0;
@@ -1905,7 +1905,7 @@ int double_cmp(const void *a, const void *b){
     return 1;
 }
 
-void print_elem(void *e, int64_t c, void* p){
+void print_elem(void *e, sqlite_int64 c, void* p){
   int ee = *(int*)(e);
   printf("%d => %lld\n", ee,c);
 }

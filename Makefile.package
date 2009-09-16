@@ -69,7 +69,7 @@ test:
 	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD)"
 	ssh $(LINUX_SERVER) "source .zprofile && source /etc/profile.d/java.sh && cd $(LINUX_WORK) && $(TEST_CMD)"
 	ssh $(AMD_SERVER) "source .zprofile && cd $(AMD_WORK) && $(TEST_CMD)"
-	ssh $(WIN_SERVER) "source .zprofile && cd $(WIN_WORK) && $(TEST_CMD) -DargLine='-Dsqlite.purejava=true'"
+	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD) -DargLine='-Dsqlite.purejava=true'"
 
 	
 release:
