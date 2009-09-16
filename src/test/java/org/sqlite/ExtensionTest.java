@@ -40,8 +40,6 @@ public class ExtensionTest {
 
     @Test
     public void extFTS3() throws Exception {
-        if (!SQLiteJDBCLoader.isNativeMode())
-            return;
 
         stat.execute("create virtual table recipe using fts3(name, ingredients)");
         stat
@@ -58,8 +56,6 @@ public class ExtensionTest {
 
     @Test
     public void extFunctions() throws Exception {
-        if (!SQLiteJDBCLoader.isNativeMode())
-            return;
 
         {
             ResultSet rs = stat.executeQuery("select cos(radians(45))");
