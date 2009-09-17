@@ -91,7 +91,7 @@ purejava:
 	cp sqlitejdbc/build/org/sqlite/SQLite.class $(RESOURCE_DIR)/org/sqlite/
 
 test-purejava:
-	mvn -Dsqlite.purejava=true test	
+	mvn -DargLine="-Dsqlite.purejava=true" test	
 
 clean:
 	cd sqlitejdbc && make clean
