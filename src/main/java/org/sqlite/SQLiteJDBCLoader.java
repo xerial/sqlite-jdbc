@@ -55,19 +55,16 @@ public class SQLiteJDBCLoader
 
     private static boolean extracted = false;
 
-    public static boolean initialize()
-    {
+    public static boolean initialize() {
         loadSQLiteNativeLibrary();
         return extracted;
     }
 
-    static boolean getPureJavaFlag()
-    {
+    static boolean getPureJavaFlag() {
         return Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
     }
 
-    public static boolean isNativeMode()
-    {
+    public static boolean isNativeMode() {
         if (getPureJavaFlag())
             return false;
 
@@ -84,28 +81,23 @@ public class SQLiteJDBCLoader
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    static String md5sum(InputStream input) throws IOException
-    {
+    static String md5sum(InputStream input) throws IOException {
         BufferedInputStream in = new BufferedInputStream(input);
 
-        try
-        {
+        try {
             MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
             DigestInputStream digestInputStream = new DigestInputStream(in, digest);
-            for (; digestInputStream.read() >= 0;)
-            {
+            for (; digestInputStream.read() >= 0;) {
 
             }
             ByteArrayOutputStream md5out = new ByteArrayOutputStream();
             md5out.write(digest.digest());
             return md5out.toString();
         }
-        catch (NoSuchAlgorithmException e)
-        {
+        catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("MD5 algorithm is not available: " + e);
         }
-        finally
-        {
+        finally {
             in.close();
         }
     }
@@ -119,32 +111,26 @@ public class SQLiteJDBCLoader
      * @return
      */
     private static boolean extractAndLoadLibraryFile(String libFolderForCurrentOS, String libraryFileName,
-            String targetFolder)
-    {
+            String targetFolder) {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
         final String prefix = "sqlite-" + getVersion() + "-";
 
         String extractedLibFileName = prefix + libraryFileName;
         File extractedLibFile = new File(targetFolder, extractedLibFileName);
 
-        try
-        {
-            if (extractedLibFile.exists())
-            {
+        try {
+            if (extractedLibFile.exists()) {
                 // test md5sum value
                 String md5sum1 = md5sum(SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath));
                 String md5sum2 = md5sum(new FileInputStream(extractedLibFile));
 
-                if (md5sum1.equals(md5sum2))
-                {
+                if (md5sum1.equals(md5sum2)) {
                     return loadNativeLibrary(targetFolder, extractedLibFileName);
                 }
-                else
-                {
+                else {
                     // remove old native library file
                     boolean deletionSucceeded = extractedLibFile.delete();
-                    if (!deletionSucceeded)
-                    {
+                    if (!deletionSucceeded) {
                         throw new IOException("failed to remove existing native library file: "
                                 + extractedLibFile.getAbsolutePath());
                     }
@@ -156,51 +142,39 @@ public class SQLiteJDBCLoader
             FileOutputStream writer = new FileOutputStream(extractedLibFile);
             byte[] buffer = new byte[1024];
             int bytesRead = 0;
-            while ((bytesRead = reader.read(buffer)) != -1)
-            {
+            while ((bytesRead = reader.read(buffer)) != -1) {
                 writer.write(buffer, 0, bytesRead);
             }
 
             writer.close();
             reader.close();
 
-            if (!System.getProperty("os.name").contains("Windows"))
-            {
-                try
-                {
+            if (!System.getProperty("os.name").contains("Windows")) {
+                try {
                     Runtime.getRuntime().exec(new String[] { "chmod", "755", extractedLibFile.getAbsolutePath() })
                             .waitFor();
                 }
-                catch (Throwable e)
-                {}
+                catch (Throwable e) {}
             }
 
             return loadNativeLibrary(targetFolder, extractedLibFileName);
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             System.err.println(e.getMessage());
             return false;
         }
 
     }
 
-    private static synchronized boolean loadNativeLibrary(String path, String name)
-    {
+    private static synchronized boolean loadNativeLibrary(String path, String name) {
         File libPath = new File(path, name);
-        if (libPath.exists())
-        {
-            // System.setProperty("org.sqlite.lib.path", path == null ? "./" :
-            // path);
-            // System.setProperty("org.sqlite.lib.name", name);
+        if (libPath.exists()) {
 
-            try
-            {
+            try {
                 System.load(new File(path, name).getAbsolutePath());
                 return true;
             }
-            catch (UnsatisfiedLinkError e)
-            {
+            catch (UnsatisfiedLinkError e) {
                 System.err.println(e);
                 return false;
             }
@@ -210,14 +184,12 @@ public class SQLiteJDBCLoader
             return false;
     }
 
-    private static void loadSQLiteNativeLibrary()
-    {
+    private static void loadSQLiteNativeLibrary() {
         if (extracted)
             return;
 
         boolean runInPureJavaMode = getPureJavaFlag();
-        if (runInPureJavaMode)
-        {
+        if (runInPureJavaMode) {
             extracted = false;
             return;
         }
@@ -228,10 +200,8 @@ public class SQLiteJDBCLoader
         if (sqliteNativeLibraryName == null)
             sqliteNativeLibraryName = System.mapLibraryName("sqlitejdbc");
 
-        if (sqliteNativeLibraryPath != null)
-        {
-            if (loadNativeLibrary(sqliteNativeLibraryPath, sqliteNativeLibraryName))
-            {
+        if (sqliteNativeLibraryPath != null) {
+            if (loadNativeLibrary(sqliteNativeLibraryPath, sqliteNativeLibraryName)) {
                 extracted = true;
                 return;
             }
@@ -240,8 +210,7 @@ public class SQLiteJDBCLoader
         // Load the os-dependent library from a jar file
         sqliteNativeLibraryPath = "/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
 
-        if (SQLiteJDBCLoader.class.getResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName) == null)
-        {
+        if (SQLiteJDBCLoader.class.getResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName) == null) {
             // use nested VM version
             return;
         }
@@ -249,8 +218,7 @@ public class SQLiteJDBCLoader
         // temporary library folder
         String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
         /* Try extracting the library from jar */
-        if (extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder))
-        {
+        if (extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
             extracted = true;
             return;
         }
@@ -259,30 +227,38 @@ public class SQLiteJDBCLoader
         return;
     }
 
-    private static void getNativeLibraryFolderForTheCurrentOS()
-    {
+    private static void getNativeLibraryFolderForTheCurrentOS() {
         String osName = OSInfo.getOSName();
         String archName = OSInfo.getArchName();
 
     }
 
-    public static String getVersion()
-    {
-        URL versionFile = SQLiteJDBCLoader.class.getResource("/VERSION");
+    public static int getMajorVersion() {
+        String[] c = getVersion().split("\\.");
+        return (c.length > 0) ? Integer.parseInt(c[0]) : 1;
+    }
+
+    public static int getMinorVersion() {
+        String[] c = getVersion().split("\\.");
+        return (c.length > 1) ? Integer.parseInt(c[1]) : 0;
+    }
+
+    public static String getVersion() {
+
+        URL versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
+        if (versionFile == null)
+            versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
 
         String version = "unknown";
-        try
-        {
-            if (versionFile != null)
-            {
+        try {
+            if (versionFile != null) {
                 Properties versionData = new Properties();
                 versionData.load(versionFile.openStream());
-                version = versionData.getProperty("sqlite_version", version);
+                version = versionData.getProperty("version", version);
                 version = version.trim().replaceAll("[^0-9\\.]", "");
             }
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             System.err.println(e);
         }
         return version;

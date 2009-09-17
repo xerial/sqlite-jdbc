@@ -30,9 +30,7 @@ ifeq ($(arch),)
 arch := $(shell uname -m)
 endif
 
-sqlite := sqlite-$(sqlite_version)
-
-sqlitejdbc := sqlitejdbc-v$(shell cat VERSION)
+sqlite := sqlite-$(version)
 
 jni_md := $(shell find -L "$(JAVA_HOME)" -name jni_md.h)
 ifneq ($(jni_md),)

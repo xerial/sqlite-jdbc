@@ -388,11 +388,11 @@ class MetaData implements DatabaseMetaData
 
             colType = colType == null ? "TEXT" : colType.toUpperCase();
             int colJavaType = -1;
-            if (colType == "INT" || colType == "INTEGER")
+            if (colType.equals("INT") || colType.equals("INTEGER"))
                 colJavaType = Types.INTEGER;
-            else if (colType == "TEXT")
+            else if (colType.equals("TEXT"))
                 colJavaType = Types.VARCHAR;
-            else if (colType == "FLOAT")
+            else if (colType.equals("FLOAT"))
                 colJavaType = Types.FLOAT;
             else
                 colJavaType = Types.VARCHAR;

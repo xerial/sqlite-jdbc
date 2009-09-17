@@ -27,8 +27,10 @@
       </resource>
       <resource>
         <directory>${basedir}</directory>
+        <targetPath>META-INF/maven/${groupId}/${artifactId}</targetPath>
         <includes>
           <include>VERSION</include>
+          <include>LICENSE*</include>
         </includes>
       </resource>
     </resources>

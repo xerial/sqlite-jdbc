@@ -20,20 +20,17 @@ import org.junit.Test;
 public class JDBCTest
 {
     @BeforeClass
-    public static void forName() throws Exception
-    {
+    public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
     }
 
     @Test
-    public void enableLoadExtensionTest() throws Exception
-    {
+    public void enableLoadExtensionTest() throws Exception {
         Properties prop = new Properties();
         prop.setProperty("enable_load_extension", "true");
 
         Connection conn = null;
-        try
-        {
+        try {
             conn = DriverManager.getConnection("jdbc:sqlite:", prop);
             Statement stat = conn.createStatement();
 
@@ -47,11 +44,16 @@ public class JDBCTest
             //            System.out.println(rs.getDouble(1));
 
         }
-        finally
-        {
+        finally {
             if (conn != null)
                 conn.close();
         }
+    }
+
+    @Test
+    public void majorVersion() throws Exception {
+        int major = DriverManager.getDriver("jdbc:sqlite:").getMajorVersion();
+        int minor = DriverManager.getDriver("jdbc:sqlite:").getMinorVersion();
     }
 
 }

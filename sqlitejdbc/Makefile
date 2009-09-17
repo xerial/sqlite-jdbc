@@ -21,15 +21,10 @@ SRC_FOLDER=../src/main/java/org/sqlite/
 
 default: test
 
-test: native $(test_classes)
-	$(JAVA) -Djava.library.path=build/$(target) \
-	    -cp "build/$(sqlitejdbc)-native.jar$(sep)build$(sep)$(libjunit)" \
-	    org.junit.runner.JUnitCore $(tests)
+test: native 
 
-native: build/$(sqlitejdbc)-native.jar build/$(target)/$(LIBNAME)
+native: build/$(target)/$(LIBNAME)
 	
-build/$(sqlitejdbc)-native.jar: $(native_classes)
-	cd build && jar cf $(sqlitejdbc)-native.jar $(java_classlist)
 
 build/$(target)/$(LIBNAME): build/$(sqlite)-$(target)/sqlite3.o build/org/sqlite/NativeDB.class
 	@mkdir -p build/$(target)

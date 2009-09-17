@@ -3,7 +3,7 @@
   <classpathentry kind="src" path="src/test/resources" output="target/test-classes" excluding="**/*.java"/>
   <classpathentry kind="src" path="src/main/java"/>
   <classpathentry kind="src" path="src/main/resources" including="native/**|org/**" excluding="**/*.java"/>
-  <classpathentry kind="src" path="." including="VERSION" excluding="**/*.java"/>
+  <classpathentry kind="src" path="." including="VERSION|LICENSE*" excluding="**/*.java"/>
   <classpathentry kind="output" path="target/classes"/>
   <classpathentry kind="var" path="M2_REPO/org/xerial/thirdparty/jdbc-api/1.4/jdbc-api-1.4.jar"/>
   <classpathentry kind="var" path="M2_REPO/junit/junit/4.1/junit-4.1.jar"/>

@@ -1,0 +1,8 @@
+<project default="copy-resources">
+  <target name="init"/>
+  <target name="copy-resources" depends="init">
+    <copy todir="target/classes/META-INF/maven/org.xerial/sqlite-jdbc" filtering="false">
+      <fileset dir="." includes="VERSION|LICENSE*" excludes="**/*.java"/>
+    </copy>
+  </target>
+</project>

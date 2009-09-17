@@ -5,25 +5,7 @@ nestedvm := nestedvm-$(nestedvm_version)
 
 default: test
 
-test: dist/$(sqlitejdbc)-pure.jar $(test_classes)
-	$(JAVA) -cp "dist/$(sqlitejdbc)-pure.jar$(sep)build$(sep)$(libjunit)" \
-	    org.junit.runner.JUnitCore $(tests)
-
-dist/$(sqlitejdbc)-pure.jar: build/org/sqlite/SQLite.class $(java_classes)
-	@mkdir -p dist
-	cd build && jar cf ../$@ \
-	    org/sqlite/SQLite.class $(java_classlist) \
-	    -C ../$(nestedvm)/build org/ibex
-
-build/org/sqlite/%.class: ../src/main/java/org/sqlite/%.java
-	@mkdir -p build
-	$(JAVAC) -source 1.5 -target 1.5 -classpath "$(nestedvm)/build" \
-	    -sourcepath ../src/main/java -d build $<
-
-build/test/org/sqlite/%.class: ../src/test/java/org/sqlite/%.java
-	@mkdir -p build/test
-	$(JAVAC) -target 1.5 -classpath "build$(sep)$(libjunit)" \
-	    -sourcepath ../src/test/java -d build/test $<
+test: build/org/sqlite/SQLite.class
 
 $(nestedvm)/%:
 	$(MAKE) -C $(nestedvm) $*

@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import org.junit.After;
 import org.junit.Before;
@@ -36,7 +37,7 @@ public class DBMetaDataTest
     {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
-        stat.executeUpdate("create table test (id integer primary key, fn, sn);");
+        stat.executeUpdate("create table test (id integer primary key, fn float, sn);");
         stat.executeUpdate("create view testView as select * from test;");
         meta = conn.getMetaData();
     }
@@ -124,11 +125,13 @@ public class DBMetaDataTest
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "test");
         assertEquals(rs.getString("COLUMN_NAME"), "id");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "fn");
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "fn");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.FLOAT);
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "sn");

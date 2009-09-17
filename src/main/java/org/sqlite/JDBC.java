@@ -27,40 +27,32 @@ public class JDBC implements Driver
 {
     private static final String PREFIX = "jdbc:sqlite:";
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             DriverManager.registerDriver(new JDBC());
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public int getMajorVersion()
-    {
-        return 1;
+    public int getMajorVersion() {
+        return SQLiteJDBCLoader.getMajorVersion();
     }
 
-    public int getMinorVersion()
-    {
-        return 1;
+    public int getMinorVersion() {
+        return SQLiteJDBCLoader.getMinorVersion();
     }
 
-    public boolean jdbcCompliant()
-    {
+    public boolean jdbcCompliant() {
         return false;
     }
 
-    public boolean acceptsURL(String url)
-    {
+    public boolean acceptsURL(String url) {
         return url != null && url.toLowerCase().startsWith(PREFIX);
     }
 
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
-    {
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
         DriverPropertyInfo sharedCache = new DriverPropertyInfo("shared_cache", "false");
         sharedCache.choices = new String[] { "true", "false" };
         sharedCache.description = "Enable SQLite Shared-Cache mode, native driver only.";
@@ -74,8 +66,7 @@ public class JDBC implements Driver
         return new DriverPropertyInfo[] { sharedCache, loadExt };
     }
 
-    public Connection connect(String url, Properties info) throws SQLException
-    {
+    public Connection connect(String url, Properties info) throws SQLException {
         if (!acceptsURL(url))
             return null;
         url = url.trim();
