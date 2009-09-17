@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.6.17.3</version>
+  <version>3.6.17.4-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -101,10 +101,4 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-
-  <scm>
-    <connection>scm:svn:http://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-3.6.17.3</connection>
-    <developerConnection>scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-3.6.17.3</developerConnection>
-    <url>http://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-3.6.17.3</url>
-  </scm>
 </project>
