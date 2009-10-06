@@ -64,7 +64,7 @@ build/test/org/sqlite/%.class: ../src/test/java/org/sqlite/%.java
 dl/$(sqlite)-amal.zip:
 	@mkdir -p dl
 	curl -odl/$(sqlite)-amal.zip \
-	http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(sqlite_version)).zip
+	http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(version)).zip
 
 clean:
 	rm -rf build dist
