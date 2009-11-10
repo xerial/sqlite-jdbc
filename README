@@ -11,3 +11,11 @@
 * mvn deploy
 * mvn deploy -Psourceforge  (for uploading Sourceforge.jp repository, which are synchronized with the Maven central repository)
 
+
+
+= How to build Win64 native library
+- Install cygwin with make, curl, unzip 
+- Install MinGW64
+- http://sourceforge.net/projects/mingw-w64/files/
+-- I downloaded mingw-w64-bin_i686-mingw_20091109.zip, and add bin folder to the PATH
+- make Win_CC=x86_64-w64-mingw32-gcc Win_STRIP=x86_64-w64-mingw32-strip
