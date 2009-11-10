@@ -61,13 +61,14 @@ Default_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
 Default_LINKFLAGS := -shared
 Default_LIBNAME   := libsqlitejdbc.so
 
-Support10_4 := -isysroot /Developer/SDKs/MacOSX10.4u.sdk
+#Support10_4 := -isysroot /Developer/SDKs/MacOSX10.4u.sdk
 #Darwin_CC        := gcc -arch $(arch) -mmacosx-version-min=10.4 $(Support10_4)
 Darwin_CC        := gcc -arch $(arch) 
 Darwin_STRIP     := strip -x
 Darwin_CFLAGS    := -I$(JAVA_HOME)/include -Os -fPIC
-Darwin_LINKFLAGS := -dynamiclib $(Support10_4)
+Darwin_LINKFLAGS := -dynamiclib 
 Darwin_LIBNAME   := libsqlitejdbc.jnilib
+
 
 #Win_CC           := $(arch)-mingw32msvc-gcc
 #Win_STRIP        := $(arch)-mingw32msvc-strip
