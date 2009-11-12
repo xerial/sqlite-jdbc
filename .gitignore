@@ -2,4 +2,5 @@ target
 *~
 sqlitejdbc/dl
 sqlitejdbc/build
+sqlitejdbc/nestedvm-*
 src/main/resources/org/ibex/nestedvm/*.o
