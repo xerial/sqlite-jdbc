@@ -25,9 +25,12 @@ public class SQLitePureJavaTest
 {
 
     private Connection connection = null;
+    private String isPureJava = "false";
 
     @Before
     public void setUp() throws Exception {
+	isPureJava =System.getProperty("sqlite.purejava", "false");
+
         System.setProperty("sqlite.purejava", "true");
         connection = null;
         Class.forName("org.sqlite.JDBC");
@@ -40,7 +43,8 @@ public class SQLitePureJavaTest
         if (connection != null)
             connection.close();
 
-        System.setProperty("sqlite.purejava", "false");
+	// reset
+        System.setProperty("sqlite.purejava", isPureJava);
     }
 
     @Test
