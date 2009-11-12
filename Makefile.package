@@ -3,24 +3,27 @@ NATIVE_DIR=$(RESOURCE_DIR)/native
 RSYNC=rsync -av -e ssh --exclude=".svn"
 
 WIN_SERVER=192.168.131.10
-WIN_WORK=work/eclipse/xerial/sqlite-jdbc
+WIN_WORK=work/git/sqlite-jdbc
 
-MAC_SERVER=192.168.131.9
-MAC_WORK=work/eclipse/workspace/xerial/sqlite-jdbc
+MAC_SERVER=localhost
+MAC_WORK=work/git/sqlite-jdbc
+
+MAC_TIGER_SERVER=192.168.131.3
+MAC_TIGER_WORK=work/git/sqlite-jdbc
 
 LINUX_SERVER=sprite
-LINUX_WORK=work/eclipse/xerial/sqlite-jdbc
+LINUX_WORK=work/git/sqlite-jdbc
 
 AMD_SERVER=utgb01
-AMD_WORK=work/eclipse/xerial/sqlite-jdbc
+AMD_WORK=work/git/sqlite-jdbc
 
-BUILD_CMD = svn update && make clean-native && make native
+BUILD_CMD = git pull && make clean-native && make native
 TEST_CMD = mvn test
 
 all: compile test
 
 include VERSION
-sqlite-version := sqlite-$(sqlite_version)
+sqlite-version := sqlite-$(version)
 
 LIB_DIR=target/dll/$(sqlite-version)
 DLL_DIR=$(LIB_DIR)/native
@@ -32,9 +35,9 @@ DLL_AMD64=$(DLL_DIR)/Linux/amd64/libsqlitejdbc.so
 LIB_PUREJAVA=$(LIB_DIR)/purejava/SQLite.class
 
 $(LIB_PUREJAVA):
-	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK)/sqlitejdbc && make -f Makefile.nested"
+	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK)/sqlitejdbc && make -f Makefile.nested"
 	mkdir -p $(LIB_DIR)/purejava
-	scp $(MAC_SERVER):./$(MAC_WORK)/sqlitejdbc/build/org/sqlite/SQLite.class $(LIB_DIR)/purejava/
+	scp $(MAC_TIGER_SERVER):./$(MAC_TIGER_WORK)/sqlitejdbc/build/org/sqlite/SQLite.class $(LIB_DIR)/purejava/
 
 
 $(DLL_WIN): 
@@ -77,8 +80,8 @@ release:
 	mvn release:perform
 
 release-xerial:
-	mvn release:perform -DconnectionUrl=scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-$(sqlite_version)
+	mvn release:perform -DconnectionUrl=scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-$(version)
 
 release-sourceforge:
-	mvn release:perform -Darguments="-P sourceforge" -DconnectionUrl=scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-$(sqlite_version)
+	mvn release:perform -Darguments="-P sourceforge" -DconnectionUrl=scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-$(version)
 	
