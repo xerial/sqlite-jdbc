@@ -11,6 +11,14 @@
 * mvn deploy
 * mvn deploy -Psourceforge  (for uploading Sourceforge.jp repository, which are synchronized with the Maven central repository)
 
+= How to submit a patch
+
+> (do some change)
+> hg commit -m 'what changesa are made for the source'
+> hg export tip > patch.diff
+
+submit the patch to the issue tracker
+
 
 
 = How to build Win64 native library
