@@ -723,7 +723,7 @@ class MetaData implements DatabaseMetaData
         String sql = "select"
                 + " null as TABLE_CAT,"
                 + " null as TABLE_SCHEM,"
-                + " upper(name) as TABLE_NAME,"
+                + " name as TABLE_NAME,"
                 + " upper(type) as TABLE_TYPE,"
                 + " null as REMARKS,"
                 + " null as TYPE_CAT,"
