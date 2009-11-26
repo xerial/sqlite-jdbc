@@ -1,7 +1,0 @@
-= Git
-> git clone http://git.xerial.org/repo/sqlite-jdbc.git
-> cd sqlite-jdbc
-> edit ..
-> git prepare-patch
-
-
