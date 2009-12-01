@@ -19,31 +19,27 @@ import org.junit.Test;
 public class StatementTest
 {
     private Connection conn;
-    private Statement stat;
+    private Statement  stat;
 
     @BeforeClass
-    public static void forName() throws Exception
-    {
+    public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
     }
 
     @Before
-    public void connect() throws Exception
-    {
+    public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
     }
 
     @After
-    public void close() throws SQLException
-    {
+    public void close() throws SQLException {
         stat.close();
         conn.close();
     }
 
     @Test
-    public void stmtUpdate() throws SQLException
-    {
+    public void stmtUpdate() throws SQLException {
         assertEquals(stat.executeUpdate("create table s1 (c1);"), 0);
         assertEquals(stat.executeUpdate("insert into s1 values (0);"), 1);
         assertEquals(stat.executeUpdate("insert into s1 values (1);"), 1);
@@ -55,16 +51,14 @@ public class StatementTest
     }
 
     @Test
-    public void emptyRS() throws SQLException
-    {
+    public void emptyRS() throws SQLException {
         ResultSet rs = stat.executeQuery("select null limit 0;");
         assertFalse(rs.next());
         rs.close();
     }
 
     @Test
-    public void singleRowRS() throws SQLException
-    {
+    public void singleRowRS() throws SQLException {
         ResultSet rs = stat.executeQuery("select " + Integer.MAX_VALUE + ";");
         assertTrue(rs.next());
         assertEquals(rs.getInt(1), Integer.MAX_VALUE);
@@ -75,8 +69,7 @@ public class StatementTest
     }
 
     @Test
-    public void twoRowRS() throws SQLException
-    {
+    public void twoRowRS() throws SQLException {
         ResultSet rs = stat.executeQuery("select 9 union all select 7;");
         assertTrue(rs.next());
         assertEquals(rs.getInt(1), 9);
@@ -87,14 +80,12 @@ public class StatementTest
     }
 
     @Test
-    public void autoClose() throws SQLException
-    {
+    public void autoClose() throws SQLException {
         conn.createStatement().executeQuery("select 1;");
     }
 
     @Test
-    public void stringRS() throws SQLException
-    {
+    public void stringRS() throws SQLException {
         ResultSet rs = stat.executeQuery("select \"Russell\";");
         assertTrue(rs.next());
         assertEquals(rs.getString(1), "Russell");
@@ -103,8 +94,7 @@ public class StatementTest
     }
 
     @Test
-    public void execute() throws SQLException
-    {
+    public void execute() throws SQLException {
         assertTrue(stat.execute("select null;"));
         ResultSet rs = stat.getResultSet();
         assertNotNull(rs);
@@ -125,8 +115,7 @@ public class StatementTest
     }
 
     @Test
-    public void colNameAccess() throws SQLException
-    {
+    public void colNameAccess() throws SQLException {
         assertEquals(stat.executeUpdate("create table tab (id, firstname, surname);"), 0);
         assertEquals(stat.executeUpdate("insert into tab values (0, 'Bob', 'Builder');"), 1);
         assertEquals(stat.executeUpdate("insert into tab values (1, 'Fred', 'Blogs');"), 1);
@@ -151,8 +140,7 @@ public class StatementTest
     }
 
     @Test
-    public void nulls() throws SQLException
-    {
+    public void nulls() throws SQLException {
         ResultSet rs = stat.executeQuery("select null union all select null;");
         assertTrue(rs.next());
         assertNull(rs.getString(1));
@@ -165,15 +153,13 @@ public class StatementTest
     }
 
     @Test
-    public void tempTable() throws SQLException
-    {
+    public void tempTable() throws SQLException {
         assertEquals(stat.executeUpdate("create temp table myTemp (a);"), 0);
         assertEquals(stat.executeUpdate("insert into myTemp values (2);"), 1);
     }
 
     @Test
-    public void insert1000() throws SQLException
-    {
+    public void insert1000() throws SQLException {
         assertEquals(stat.executeUpdate("create table in1000 (a);"), 0);
         conn.setAutoCommit(false);
         for (int i = 0; i < 1000; i++)
@@ -188,8 +174,7 @@ public class StatementTest
         assertEquals(stat.executeUpdate("drop table in1000;"), 1);
     }
 
-    private void assertArrayEq(int[] a, int[] b)
-    {
+    private void assertArrayEq(int[] a, int[] b) {
         assertNotNull(a);
         assertNotNull(b);
         assertEquals(a.length, b.length);
@@ -198,8 +183,7 @@ public class StatementTest
     }
 
     @Test
-    public void batch() throws SQLException
-    {
+    public void batch() throws SQLException {
         stat.addBatch("create table batch (c1);");
         stat.addBatch("insert into batch values (1);");
         stat.addBatch("insert into batch values (1);");
@@ -225,16 +209,14 @@ public class StatementTest
     }
 
     @Test
-    public void closeOnFalseNext() throws SQLException
-    {
+    public void closeOnFalseNext() throws SQLException {
         stat.executeUpdate("create table t1 (c1);");
         conn.createStatement().executeQuery("select * from t1;").next();
         stat.executeUpdate("drop table t1;");
     }
 
     @Test
-    public void getGeneratedKeys() throws SQLException
-    {
+    public void getGeneratedKeys() throws SQLException {
         ResultSet rs;
         stat.executeUpdate("create table t1 (c1 integer primary key, v);");
         stat.executeUpdate("insert into t1 (v) values ('red');");
@@ -250,8 +232,7 @@ public class StatementTest
     }
 
     @Test
-    public void isBeforeFirst() throws SQLException
-    {
+    public void isBeforeFirst() throws SQLException {
         ResultSet rs = stat.executeQuery("select 1 union all select 2;");
         assertTrue(rs.isBeforeFirst());
         assertTrue(rs.next());
@@ -267,8 +248,7 @@ public class StatementTest
     }
 
     @Test
-    public void columnNaming() throws SQLException
-    {
+    public void columnNaming() throws SQLException {
         stat.executeUpdate("create table t1 (c1 integer);");
         stat.executeUpdate("create table t2 (c1 integer);");
         stat.executeUpdate("insert into t1 values (1);");
@@ -280,8 +260,7 @@ public class StatementTest
     }
 
     @Test
-    public void nullDate() throws SQLException
-    {
+    public void nullDate() throws SQLException {
         ResultSet rs = stat.executeQuery("select null;");
         assertTrue(rs.next());
         assertEquals(rs.getDate(1), null);
@@ -291,8 +270,7 @@ public class StatementTest
 
     @Ignore
     @Test(expected = SQLException.class)
-    public void ambiguousColumnNaming() throws SQLException
-    {
+    public void ambiguousColumnNaming() throws SQLException {
         stat.executeUpdate("create table t1 (c1 int);");
         stat.executeUpdate("create table t2 (c1 int, c2 int);");
         stat.executeUpdate("insert into t1 values (1);");
@@ -304,8 +282,7 @@ public class StatementTest
     }
 
     @Test(expected = SQLException.class)
-    public void failToDropWhenRSOpen() throws SQLException
-    {
+    public void failToDropWhenRSOpen() throws SQLException {
         stat.executeUpdate("create table t1 (c1);");
         stat.executeUpdate("insert into t1 values (4);");
         stat.executeUpdate("insert into t1 values (4);");
@@ -314,15 +291,13 @@ public class StatementTest
     }
 
     @Test(expected = SQLException.class)
-    public void executeNoRS() throws SQLException
-    {
+    public void executeNoRS() throws SQLException {
         assertFalse(stat.execute("insert into test values (8);"));
         stat.getResultSet();
     }
 
     @Test(expected = SQLException.class)
-    public void executeClearRS() throws SQLException
-    {
+    public void executeClearRS() throws SQLException {
         assertTrue(stat.execute("select null;"));
         assertNotNull(stat.getResultSet());
         assertFalse(stat.getMoreResults());
@@ -330,40 +305,40 @@ public class StatementTest
     }
 
     @Test(expected = BatchUpdateException.class)
-    public void batchReturnsResults() throws SQLException
-    {
+    public void batchReturnsResults() throws SQLException {
         stat.addBatch("select null;");
         stat.executeBatch();
     }
 
     @Test(expected = SQLException.class)
-    public void noSuchTable() throws SQLException
-    {
+    public void noSuchTable() throws SQLException {
         stat.executeQuery("select * from doesnotexist;");
     }
 
     @Test(expected = SQLException.class)
-    public void noSuchCol() throws SQLException
-    {
+    public void noSuchCol() throws SQLException {
         stat.executeQuery("select notacol from (select 1);");
     }
 
     @Test(expected = SQLException.class)
-    public void noSuchColName() throws SQLException
-    {
+    public void noSuchColName() throws SQLException {
         ResultSet rs = stat.executeQuery("select 1;");
         assertTrue(rs.next());
         rs.getInt("noSuchColName");
     }
 
     @Test
-    public void multipleStatements() throws SQLException
-    {
+    public void multipleStatements() throws SQLException {
         // ; insert into person values(1,'leo')
         int count = stat
                 .executeUpdate("create table person (id integer, name string); insert into person values(1, 'leo'); insert into person values(2, 'yui');");
         ResultSet rs = stat.executeQuery("select * from person");
         assertTrue(rs.next());
         assertTrue(rs.next());
+    }
+
+    @Test
+    public void blobTest() throws SQLException {
+        stat.executeUpdate("CREATE TABLE Foo (KeyId INTEGER, Stuff BLOB)");
     }
 }
