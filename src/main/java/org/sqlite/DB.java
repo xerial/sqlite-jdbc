@@ -37,14 +37,14 @@ import java.util.Map;
 abstract class DB implements Codes
 {
     /** The JDBC Connection that 'owns' this database instance. */
-    Conn conn = null;
+    Conn        conn   = null;
 
     /** The "begin;"and "commit;" statement handles. */
-    long begin = 0;
-    long commit = 0;
+    long        begin  = 0;
+    long        commit = 0;
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
-    private Map stmts = new Hashtable();
+    private Map stmts  = new Hashtable();
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
@@ -62,14 +62,11 @@ abstract class DB implements Codes
 
     abstract int enable_load_extension(boolean enable) throws SQLException;
 
-    final synchronized void exec(String sql) throws SQLException
-    {
+    final synchronized void exec(String sql) throws SQLException {
         long pointer = 0;
-        try
-        {
+        try {
             pointer = prepare(sql);
-            switch (step(pointer))
-            {
+            switch (step(pointer)) {
             case SQLITE_DONE:
                 ensureAutoCommit();
                 return;
@@ -79,31 +76,25 @@ abstract class DB implements Codes
                 throwex();
             }
         }
-        finally
-        {
+        finally {
             finalize(pointer);
         }
     }
 
-    final synchronized void open(Conn conn, String file) throws SQLException
-    {
+    final synchronized void open(Conn conn, String file, int openFlags) throws SQLException {
         this.conn = conn;
-        _open(file);
+        _open(file, openFlags);
     }
 
-    final synchronized void close() throws SQLException
-    {
+    final synchronized void close() throws SQLException {
         // finalize any remaining statements before closing db
-        synchronized (stmts)
-        {
+        synchronized (stmts) {
             Iterator i = stmts.entrySet().iterator();
-            while (i.hasNext())
-            {
+            while (i.hasNext()) {
                 Map.Entry entry = (Map.Entry) i.next();
                 Stmt stmt = (Stmt) entry.getValue();
                 finalize(((Long) entry.getKey()).longValue());
-                if (stmt != null)
-                {
+                if (stmt != null) {
                     stmt.pointer = 0;
                 }
                 i.remove();
@@ -114,13 +105,11 @@ abstract class DB implements Codes
         free_functions();
 
         // clean up commit object
-        if (begin != 0)
-        {
+        if (begin != 0) {
             finalize(begin);
             begin = 0;
         }
-        if (commit != 0)
-        {
+        if (commit != 0) {
             finalize(commit);
             commit = 0;
         }
@@ -128,32 +117,28 @@ abstract class DB implements Codes
         _close();
     }
 
-    final synchronized void prepare(Stmt stmt) throws SQLException
-    {
+    final synchronized void prepare(Stmt stmt) throws SQLException {
         if (stmt.pointer != 0)
             finalize(stmt);
         stmt.pointer = prepare(stmt.sql);
         stmts.put(new Long(stmt.pointer), stmt);
     }
 
-    final synchronized int finalize(Stmt stmt) throws SQLException
-    {
+    final synchronized int finalize(Stmt stmt) throws SQLException {
         if (stmt.pointer == 0)
             return 0;
         int rc = SQLITE_ERROR;
-        try
-        {
+        try {
             rc = finalize(stmt.pointer);
         }
-        finally
-        {
+        finally {
             stmts.remove(new Long(stmt.pointer));
             stmt.pointer = 0;
         }
         return rc;
     }
 
-    protected abstract void _open(String filename) throws SQLException;
+    protected abstract void _open(String filename, int openFlags) throws SQLException;
 
     protected abstract void _close() throws SQLException;
 
@@ -246,57 +231,45 @@ abstract class DB implements Codes
 
     // COMPOUND FUNCTIONS ////////////////////////////////////////////
 
-    final synchronized String[] column_names(long stmt) throws SQLException
-    {
+    final synchronized String[] column_names(long stmt) throws SQLException {
         String[] names = new String[column_count(stmt)];
         for (int i = 0; i < names.length; i++)
             names[i] = column_name(stmt, i);
         return names;
     }
 
-    final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException
-    {
+    final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
         pos++;
-        if (v == null)
-        {
+        if (v == null) {
             return bind_null(stmt, pos);
         }
-        else if (v instanceof Integer)
-        {
+        else if (v instanceof Integer) {
             return bind_int(stmt, pos, ((Integer) v).intValue());
         }
-        else if (v instanceof Short)
-        {
+        else if (v instanceof Short) {
             return bind_int(stmt, pos, ((Short) v).intValue());
         }
-        else if (v instanceof Long)
-        {
+        else if (v instanceof Long) {
             return bind_long(stmt, pos, ((Long) v).longValue());
         }
-        else if (v instanceof Float)
-        {
+        else if (v instanceof Float) {
             return bind_double(stmt, pos, ((Float) v).doubleValue());
         }
-        else if (v instanceof Double)
-        {
+        else if (v instanceof Double) {
             return bind_double(stmt, pos, ((Double) v).doubleValue());
         }
-        else if (v instanceof String)
-        {
+        else if (v instanceof String) {
             return bind_text(stmt, pos, (String) v);
         }
-        else if (v instanceof byte[])
-        {
+        else if (v instanceof byte[]) {
             return bind_blob(stmt, pos, (byte[]) v);
         }
-        else
-        {
+        else {
             throw new SQLException("unexpected param type: " + v.getClass());
         }
     }
 
-    final synchronized int[] executeBatch(long stmt, int count, Object[] vals) throws SQLException
-    {
+    final synchronized int[] executeBatch(long stmt, int count, Object[] vals) throws SQLException {
         if (count < 1)
             throw new SQLException("count (" + count + ") < 1");
 
@@ -305,18 +278,15 @@ abstract class DB implements Codes
         int rc;
         int[] changes = new int[count];
 
-        try
-        {
-            for (int i = 0; i < count; i++)
-            {
+        try {
+            for (int i = 0; i < count; i++) {
                 reset(stmt);
                 for (int j = 0; j < params; j++)
                     if (sqlbind(stmt, j, vals[(i * params) + j]) != SQLITE_OK)
                         throwex();
 
                 rc = step(stmt);
-                if (rc != SQLITE_DONE)
-                {
+                if (rc != SQLITE_DONE) {
                     reset(stmt);
                     if (rc == SQLITE_ROW)
                         throw new BatchUpdateException("batch entry " + i + ": query returns results", changes);
@@ -326,8 +296,7 @@ abstract class DB implements Codes
                 changes[i] = changes();
             }
         }
-        finally
-        {
+        finally {
             ensureAutoCommit();
         }
 
@@ -335,10 +304,8 @@ abstract class DB implements Codes
         return changes;
     }
 
-    final synchronized boolean execute(Stmt stmt, Object[] vals) throws SQLException
-    {
-        if (vals != null)
-        {
+    final synchronized boolean execute(Stmt stmt, Object[] vals) throws SQLException {
+        if (vals != null) {
             final int params = bind_parameter_count(stmt.pointer);
             if (params != vals.length)
                 throw new SQLException("assertion failure: param count (" + params + ") != value count (" + vals.length
@@ -350,8 +317,7 @@ abstract class DB implements Codes
         }
 
         int statusCode = step(stmt.pointer);
-        switch (statusCode)
-        {
+        switch (statusCode) {
         case SQLITE_DONE:
             reset(stmt.pointer);
             ensureAutoCommit();
@@ -369,11 +335,9 @@ abstract class DB implements Codes
 
     }
 
-    final synchronized boolean execute(String sql) throws SQLException
-    {
+    final synchronized boolean execute(String sql) throws SQLException {
         int statusCode = _exec(sql);
-        switch (statusCode)
-        {
+        switch (statusCode) {
         case SQLITE_OK:
             return false;
         case SQLITE_DONE:
@@ -386,37 +350,31 @@ abstract class DB implements Codes
         }
     }
 
-    final synchronized int executeUpdate(Stmt stmt, Object[] vals) throws SQLException
-    {
+    final synchronized int executeUpdate(Stmt stmt, Object[] vals) throws SQLException {
         if (execute(stmt, vals))
             throw new SQLException("query returns results");
         reset(stmt.pointer);
         return changes();
     }
 
-    final void throwex() throws SQLException
-    {
+    final void throwex() throws SQLException {
         throw new SQLException(errmsg());
     }
 
-    final void throwex(int errorCode) throws SQLException
-    {
+    final void throwex(int errorCode) throws SQLException {
         throw newSQLException(errorCode);
     }
 
-    final void throwex(int errorCode, String errorMessage) throws SQLException
-    {
+    final void throwex(int errorCode, String errorMessage) throws SQLException {
         throw newSQLException(errorCode, errorMessage);
     }
 
-    static SQLException newSQLException(int errorCode, String errorMessage) throws SQLException
-    {
+    static SQLException newSQLException(int errorCode, String errorMessage) throws SQLException {
         SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
         return new SQLException(String.format("%s (%s)", code, errorMessage));
     }
 
-    private SQLException newSQLException(int errorCode) throws SQLException
-    {
+    private SQLException newSQLException(int errorCode) throws SQLException {
         return newSQLException(errorCode, errmsg());
     }
 
@@ -451,8 +409,7 @@ abstract class DB implements Codes
      * As a solution, we call "commit" after every statement in auto-commit
      * mode.
      */
-    final void ensureAutoCommit() throws SQLException
-    {
+    final void ensureAutoCommit() throws SQLException {
         if (!conn.getAutoCommit())
             return;
 
@@ -461,19 +418,16 @@ abstract class DB implements Codes
         if (commit == 0)
             commit = prepare("commit;");
 
-        try
-        {
+        try {
             if (step(begin) != SQLITE_DONE)
                 return; // assume we are in a transaction
-            if (step(commit) != SQLITE_DONE)
-            {
+            if (step(commit) != SQLITE_DONE) {
                 reset(commit);
                 throwex();
             }
             //throw new SQLException("unable to auto-commit");
         }
-        finally
-        {
+        finally {
             reset(begin);
             reset(commit);
         }

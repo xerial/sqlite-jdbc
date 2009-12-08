@@ -38,7 +38,8 @@ import java.util.Properties;
  */
 public class SQLiteConfig
 {
-    private Properties pragmaTable = new Properties();
+    private Properties pragmaTable  = new Properties();
+    private int        openModeFlag = 0x00;
 
     public SQLiteConfig() {
 
@@ -54,6 +55,22 @@ public class SQLiteConfig
 
     private void set(Pragma pragma, int num) {
         setPragma(pragma, Integer.toString(num));
+    }
+
+    private boolean getBoolean(Pragma pragma, String defaultValue) {
+        return Boolean.parseBoolean(pragmaTable.getProperty(pragma.pragmaName, defaultValue));
+    }
+
+    public boolean isEnabledSharedCache() {
+        return getBoolean(Pragma.SHARED_CACHE, "false");
+    }
+
+    public boolean isEnabledLoadExtension() {
+        return getBoolean(Pragma.LOAD_EXTENSION, "false");
+    }
+
+    public int getOpenModeFlags() {
+        return openModeFlag;
     }
 
     /**
@@ -95,9 +112,9 @@ public class SQLiteConfig
 
     private static enum Pragma {
 
+        OPEN_MODE("open_mode", "Database open-mode flag", null),
         SHARED_CACHE("shared_cache", "Enablse SQLite Shared-Cache mode, native driver only", OnOff),
         LOAD_EXTENSION("enable_load_extension", "Enable SQLite load_extention() function, native driver only", OnOff),
-        READ_ONLY("read_only", "Open database in read-only mode", OnOff),
 
         CACHE_SIZE("cache_size"),
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
@@ -143,6 +160,24 @@ public class SQLiteConfig
         }
     }
 
+    /**
+     * Set the database open mode
+     * 
+     * @param mode
+     */
+    public void setOpenMode(SQLiteOpenMode mode) {
+        openModeFlag |= mode.flag;
+    }
+
+    /**
+     * Reset the specified database open mode flag
+     * 
+     * @param mode
+     */
+    public void resetOpenMode(SQLiteOpenMode mode) {
+        openModeFlag &= ~mode.flag;
+    }
+
     public void setSharedCache(boolean enable) {
         set(Pragma.SHARED_CACHE, enable);
     }
@@ -152,7 +187,7 @@ public class SQLiteConfig
     }
 
     public void setReadOnly(boolean readOnly) {
-        set(Pragma.READ_ONLY, readOnly);
+        setOpenMode(SQLiteOpenMode.READONLY);
     }
 
     public void setCacheSize(int numberOfPages) {

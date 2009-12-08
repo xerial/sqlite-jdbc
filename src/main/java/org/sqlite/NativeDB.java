@@ -22,13 +22,12 @@ import java.sql.SQLException;
 final class NativeDB extends DB
 {
     /** SQLite connection handle. */
-    long pointer = 0;
+    long                   pointer       = 0;
 
-    private static boolean isLoaded = false;
+    private static boolean isLoaded      = false;
     private static boolean loadSucceeded = false;
 
-    static boolean load()
-    {
+    static boolean load() {
         if (isLoaded)
             return loadSucceeded == true;
 
@@ -42,7 +41,7 @@ final class NativeDB extends DB
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
-    protected native synchronized void _open(String file) throws SQLException;
+    protected native synchronized void _open(String file, int openFlags) throws SQLException;
 
     protected native synchronized void _close() throws SQLException;
 
@@ -150,8 +149,7 @@ final class NativeDB extends DB
      */
     native synchronized boolean[][] column_metadata(long stmt);
 
-    static void throwex(String msg) throws SQLException
-    {
+    static void throwex(String msg) throws SQLException {
         throw new SQLException(msg);
     }
 }

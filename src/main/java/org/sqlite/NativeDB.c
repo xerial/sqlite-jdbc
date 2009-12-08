@@ -307,7 +307,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_enable_1load_1extension(
 
 
 JNIEXPORT void JNICALL Java_org_sqlite_NativeDB__1open(
-        JNIEnv *env, jobject this, jstring file)
+        JNIEnv *env, jobject this, jstring file, jint flags)
 {
     int ret;
     sqlite3 *db = gethandle(env, this);
@@ -320,7 +320,7 @@ JNIEXPORT void JNICALL Java_org_sqlite_NativeDB__1open(
     }
 
     str = (*env)->GetStringUTFChars(env, file, 0);
-    ret = sqlite3_open(str, &db); 
+    ret = sqlite3_open_v2(str, &db, flags, NULL); 
     if (ret) {
         throw_errorcode(env, this, ret);
         sqlite3_close(db);
