@@ -25,14 +25,12 @@ import org.junit.Test;
 public class QueryTest
 {
     @BeforeClass
-    public static void forName() throws Exception
-    {
+    public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
     }
 
     @Test
-    public void createTable() throws Exception
-    {
+    public void createTable() throws Exception {
         String driver = "org.sqlite.JDBC";
         String url = "jdbc:sqlite::memory:";
         //String url = "jdbc:sqlite:file.db";
@@ -43,13 +41,11 @@ public class QueryTest
         stmt.close();
 
         stmt = conn.createStatement();
-        try
-        {
+        try {
             ResultSet rs = stmt.executeQuery("SELECT * FROM sample");
             rs.next();
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -58,15 +54,16 @@ public class QueryTest
     }
 
     @Test
-    public void setFloatTest() throws Exception
-    {
+    public void setFloatTest() throws Exception {
         String driver = "org.sqlite.JDBC";
         String url = "jdbc:sqlite::memory:";
 
         float f = 3.141597f;
         Connection conn = DriverManager.getConnection(url);
         conn.createStatement().execute("create table sample (data NOAFFINITY)");
-        conn.createStatement().execute(String.format("insert into sample values(%f)", f));
+        PreparedStatement prep = conn.prepareStatement("insert into sample values(?)");
+        prep.setFloat(1, f);
+        prep.executeUpdate();
 
         PreparedStatement stmt = conn.prepareStatement("select * from sample where data > ?");
         stmt.setObject(1, 3.0f);
@@ -78,8 +75,7 @@ public class QueryTest
     }
 
     @Test
-    public void dateTimeTest() throws Exception
-    {
+    public void dateTimeTest() throws Exception {
         String url = "jdbc:sqlite::memory:";
 
         float f = 3.141597f;
@@ -97,8 +93,7 @@ public class QueryTest
     }
 
     @Test
-    public void viewTest() throws Exception
-    {
+    public void viewTest() throws Exception {
         Connection conn = DriverManager.getConnection("jdbc:sqlite::memory:");
         Statement st1 = conn.createStatement();
         // drop table if it already exists
@@ -113,12 +108,10 @@ public class QueryTest
     }
 
     @Test
-    public void concatTest()
-    {
+    public void concatTest() {
 
         Connection connection = null;
-        try
-        {
+        try {
             // create a database connection
             connection = DriverManager.getConnection("jdbc:sqlite::memory:");
             Statement statement = connection.createStatement();
@@ -145,15 +138,13 @@ public class QueryTest
 
             ResultSet rs = statement
                     .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=2 and mxp.pid=person.id and mxp.type='T'");
-            while (rs.next())
-            {
+            while (rs.next()) {
                 // read the result set
                 assertEquals("Y,abc", rs.getString(1));
             }
             rs = statement
                     .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=1 and mxp.pid=person.id and mxp.type='T'");
-            while (rs.next())
-            {
+            while (rs.next()) {
                 // read the result set
                 assertEquals("Y", rs.getString(1));
             }
@@ -163,36 +154,30 @@ public class QueryTest
             ps.clearParameters();
             ps.setInt(1, new Integer(2));
             rs = ps.executeQuery();
-            while (rs.next())
-            {
+            while (rs.next()) {
                 // read the result set
                 assertEquals("Y,abc", rs.getString(1));
             }
             ps.clearParameters();
             ps.setInt(1, new Integer(2));
             rs = ps.executeQuery();
-            while (rs.next())
-            {
+            while (rs.next()) {
                 // read the result set
                 assertEquals("Y,abc", rs.getString(1));
             }
 
         }
-        catch (SQLException e)
-        {
+        catch (SQLException e) {
             // if the error message is "out of memory",
             // it probably means no database file is found
             System.err.println(e.getMessage());
         }
-        finally
-        {
-            try
-            {
+        finally {
+            try {
                 if (connection != null)
                     connection.close();
             }
-            catch (SQLException e)
-            {
+            catch (SQLException e) {
                 // connection close failed.
                 System.err.println(e);
             }
