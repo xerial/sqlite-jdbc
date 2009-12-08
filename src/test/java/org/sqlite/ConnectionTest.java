@@ -32,7 +32,13 @@ public class ConnectionTest
         Statement stat = conn.createStatement();
         conn.close();
 
-        stat.executeUpdate("create table A(id, name)");
+        try {
+            stat.executeUpdate("create table A(id, name)");
+        }
+        catch (SQLException e) {
+            return; // successfully detect the operation on the closed DB
+        }
+        fail("should not reach here");
     }
 
     @Test

@@ -26,7 +26,7 @@ test: native
 native: build/$(target)/$(LIBNAME)
 	
 
-build/$(target)/$(LIBNAME): build/$(sqlite)-$(target)/sqlite3.o build/org/sqlite/NativeDB.class
+build/$(target)/$(LIBNAME): build/$(sqlite)-$(target)/sqlite3.o build/org/sqlite/NativeDB.class ../src/main/java/org/sqlite/NativeDB.c
 	@mkdir -p build/$(target)
 	$(JAVAH) -classpath build -jni -o build/NativeDB.h org.sqlite.NativeDB
 	$(CC) $(CFLAGS) -c -o build/$(target)/NativeDB.o \

@@ -31,19 +31,20 @@ import java.util.Calendar;
 /**
  * Implements a JDBC ResultSet.
  */
-final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
+final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
+{
     private final Stmt stmt;
-    private final DB db;
+    private final DB   db;
 
-    boolean open = false; // true means have results and can iterate them
-    int maxRows; // max. number of rows as set by a Statement
-    String[] cols = null; // if null, the RS is closed()
-    String[] colsMeta = null; // same as cols, but used by Meta interface
-    boolean[][] meta = null;
+    boolean            open     = false; // true means have results and can iterate them
+    int                maxRows;         // max. number of rows as set by a Statement
+    String[]           cols     = null; // if null, the RS is closed()
+    String[]           colsMeta = null; // same as cols, but used by Meta interface
+    boolean[][]        meta     = null;
 
-    private int limitRows; // 0 means no limit, must check against maxRows
-    private int row = 1; // number of current row, starts at 1
-    private int lastCol; // last column accessed, for wasNull(). -1 if none
+    private int        limitRows;       // 0 means no limit, must check against maxRows
+    private int        row      = 0;    // number of current row, starts at 1 (0 is for before loading data)
+    private int        lastCol;         // last column accessed, for wasNull(). -1 if none
 
     RS(Stmt stmt) {
         this.stmt = stmt;
@@ -93,7 +94,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
         meta = null;
         open = false;
         limitRows = 0;
-        row = 1;
+        row = 0;
         lastCol = -1;
 
         if (stmt == null)
@@ -108,8 +109,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
         int c = -1;
         for (int i = 0; i < cols.length; i++) {
             if (col.equalsIgnoreCase(cols[i])
-                    || (cols[i].toUpperCase().endsWith(col.toUpperCase()) && cols[i].charAt(cols[i]
-                            .length()
+                    || (cols[i].toUpperCase().endsWith(col.toUpperCase()) && cols[i].charAt(cols[i].length()
                             - col.length()) == '.')) {
                 if (c == -1)
                     c = i;
@@ -129,7 +129,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
         lastCol = -1;
 
         // first row is loaded by execute(), so do not step() again
-        if (row == 1) {
+        if (row == 0) {
             row++;
             return true;
         }
@@ -186,11 +186,11 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
     }
 
     public boolean isBeforeFirst() throws SQLException {
-        return open && row == 1;
+        return open && row == 0;
     }
 
     public boolean isFirst() throws SQLException {
-        return row == 2;
+        return row == 1;
     }
 
     public boolean isLast() throws SQLException { // FIXME
@@ -236,9 +236,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
     }
 
     public Reader getCharacterStream(int col) throws SQLException {
-		return new StringReader(getString(col));
+        return new StringReader(getString(col));
     }
-    
+
     public Reader getCharacterStream(String col) throws SQLException {
         return getCharacterStream(findColumn(col));
     }

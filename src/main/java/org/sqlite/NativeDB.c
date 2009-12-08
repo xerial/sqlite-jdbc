@@ -69,6 +69,18 @@ static void throwexmsg(JNIEnv *env, const char *str)
                                 (*env)->NewStringUTF(env, str));
 }
 
+static void throw_errorcod_and_msg(JNIEnv *env, int errorCode, const char *str)
+{
+    static jmethodID mth_throwexmsg = 0;
+
+    if (!mth_throwexmsg) mth_throwexmsg = (*env)->GetStaticMethodID(
+            env, dbclass, "throwex", "(ILjava/lang/String;)V");
+
+    (*env)->CallStaticVoidMethod(env, dbclass, mth_throwexmsg, (jint) errorCode,
+                                (*env)->NewStringUTF(env, str));
+}
+
+
 static sqlite3 * gethandle(JNIEnv *env, jobject this)
 {
     static jfieldID pointer = 0;
@@ -361,7 +373,7 @@ JNIEXPORT jlong JNICALL Java_org_sqlite_NativeDB_prepare(
     (*env)->ReleaseStringUTFChars(env, sql, strsql);
 
     if (status != SQLITE_OK) {
-        throwex(env, this);
+        throw_errorcode(env, this, status);
         return fromref(0);
     }
     return fromref(stmt);
@@ -372,6 +384,12 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB__1exec(
 {
     sqlite3* db = gethandle(env, this);
     sqlite3_stmt* stmt;
+	
+	if(!db)
+	{
+		throw_errorcode(env, this, 21);
+		return 21;
+	}
 
     const char *strsql = (*env)->GetStringUTFChars(env, sql, 0);
     char* errorMsg;
