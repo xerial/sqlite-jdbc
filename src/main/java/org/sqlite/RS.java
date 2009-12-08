@@ -15,6 +15,8 @@
  */
 package org.sqlite;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -231,6 +233,14 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes {
 
     public byte[] getBytes(String col) throws SQLException {
         return getBytes(findColumn(col));
+    }
+
+    public Reader getCharacterStream(int col) throws SQLException {
+		return new StringReader(getString(col));
+    }
+    
+    public Reader getCharacterStream(String col) throws SQLException {
+        return getCharacterStream(findColumn(col));
     }
 
     public Date getDate(int col) throws SQLException {

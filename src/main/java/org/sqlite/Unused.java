@@ -60,8 +60,6 @@ abstract class Unused
         throws SQLException { throw unused(); }
     public void setBlob(int i, Blob x)
         throws SQLException { throw unused(); }
-    public void setCharacterStream(int pos, Reader reader, int length)
-        throws SQLException { throw unused(); }
     public void setClob(int i, Clob x)
         throws SQLException { throw unused(); }
     public void setRef(int i, Ref x)
@@ -97,10 +95,6 @@ abstract class Unused
     public Blob getBlob(int col)
         throws SQLException { throw unused(); }
     public Blob getBlob(String col)
-        throws SQLException { throw unused(); }
-    public Reader getCharacterStream(int col)
-        throws SQLException { throw unused(); }
-    public Reader getCharacterStream(String col)
         throws SQLException { throw unused(); }
     public Clob getClob(int col)
         throws SQLException { throw unused(); }

@@ -16,6 +16,9 @@
 
 package org.sqlite;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.sql.Date;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -261,6 +264,8 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
             batch(pos, value);
         else if (value instanceof Boolean)
             setBoolean(pos, ((Boolean) value).booleanValue());
+        else if (value instanceof byte[])
+            batch(pos, value);
         else
             batch(pos, value.toString());
     }
@@ -283,6 +288,29 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     public void setString(int pos, String value) throws SQLException
     {
         batch(pos, value);
+    }
+    
+    public void setCharacterStream(int pos, Reader reader, int length)
+    throws SQLException {
+		try
+		{
+			// copy chars from reader to StringBuffer
+			StringBuffer sb = new StringBuffer();
+			char[] cbuf = new char[8192];
+			int cnt;
+
+			while ((cnt=reader.read(cbuf)) > 0)
+			{
+				sb.append(cbuf, 0, cnt);
+			}
+
+			// set as string
+			setString(pos, sb.toString());
+		}
+		catch (IOException e)
+		{
+			throw new SQLException("Cannot read from character stream, exception message: " + e.getMessage());
+		}
     }
 
     public void setDate(int pos, Date x) throws SQLException
