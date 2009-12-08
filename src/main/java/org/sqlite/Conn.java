@@ -60,7 +60,9 @@ class Conn implements Connection
         boolean enableLoadExtension = config.isEnabledLoadExtension();
         db.shared_cache(enableSharedCache);
         db.enable_load_extension(enableLoadExtension);
+
         // set pragmas
+        config.apply(this);
     }
 
     private static final String RESOURCE_NAME_PREFIX = ":resource:";

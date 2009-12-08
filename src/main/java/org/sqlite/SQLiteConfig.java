@@ -24,8 +24,12 @@
 //--------------------------------------
 package org.sqlite;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashSet;
 import java.util.Properties;
 
 /**
@@ -48,14 +52,49 @@ public class SQLiteConfig
     public SQLiteConfig(Properties prop) {
         this.pragmaTable = prop;
 
-        if (pragmaTable.contains(Pragma.OPEN_MODE)) {
-            openModeFlag = Integer.parseInt(pragmaTable.getProperty(Pragma.OPEN_MODE.pragmaName));
+        String openMode = pragmaTable.getProperty(Pragma.OPEN_MODE.pragmaName);
+        if (openMode != null) {
+            openModeFlag = Integer.parseInt(openMode);
         }
         else {
             // set the default open mode of SQLite3
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
+    }
+
+    /**
+     * Apply the current configuration to connection
+     * 
+     * @param conn
+     * @throws SQLException
+     */
+    public void apply(Connection conn) throws SQLException {
+
+        HashSet<String> nonPragmaParams = new HashSet<String>();
+        nonPragmaParams.add(Pragma.OPEN_MODE.pragmaName);
+        nonPragmaParams.add(Pragma.SHARED_CACHE.pragmaName);
+        nonPragmaParams.add(Pragma.LOAD_EXTENSION.pragmaName);
+
+        Statement stat = conn.createStatement();
+        try {
+            int count = 0;
+            for (Object each : pragmaTable.keySet()) {
+                String key = each.toString();
+                if (nonPragmaParams.contains(key))
+                    continue;
+
+                String value = pragmaTable.getProperty(key);
+                stat.addBatch(String.format("pragma %s=%s", key, value));
+                count++;
+            }
+            stat.executeBatch();
+        }
+        finally {
+            if (stat != null)
+                stat.close();
+        }
+
     }
 
     private void set(Pragma pragma, boolean flag) {
@@ -99,6 +138,8 @@ public class SQLiteConfig
      * @return properties representation of this configuration
      */
     public Properties toProperties() {
+        pragmaTable.setProperty(Pragma.OPEN_MODE.pragmaName, Integer.toString(openModeFlag));
+
         return pragmaTable;
     }
 
@@ -121,10 +162,12 @@ public class SQLiteConfig
 
     private static enum Pragma {
 
+        // Parameters requiring SQLite3 API invocation
         OPEN_MODE("open_mode", "Database open-mode flag", null),
         SHARED_CACHE("shared_cache", "Enablse SQLite Shared-Cache mode, native driver only", OnOff),
         LOAD_EXTENSION("enable_load_extension", "Enable SQLite load_extention() function, native driver only", OnOff),
 
+        // Pragmas that can be set after opening the database 
         CACHE_SIZE("cache_size"),
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
         COUNT_CHANGES("count_changes", OnOff),
@@ -196,7 +239,14 @@ public class SQLiteConfig
     }
 
     public void setReadOnly(boolean readOnly) {
-        setOpenMode(SQLiteOpenMode.READONLY);
+        if (readOnly) {
+            setOpenMode(SQLiteOpenMode.READONLY);
+            resetOpenMode(SQLiteOpenMode.READWRITE);
+        }
+        else {
+            setOpenMode(SQLiteOpenMode.READWRITE);
+            resetOpenMode(SQLiteOpenMode.READONLY);
+        }
     }
 
     public void setCacheSize(int numberOfPages) {
