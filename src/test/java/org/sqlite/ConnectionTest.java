@@ -37,11 +37,14 @@ public class ConnectionTest
 
     @Test
     public void readOnly() throws SQLException {
+        // set read only mode
         SQLiteConfig config = new SQLiteConfig();
         config.setReadOnly(true);
+
         Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
         Statement stat = conn.createStatement();
         try {
+            // these updates must be forbidden in read-only mode
             stat.executeUpdate("create table A(id, name)");
             stat.executeUpdate("insert into A values(1, 'leo')");
         }
