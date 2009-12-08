@@ -53,17 +53,7 @@ public class JDBC implements Driver
     }
 
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
-        DriverPropertyInfo sharedCache = new DriverPropertyInfo("shared_cache", "false");
-        sharedCache.choices = new String[] { "true", "false" };
-        sharedCache.description = "Enable SQLite Shared-Cache mode, native driver only.";
-        sharedCache.required = false;
-
-        DriverPropertyInfo loadExt = new DriverPropertyInfo("enable_load_extension", "false");
-        loadExt.choices = new String[] { "true", "false" };
-        loadExt.description = "Enable SQLite load_extension() functionality";
-        loadExt.required = false;
-
-        return new DriverPropertyInfo[] { sharedCache, loadExt };
+        return SQLiteConfig.getDriverPropertyInfo();
     }
 
     public Connection connect(String url, Properties info) throws SQLException {
