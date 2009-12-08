@@ -24,7 +24,9 @@
 //--------------------------------------
 package org.sqlite;
 
-import java.util.HashMap;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.util.Properties;
 
 /**
  * SQLite Configuration
@@ -36,28 +38,66 @@ import java.util.HashMap;
  */
 public class SQLiteConfig
 {
-    private HashMap<String, String> pragmaName_statement = new HashMap<String, String>();
+    private Properties pragmaTable = new Properties();
+
+    public SQLiteConfig() {
+
+    }
+
+    public SQLiteConfig(Properties prop) {
+        this.pragmaTable = prop;
+    }
 
     private void set(Pragma pragma, boolean flag) {
-        set(pragma, Boolean.toString(flag));
+        setPragma(pragma, Boolean.toString(flag));
     }
 
     private void set(Pragma pragma, int num) {
-        set(pragma, Integer.toString(num));
+        setPragma(pragma, Integer.toString(num));
     }
 
-    private void set(Pragma pragma, String value) {
-        pragmaName_statement.put(pragma.pragmaName, String.format("pragma %s = %s", pragma.pragmaName, value));
+    /**
+     * Set a pragma value. To take effect the pragma settings,
+     * 
+     * @param pragma
+     * @param value
+     */
+    public void setPragma(Pragma pragma, String value) {
+        pragmaTable.put(pragma.pragmaName, value);
     }
 
-    private void set(String databaseName, Pragma pragma, String value) {
-        pragmaName_statement.put(pragma.pragmaName, String.format("pragma %s.%s = %s", databaseName, pragma.pragmaName,
-                value));
+    /**
+     * Convert this SQLiteConfig settings into a Properties object, that can be
+     * passed to the {@link DriverManager#getConnection(String, Properties)}.
+     * 
+     * @return properties representation of this configuration
+     */
+    public Properties toProperties() {
+        return pragmaTable;
+    }
+
+    static DriverPropertyInfo[] getDriverPropertyInfo() {
+        Pragma[] pragma = Pragma.values();
+        DriverPropertyInfo[] result = new DriverPropertyInfo[pragma.length];
+        int index = 0;
+        for (Pragma p : Pragma.values()) {
+            DriverPropertyInfo di = new DriverPropertyInfo(p.pragmaName, null);
+            di.choices = p.choices;
+            di.description = p.description;
+            di.required = false;
+            result[index++] = di;
+        }
+
+        return result;
     }
 
     private static final String[] OnOff = new String[] { "true", "false" };
 
-    public static enum Pragma {
+    private static enum Pragma {
+
+        SHARED_CACHE("shared_cache", "Enablse SQLite Shared-Cache mode, native driver only", OnOff),
+        LOAD_EXTENSION("enable_load_extension", "Enable SQLite load_extention() function, native driver only", OnOff),
+        READ_ONLY("read_only", "Open database in read-only mode", OnOff),
 
         CACHE_SIZE("cache_size"),
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
@@ -85,16 +125,34 @@ public class SQLiteConfig
         USER_VERSION("user_version");
 
         public final String   pragmaName;
-        public final String[] chioices;
+        public final String[] choices;
+        public final String   description;
 
         private Pragma(String pragmaName) {
             this(pragmaName, null);
         }
 
         private Pragma(String pragmaName, String[] choices) {
-            this.pragmaName = pragmaName;
-            this.chioices = choices;
+            this(pragmaName, null, null);
         }
+
+        private Pragma(String pragmaName, String description, String[] choices) {
+            this.pragmaName = pragmaName;
+            this.description = description;
+            this.choices = choices;
+        }
+    }
+
+    public void setSharedCache(boolean enable) {
+        set(Pragma.SHARED_CACHE, enable);
+    }
+
+    public void enableLoadExtension(boolean enable) {
+        set(Pragma.LOAD_EXTENSION, enable);
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        set(Pragma.READ_ONLY, readOnly);
     }
 
     public void setCacheSize(int numberOfPages) {
@@ -123,7 +181,8 @@ public class SQLiteConfig
     }
 
     /**
-     * Common interface to retrieve available pragma parameter values.
+     * The common interface for retrieving the available pragma parameter
+     * values.
      * 
      * @author leo
      * 
@@ -134,7 +193,7 @@ public class SQLiteConfig
     }
 
     /**
-     * Convert enum values to string arrays
+     * Convert the given Enum values to a string array
      * 
      * @param list
      * @return
@@ -169,7 +228,7 @@ public class SQLiteConfig
     }
 
     public void setEncoding(Encoding encoding) {
-        set(Pragma.ENCODING, encoding.typeName);
+        setPragma(Pragma.ENCODING, encoding.typeName);
     }
 
     public void enforceForeignKeys(boolean enforce) {
@@ -189,12 +248,12 @@ public class SQLiteConfig
     }
 
     public void setJournalMode(JournalMode mode) {
-        set(Pragma.JOURNAL_MODE, mode.name());
+        setPragma(Pragma.JOURNAL_MODE, mode.name());
     }
 
-    public void setJournalMode(String databaseName, JournalMode mode) {
-        set(databaseName, Pragma.JOURNAL_MODE, mode.name());
-    }
+    //    public void setJournalMode(String databaseName, JournalMode mode) {
+    //        setPragma(databaseName, Pragma.JOURNAL_MODE, mode.name());
+    //    }
 
     public void setJounalSizeLimit(int limit) {
         set(Pragma.JOURNAL_SIZE_LIMIT, limit);
@@ -212,12 +271,12 @@ public class SQLiteConfig
     }
 
     public void setLockingMode(LockingMode mode) {
-        set(Pragma.LOCKING_MODE, mode.name());
+        setPragma(Pragma.LOCKING_MODE, mode.name());
     }
 
-    public void setLockingMode(String databaseName, LockingMode mode) {
-        set(databaseName, Pragma.LOCKING_MODE, mode.name());
-    }
+    //    public void setLockingMode(String databaseName, LockingMode mode) {
+    //        setPragma(databaseName, Pragma.LOCKING_MODE, mode.name());
+    //    }
 
     public void setPageSize(int numBytes) {
         set(Pragma.PAGE_SIZE, numBytes);
@@ -252,7 +311,7 @@ public class SQLiteConfig
     }
 
     public void setSynchronous(SynchronousMode mode) {
-        set(Pragma.SYNCHRONOUS, mode.name());
+        setPragma(Pragma.SYNCHRONOUS, mode.name());
     }
 
     public static enum TempStore implements PragmaValue {
@@ -265,11 +324,11 @@ public class SQLiteConfig
     }
 
     public void setTempStore(TempStore storeType) {
-        set(Pragma.TEMP_STORE, storeType.name());
+        setPragma(Pragma.TEMP_STORE, storeType.name());
     }
 
     public void setTempStoreDirectory(String directoryName) {
-        set(Pragma.TEMP_STORE_DIRECTORY, String.format("'%s'", directoryName));
+        setPragma(Pragma.TEMP_STORE_DIRECTORY, String.format("'%s'", directoryName));
     }
 
     public void setUserVersion(int version) {
