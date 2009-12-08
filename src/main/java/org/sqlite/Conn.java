@@ -54,17 +54,13 @@ class Conn implements Connection
         this.fileName = fileName;
 
         SQLiteConfig config = new SQLiteConfig(prop);
+        open(config.getOpenModeFlags());
 
         boolean enableSharedCache = config.isEnabledSharedCache();
         boolean enableLoadExtension = config.isEnabledLoadExtension();
-
         db.shared_cache(enableSharedCache);
         db.enable_load_extension(enableLoadExtension);
-
-        open(config.getOpenModeFlags());
-
         // set pragmas
-
     }
 
     private static final String RESOURCE_NAME_PREFIX = ":resource:";

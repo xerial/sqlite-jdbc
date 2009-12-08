@@ -38,15 +38,24 @@ import java.util.Properties;
  */
 public class SQLiteConfig
 {
-    private Properties pragmaTable  = new Properties();
-    private int        openModeFlag = 0x00;
+    private final Properties pragmaTable;
+    private int              openModeFlag = 0x00;
 
     public SQLiteConfig() {
-
+        this(new Properties());
     }
 
     public SQLiteConfig(Properties prop) {
         this.pragmaTable = prop;
+
+        if (pragmaTable.contains(Pragma.OPEN_MODE)) {
+            openModeFlag = Integer.parseInt(pragmaTable.getProperty(Pragma.OPEN_MODE.pragmaName));
+        }
+        else {
+            // set the default open mode of SQLite3
+            setOpenMode(SQLiteOpenMode.READWRITE);
+            setOpenMode(SQLiteOpenMode.CREATE);
+        }
     }
 
     private void set(Pragma pragma, boolean flag) {
