@@ -3,21 +3,21 @@ NATIVE_DIR=$(RESOURCE_DIR)/native
 RSYNC=rsync -av -e ssh --exclude=".svn"
 
 WIN_SERVER=192.168.131.10
-WIN_WORK=work/git/sqlite-jdbc
+WIN_WORK=work/hg/sqlite-jdbc
 
 MAC_SERVER=localhost
-MAC_WORK=work/git/sqlite-jdbc
+MAC_WORK=work/hg/sqlite-jdbc
 
 MAC_TIGER_SERVER=192.168.131.3
-MAC_TIGER_WORK=work/git/sqlite-jdbc
+MAC_TIGER_WORK=work/hg/sqlite-jdbc
 
 LINUX_SERVER=sprite
-LINUX_WORK=work/git/sqlite-jdbc
+LINUX_WORK=work/hg/sqlite-jdbc
 
 AMD_SERVER=utgb01
-AMD_WORK=work/git/sqlite-jdbc
+AMD_WORK=work/hg/sqlite-jdbc
 
-BUILD_CMD = git pull && make clean-native && make native
+BUILD_CMD = hg pull -u && make clean-native && make native
 TEST_CMD = mvn test
 
 all: compile test
@@ -88,8 +88,9 @@ release:
 	mvn release:perform
 
 release-xerial:
-	mvn release:perform -DconnectionUrl=scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-$(version)
+	mvn release:perform -DconnectionUrl=scm:hg:https://sqlite.xerial.googlecode.com/hg/ -Dtag=sqlite-jdbc-$(version)
 
 release-sourceforge:
-	mvn release:perform -Darguments="-P sourceforge" -DconnectionUrl=scm:svn:https://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-$(version)
+	mvn release:perform -Darguments="-P sourceforge" -DconnectionUrl=-DconnectionUrl=scm:hg:https://sqlite.xerial.googlecode.com/hg/ -Dtag=sqlite-jdbc-$(version)
+	
 	
