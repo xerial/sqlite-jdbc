@@ -383,15 +383,15 @@ class Conn implements Connection
     }
 
     public PreparedStatement prepareStatement(String sql, int autoC) throws SQLException {
-        throw new SQLException("NYI");
+        return prepareStatement(sql);
     }
 
     public PreparedStatement prepareStatement(String sql, int[] colInds) throws SQLException {
-        throw new SQLException("NYI");
+        return prepareStatement(sql);
     }
 
     public PreparedStatement prepareStatement(String sql, String[] colNames) throws SQLException {
-        throw new SQLException("NYI");
+        return prepareStatement(sql);
     }
 
     public PreparedStatement prepareStatement(String sql, int rst, int rsc) throws SQLException {
