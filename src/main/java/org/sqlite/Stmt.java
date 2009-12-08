@@ -246,12 +246,12 @@ class Stmt extends Unused implements Statement, Codes
 
     // TODO: write test
     public int getMaxRows() throws SQLException {
-        checkOpen();
+        //checkOpen();
         return rs.maxRows;
     }
 
     public void setMaxRows(int max) throws SQLException {
-        checkOpen();
+        //checkOpen();
         if (max < 0)
             throw new SQLException("max row count must be >= 0");
         rs.maxRows = max;

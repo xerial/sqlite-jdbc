@@ -357,4 +357,9 @@ public class StatementTest
         Date d = rs.getDate(1);
         assertEquals(day.getTime(), d.getTime());
     }
+
+    @Test
+    public void maxRows() throws SQLException {
+        stat.setMaxRows(1);
+    }
 }
