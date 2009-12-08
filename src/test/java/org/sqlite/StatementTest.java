@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -340,5 +342,19 @@ public class StatementTest
     @Test
     public void blobTest() throws SQLException {
         stat.executeUpdate("CREATE TABLE Foo (KeyId INTEGER, Stuff BLOB)");
+    }
+
+    @Test
+    public void dateTimeTest() throws SQLException {
+        Date day = new Date(new java.util.Date().getTime());
+
+        stat.executeUpdate("create table day (time datatime)");
+        PreparedStatement prep = conn.prepareStatement("insert into day values(?)");
+        prep.setDate(1, day);
+        prep.executeUpdate();
+        ResultSet rs = stat.executeQuery("select * from day");
+        assertTrue(rs.next());
+        Date d = rs.getDate(1);
+        assertEquals(day.getTime(), d.getTime());
     }
 }
