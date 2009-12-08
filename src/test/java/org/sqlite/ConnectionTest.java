@@ -7,11 +7,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sqlite.SQLiteConfig.SynchronousMode;
 
 /**
  * These tests check whether access to files is woring correctly and some
@@ -22,6 +24,15 @@ public class ConnectionTest
     @BeforeClass
     public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
+    }
+
+    @Test
+    public void executeUpdateOnClosedDB() throws SQLException {
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+        Statement stat = conn.createStatement();
+        conn.close();
+
+        stat.executeUpdate("create table A(id, name)");
     }
 
     @Test
@@ -64,9 +75,33 @@ public class ConnectionTest
                 stat.executeUpdate("insert into track values(2, 'second track', 3)"); // invalid reference
             }
             catch (SQLException e) {
-                return; // successfully detect foreign key constraints
+                return; // successfully detect violation of foreign key constraints
             }
             fail("foreign key constraint must be enforced");
+        }
+        finally {
+            stat.close();
+            conn.close();
+        }
+
+    }
+
+    @Test
+    public void synchronous() throws SQLException {
+        SQLiteConfig config = new SQLiteConfig();
+        config.setSynchronous(SynchronousMode.OFF);
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
+        Statement stat = conn.createStatement();
+
+        try {
+            ResultSet rs = stat.executeQuery("pragma synchronous");
+            if (rs.next()) {
+                ResultSetMetaData rm = rs.getMetaData();
+                int i = rm.getColumnCount();
+                int synchronous = rs.getInt(1);
+                assertEquals(0, synchronous);
+            }
+
         }
         finally {
             stat.close();
