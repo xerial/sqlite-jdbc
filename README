@@ -26,4 +26,4 @@ submit the patch to the issue tracker
 - Install MinGW64
 - http://sourceforge.net/projects/mingw-w64/files/
 -- I downloaded mingw-w64-bin_i686-mingw_20091109.zip, and add bin folder to the PATH
-- make Win_CC=x86_64-w64-mingw32-gcc Win_STRIP=x86_64-w64-mingw32-strip
+- make native  Win_CC=x86_64-w64-mingw32-gcc Win_STRIP=x86_64-w64-mingw32-strip
