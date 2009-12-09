@@ -80,12 +80,19 @@
         <configuration>
           <!--  do not run site-deploy goal, included in the default settings  -->
           <goals>deploy</goals>
+          <connectionUrl>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connectionUrl>
         </configuration>
       </plugin>
 
     </plugins>
 
   </build>
+  
+  <scm>
+    <connection>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connection>
+    <developerConnection>scm:hg:default</developerConnection>
+  </scm>
+  
 
   <dependencies>
     <dependency>
