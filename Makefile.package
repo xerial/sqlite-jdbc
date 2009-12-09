@@ -22,6 +22,8 @@ TEST_CMD = mvn test
 
 all: compile test
 
+.PHONY: compile test native clean
+
 include VERSION
 sqlite-version := sqlite-$(version)
 
@@ -70,16 +72,22 @@ $(DLL_AMD64):
 $(DLL_DIR):
 	mkdir -p $@
 
-compile: $(DLL_DIR) $(LIB_PUREJAVA) $(DLL_WIN) $(DLL_MAC) $(DLL_TIGER_MAC) $(DLL_LINUX) $(DLL_AMD64)
-	cp $(LIB_PUREJAVA) $(RESOURCE_DIR)/org/sqlite
+native: $(DLL_DIR) $(DLL_WIN) $(DLL_MAC) $(DLL_TIGER_MAC) $(DLL_LINUX) $(DLL_AMD64)
+
+compile-native: native
 	cp -r $(DLL_DIR)/ $(RESOURCE_DIR)/native/
 
-test:
+compile: compile-native $(LIB_PUREJAVA) 
+	cp $(LIB_PUREJAVA) $(RESOURCE_DIR)/org/sqlite
+
+test-native:
 	ssh $(WIN_SERVER) "source .zprofile && cd $(WIN_WORK) && $(TEST_CMD)"
 	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD)"
 	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD)"
 	ssh $(LINUX_SERVER) "source .zprofile && source /etc/profile.d/java.sh && cd $(LINUX_WORK) && $(TEST_CMD)"
 	ssh $(AMD_SERVER) "source .zprofile && cd $(AMD_WORK) && $(TEST_CMD)"
+
+test:
 	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD) -DargLine='-Dsqlite.purejava=true'"
 
 	
