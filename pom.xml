@@ -87,12 +87,13 @@
     </plugins>
 
   </build>
-  
+
   <scm>
     <connection>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connection>
     <developerConnection>scm:hg:default</developerConnection>
+    <url>scm:hg:https://sqlite.xerial.googlecode.com/hg/</url>
   </scm>
-  
+
 
   <dependencies>
     <dependency>
