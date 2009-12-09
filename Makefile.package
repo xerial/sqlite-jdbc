@@ -21,9 +21,13 @@ BUILD_CMD = hg pull -u && make clean-native && make native
 TEST_CMD = mvn test
 
 all: compile test
+<<<<<<< local
+z
+=======
 
 .PHONY: compile test native clean
 
+>>>>>>> other
 include VERSION
 sqlite-version := sqlite-$(version)
 

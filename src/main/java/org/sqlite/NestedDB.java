@@ -68,7 +68,8 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         // open the db and retrieve sqlite3_db* pointer
         int passback = rt.xmalloc(4);
         int str = rt.strdup(filename);
-        if (call("sqlite3_open_v2", str, openFlags, passback) != SQLITE_OK)
+        //      if (call("sqlite3_open_v2", str, openFlags, 0, passback) != SQLITE_OK)
+        if (call("sqlite3_open_v2", str, passback, openFlags, 0) != SQLITE_OK)
             throwex();
         handle = deref(passback);
         rt.free(str);
@@ -143,6 +144,8 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
 
     @Override
     protected synchronized int _exec(String sql) throws SQLException {
+        if (rt == null)
+            throw DB.newSQLException(SQLiteErrorCode.SQLITE_MISUSE.code, "attempt to use the closed conection");
         int passback = rt.xmalloc(4);
         int str = rt.strdup(sql);
         int status = call("sqlite3_exec", handle, str, 0, 0, passback);
