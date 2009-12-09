@@ -5,6 +5,9 @@ RSYNC=rsync -av -e ssh --exclude=".svn"
 WIN_SERVER=192.168.131.10
 WIN_WORK=work/hg/sqlite-jdbc
 
+WIN64_SERVER=192.168.3.50
+WIN64_WORK=work/hg/sqlite-jdbc
+
 MAC_SERVER=localhost
 MAC_WORK=work/hg/sqlite-jdbc
 
@@ -31,11 +34,13 @@ LIB_DIR=target/dll/$(sqlite-version)
 DLL_DIR=$(LIB_DIR)/native
 
 DLL_WIN=$(DLL_DIR)/Windows/x86/sqlitejdbc.dll
+DLL_WIN64=$(DLL_DIR)/Windows/amd64/sqlitejdbc.dll
 DLL_MAC=$(DLL_DIR)/Mac/x86_64/libsqlitejdbc.jnilib
 DLL_TIGER_MAC=$(DLL_DIR)/Mac/i386/libsqlitejdbc.jnilib
 DLL_LINUX=$(DLL_DIR)/Linux/i386/libsqlitejdbc.so
 DLL_AMD64=$(DLL_DIR)/Linux/amd64/libsqlitejdbc.so
 LIB_PUREJAVA=$(LIB_DIR)/purejava/SQLite.class
+
 
 $(LIB_PUREJAVA):
 	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK)/sqlitejdbc && make -f Makefile.nested"
@@ -47,6 +52,11 @@ $(DLL_WIN):
 	ssh $(WIN_SERVER) "source .zprofile && cd $(WIN_WORK) && $(BUILD_CMD)"
 	mkdir -p $(DLL_DIR)/Windows
 	$(RSYNC)  $(WIN_SERVER):./$(WIN_WORK)/$(DLL_DIR)/Windows/ $(DLL_DIR)/Windows/
+
+$(DLL_WIN64): 
+	ssh $(WIN64_SERVER) "source .zprofile && cd $(WIN64_WORK) && $(BUILD_CMD) Win_CC=x86_64-w64-mingw32-gcc Win_STRIP=x86_64-w64-mingw32-strip"
+	mkdir -p $(DLL_DIR)/Windows
+	$(RSYNC)  $(WIN64_SERVER):./$(WIN64_WORK)/$(DLL_DIR)/Windows/ $(DLL_DIR)/Windows/
 
 $(DLL_MAC): 
 	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(BUILD_CMD) arch=x86_64"
@@ -72,7 +82,7 @@ $(DLL_AMD64):
 $(DLL_DIR):
 	mkdir -p $@
 
-native: $(DLL_DIR) $(DLL_WIN) $(DLL_MAC) $(DLL_TIGER_MAC) $(DLL_LINUX) $(DLL_AMD64)
+native: $(DLL_DIR) $(DLL_WIN) $(DLL_WIN64) $(DLL_MAC) $(DLL_TIGER_MAC) $(DLL_LINUX) $(DLL_AMD64)
 
 compile-native: native
 	cp -r $(DLL_DIR)/ $(RESOURCE_DIR)/native/
