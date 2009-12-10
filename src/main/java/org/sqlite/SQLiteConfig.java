@@ -71,24 +71,30 @@ public class SQLiteConfig
      */
     public void apply(Connection conn) throws SQLException {
 
-        HashSet<String> nonPragmaParams = new HashSet<String>();
-        nonPragmaParams.add(Pragma.OPEN_MODE.pragmaName);
-        nonPragmaParams.add(Pragma.SHARED_CACHE.pragmaName);
-        nonPragmaParams.add(Pragma.LOAD_EXTENSION.pragmaName);
+        HashSet<String> pragmaParams = new HashSet<String>();
+        for (Pragma each : Pragma.values()) {
+            pragmaParams.add(each.pragmaName);
+        }
+
+        pragmaParams.remove(Pragma.OPEN_MODE.pragmaName);
+        pragmaParams.remove(Pragma.SHARED_CACHE.pragmaName);
+        pragmaParams.remove(Pragma.LOAD_EXTENSION.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
             int count = 0;
             for (Object each : pragmaTable.keySet()) {
                 String key = each.toString();
-                if (nonPragmaParams.contains(key))
+                if (!pragmaParams.contains(key))
                     continue;
 
                 String value = pragmaTable.getProperty(key);
-                stat.addBatch(String.format("pragma %s=%s", key, value));
+                String sql = String.format("pragma %s=%s", key, value);
+                stat.addBatch(sql);
                 count++;
             }
-            stat.executeBatch();
+            if (count > 0)
+                stat.executeBatch();
         }
         finally {
             if (stat != null)
