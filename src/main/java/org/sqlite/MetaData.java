@@ -634,7 +634,6 @@ class MetaData implements DatabaseMetaData
             sql += "select null as un, null as n, null as op, null as cn) limit 0;";
         }
 
-        System.out.println (sql);
         return stat.executeQuery(sql);
     }
 
