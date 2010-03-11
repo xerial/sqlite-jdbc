@@ -46,7 +46,9 @@ build/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
 	    -DSQLITE_CORE \
 	    -DSQLITE_ENABLE_FTS3 \
+	    -DSQLITE_ENABLE_FTS3_PARENTHESIS \
 		-DSQLITE_ENABLE_RTREE \
+		-DSQLITE_ENABLE_STAT2 \
 		-DSQLITE_OMIT_LOAD_EXTENSION \
 		sqlite3.c; \
 	$$CC -c $$CFLAGS -o NestedDB.o Nested*.c)
