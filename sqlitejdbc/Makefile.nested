@@ -12,8 +12,8 @@ $(nestedvm)/%:
 
 dl/$(nestedvm).tgz:
 	@mkdir -p dl
-	cp ../archive/$(nestedvm).tgz $@
-#	curl -odl/$(nestedvm).tgz http://nestedvm.ibex.org/dist/$(nestedvm).tgz
+#	cp ../archive/$(nestedvm).tgz $@
+	curl -odl/$(nestedvm).tgz http://nestedvm.ibex.org/dist/$(nestedvm).tgz
 
 dl/$(sqlite)-amal.zip:
 	@mkdir -p dl
