@@ -51,7 +51,6 @@ public class SQLiteConfig
 
     public SQLiteConfig(Properties prop) {
         this.pragmaTable = prop;
-
         String openMode = pragmaTable.getProperty(Pragma.OPEN_MODE.pragmaName);
         if (openMode != null) {
             openModeFlag = Integer.parseInt(openMode);
@@ -61,6 +60,16 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
+    }
+
+    /**
+     * Create a new JDBC connection using the current configuration
+     * 
+     * @return
+     * @throws SQLException
+     */
+    public Connection createConnection(String url) throws SQLException {
+        return JDBC.createConnection(url, toProperties());
     }
 
     /**
@@ -89,9 +98,11 @@ public class SQLiteConfig
                     continue;
 
                 String value = pragmaTable.getProperty(key);
-                String sql = String.format("pragma %s=%s", key, value);
-                stat.addBatch(sql);
-                count++;
+                if (value != null) {
+                    String sql = String.format("pragma %s=%s", key, value);
+                    stat.addBatch(sql);
+                    count++;
+                }
             }
             if (count > 0)
                 stat.executeBatch();

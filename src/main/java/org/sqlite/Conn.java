@@ -236,6 +236,7 @@ class Conn implements Connection
             throw new SQLException("SQLite only supports closing cursors at commit");
     }
 
+    @Override
     public void finalize() throws SQLException {
         close();
     }

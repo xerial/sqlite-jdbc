@@ -25,7 +25,7 @@ import java.util.Properties;
 
 public class JDBC implements Driver
 {
-    private static final String PREFIX = "jdbc:sqlite:";
+    public static final String PREFIX = "jdbc:sqlite:";
 
     static {
         try {
@@ -49,6 +49,10 @@ public class JDBC implements Driver
     }
 
     public boolean acceptsURL(String url) {
+        return isValidURL(url);
+    }
+
+    public static boolean isValidURL(String url) {
         return url != null && url.toLowerCase().startsWith(PREFIX);
     }
 
@@ -57,13 +61,19 @@ public class JDBC implements Driver
     }
 
     public Connection connect(String url, Properties info) throws SQLException {
-        if (!acceptsURL(url))
-            return null;
-        url = url.trim();
+        return createConnection(url, info);
+    }
 
+    static String extractAddress(String url) {
         // if no file name is given use a memory database
-        String file = PREFIX.equalsIgnoreCase(url) ? ":memory:" : url.substring(PREFIX.length());
+        return PREFIX.equalsIgnoreCase(url) ? ":memory:" : url.substring(PREFIX.length());
+    }
 
-        return new Conn(url, file, info);
+    public static Connection createConnection(String url, Properties prop) throws SQLException {
+        if (!isValidURL(url))
+            throw new SQLException("invalid database address: " + url);
+
+        url = url.trim();
+        return new Conn(url, extractAddress(url), prop);
     }
 }
