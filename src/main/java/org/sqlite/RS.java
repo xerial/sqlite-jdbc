@@ -137,8 +137,6 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         // check if we are row limited by the statement or the ResultSet
         if (maxRows != 0 && row > maxRows)
             return false;
-        if (limitRows != 0 && row >= limitRows)
-            return false;
 
         // do the real work
         int statusCode = db.step(stmt.pointer);
@@ -197,6 +195,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         throw new SQLException("function not yet implemented for SQLite");
     }
 
+    @Override
     protected void finalize() throws SQLException {
         close();
     }
@@ -368,7 +367,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         switch (db.column_type(stmt.pointer, checkCol(col))) {
         case SQLITE_INTEGER:
             long val = getLong(col);
-            if (val > (long) Integer.MAX_VALUE || val < (long) Integer.MIN_VALUE)
+            if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE)
                 return new Long(val);
             else
                 return new Integer((int) val);
