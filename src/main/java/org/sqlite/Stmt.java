@@ -21,6 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.sqlite.DB.ProgressObserver;
 
 class Stmt extends Unused implements Statement, Codes
 {
@@ -98,6 +102,7 @@ class Stmt extends Unused implements Statement, Codes
             db.throwex();
     }
 
+    @Override
     protected void finalize() throws SQLException {
         close();
     }
@@ -120,23 +125,53 @@ class Stmt extends Unused implements Statement, Codes
         return getResultSet();
     }
 
+    private static Pattern backupCmd = Pattern.compile("backup(\\s+(\"[^\"]*\"|\\S+))?\\s+to\\s+(\"[^\"]*\"|\\S+)");
+
+    static Matcher parseBackupCommand(String sql) {
+        return backupCmd.matcher(sql);
+    }
+
+    static class BackupObserver implements ProgressObserver
+    {
+        public void progress(int remaining, int pageCount) {
+
+        }
+    }
+
     public int executeUpdate(String sql) throws SQLException {
         close();
         this.sql = sql;
+
         int changes = 0;
-        try {
-            //db.prepare(this);
-            //changes = db.executeUpdate(this, null);
-
-            // directly invokes the exec API to support multiple SQL statements 
-            int statusCode = db._exec(sql);
-            if (statusCode != SQLITE_OK)
-                throw DB.newSQLException(statusCode, "");
-
-            changes = db.changes();
+        if (sql != null && sql.startsWith("backup")) {
+            // backup command
+            Matcher m = parseBackupCommand(sql);
+            if (m.matches()) {
+                String dbName = m.group(2);
+                String dest = m.group(3);
+                if (dbName == null || dbName.length() == 0)
+                    dbName = "main";
+                db.backup(dest, new BackupObserver());
+                return changes;
+            }
+            else
+                throw new SQLException("syntax error in " + sql);
         }
-        finally {
-            close();
+        else {
+            try {
+                //db.prepare(this);
+                //changes = db.executeUpdate(this, null);
+
+                // directly invokes the exec API to support multiple SQL statements 
+                int statusCode = db._exec(sql);
+                if (statusCode != SQLITE_OK)
+                    throw DB.newSQLException(statusCode, "");
+
+                changes = db.changes();
+            }
+            finally {
+                close();
+            }
         }
         return changes;
     }

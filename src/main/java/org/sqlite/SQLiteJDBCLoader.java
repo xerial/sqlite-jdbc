@@ -217,7 +217,7 @@ public class SQLiteJDBCLoader
 
         // temporary library folder
         String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
-        /* Try extracting the library from jar */
+        // Try extracting the library from jar 
         if (extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
             extracted = true;
             return;

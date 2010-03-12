@@ -37,14 +37,14 @@ import java.util.Map;
 abstract class DB implements Codes
 {
     /** The JDBC Connection that 'owns' this database instance. */
-    Conn        conn   = null;
+    Conn              conn   = null;
 
     /** The "begin;"and "commit;" statement handles. */
-    long        begin  = 0;
-    long        commit = 0;
+    long              begin  = 0;
+    long              commit = 0;
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
-    private Map stmts  = new Hashtable();
+    private final Map stmts  = new Hashtable();
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
@@ -221,6 +221,13 @@ abstract class DB implements Codes
     abstract int destroy_function(String name) throws SQLException;
 
     abstract void free_functions() throws SQLException;
+
+    abstract int backup(String destFileName, ProgressObserver observer) throws SQLException;
+
+    public static interface ProgressObserver
+    {
+        public void progress(int remaining, int pageCount);
+    }
 
     /**
      * Provides metadata for the columns of a statement. Returns: res[col][0] =

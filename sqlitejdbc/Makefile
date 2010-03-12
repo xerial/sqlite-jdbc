@@ -24,7 +24,7 @@ default: test
 test: native 
 
 native: build/$(target)/$(LIBNAME)
-	
+
 
 build/$(target)/$(LIBNAME): build/$(sqlite)-$(target)/sqlite3.o build/org/sqlite/NativeDB.class ../src/main/java/org/sqlite/NativeDB.c
 	@mkdir -p build/$(target)
