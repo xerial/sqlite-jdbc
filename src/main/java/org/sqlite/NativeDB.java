@@ -190,7 +190,11 @@ final class NativeDB extends DB
     native synchronized void free_functions();
 
     @Override
-    native synchronized int backup(String destFileName, ProgressObserver observer) throws SQLException;
+    native synchronized int backup(String dbName, String destFileName, ProgressObserver observer) throws SQLException;
+
+    @Override
+    native synchronized int restore(String dbName, String sourceFileName, ProgressObserver observer)
+            throws SQLException;
 
     // COMPOUND FUNCTIONS (for optimisation) /////////////////////////
 

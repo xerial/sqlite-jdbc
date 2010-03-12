@@ -222,7 +222,9 @@ abstract class DB implements Codes
 
     abstract void free_functions() throws SQLException;
 
-    abstract int backup(String destFileName, ProgressObserver observer) throws SQLException;
+    abstract int backup(String dbName, String destFileName, ProgressObserver observer) throws SQLException;
+
+    abstract int restore(String dbName, String sourceFileName, ProgressObserver observer) throws SQLException;
 
     public static interface ProgressObserver
     {

@@ -879,6 +879,7 @@ void reportProgress(JNIEnv* env, jobject func, int remaining, int pageCount) {
 
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_backup(
   JNIEnv *env, jobject this, 
+  jstring zDBName,
   jstring zFilename,      	  /* Name of file to back up to */
   jobject observer			  /* Progress function to invoke */     
 )
@@ -888,16 +889,74 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_backup(
   sqlite3* pFile;             /* Database connection opened on zFilename */
   sqlite3_backup *pBackup;    /* Backup handle used to copy data */
   const char *dFileName;
+  const char *dDBName;
 
   pDb = gethandle(env, this);
 
   dFileName = (*env)->GetStringUTFChars(env, zFilename, 0);
+  dDBName = (*env)->GetStringUTFChars(env, zDBName, 0);
+  
   /* Open the database file identified by dFileName. */
   rc = sqlite3_open(dFileName, &pFile);
   if( rc==SQLITE_OK ){
 
     /* Open the sqlite3_backup object used to accomplish the transfer */
-    pBackup = sqlite3_backup_init(pFile, "main", pDb, "main");
+    pBackup = sqlite3_backup_init(pFile, dDBName, pDb, dDBName);
+    if( pBackup ){
+
+      /* Each iteration of this loop copies 5 database pages from database
+      ** pDb to the backup database. If the return value of backup_step()
+      ** indicates that there are still further pages to copy, sleep for
+      ** 250 ms before repeating. */
+      do {
+        rc = sqlite3_backup_step(pBackup, 5);
+        
+        reportProgress(env, observer,
+            sqlite3_backup_remaining(pBackup),
+            sqlite3_backup_pagecount(pBackup)
+        );
+        if( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED ){
+          sqlite3_sleep(250);
+        }
+      } while( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED );
+
+      /* Release resources allocated by backup_init(). */
+      (void)sqlite3_backup_finish(pBackup);
+    }
+    rc = sqlite3_errcode(pFile);
+  }
+  
+  /* Close the database connection opened on database file zFilename
+  ** and return the result of this function. */
+  (void)sqlite3_close(pFile);
+  return rc;
+} 
+
+JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_restore(
+  JNIEnv *env, jobject this, 
+  jstring zDBName,
+  jstring zFilename,      	  /* Name of file to back up to */
+  jobject observer			  /* Progress function to invoke */     
+)
+{
+  int rc;                     /* Function return code */
+  sqlite3* pDb;               /* Database to back up */
+  sqlite3* pFile;             /* Database connection opened on zFilename */
+  sqlite3_backup *pBackup;    /* Backup handle used to copy data */
+  const char *dFileName;
+  const char *dDBName;
+
+  pDb = gethandle(env, this);
+
+  dFileName = (*env)->GetStringUTFChars(env, zFilename, 0);
+  dDBName = (*env)->GetStringUTFChars(env, zDBName, 0);
+
+  /* Open the database file identified by dFileName. */
+  rc = sqlite3_open(dFileName, &pFile);
+  if( rc==SQLITE_OK ){
+
+    /* Open the sqlite3_backup object used to accomplish the transfer */
+    pBackup = sqlite3_backup_init(pDb, dDBName, pFile, dDBName);
     if( pBackup ){
 
       /* Each iteration of this loop copies 5 database pages from database

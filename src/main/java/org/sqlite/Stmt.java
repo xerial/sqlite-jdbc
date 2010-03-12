@@ -21,10 +21,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.sqlite.DB.ProgressObserver;
+import org.sqlite.ExtendedCommand.SQLExtension;
 
 class Stmt extends Unused implements Statement, Codes
 {
@@ -110,6 +109,7 @@ class Stmt extends Unused implements Statement, Codes
     public boolean execute(String sql) throws SQLException {
         close();
         this.sql = sql;
+
         db.prepare(this);
         return exec();
     }
@@ -117,6 +117,7 @@ class Stmt extends Unused implements Statement, Codes
     public ResultSet executeQuery(String sql) throws SQLException {
         close();
         this.sql = sql;
+
         db.prepare(this);
         if (!exec()) {
             close();
@@ -125,16 +126,10 @@ class Stmt extends Unused implements Statement, Codes
         return getResultSet();
     }
 
-    private static Pattern backupCmd = Pattern.compile("backup(\\s+(\"[^\"]*\"|\\S+))?\\s+to\\s+(\"[^\"]*\"|\\S+)");
-
-    static Matcher parseBackupCommand(String sql) {
-        return backupCmd.matcher(sql);
-    }
-
     static class BackupObserver implements ProgressObserver
     {
         public void progress(int remaining, int pageCount) {
-
+            System.out.println(String.format("remaining:%d, page count:%d", remaining, pageCount));
         }
     }
 
@@ -143,19 +138,10 @@ class Stmt extends Unused implements Statement, Codes
         this.sql = sql;
 
         int changes = 0;
-        if (sql != null && sql.startsWith("backup")) {
-            // backup command
-            Matcher m = parseBackupCommand(sql);
-            if (m.matches()) {
-                String dbName = m.group(2);
-                String dest = m.group(3);
-                if (dbName == null || dbName.length() == 0)
-                    dbName = "main";
-                db.backup(dest, new BackupObserver());
-                return changes;
-            }
-            else
-                throw new SQLException("syntax error in " + sql);
+        SQLExtension ext = ExtendedCommand.parse(sql);
+        if (ext != null) {
+            // execute extended command 
+            ext.execute(db);
         }
         else {
             try {

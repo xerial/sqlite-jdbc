@@ -11,11 +11,13 @@ package org.sqlite;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.regex.Matcher;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,33 +30,32 @@ public class BackupTest
     }
 
     @Test
-    public void backup() throws SQLException {
+    public void backupAndRestore() throws SQLException, IOException {
+        // create a memory database
+        File tmpFile = File.createTempFile("backup-test", ".sqlite");
+        tmpFile.deleteOnExit();
+
+        // memory DB to file
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id, name)");
         stmt.executeUpdate("insert into sample values(1, \"leo\")");
         stmt.executeUpdate("insert into sample values(2, \"yui\")");
 
-        // TODO some backup mechanism 
-        stmt.executeUpdate("backup to target/sample.db");
-        conn.close();
-    }
+        stmt.executeUpdate("backup to " + tmpFile.getAbsolutePath());
+        stmt.close();
 
-    @Test
-    public void parseBackupCmd() {
-        Matcher m = Stmt.parseBackupCommand("backup mydb to somewhere/backupfolder/mydb.sqlite");
-        assertTrue(m.matches());
-        assertEquals("mydb", m.group(2));
-        assertEquals("somewhere/backupfolder/mydb.sqlite", m.group(3));
+        // open another memory database
+        Connection conn2 = DriverManager.getConnection("jdbc:sqlite:");
+        Statement stmt2 = conn2.createStatement();
+        stmt2.executeUpdate("restore from " + tmpFile.getAbsolutePath());
+        ResultSet rs = stmt2.executeQuery("select * from sample");
+        int count = 0;
+        while (rs.next()) {
+            count++;
+        }
 
-        m = Stmt.parseBackupCommand("backup main to \"tmp folder with space\"");
-        assertTrue(m.matches());
-        assertEquals("main", m.group(2));
-        assertEquals("\"tmp folder with space\"", m.group(3));
-
-        m = Stmt.parseBackupCommand("backup to target/sample.db");
-        assertTrue(m.matches());
-        assertEquals("target/sample.db", m.group(3));
+        assertEquals(2, count);
 
     }
 

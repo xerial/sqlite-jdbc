@@ -513,8 +513,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
     }
 
     @Override
-    int backup(String destFileName, ProgressObserver observer) throws SQLException {
+    int backup(String dbName, String destFileName, ProgressObserver observer) throws SQLException {
         throw new SQLException("backup command is not supported in pure-java mode");
+    }
+
+    @Override
+    int restore(String dbName, String sourceFileName, ProgressObserver observer) throws SQLException {
+        throw new SQLException("restore command is not supported in pure-java mode");
     }
 
     // HELPER FUNCTIONS /////////////////////////////////////////////
