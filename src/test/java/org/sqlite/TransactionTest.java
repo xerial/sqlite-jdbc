@@ -24,23 +24,19 @@ import org.junit.Test;
 public class TransactionTest
 {
     private Connection conn1, conn2, conn3;
-    private Statement stat1, stat2, stat3;
+    private Statement  stat1, stat2, stat3;
 
-    boolean done = false;
-
-    File tmpFile;
+    boolean            done = false;
 
     @BeforeClass
-    public static void forName() throws Exception
-    {
+    public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
         System.out.println("running in " + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java") + " mode");
     }
 
     @Before
-    public void connect() throws Exception
-    {
-        tmpFile = File.createTempFile("test-trans", ".db");
+    public void connect() throws Exception {
+        File tmpFile = File.createTempFile("test-trans", ".db");
         tmpFile.deleteOnExit();
 
         Properties prop = new Properties();
@@ -55,8 +51,7 @@ public class TransactionTest
     }
 
     @After
-    public void close() throws Exception
-    {
+    public void close() throws Exception {
         stat1.close();
         stat2.close();
         stat3.close();
@@ -67,8 +62,7 @@ public class TransactionTest
     }
 
     @Test
-    public void multiConn() throws SQLException
-    {
+    public void multiConn() throws SQLException {
         stat1.executeUpdate("create table test (c1);");
         stat1.executeUpdate("insert into test values (1);");
         stat2.executeUpdate("insert into test values (2);");
@@ -86,16 +80,14 @@ public class TransactionTest
     }
 
     @Test
-    public void locking() throws SQLException
-    {
+    public void locking() throws SQLException {
         stat1.executeUpdate("create table test (c1);");
         stat1.executeUpdate("begin immediate;");
         stat2.executeUpdate("select * from test;");
     }
 
     @Test
-    public void insert() throws SQLException
-    {
+    public void insert() throws SQLException {
         ResultSet rs;
         String countSql = "select count(*) from trans;";
 
@@ -124,8 +116,7 @@ public class TransactionTest
     }
 
     @Test
-    public void rollback() throws SQLException
-    {
+    public void rollback() throws SQLException {
         String select = "select * from trans;";
         ResultSet rs;
 
@@ -145,8 +136,7 @@ public class TransactionTest
     }
 
     @Test
-    public void multiRollback() throws SQLException
-    {
+    public void multiRollback() throws SQLException {
         ResultSet rs;
 
         stat1.executeUpdate("create table t (c1);");
@@ -184,8 +174,7 @@ public class TransactionTest
     }
 
     @Test
-    public void transactionsDontMindReads() throws SQLException
-    {
+    public void transactionsDontMindReads() throws SQLException {
         stat1.executeUpdate("create table t (c1);");
         stat1.executeUpdate("insert into t values (1);");
         stat1.executeUpdate("insert into t values (2);");
@@ -200,8 +189,7 @@ public class TransactionTest
     }
 
     @Test
-    public void secondConnWillWait() throws Exception
-    {
+    public void secondConnWillWait() throws Exception {
         stat1.executeUpdate("create table t (c1);");
         stat1.executeUpdate("insert into t values (1);");
         stat1.executeUpdate("insert into t values (2);");
@@ -211,20 +199,17 @@ public class TransactionTest
         final TransactionTest lock = this;
         lock.done = false;
         new Thread() {
-            public void run()
-            {
-                try
-                {
+            @Override
+            public void run() {
+                try {
                     stat2.executeUpdate("insert into t values (3);");
                 }
-                catch (SQLException e)
-                {
+                catch (SQLException e) {
                     e.printStackTrace();
                     return;
                 }
 
-                synchronized (lock)
-                {
+                synchronized (lock) {
                     lock.done = true;
                     lock.notify();
                 }
@@ -234,8 +219,7 @@ public class TransactionTest
         Thread.sleep(100);
         rs.close();
 
-        synchronized (lock)
-        {
+        synchronized (lock) {
             lock.wait(5000);
             if (!lock.done)
                 throw new Exception("should be done");
@@ -243,8 +227,7 @@ public class TransactionTest
     }
 
     @Test(expected = SQLException.class)
-    public void secondConnMustTimeout() throws SQLException
-    {
+    public void secondConnMustTimeout() throws SQLException {
         stat1.setQueryTimeout(1);
         stat1.executeUpdate("create table t (c1);");
         stat1.executeUpdate("insert into t values (1);");
@@ -257,8 +240,7 @@ public class TransactionTest
 
     //    @Test(expected= SQLException.class)
     @Test
-    public void cantUpdateWhileReading() throws SQLException
-    {
+    public void cantUpdateWhileReading() throws SQLException {
         stat1.executeUpdate("create table t (c1);");
         stat1.executeUpdate("insert into t values (1);");
         stat1.executeUpdate("insert into t values (2);");
@@ -270,14 +252,12 @@ public class TransactionTest
     }
 
     @Test(expected = SQLException.class)
-    public void cantCommit() throws SQLException
-    {
+    public void cantCommit() throws SQLException {
         conn1.commit();
     }
 
     @Test(expected = SQLException.class)
-    public void cantRollback() throws SQLException
-    {
+    public void cantRollback() throws SQLException {
         conn1.rollback();
     }
 
