@@ -37,7 +37,7 @@ public class TransactionTest
     @Before
     public void connect() throws Exception {
         File tmpFile = File.createTempFile("test-trans", ".db");
-        tmpFile.deleteOnExit();
+	// tmpFile.deleteOnExit();
 
         Properties prop = new Properties();
         prop.setProperty("shared_cache", "false");
