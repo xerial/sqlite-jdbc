@@ -64,6 +64,10 @@ public class SQLiteJDBCLoader
         return Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
     }
 
+    public static boolean isPureJavaMode() {
+        return !isNativeMode();
+    }
+
     public static boolean isNativeMode() {
         if (getPureJavaFlag())
             return false;

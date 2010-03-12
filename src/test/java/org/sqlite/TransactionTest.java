@@ -45,9 +45,16 @@ public class TransactionTest
         conn1 = DriverManager.getConnection("jdbc:sqlite:" + tmpFile.getAbsolutePath(), prop);
         conn2 = DriverManager.getConnection("jdbc:sqlite:" + tmpFile.getAbsolutePath(), prop);
         conn3 = DriverManager.getConnection("jdbc:sqlite:" + tmpFile.getAbsolutePath(), prop);
+
         stat1 = conn1.createStatement();
         stat2 = conn2.createStatement();
         stat3 = conn3.createStatement();
+
+        //        if (SQLiteJDBCLoader.isPureJavaMode()) {
+        //            stat1.setQueryTimeout(3);
+        //            stat2.setQueryTimeout(3);
+        //            stat3.setQueryTimeout(3);
+        //        }
     }
 
     @After
@@ -58,7 +65,6 @@ public class TransactionTest
         conn1.close();
         conn2.close();
         conn3.close();
-
     }
 
     @Test
