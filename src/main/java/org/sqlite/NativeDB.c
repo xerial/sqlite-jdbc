@@ -901,7 +901,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_backup(
   if( rc==SQLITE_OK ){
 
     /* Open the sqlite3_backup object used to accomplish the transfer */
-    pBackup = sqlite3_backup_init(pFile, dDBName, pDb, dDBName);
+    pBackup = sqlite3_backup_init(pFile, "main", pDb, dDBName);
     if( pBackup ){
 	  while((rc = sqlite3_backup_step(pBackup,100))==SQLITE_OK ){}
 
@@ -930,6 +930,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_restore(
   sqlite3_backup *pBackup;    /* Backup handle used to copy data */
   const char *dFileName;
   const char *dDBName;
+  int nTimeout = 0;
 
   pDb = gethandle(env, this);
 
@@ -941,10 +942,15 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_restore(
   if( rc==SQLITE_OK ){
 
     /* Open the sqlite3_backup object used to accomplish the transfer */
-    pBackup = sqlite3_backup_init(pDb, dDBName, pFile, dDBName);
+    pBackup = sqlite3_backup_init(pDb, dDBName, pFile, "main");
     if( pBackup ){
-
-      while((rc = sqlite3_backup_step(pBackup,100))==SQLITE_OK ){}
+	    while( (rc = sqlite3_backup_step(pBackup,100))==SQLITE_OK
+    	      || rc==SQLITE_BUSY  ){
+     	 	if( rc==SQLITE_BUSY ){
+        		if( nTimeout++ >= 3 ) break;
+	        	sqlite3_sleep(100);
+    		}
+	    }
       /* Release resources allocated by backup_init(). */
       (void)sqlite3_backup_finish(pBackup);
     }
