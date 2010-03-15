@@ -903,22 +903,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_backup(
     /* Open the sqlite3_backup object used to accomplish the transfer */
     pBackup = sqlite3_backup_init(pFile, dDBName, pDb, dDBName);
     if( pBackup ){
-
-      /* Each iteration of this loop copies 5 database pages from database
-      ** pDb to the backup database. If the return value of backup_step()
-      ** indicates that there are still further pages to copy, sleep for
-      ** 250 ms before repeating. */
-      do {
-        rc = sqlite3_backup_step(pBackup, 5);
-        
-        reportProgress(env, observer,
-            sqlite3_backup_remaining(pBackup),
-            sqlite3_backup_pagecount(pBackup)
-        );
-        if( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED ){
-          sqlite3_sleep(250);
-        }
-      } while( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED );
+	  while((rc = sqlite3_backup_step(pBackup,100))==SQLITE_OK ){}
 
       /* Release resources allocated by backup_init(). */
       (void)sqlite3_backup_finish(pBackup);
@@ -959,22 +944,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_restore(
     pBackup = sqlite3_backup_init(pDb, dDBName, pFile, dDBName);
     if( pBackup ){
 
-      /* Each iteration of this loop copies 5 database pages from database
-      ** pDb to the backup database. If the return value of backup_step()
-      ** indicates that there are still further pages to copy, sleep for
-      ** 250 ms before repeating. */
-      do {
-        rc = sqlite3_backup_step(pBackup, 5);
-        
-        reportProgress(env, observer,
-            sqlite3_backup_remaining(pBackup),
-            sqlite3_backup_pagecount(pBackup)
-        );
-        if( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED ){
-          sqlite3_sleep(250);
-        }
-      } while( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED );
-
+      while((rc = sqlite3_backup_step(pBackup,100))==SQLITE_OK ){}
       /* Release resources allocated by backup_init(). */
       (void)sqlite3_backup_finish(pBackup);
     }

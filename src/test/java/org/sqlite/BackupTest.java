@@ -9,7 +9,7 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +22,8 @@ import java.sql.Statement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BackupTest
-{
+public class BackupTest {
+
     @BeforeClass
     public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
@@ -60,6 +60,24 @@ public class BackupTest
         }
 
         assertEquals(2, count);
+
+    }
+
+    @Test
+    public void memoryToDisk() throws Exception {
+
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate("create table sample(id integer primary key autoincrement, name)");
+        for (int i = 0; i < 10000; i++)
+            stmt.executeUpdate("insert into sample(name) values(\"leo\")");
+
+        File tmpFile = File.createTempFile("backup-test2", ".sqlite");
+        tmpFile.deleteOnExit();
+        //System.err.println("backup start");
+        stmt.executeUpdate("backup to " + tmpFile.getAbsolutePath());
+        stmt.close();
+        //System.err.println("backup done.");
 
     }
 
