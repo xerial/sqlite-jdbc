@@ -64,7 +64,7 @@ $(DLL_MAC):
 	$(RSYNC)  $(MAC_SERVER):./$(MAC_WORK)/$(DLL_DIR)/Mac/ $(DLL_DIR)/Mac/
 
 $(DLL_TIGER_MAC): 
-	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK) && $(BUILD_CMD)"
+	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK) && $(BUILD_CMD) SQLITE_FLAGS=-DSQLITE_ENABLE_LOCKING_STYLE"
 	mkdir -p $(DLL_DIR)/Mac
 	$(RSYNC)  $(MAC_TIGER_SERVER):./$(MAC_TIGER_WORK)/$(DLL_DIR)/Mac/ $(DLL_DIR)/Mac/
 

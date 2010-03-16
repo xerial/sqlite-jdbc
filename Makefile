@@ -83,7 +83,7 @@ package: $(UPDATE_FLAG)
 	mvn package
 
 clean-native:
-	rm -rf sqlitejdbc/build/$(sqlite)-$(target)
+	rm -rf sqlitejdbc/build/$(sqlite)-$(target) $(UPDATE_FLAG)
 
 purejava: 
 	cd sqlitejdbc && make -f Makefile.nested
