@@ -52,7 +52,6 @@ build/$(sqlite)-%/sqlite3.o: dl/$(sqlite)-amal.zip
 	    -DSQLITE_ENABLE_FTS3_PARENTHESIS \
 	    -DSQLITE_ENABLE_RTREE \
 	    -DSQLITE_ENABLE_STAT2 \
-            -DSQLITE_ENABLE_LOCKING_STYLE \
 	    sqlite3.c)
 
 build/org/sqlite/%.class: ../src/main/java/org/sqlite/%.java

@@ -65,7 +65,7 @@ Default_LIBNAME   := libsqlitejdbc.so
 #Darwin_CC        := gcc -arch $(arch) -mmacosx-version-min=10.4 $(Support10_4)
 Darwin_CC        := gcc -arch $(arch) 
 Darwin_STRIP     := strip -x
-Darwin_CFLAGS    := -I$(JAVA_HOME)/include -O3 -fPIC
+Darwin_CFLAGS    := -I$(JAVA_HOME)/include -O3 -fPIC -DSQLITE_ENABLE_LOCKING_STYLE
 Darwin_LINKFLAGS := -dynamiclib 
 Darwin_LIBNAME   := libsqlitejdbc.jnilib
 
