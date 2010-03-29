@@ -51,6 +51,10 @@ public class ExtendedCommandTest
         assertEquals("main", b.srcDB);
         assertEquals("tmp folder with space", b.destFile);
 
+        b = parseBackupCommand("backup main to 'tmp folder with space'");
+        assertEquals("main", b.srcDB);
+        assertEquals("tmp folder with space", b.destFile);
+
         b = parseBackupCommand("backup to target/sample.db");
         assertEquals("main", b.srcDB);
         assertEquals("target/sample.db", b.destFile);
@@ -63,6 +67,10 @@ public class ExtendedCommandTest
         assertEquals("somewhere/backupfolder/mydb.sqlite", b.srcFile);
 
         b = parseRestoreCommand("restore main from \"tmp folder with space\"");
+        assertEquals("main", b.targetDB);
+        assertEquals("tmp folder with space", b.srcFile);
+
+        b = parseRestoreCommand("restore main from 'tmp folder with space'");
         assertEquals("main", b.targetDB);
         assertEquals("tmp folder with space", b.srcFile);
 

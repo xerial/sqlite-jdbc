@@ -58,7 +58,8 @@ public class ExtendedCommand
             this.destFile = destFile;
         }
 
-        private static Pattern backupCmd = Pattern.compile("backup(\\s+(\"[^\"]*\"|\\S+))?\\s+to\\s+(\"[^\"]*\"|\\S+)");
+        private static Pattern backupCmd = Pattern
+                                                 .compile("backup(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+to\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)");
 
         public static BackupCommand parse(String sql) throws SQLException {
             if (sql != null) {
@@ -86,7 +87,7 @@ public class ExtendedCommand
         public final String    targetDB;
         public final String    srcFile;
         private static Pattern restoreCmd = Pattern
-                                                  .compile("restore(\\s+(\"[^\"]*\"|\\S+))?\\s+from\\s+(\"[^\"]*\"|\\S+)");
+                                                  .compile("restore(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+from\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)");
 
         public RestoreCommand(String targetDB, String srcFile) {
             this.targetDB = targetDB;
