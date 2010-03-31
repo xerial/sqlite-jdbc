@@ -421,12 +421,19 @@ public class DBMetaDataTest
         stat.executeUpdate("create table person (id integer)");
         stat.executeUpdate("create table address (pid integer, name, foreign key(pid) references person(id))");
 
-        ResultSet importedKeys = meta.getImportedKeys(null, null, "address");
+        ResultSet importedKeys = meta.getImportedKeys("default", "global", "address");
         assertTrue(importedKeys.next());
+        assertEquals("default", importedKeys.getString("PKTABLE_CAT"));
+        assertEquals("global", importedKeys.getString("PKTABLE_SCHEM"));
+        assertEquals("default", importedKeys.getString("FKTABLE_CAT"));
         assertEquals("person", importedKeys.getString("PKTABLE_NAME"));
         assertEquals("id", importedKeys.getString("PKCOLUMN_NAME"));
         assertEquals("address", importedKeys.getString("FKTABLE_NAME"));
         assertEquals("pid", importedKeys.getString("FKCOLUMN_NAME"));
+        importedKeys.close();
+
+        importedKeys = meta.getImportedKeys(null, null, "person");
+        assertTrue(!importedKeys.next());
         importedKeys.close();
     }
 
@@ -436,8 +443,13 @@ public class DBMetaDataTest
         stat.executeUpdate("create table person (id integer)");
         stat.executeUpdate("create table address (pid integer, name, foreign key(pid) references person(id))");
 
-        ResultSet exportedKeys = meta.getExportedKeys(null, null, "person");
+        ResultSet exportedKeys = meta.getExportedKeys("default", "global", "person");
         assertTrue(exportedKeys.next());
+        assertEquals("default", exportedKeys.getString("PKTABLE_CAT"));
+        assertEquals("global", exportedKeys.getString("PKTABLE_SCHEM"));
+        assertEquals("default", exportedKeys.getString("FKTABLE_CAT"));
+        assertEquals("global", exportedKeys.getString("FKTABLE_SCHEM"));
+
         assertEquals("person", exportedKeys.getString("PKTABLE_NAME"));
         assertEquals("id", exportedKeys.getString("PKCOLUMN_NAME"));
         assertEquals("address", exportedKeys.getString("FKTABLE_NAME"));
@@ -445,11 +457,24 @@ public class DBMetaDataTest
 
         exportedKeys.close();
 
+        exportedKeys = meta.getExportedKeys(null, null, "address");
+        assertTrue(!exportedKeys.next());
+        exportedKeys.close();
+
+    }
+
+    @Test
+    public void columnOrderOfgetCrossReference() throws SQLException {
+        stat.executeUpdate("create table person (id integer)");
+        stat.executeUpdate("create table address (pid integer, name, foreign key(pid) references person(id))");
+
+        ResultSet cr = meta.getCrossReference(null, null, "person", null, null, "address");
+        //assertTrue(cr.next());
+
     }
 
     /* TODO
-    @Test public void columnOrderOfgetExportedKeys() throws SQLException {
-    @Test public void columnOrderOfgetCrossReference() throws SQLException {
+    
     @Test public void columnOrderOfgetTypeInfo() throws SQLException {
     @Test public void columnOrderOfgetIndexInfo() throws SQLException {
     @Test public void columnOrderOfgetSuperTypes() throws SQLException {

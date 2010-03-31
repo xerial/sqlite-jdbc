@@ -30,11 +30,10 @@ import java.util.Iterator;
 class MetaData implements DatabaseMetaData
 {
     private Conn              conn;
-    private PreparedStatement getTables        = null, getTableTypes = null, getTypeInfo = null,
-            getCrossReference = null, getCatalogs = null, getSchemas = null, getUDTs = null, getColumnsTblName = null,
-            getSuperTypes = null, getSuperTables = null, getTablePrivileges = null, getIndexInfo = null,
-            getProcedures = null, getProcedureColumns = null, getAttributes = null, getBestRowIdentifier = null,
-            getVersionColumns = null, getColumnPrivileges = null;
+    private PreparedStatement getTables        = null, getTableTypes = null, getTypeInfo = null, getCatalogs = null,
+            getSchemas = null, getUDTs = null, getColumnsTblName = null, getSuperTypes = null, getSuperTables = null,
+            getTablePrivileges = null, getIndexInfo = null, getProcedures = null, getProcedureColumns = null,
+            getAttributes = null, getBestRowIdentifier = null, getVersionColumns = null, getColumnPrivileges = null;
 
     /** Used by PrepStmt to save generating a new statement every call. */
     private PreparedStatement getGeneratedKeys = null;
@@ -59,8 +58,6 @@ class MetaData implements DatabaseMetaData
                 getTableTypes.close();
             if (getTypeInfo != null)
                 getTypeInfo.close();
-            if (getCrossReference != null)
-                getCrossReference.close();
             if (getCatalogs != null)
                 getCatalogs.close();
             if (getSchemas != null)
@@ -95,7 +92,6 @@ class MetaData implements DatabaseMetaData
             getTables = null;
             getTableTypes = null;
             getTypeInfo = null;
-            getCrossReference = null;
             getCatalogs = null;
             getSchemas = null;
             getUDTs = null;
@@ -791,14 +787,20 @@ class MetaData implements DatabaseMetaData
 
     public ResultSet getCrossReference(String pc, String ps, String pt, String fc, String fs, String ft)
             throws SQLException {
-        if (getCrossReference == null)
-            getCrossReference = conn.prepareStatement("select " + "null as PKTABLE_CAT, " + "null as PKTABLE_SCHEM, "
-                    + "null as PKTABLE_NAME, " + "null as PKCOLUMN_NAME, " + "null as FKTABLE_CAT, "
-                    + "null as FKTABLE_SCHEM, " + "null as FKTABLE_NAME, " + "null as FKCOLUMN_NAME, "
-                    + "null as KEY_SEQ, " + "null as UPDATE_RULE, " + "null as DELETE_RULE, " + "null as FK_NAME, "
-                    + "null as PK_NAME, " + "null as DEFERRABILITY " + "limit 0;");
-        getCrossReference.clearParameters();
-        return getCrossReference.executeQuery();
+
+        if (pt == null)
+            return getExportedKeys(fc, fs, ft);
+        if (ft == null)
+            return getImportedKeys(pc, ps, pt);
+
+        StringBuilder query = new StringBuilder();
+        query.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, ", quote(pc), quote(ps))
+                + "pt as PKTABLE_NAME, pcn as PKCOLUMN_NAME, "
+                + String.format("%s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(fc), quote(fs))
+                + "fkn as FKTABLE_NAME, fcn as FKCOLUMN_NAME, " + "ks as KEY_SEQ, " + "ur as UPDATE_RULE, "
+                + "dr as DELETE_RULE, " + "null as FK_NAME, " + "null as PK_NAME, "
+                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY limit 0;");
+        return conn.createStatement().executeQuery(query.toString());
     }
 
     public ResultSet getSchemas() throws SQLException {
@@ -845,13 +847,26 @@ class MetaData implements DatabaseMetaData
         return stat.executeQuery(sql);
     }
 
+    private static String quote(String tableName) {
+        if (tableName == null)
+            return "null";
+        else
+            return String.format("'%s'", tableName);
+    }
+
     public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
 
         StringBuilder exportedKeysQuery = new StringBuilder();
-        exportedKeysQuery.append("select null as PKTABLE_CAT, null as PKTABLE_SCHEM, " + "'" + escape(table)
-                + "' as PKTABLE_NAME, " + "pcn as PKCOLUMN_NAME, null as FKTABLE_CAT, null as FKTABLE_SCHEM, "
-                + "fkn as FKTABLE_NAME, fcn as FKCOLUMN_NAME, " + "ks as KEY_SEQ, " + "ur as UPDATE_RULE, "
-                + "dr as DELETE_RULE, " + "null as FK_NAME, " + "null as PK_NAME, "
+        exportedKeysQuery.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ",
+                quote(catalog), quote(schema), quote(table))
+                + String.format("pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(catalog),
+                        quote(schema))
+                + "fkn as FKTABLE_NAME, fcn as FKCOLUMN_NAME, "
+                + "ks as KEY_SEQ, "
+                + "ur as UPDATE_RULE, "
+                + "dr as DELETE_RULE, "
+                + "'' as FK_NAME, "
+                + "'' as PK_NAME, "
                 + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (");
 
         // retrieve table list
@@ -886,15 +901,18 @@ class MetaData implements DatabaseMetaData
 
                     exportedKeysQuery.append("select " + Integer.toString(keySeq) + " as ks," + "'"
                             + escape(targetTable) + "' as fkn," + "'" + escape(FKColName) + "' as fcn," + "'"
-                            + escape(PKColName) + "' as pcn," + "case '" + escape(updateRule) + "'"
-                            + " when 'CASCADE' then " + Integer.toString(importedKeyCascade) + " when 'RESTRICT' then "
-                            + Integer.toString(importedKeyRestrict) + " when 'SET NULL' then "
-                            + Integer.toString(importedKeySetNull) + " when 'SET DEFAULT' then "
-                            + Integer.toString(importedKeySetDefault) + " end as ur," + "case '" + escape(deleteRule)
-                            + "'" + " when 'CASCADE' then " + Integer.toString(importedKeyCascade)
-                            + " when 'RESTRICT' then " + Integer.toString(importedKeyRestrict)
-                            + " when 'SET NULL' then " + Integer.toString(importedKeySetNull)
-                            + " when 'SET DEFAULT' then " + Integer.toString(importedKeySetDefault) + " end as dr");
+                            + escape(PKColName) + "' as pcn," + String.format("case '%s' ", escape(updateRule))
+                            + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
+                            + String.format("when 'CASCADE' then %d ", importedKeyCascade)
+                            + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
+                            + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
+                            + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as ur,"
+                            + String.format("case '%s' ", escape(deleteRule))
+                            + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
+                            + String.format("when 'CASCADE' then %d ", importedKeyCascade)
+                            + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
+                            + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
+                            + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as dr");
 
                     count++;
                 }
@@ -907,11 +925,16 @@ class MetaData implements DatabaseMetaData
             }
         }
 
-        String sql = (count > 0) ? exportedKeysQuery.toString() : ("select " + "null as PKTABLE_CAT, "
-                + "null as PKTABLE_SCHEM, " + "null as PKTABLE_NAME, " + "null as PKCOLUMN_NAME, "
-                + "null as FKTABLE_CAT, " + "null as FKTABLE_SCHEM, " + "null as FKTABLE_NAME, "
-                + "null as FKCOLUMN_NAME, " + "null as KEY_SEQ, " + "null as UPDATE_RULE, " + "null as DELETE_RULE, "
-                + "null as FK_NAME, " + "null as PK_NAME, " + "null as DEFERRABILITY limit 0;");
+        String sql = (count > 0) ? exportedKeysQuery.toString() : (String.format(
+                "select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(catalog), quote(schema),
+                quote(table))
+                + "'' as PKCOLUMN_NAME, "
+                + String.format("%s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(catalog), quote(schema))
+                + "'' as FKTABLE_NAME, "
+                + "'' as FKCOLUMN_NAME, "
+                + "-1 as KEY_SEQ, "
+                + "3 as UPDATE_RULE, "
+                + "3 as DELETE_RULE, " + "'' as FK_NAME, " + "'' as PK_NAME, " + "5 as DEFERRABILITY limit 0;");
         return stat.executeQuery(sql);
     }
 
@@ -920,11 +943,13 @@ class MetaData implements DatabaseMetaData
         ResultSet rs = null;
         Statement stat = conn.createStatement();
 
-        sql = "select " + "null as PKTABLE_CAT, " + "null as PKTABLE_SCHEM, " + "ptn as PKTABLE_NAME, "
-                + "pcn as PKCOLUMN_NAME, " + "null as FKTABLE_CAT, " + "null as FKTABLE_SCHEM, " + "'" + escape(table)
-                + "' as FKTABLE_NAME, " + "fcn as FKCOLUMN_NAME, " + "ks as KEY_SEQ, " + "ur as UPDATE_RULE, "
-                + "dr as DELETE_RULE, " + "null as FK_NAME, " + "null as PK_NAME, "
-                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (";
+        sql = String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, ", quote(catalog), quote(schema))
+                + String
+                        .format(
+                                "ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, %s as FKTABLE_NAME, ",
+                                quote(catalog), quote(schema), quote(table)) + "fcn as FKCOLUMN_NAME, "
+                + "ks as KEY_SEQ, " + "ur as UPDATE_RULE, " + "dr as DELETE_RULE, " + "'' as FK_NAME, "
+                + "'' as PK_NAME, " + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (";
 
         // Use a try catch block to avoid "query does not return ResultSet" error
         try {
@@ -941,22 +966,27 @@ class MetaData implements DatabaseMetaData
                 if (i > 0)
                     sql += " union all ";
 
-                sql += "select " + Integer.toString(keySeq) + " as ks," + "'" + escape(PKTabName) + "' as ptn," + "'"
-                        + escape(FKColName) + "' as fcn," + "'" + escape(PKColName) + "' as pcn," + "case '"
-                        + escape(updateRule) + "'" + " when 'CASCADE' then " + Integer.toString(importedKeyCascade)
-                        + " when 'RESTRICT' then " + Integer.toString(importedKeyRestrict) + " when 'SET NULL' then "
-                        + Integer.toString(importedKeySetNull) + " when 'SET DEFAULT' then "
-                        + Integer.toString(importedKeySetDefault) + " end as ur," + "case '" + escape(deleteRule) + "'"
-                        + " when 'CASCADE' then " + Integer.toString(importedKeyCascade) + " when 'RESTRICT' then "
-                        + Integer.toString(importedKeyRestrict) + " when 'SET NULL' then "
-                        + Integer.toString(importedKeySetNull) + " when 'SET DEFAULT' then "
-                        + Integer.toString(importedKeySetDefault) + " end as dr";
+                sql += String.format("select %d as ks,", keySeq)
+                        + String.format("'%s' as ptn, '%s' as fcn, '%s' as pcn,", escape(PKTabName), escape(FKColName),
+                                escape(PKColName)) + String.format("case '%s' ", escape(updateRule))
+                        + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
+                        + String.format("when 'CASCADE' then %d ", importedKeyCascade)
+                        + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
+                        + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
+                        + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as ur,"
+                        + String.format("case '%s' ", escape(deleteRule))
+                        + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
+                        + String.format("when 'CASCADE' then %d ", importedKeyCascade)
+                        + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
+                        + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
+                        + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as dr";
             }
             sql += ");";
             rs.close();
         }
         catch (SQLException e) {
-            sql += "select null as ks, null as ptn, null as fcn, null as pcn, null as ur, null as dr) limit 0;";
+            sql += "select -1 as ks, '' as ptn, '' as fcn, '' as pcn, " + importedKeyNoAction + " as ur, "
+                    + importedKeyNoAction + " as dr) limit 0;";
         }
 
         return stat.executeQuery(sql);
