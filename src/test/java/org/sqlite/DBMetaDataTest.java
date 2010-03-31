@@ -428,6 +428,8 @@ public class DBMetaDataTest
         assertEquals("default", importedKeys.getString("FKTABLE_CAT"));
         assertEquals("person", importedKeys.getString("PKTABLE_NAME"));
         assertEquals("id", importedKeys.getString("PKCOLUMN_NAME"));
+        assertNotNull(importedKeys.getString("PK_NAME"));
+        assertNotNull(importedKeys.getString("FK_NAME"));
         assertEquals("address", importedKeys.getString("FKTABLE_NAME"));
         assertEquals("pid", importedKeys.getString("FKCOLUMN_NAME"));
         importedKeys.close();
@@ -449,6 +451,8 @@ public class DBMetaDataTest
         assertEquals("global", exportedKeys.getString("PKTABLE_SCHEM"));
         assertEquals("default", exportedKeys.getString("FKTABLE_CAT"));
         assertEquals("global", exportedKeys.getString("FKTABLE_SCHEM"));
+        assertNotNull(exportedKeys.getString("PK_NAME"));
+        assertNotNull(exportedKeys.getString("FK_NAME"));
 
         assertEquals("person", exportedKeys.getString("PKTABLE_NAME"));
         assertEquals("id", exportedKeys.getString("PKCOLUMN_NAME"));
