@@ -794,12 +794,15 @@ class MetaData implements DatabaseMetaData
             return getImportedKeys(pc, ps, pt);
 
         StringBuilder query = new StringBuilder();
-        query.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, ", quote(pc), quote(ps))
-                + "pt as PKTABLE_NAME, pcn as PKCOLUMN_NAME, "
-                + String.format("%s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(fc), quote(fs))
-                + "fkn as FKTABLE_NAME, fcn as FKCOLUMN_NAME, " + "ks as KEY_SEQ, " + "ur as UPDATE_RULE, "
-                + "dr as DELETE_RULE, " + "null as FK_NAME, " + "null as PK_NAME, "
-                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY limit 0;");
+        query.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(pc),
+                quote(ps), quote(pt))
+                + "'' as PKCOLUMN_NAME, "
+                + String.format("%s as FKTABLE_CAT, %s as FKTABLE_SCHEM,  %s as FKTABLE_NAME, ", quote(fc), quote(fs),
+                        quote(ft))
+                + "'' as FKCOLUMN_NAME, -1 as KEY_SEQ, 3 as UPDATE_RULE, "
+                + "3 as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, "
+                + Integer.toString(importedKeyInitiallyDeferred)
+                + " as DEFERRABILITY limit 0;");
         return conn.createStatement().executeQuery(query.toString());
     }
 
