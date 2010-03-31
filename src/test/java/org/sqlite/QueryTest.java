@@ -108,6 +108,17 @@ public class QueryTest
     }
 
     @Test
+    public void timeoutTest() throws Exception {
+
+        Connection conn = DriverManager.getConnection("jdbc:sqlite::memory:");
+        Statement st1 = conn.createStatement();
+
+        st1.setQueryTimeout(1);
+
+        st1.close();
+    }
+
+    @Test
     public void concatTest() {
 
         Connection connection = null;

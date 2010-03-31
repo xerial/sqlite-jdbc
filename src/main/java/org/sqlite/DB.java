@@ -17,7 +17,7 @@ package org.sqlite;
 
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -37,14 +37,14 @@ import java.util.Map;
 abstract class DB implements Codes
 {
     /** The JDBC Connection that 'owns' this database instance. */
-    Conn              conn   = null;
+    Conn                          conn   = null;
 
     /** The "begin;"and "commit;" statement handles. */
-    long              begin  = 0;
-    long              commit = 0;
+    long                          begin  = 0;
+    long                          commit = 0;
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
-    private final Map stmts  = new Hashtable();
+    private final Map<Long, Stmt> stmts  = new HashMap<Long, Stmt>();
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
