@@ -8,10 +8,10 @@ WIN_WORK=work/hg/sqlite-jdbc
 WIN64_SERVER=192.168.3.50
 WIN64_WORK=work/hg/sqlite-jdbc
 
-MAC_SERVER=localhost
+MAC_SERVER=192.168.131.11
 MAC_WORK=work/hg/sqlite-jdbc
 
-MAC_TIGER_SERVER=192.168.131.3
+MAC_TIGER_SERVER=192.168.131.12
 MAC_TIGER_WORK=work/hg/sqlite-jdbc
 
 LINUX_SERVER=sprite
