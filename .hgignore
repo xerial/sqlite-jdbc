@@ -2,6 +2,8 @@ target
 sqlitejdbc/build
 sqlitejdbc/dl
 sqlitejdbc/nestedvm-2009-08-09
+.classpath
+.project
 
 syntax: glob
 src/main/resources/org/ibex/nestedvm/*.o
