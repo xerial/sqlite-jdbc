@@ -9,7 +9,7 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,8 @@ import java.sql.Statement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class BackupTest {
+public class BackupTest
+{
 
     @BeforeClass
     public static void forName() throws Exception {
@@ -65,6 +66,9 @@ public class BackupTest {
 
     @Test
     public void memoryToDisk() throws Exception {
+
+        if (!SQLiteJDBCLoader.isNativeMode())
+            return; // skip this test in pure-java mode
 
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         Statement stmt = conn.createStatement();

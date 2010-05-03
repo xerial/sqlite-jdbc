@@ -1,9 +1,6 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -22,19 +19,17 @@ import org.junit.Test;
 /** These tests are designed to stress Statements on memory databases. */
 public class DBMetaDataTest
 {
-    private Connection conn;
-    private Statement stat;
+    private Connection       conn;
+    private Statement        stat;
     private DatabaseMetaData meta;
 
     @BeforeClass
-    public static void forName() throws Exception
-    {
+    public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
     }
 
     @Before
-    public void connect() throws Exception
-    {
+    public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
         stat.executeUpdate("create table test (id integer primary key, fn float, sn);");
@@ -43,16 +38,14 @@ public class DBMetaDataTest
     }
 
     @After
-    public void close() throws SQLException
-    {
+    public void close() throws SQLException {
         meta = null;
         stat.close();
         conn.close();
     }
 
     @Test
-    public void getTables() throws SQLException
-    {
+    public void getTables() throws SQLException {
         ResultSet rs = meta.getTables(null, null, null, null);
         assertNotNull(rs);
         assertTrue(rs.next());
@@ -89,8 +82,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void getTableTypes() throws SQLException
-    {
+    public void getTableTypes() throws SQLException {
         ResultSet rs = meta.getTableTypes();
         assertNotNull(rs);
         assertTrue(rs.next());
@@ -101,8 +93,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void getTypeInfo() throws SQLException
-    {
+    public void getTypeInfo() throws SQLException {
         ResultSet rs = meta.getTypeInfo();
         assertNotNull(rs);
         assertTrue(rs.next());
@@ -119,8 +110,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void getColumns() throws SQLException
-    {
+    public void getColumns() throws SQLException {
         ResultSet rs = meta.getColumns(null, null, "test", "id");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "test");
@@ -179,8 +169,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetTables() throws SQLException
-    {
+    public void columnOrderOfgetTables() throws SQLException {
         ResultSet rs = meta.getTables(null, null, null, null);
         assertTrue(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -198,8 +187,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetTableTypes() throws SQLException
-    {
+    public void columnOrderOfgetTableTypes() throws SQLException {
         ResultSet rs = meta.getTableTypes();
         assertTrue(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -208,8 +196,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetTypeInfo() throws SQLException
-    {
+    public void columnOrderOfgetTypeInfo() throws SQLException {
         ResultSet rs = meta.getTypeInfo();
         assertTrue(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -235,8 +222,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetColumns() throws SQLException
-    {
+    public void columnOrderOfgetColumns() throws SQLException {
         ResultSet rs = meta.getColumns(null, null, "test", null);
         assertTrue(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -270,8 +256,7 @@ public class DBMetaDataTest
     // do not bother testing their parameters, only the column types
 
     @Test
-    public void columnOrderOfgetProcedures() throws SQLException
-    {
+    public void columnOrderOfgetProcedures() throws SQLException {
         ResultSet rs = meta.getProcedures(null, null, null);
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -285,8 +270,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetProcedurColumns() throws SQLException
-    {
+    public void columnOrderOfgetProcedurColumns() throws SQLException {
         ResultSet rs = meta.getProcedureColumns(null, null, null, null);
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -307,8 +291,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetSchemas() throws SQLException
-    {
+    public void columnOrderOfgetSchemas() throws SQLException {
         ResultSet rs = meta.getSchemas();
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -318,8 +301,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetCatalogs() throws SQLException
-    {
+    public void columnOrderOfgetCatalogs() throws SQLException {
         ResultSet rs = meta.getCatalogs();
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -328,8 +310,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetColumnPrivileges() throws SQLException
-    {
+    public void columnOrderOfgetColumnPrivileges() throws SQLException {
         ResultSet rs = meta.getColumnPrivileges(null, null, null, null);
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -345,8 +326,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetTablePrivileges() throws SQLException
-    {
+    public void columnOrderOfgetTablePrivileges() throws SQLException {
         ResultSet rs = meta.getTablePrivileges(null, null, null);
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -361,8 +341,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetBestRowIdentifier() throws SQLException
-    {
+    public void columnOrderOfgetBestRowIdentifier() throws SQLException {
         ResultSet rs = meta.getBestRowIdentifier(null, null, null, 0, false);
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -378,8 +357,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetVersionColumns() throws SQLException
-    {
+    public void columnOrderOfgetVersionColumns() throws SQLException {
         ResultSet rs = meta.getVersionColumns(null, null, null);
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -395,8 +373,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetPrimaryKeys() throws SQLException
-    {
+    public void columnOrderOfgetPrimaryKeys() throws SQLException {
         ResultSet rs;
         ResultSetMetaData rsmeta;
 
@@ -438,10 +415,70 @@ public class DBMetaDataTest
         rs.close();
     }
 
+    @Test
+    public void columnOrderOfgetImportedKeys() throws SQLException {
+
+        stat.executeUpdate("create table person (id integer)");
+        stat.executeUpdate("create table address (pid integer, name, foreign key(pid) references person(id))");
+
+        ResultSet importedKeys = meta.getImportedKeys("default", "global", "address");
+        assertTrue(importedKeys.next());
+        assertEquals("default", importedKeys.getString("PKTABLE_CAT"));
+        assertEquals("global", importedKeys.getString("PKTABLE_SCHEM"));
+        assertEquals("default", importedKeys.getString("FKTABLE_CAT"));
+        assertEquals("person", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("id", importedKeys.getString("PKCOLUMN_NAME"));
+        assertNotNull(importedKeys.getString("PK_NAME"));
+        assertNotNull(importedKeys.getString("FK_NAME"));
+        assertEquals("address", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("pid", importedKeys.getString("FKCOLUMN_NAME"));
+        importedKeys.close();
+
+        importedKeys = meta.getImportedKeys(null, null, "person");
+        assertTrue(!importedKeys.next());
+        importedKeys.close();
+    }
+
+    @Test
+    public void columnOrderOfgetExportedKeys() throws SQLException {
+
+        stat.executeUpdate("create table person (id integer)");
+        stat.executeUpdate("create table address (pid integer, name, foreign key(pid) references person(id))");
+
+        ResultSet exportedKeys = meta.getExportedKeys("default", "global", "person");
+        assertTrue(exportedKeys.next());
+        assertEquals("default", exportedKeys.getString("PKTABLE_CAT"));
+        assertEquals("global", exportedKeys.getString("PKTABLE_SCHEM"));
+        assertEquals("default", exportedKeys.getString("FKTABLE_CAT"));
+        assertEquals("global", exportedKeys.getString("FKTABLE_SCHEM"));
+        assertNotNull(exportedKeys.getString("PK_NAME"));
+        assertNotNull(exportedKeys.getString("FK_NAME"));
+
+        assertEquals("person", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("id", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("address", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("pid", exportedKeys.getString("FKCOLUMN_NAME"));
+
+        exportedKeys.close();
+
+        exportedKeys = meta.getExportedKeys(null, null, "address");
+        assertTrue(!exportedKeys.next());
+        exportedKeys.close();
+
+    }
+
+    @Test
+    public void columnOrderOfgetCrossReference() throws SQLException {
+        stat.executeUpdate("create table person (id integer)");
+        stat.executeUpdate("create table address (pid integer, name, foreign key(pid) references person(id))");
+
+        ResultSet cr = meta.getCrossReference(null, null, "person", null, null, "address");
+        //assertTrue(cr.next());
+
+    }
+
     /* TODO
-    @Test public void columnOrderOfgetImportedKeys() throws SQLException {
-    @Test public void columnOrderOfgetExportedKeys() throws SQLException {
-    @Test public void columnOrderOfgetCrossReference() throws SQLException {
+    
     @Test public void columnOrderOfgetTypeInfo() throws SQLException {
     @Test public void columnOrderOfgetIndexInfo() throws SQLException {
     @Test public void columnOrderOfgetSuperTypes() throws SQLException {
@@ -449,8 +486,7 @@ public class DBMetaDataTest
     @Test public void columnOrderOfgetAttributes() throws SQLException {*/
 
     @Test
-    public void columnOrderOfgetUDTs() throws SQLException
-    {
+    public void columnOrderOfgetUDTs() throws SQLException {
         ResultSet rs = meta.getUDTs(null, null, null, null);
         assertFalse(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
@@ -465,8 +501,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void version() throws SQLException
-    {
+    public void version() throws SQLException {
         assertNotNull(meta.getDatabaseProductVersion());
     }
 }
