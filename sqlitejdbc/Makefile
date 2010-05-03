@@ -32,7 +32,7 @@ build/$(target)/$(LIBNAME): build/$(sqlite)-$(target)/sqlite3.o build/org/sqlite
 	$(CC) $(CFLAGS) -c -o build/$(target)/NativeDB.o \
 		../src/main/java/org/sqlite/NativeDB.c
 	$(CC) $(CFLAGS) $(LINKFLAGS) -o build/$(target)/$(LIBNAME) \
-		build/$(target)/NativeDB.o build/$(sqlite)-$(target)/*.o
+		build/$(target)/NativeDB.o build/$(sqlite)-$(target)/*.o 
 	$(STRIP) build/$(target)/$(LIBNAME)
 
 build/$(sqlite)-%/sqlite3.o: dl/$(sqlite)-amal.zip
