@@ -74,7 +74,7 @@ Darwin_LIBNAME   := libsqlitejdbc.jnilib
 #Win_STRIP        := $(arch)-mingw32msvc-strip
 Win_CC           := mingw32-gcc
 Win_STRIP        := strip
-Win_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -Os
+Win_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O
 Win_LINKFLAGS    := -Wl,--kill-at -shared
 Win_LIBNAME      := sqlitejdbc.dll
 
