@@ -1,7 +1,6 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,7 +12,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ExtensionTest {
+public class ExtensionTest
+{
 
     @BeforeClass
     public static void forName() throws Exception {
@@ -21,7 +21,7 @@ public class ExtensionTest {
     }
 
     Connection conn;
-    Statement stat;
+    Statement  stat;
 
     @Before
     public void setUp() throws Exception {
@@ -44,8 +44,7 @@ public class ExtensionTest {
         stat.execute("create virtual table recipe using fts3(name, ingredients)");
         stat
                 .execute("insert into recipe (name, ingredients) values('broccoli stew', 'broccoli peppers cheese tomatoes')");
-        stat
-                .execute("insert into recipe (name, ingredients) values('pumpkin stew', 'pumpkin onions garlic celery')");
+        stat.execute("insert into recipe (name, ingredients) values('pumpkin stew', 'pumpkin onions garlic celery')");
 
         ResultSet rs = stat
                 .executeQuery("select rowid, name, ingredients from recipe where ingredients match 'onions'");
@@ -72,5 +71,6 @@ public class ExtensionTest {
         }
 
     }
+
 
 }

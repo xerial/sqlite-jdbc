@@ -45,6 +45,7 @@ build/$(sqlite)-%/sqlite3.o: dl/$(sqlite)-amal.zip
 	    build/$(sqlite)-$*/sqlite3.c
 	cat ext/*.c >> build/$(sqlite)-$*/sqlite3.c
 	(cd build/$(sqlite)-$*; $(CC) -o sqlite3.o -c $(CFLAGS) \
+		-DSQLITE_ENABLE_LOAD_EXTENSION \
 		-DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
 	    -DSQLITE_CORE \
