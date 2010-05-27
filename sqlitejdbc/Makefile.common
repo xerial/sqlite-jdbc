@@ -57,7 +57,7 @@ target     := $(os)-$(arch)
 # os=Default is meant to be generic unix/linux
 Default_CC        := gcc
 Default_STRIP     := strip
-Default_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
+Default_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -O3 -fPIC
 Default_LINKFLAGS := -shared
 Default_LIBNAME   := libsqlitejdbc.so
 
@@ -74,7 +74,7 @@ Darwin_LIBNAME   := libsqlitejdbc.jnilib
 #Win_STRIP        := $(arch)-mingw32msvc-strip
 Win_CC           := mingw32-gcc
 Win_STRIP        := strip
-Win_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O
+Win_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O3
 Win_LINKFLAGS    := -Wl,--kill-at -shared
 Win_LIBNAME      := sqlitejdbc.dll
 
