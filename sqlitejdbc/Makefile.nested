@@ -8,7 +8,7 @@ default: test
 test: build/org/sqlite/SQLite.class
 
 $(nestedvm)/%:
-	$(MAKE) -C $(nestedvm) $*
+	$(MAKE) CFLAGS='' -C $(nestedvm) $*
 
 dl/$(nestedvm).tgz:
 	@mkdir -p dl
