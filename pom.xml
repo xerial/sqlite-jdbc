@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.6.23.1-SNAPSHOT</version>
+  <version>3.6.23-M1-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
