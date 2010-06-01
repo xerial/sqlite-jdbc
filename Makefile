@@ -78,7 +78,7 @@ $(BUILD)/$(sqlite)-%/sqlite3.o: $(WORK)/dl/$(sqlite)-amal.zip
 	    $(BUILD)/$(sqlite)-$*/sqlite3.c
 	cat src/main/ext/*.c >> $(BUILD)/$(sqlite)-$*/sqlite3.c
 	(cd $(BUILD)/$(sqlite)-$*; $(CC) -o sqlite3.o -c $(CFLAGS) \
-	    -DSQLITE_ENABLE_LOAD_EXTENSION \
+	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
 	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
 	    -DSQLITE_CORE \
