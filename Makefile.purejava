@@ -10,28 +10,28 @@ default: test
 
 test: $(BUILD)/org/sqlite/SQLite.class
 
-$(nestedvm)/%:
-	$(MAKE) CFLAGS='' -C $(nestedvm) $*
+$(BUILD)/$(nestedvm)/%:
+	$(MAKE) CFLAGS='' -C $(BUILD)/$(nestedvm) $*
 
-dl/$(nestedvm).tgz:
-	@mkdir -p dl
+$(BUILD)/dl/$(nestedvm).tgz:
+	@mkdir -p $(dir $@)
 #	cp ../archive/$(nestedvm).tgz $@
-	curl -odl/$(nestedvm).tgz http://nestedvm.ibex.org/dist/$(nestedvm).tgz
+	curl -o$(BUILD)/dl/$(nestedvm).tgz http://nestedvm.ibex.org/dist/$(nestedvm).tgz
 
-dl/$(sqlite)-amal.zip:
-	@mkdir -p dl
-	curl -odl/$(sqlite)-amal.zip \
+$(BUILD)/dl/$(sqlite)-amal.zip:
+	@mkdir -p $(dir $@)
+	curl -o$(BUILD)/dl/$(sqlite)-amal.zip \
 	http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(sqlite_version)).zip
 
-$(nestedvm)/Makefile: dl/$(nestedvm).tgz
-	tar xfz dl/$(nestedvm).tgz
+$(BUILD)/$(nestedvm)/Makefile: $(BUILD)/dl/$(nestedvm).tgz
+	tar xfz $(BUILD)/dl/$(nestedvm).tgz -C$(BUILD)
 
 
-$(BUILD)/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.zip
+$(BUILD)/SQLite.mips: $(BUILD)/$(nestedvm)/Makefile $(BUILD)/$(nestedvm)/env.sh $(BUILD)/dl/$(sqlite)-amal.zip
 	@mkdir -p $(BUILD)
 	@mkdir -p $(BUILD)/$(sqlite)-nestedvm
-	unzip -qo dl/$(sqlite)-amal.zip -d $(BUILD)/$(sqlite)-nestedvm
-	cp ../src/main/java/org/sqlite/Nested*.c $(BUILD)/$(sqlite)-nestedvm
+	unzip -qo $(BUILD)/dl/$(sqlite)-amal.zip -d $(BUILD)/$(sqlite)-nestedvm
+	cp src/main/java/org/sqlite/Nested*.c $(BUILD)/$(sqlite)-nestedvm
 	perl -pi -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
 	    $(BUILD)/$(sqlite)-nestedvm/sqlite3ext.h
 	# we need a dummy main
@@ -41,8 +41,8 @@ $(BUILD)/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.
 	# insert a code for loading extension functions
 	perl -pi -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
 	    $(BUILD)/$(sqlite)-nestedvm/sqlite3.c
-	cat ext/*.c >> $(BUILD)/$(sqlite)-nestedvm/sqlite3.c
-	(. ./$(nestedvm)/env.sh; cd $(BUILD)/$(sqlite)-nestedvm; \
+	cat sqlitejdbc/ext/*.c >> $(BUILD)/$(sqlite)-nestedvm/sqlite3.c
+	(. ./$(BUILD)/$(nestedvm)/env.sh; cd $(BUILD)/$(sqlite)-nestedvm; \
 	$$CC -c $$CFLAGS -I. -o sqlite3.o \
 	    -DSQLITE_THREADSAFE=0 \
             -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
@@ -56,13 +56,13 @@ $(BUILD)/SQLite.mips: $(nestedvm)/Makefile $(nestedvm)/env.sh dl/$(sqlite)-amal.
             $(SQLITE_FLAGS) \
 		sqlite3.c; \
 	$$CC -c $$CFLAGS -o NestedDB.o Nested*.c)
-	./$(nestedvm)/upstream/install/bin/mips-unknown-elf-gcc \
+	./$(BUILD)/$(nestedvm)/upstream/install/bin/mips-unknown-elf-gcc \
 	        -march=mips1 --static \
 	        -o $@ $(BUILD)/$(sqlite)-nestedvm/sqlite3.o \
 			      $(BUILD)/$(sqlite)-nestedvm/NestedDB.o -lm -lc
 
 $(BUILD)/org/sqlite/SQLite.class: $(BUILD)/SQLite.mips
-	java -cp $(nestedvm)/build$(sep)$(nestedvm)/upstream/build/classgen/build \
+	java -cp $(BUILD)/$(nestedvm)/build$(sep)$(nestedvm)/upstream/build/classgen/build \
 	    org.ibex.nestedvm.Compiler \
 	    -outformat class -d $(BUILD) -o unixRuntime \
 	    org.sqlite.SQLite $(BUILD)/SQLite.mips
