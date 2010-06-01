@@ -4,25 +4,24 @@ ifndef JAVA_HOME
 $(error Set JAVA_HOME environment variable)
 endif
 
-libjdbc  := $(wildcard sqlitejdbc/lib/jdbc-*.jar)
-libjunit := $(wildcard sqlitejdbc/lib/junit-*.jar)
+libjdbc  := $(wildcard lib/jdbc-*.jar)
 
 JAVA  := "$$JAVA_HOME/bin/java"
 JAVAC := "$$JAVA_HOME/bin/javac" -Xbootclasspath/p:$(libjdbc)
 JAVAH := "$$JAVA_HOME/bin/javah"
 
-WORKDIR := target/sqlitejdbc
-OSInfoClass := org/sqlite/OSInfo
-OSINFO_PROG := $(WORKDIR)/org/sqlite/OSInfo.class
+WORK := target
+OSINFO_CLASS := org.sqlite.OSInfo
+OSINFO_PROG := lib/org/sqlite/OSInfo.class
 
-# building OSInfo.java 
-$(info compiling OSInfo.java)
-$(shell mkdir -p $(WORKDIR))
-$(shell	$(JAVAC) src/main/java/$(OSInfoClass).java -d $(WORKDIR))
+## building OSInfo.java 
+#$(info compiling OSInfo.java)
+#$(shell mkdir -p lib)
+#$(shell $(JAVAC) src/main/java/org/sqlite/OSInfo.java -d lib)
 
-OS_NAME := $(shell $(JAVA) -cp $(WORKDIR) $(OSInfoClass) --os)
-OS_ARCH := $(shell $(JAVA) -cp $(WORKDIR) $(OSInfoClass) --arch)
-LIB_FOLDER := $(shell $(JAVA) -cp $(WORKDIR) $(OSInfoClass))
+OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
+OS_ARCH := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --arch)
+LIB_FOLDER := $(shell $(JAVA) -cp $(WORK) $(OSINFO_CLASS))
 
 # Windows uses different path separators, because they hate me
 ifeq ($(OS_NAME),Windows)
@@ -105,7 +104,7 @@ LINKFLAGS := $($(target)_LINKFLAGS)
 LIBNAME   := $($(target)_LIBNAME)
 SQLITE_FLAGS := $($(target)_SQLITE_FLAGS)
 
-CFLAGS := $(CFLAGS) -Itarget/sqlitejdbc/build/$(sqlite)-$(target) -Itarget/sqlitejdbc/build
+CFLAGS := $(CFLAGS) -I$(WORK)/build/$(sqlite)-$(target) -I$(WORK)/build
 ifneq ($(jni_include),)
 CFLAGS := $(CFLAGS) -I"$(jni_include)"
 endif
