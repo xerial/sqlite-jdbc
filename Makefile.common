@@ -56,14 +56,14 @@ Default_SQLITE_FLAGS  :=
 
 Linux-i386_CC  := gcc
 Linux-i386_STRIP  := strip
-Linux-i386_CFLAGS    := -I$(JAVA_HOME)/include -Isqlitejdbc/lib/inc_mac -Os -fPIC
+Linux-i386_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
 Linux-i386_LINKFLAGS := -shared
 Linux-i386_LIBNAME   := libsqlitejdbc.so
 Linux-i386_SQLITE_FLAGS  := 
 
 Linux-amd64_CC  := gcc
 Linux-amd64_STRIP  := strip
-Linux-amd64_CFLAGS    := -I$(JAVA_HOME)/include -Isqlitejdbc/lib/inc_mac -Os -fPIC
+Linux-amd64_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
 Linux-amd64_LINKFLAGS := -shared
 Linux-amd64_LIBNAME   := libsqlitejdbc.so
 Linux-amd64_SQLITE_FLAGS  := 

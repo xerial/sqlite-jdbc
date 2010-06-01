@@ -41,7 +41,7 @@ $(BUILD)/SQLite.mips: $(BUILD)/$(nestedvm)/Makefile $(BUILD)/$(nestedvm)/env.sh 
 	# insert a code for loading extension functions
 	perl -pi -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
 	    $(BUILD)/$(sqlite)-nestedvm/sqlite3.c
-	cat sqlitejdbc/ext/*.c >> $(BUILD)/$(sqlite)-nestedvm/sqlite3.c
+	cat src/main/ext/*.c >> $(BUILD)/$(sqlite)-nestedvm/sqlite3.c
 	(. ./$(BUILD)/$(nestedvm)/env.sh; cd $(BUILD)/$(sqlite)-nestedvm; \
 	$$CC -c $$CFLAGS -I. -o sqlite3.o \
 	    -DSQLITE_THREADSAFE=0 \

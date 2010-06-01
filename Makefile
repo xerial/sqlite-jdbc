@@ -76,7 +76,7 @@ $(BUILD)/$(sqlite)-%/sqlite3.o: $(WORK)/dl/$(sqlite)-amal.zip
 # insert a code for loading extension functions
 	perl -pi -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
 	    $(BUILD)/$(sqlite)-$*/sqlite3.c
-	cat sqlitejdbc/ext/*.c >> $(BUILD)/$(sqlite)-$*/sqlite3.c
+	cat src/main/ext/*.c >> $(BUILD)/$(sqlite)-$*/sqlite3.c
 	(cd $(BUILD)/$(sqlite)-$*; $(CC) -o sqlite3.o -c $(CFLAGS) \
 	    -DSQLITE_ENABLE_LOAD_EXTENSION \
 	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
