@@ -21,7 +21,7 @@ $(BUILD)/dl/$(nestedvm).tgz:
 $(BUILD)/dl/$(sqlite)-amal.zip:
 	@mkdir -p $(dir $@)
 	curl -o$(BUILD)/dl/$(sqlite)-amal.zip \
-	http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(sqlite_version)).zip
+	http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(version)).zip
 
 $(BUILD)/$(nestedvm)/Makefile: $(BUILD)/dl/$(nestedvm).tgz
 	tar xfz $(BUILD)/dl/$(nestedvm).tgz -C$(BUILD)
@@ -62,7 +62,7 @@ $(BUILD)/SQLite.mips: $(BUILD)/$(nestedvm)/Makefile $(BUILD)/$(nestedvm)/env.sh 
 			      $(BUILD)/$(sqlite)-nestedvm/NestedDB.o -lm -lc
 
 $(BUILD)/org/sqlite/SQLite.class: $(BUILD)/SQLite.mips
-	java -cp $(BUILD)/$(nestedvm)/build$(sep)$(nestedvm)/upstream/build/classgen/build \
+	$(JAVA) -cp $(BUILD)/$(nestedvm)/build$(sep)$(BUILD)/$(nestedvm)/upstream/build/classgen/build \
 	    org.ibex.nestedvm.Compiler \
 	    -outformat class -d $(BUILD) -o unixRuntime \
 	    org.sqlite.SQLite $(BUILD)/SQLite.mips

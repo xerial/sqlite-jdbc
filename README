@@ -1,15 +1,8 @@
 
-= How to compile new version of SQLiteJDBC 
+= How to compile a new version of SQLiteJDBC 
 * Edit the VERSION file, and the version number in pom.xml file.
-* Then, run make 
-
-
-= How to build pure-java and native libraries
-* Type, make -fMakefile.package 
-
-= How to deploy to the maven repository
-* mvn deploy
-* mvn deploy -Psourceforge  (for uploading Sourceforge.jp repository, which are synchronized with the Maven central repository)
+* Then, run make:
+ $ make 
 
 = How to submit a patch
 
@@ -17,7 +10,7 @@
 > hg commit -m 'what changesa are made for the source'
 > hg export tip > patch.diff
 
-submit the patch to the issue tracker
+submit the patch to the issue tracker: http://code.google.com/p/xerial/issues/list
 
 
 
@@ -26,4 +19,21 @@ submit the patch to the issue tracker
 - Install MinGW64
 - http://sourceforge.net/projects/mingw-w64/files/
 -- I downloaded mingw-w64-bin_i686-mingw_20091109.zip, and add bin folder to the PATH
-- make native  Win_CC=x86_64-w64-mingw32-gcc Win_STRIP=x86_64-w64-mingw32-strip
+- make native  
+
+
+= How to build pure-java library
+- Use Mac OS X or Linux with gcc-3.x
+- make purejava
+- the build will fail due to the broken regex libray, so copy the non-corrupted archive I downloaded:
+  $ cp archive/regex3.8a.tar.gz target/build/nestedvm-2009-08-09/upstream/downlolad/
+- then do 'make purejava' again.
+ 
+
+= (for deployer only) How to build pure-java and native libraries
+* Type, make -fMakefile.package 
+
+= How to deploy to the maven repository
+* mvn deploy
+* mvn deploy -Psourceforge  (for uploading Sourceforge.jp repository, which are synchronized with the Maven central repository)
+
