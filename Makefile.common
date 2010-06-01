@@ -21,7 +21,7 @@ OSINFO_PROG := lib/org/sqlite/OSInfo.class
 
 OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
 OS_ARCH := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --arch)
-LIB_FOLDER := $(shell $(JAVA) -cp $(WORK) $(OSINFO_CLASS))
+LIB_FOLDER := $(shell $(JAVA) -cp lib $(OSINFO_CLASS))
 
 # Windows uses different path separators, because they hate me
 ifeq ($(OS_NAME),Windows)
