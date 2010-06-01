@@ -1,37 +1,8 @@
 # use JDK1.5 to build native libraries
 
-include VERSION
-sqlite := sqlite-$(version)
+include Makefile.common
 
-#CURRENT_DIR = $(shell cygpath -w `pwd`)
 RESOURCE_DIR = src/main/resources
-
-ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
-  OS := Win
-endif
-ifeq ($(findstring MINGW,$(shell uname)),MINGW)
-  OS := Win
-endif
-ifeq ($(shell uname),Darwin)
-  OS := Darwin
-endif
-
-ifeq ($(OS),)
-  OS := Default
-endif
-
-
-ifeq ($(arch),)
-arch := $(shell uname -m)
-endif
-
-target = $(OS)-$(arch)
-
-Default_LIBNAME   := libsqlitejdbc.so
-Darwin_LIBNAME   := libsqlitejdbc.jnilib
-Win_LIBNAME      := sqlitejdbc.dll
-LIBNAME   := $($(OS)_LIBNAME)
-
 
 .phony: all package win mac linux native deploy
 
@@ -40,32 +11,18 @@ all: package
 deploy: 
 	mvn deploy 
 
-
-OSInfoClass=org/sqlite/OSInfo
-OSINFO_PROG=target/sqlitejdbc/$(OSInfoClass).class
 SQLITE_DLL=sqlitejdbc/build/$(target)/$(LIBNAME)
 SQLITE_BUILD_DIR=sqlitejdbc/build/$(sqlite)-$(target)
 
-LIB_FOLDER = $(shell java -cp target/sqlitejdbc $(OSInfoClass))
 WORK_DIR=target/dll/$(sqlite)/native
 UPDATE_FLAG=target/dll/$(sqlite)/UPDATE
 
-$(OSINFO_PROG): src/main/java/$(OSInfoClass).java
-	mkdir -p target/sqlitejdbc
-	javac $< -d target/sqlitejdbc
-
 $(SQLITE_DLL): $(SQLITE_BUILD_DIR)
 
-$(SQLITE_BUILD_DIR): Makefile sqlitejdbc/Makefile 
-	cd sqlitejdbc && make native 
+$(SQLITE_BUILD_DIR): Makefile.native
+	$(MAKE) -f $< native 
 
-#$(NATIVE_DLL): $(OSINFO_PROG) $(SQLITE_DLL)
-#	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
-#	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
-
-#native: sqlitejdbc/build/$(target)/$(LIBNAME) target/sqlitejdbc/$(OSInfoClass).class
-
-$(UPDATE_FLAG): $(OSINFO_PROG) $(SQLITE_DLL)
+$(UPDATE_FLAG): $(SQLITE_DLL)
 	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
 	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
 	mkdir -p $(RESOURCE_DIR)/native/$(LIB_FOLDER)

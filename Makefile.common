@@ -1,24 +1,28 @@
-include ../VERSION
+include VERSION
 
 ifndef JAVA_HOME
 $(error Set JAVA_HOME environment variable)
 endif
 
+libjdbc  := $(wildcard sqlitejdbc/lib/jdbc-*.jar)
+libjunit := $(wildcard sqlitejdbc/lib/junit-*.jar)
+
 JAVA  := "$$JAVA_HOME/bin/java"
 JAVAC := "$$JAVA_HOME/bin/javac" -Xbootclasspath/p:$(libjdbc)
 JAVAH := "$$JAVA_HOME/bin/javah"
 
-WORKDIR := ../target/sqlitejdbc
+WORKDIR := target/sqlitejdbc
+OSInfoClass := org/sqlite/OSInfo
+OSINFO_PROG := $(WORKDIR)/org/sqlite/OSInfo.class
 
-OSInfoClass:=org/sqlite/OSInfo
-OSINFO_PROG:=$(WORKDIR)/$(OSInfoClass).class
-
-$(OSINFO_PROG): ../src/main/java/$(OSInfoClass).java
-	mkdir -p $(WORKDIR)
-	javac $< -d $(WORKDIR)
+# building OSInfo.java 
+$(info compiling OSInfo.java)
+$(shell mkdir -p $(WORKDIR))
+$(shell	$(JAVAC) src/main/java/$(OSInfoClass).java -d $(WORKDIR))
 
 OS_NAME := $(shell $(JAVA) -cp $(WORKDIR) $(OSInfoClass) --os)
 OS_ARCH := $(shell $(JAVA) -cp $(WORKDIR) $(OSInfoClass) --arch)
+LIB_FOLDER := $(shell $(JAVA) -cp $(WORKDIR) $(OSInfoClass))
 
 # Windows uses different path separators, because they hate me
 ifeq ($(OS_NAME),Windows)
@@ -34,8 +38,6 @@ ifneq ($(jni_md),)
 jni_include := $(shell dirname "$(jni_md)")
 endif
 
-libjdbc  := $(wildcard lib/jdbc-*.jar)
-libjunit := $(wildcard lib/junit-*.jar)
 
 # os=Default is meant to be generic unix/linux
 
@@ -48,21 +50,21 @@ endif
 
 Default_CC        := gcc
 Default_STRIP     := strip
-Default_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
+Default_CFLAGS    := -I$(JAVA_HOME)/include -Isqlitejdbc/lib/inc_mac -Os -fPIC
 Default_LINKFLAGS := -shared
 Default_LIBNAME   := libsqlitejdbc.so
 Default_SQLITE_FLAGS  := 
 
 Linux-i386_CC  := gcc
 Linux-i386_STRIP  := strip
-Linux-i386_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
+Linux-i386_CFLAGS    := -I$(JAVA_HOME)/include -Isqlitejdbc/lib/inc_mac -Os -fPIC
 Linux-i386_LINKFLAGS := -shared
 Linux-i386_LIBNAME   := libsqlitejdbc.so
 Linux-i386_SQLITE_FLAGS  := 
 
 Linux-amd64_CC  := gcc
 Linux-amd64_STRIP  := strip
-Linux-amd64_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
+Linux-amd64_CFLAGS    := -I$(JAVA_HOME)/include -Isqlitejdbc/lib/inc_mac -Os -fPIC
 Linux-amd64_LINKFLAGS := -shared
 Linux-amd64_LIBNAME   := libsqlitejdbc.so
 Linux-amd64_SQLITE_FLAGS  := 
@@ -103,7 +105,7 @@ LINKFLAGS := $($(target)_LINKFLAGS)
 LIBNAME   := $($(target)_LIBNAME)
 SQLITE_FLAGS := $($(target)_SQLITE_FLAGS)
 
-CFLAGS := $(CFLAGS) -Ibuild/$(sqlite)-$(target) -Ibuild
+CFLAGS := $(CFLAGS) -Itarget/sqlitejdbc/build/$(sqlite)-$(target) -Itarget/sqlitejdbc/build
 ifneq ($(jni_include),)
 CFLAGS := $(CFLAGS) -I"$(jni_include)"
 endif
