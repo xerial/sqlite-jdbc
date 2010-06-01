@@ -43,7 +43,7 @@ LIB_PUREJAVA=$(LIB_DIR)/purejava/SQLite.class
 
 
 $(LIB_PUREJAVA):
-	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK)/sqlitejdbc && make -f Makefile.nested"
+	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK) && make purejava"
 	mkdir -p $(LIB_DIR)/purejava
 	scp $(MAC_TIGER_SERVER):./$(MAC_TIGER_WORK)/sqlitejdbc/build/org/sqlite/SQLite.class $(LIB_DIR)/purejava/
 
@@ -54,17 +54,17 @@ $(DLL_WIN):
 	$(RSYNC)  $(WIN_SERVER):./$(WIN_WORK)/$(DLL_DIR)/Windows/ $(DLL_DIR)/Windows/
 
 $(DLL_WIN64): 
-	ssh $(WIN64_SERVER) "source .zprofile && cd $(WIN64_WORK) && $(BUILD_CMD) Win_CC=x86_64-w64-mingw32-gcc Win_STRIP=x86_64-w64-mingw32-strip"
+	ssh $(WIN64_SERVER) "source .zprofile && cd $(WIN64_WORK) && $(BUILD_CMD)"
 	mkdir -p $(DLL_DIR)/Windows
 	$(RSYNC)  $(WIN64_SERVER):./$(WIN64_WORK)/$(DLL_DIR)/Windows/ $(DLL_DIR)/Windows/
 
 $(DLL_MAC): 
-	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(BUILD_CMD) arch=x86_64"
+	ssh $(MAC_SERVER) "source .zprofile && cd $(MAC_WORK) && $(BUILD_CMD)"
 	mkdir -p $(DLL_DIR)/Mac
 	$(RSYNC)  $(MAC_SERVER):./$(MAC_WORK)/$(DLL_DIR)/Mac/ $(DLL_DIR)/Mac/
 
 $(DLL_TIGER_MAC): 
-	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK) && $(BUILD_CMD) SQLITE_FLAGS=-DSQLITE_ENABLE_LOCKING_STYLE=0"
+	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK) && $(BUILD_CMD)"
 	mkdir -p $(DLL_DIR)/Mac
 	$(RSYNC)  $(MAC_TIGER_SERVER):./$(MAC_TIGER_WORK)/$(DLL_DIR)/Mac/ $(DLL_DIR)/Mac/
 
