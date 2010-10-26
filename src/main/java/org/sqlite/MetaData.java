@@ -762,15 +762,36 @@ class MetaData implements DatabaseMetaData
                 sql += " union all ";
             colFound = true;
 
+            //            colType = colType == null ? "TEXT" : colType.toUpperCase();
+            //            int colJavaType = -1;
+            //            if (colType.equals("INT") || colType.equals("INTEGER"))
+            //                colJavaType = Types.INTEGER;
+            //            else if (colType.equals("TEXT"))
+            //                colJavaType = Types.VARCHAR;
+            //            else if (colType.equals("FLOAT"))
+            //                colJavaType = Types.FLOAT;
+            //            else
+            //                colJavaType = Types.VARCHAR;
+
+            /*
+             * improved column types
+             * ref http://www.sqlite.org/datatype3.html - 2.1 Determination Of Column
+            Affinity
+             * plus some degree of artistic-license applied
+             */
             colType = colType == null ? "TEXT" : colType.toUpperCase();
             int colJavaType = -1;
-            if (colType.equals("INT") || colType.equals("INTEGER"))
+            // rule #1 + boolean
+            if (colType.matches(".*(INT|BOOL).*"))
                 colJavaType = Types.INTEGER;
-            else if (colType.equals("TEXT"))
+            // rule #2 + blob
+            else if (colType.matches(".*(CHAR|CLOB|TEXT|BLOB).*"))
                 colJavaType = Types.VARCHAR;
-            else if (colType.equals("FLOAT"))
+            // rule #4 + decimal, numeric
+            else if (colType.matches(".*(REAL|FLOA|DOUB|DEC|NUM).*"))
                 colJavaType = Types.FLOAT;
             else
+                // catch-all               
                 colJavaType = Types.VARCHAR;
 
             sql += "select " + i + " as ordpos, " + colNullable + " as colnullable, '" + colJavaType + "' as ct, '"
@@ -947,12 +968,11 @@ class MetaData implements DatabaseMetaData
         Statement stat = conn.createStatement();
 
         sql = String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, ", quote(catalog), quote(schema))
-                + String
-                        .format(
-                                "ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, %s as FKTABLE_NAME, ",
-                                quote(catalog), quote(schema), quote(table)) + "fcn as FKCOLUMN_NAME, "
-                + "ks as KEY_SEQ, " + "ur as UPDATE_RULE, " + "dr as DELETE_RULE, " + "'' as FK_NAME, "
-                + "'' as PK_NAME, " + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (";
+                + String.format(
+                        "ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, %s as FKTABLE_NAME, ",
+                        quote(catalog), quote(schema), quote(table)) + "fcn as FKCOLUMN_NAME, " + "ks as KEY_SEQ, "
+                + "ur as UPDATE_RULE, " + "dr as DELETE_RULE, " + "'' as FK_NAME, " + "'' as PK_NAME, "
+                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (";
 
         // Use a try catch block to avoid "query does not return ResultSet" error
         try {
