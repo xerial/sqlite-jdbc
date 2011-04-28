@@ -104,7 +104,9 @@ LINKFLAGS := $($(target)_LINKFLAGS)
 LIBNAME   := $($(target)_LIBNAME)
 SQLITE_FLAGS := $($(target)_SQLITE_FLAGS)
 
-CFLAGS := $(CFLAGS) -I$(WORK)/build/$(sqlite)-$(target) -I$(WORK)/build
+SQLITE_AMAL_PREFIX:=sqlite-amalgamation-$(subst .,0,$(version))
+
+CFLAGS := $(CFLAGS) -I$(WORK)/build/$(sqlite)-$(target)/$(SQLITE_AMAL_PREFIX) -I$(WORK)/build
 ifneq ($(jni_include),)
 CFLAGS := $(CFLAGS) -I"$(jni_include)"
 endif

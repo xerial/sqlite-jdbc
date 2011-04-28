@@ -17,8 +17,10 @@ UPDATE_FLAG=$(WORK)/dll/$(sqlite)/UPDATE
 BUILD:=$(WORK)/build
 NATIVE_DLL:=$(WORK_DIR)/$(LIB_FOLDER)/$(LIBNAME)
 
+
+
 SQLITE_DLL=$(BUILD)/$(target)/$(LIBNAME)
-SQLITE_BUILD_DIR=$(BUILD)/$(sqlite)-$(target)
+SQLITE_BUILD_DIR=$(BUILD)/$(sqlite)-$(target)/$(SQLITE_AMAL_PREFIX)
 
 
 $(UPDATE_FLAG): $(SQLITE_DLL)
@@ -67,17 +69,19 @@ $(SQLITE_DLL): $(SQLITE_BUILD_DIR)/sqlite3.o $(BUILD)/org/sqlite/NativeDB.class 
 		$(BUILD)/$(target)/NativeDB.o $(SQLITE_BUILD_DIR)/*.o 
 	$(STRIP) $@
 
-$(BUILD)/$(sqlite)-%/sqlite3.o: $(WORK)/dl/$(sqlite)-amal.zip
-	@mkdir -p $(dir $@)
+
+
+$(BUILD)/$(sqlite)-$(target)/$(SQLITE_AMAL_PREFIX)/sqlite3.o: $(WORK)/dl/$(sqlite)-amal.zip
+	@mkdir -p $(BUILD)/$(sqlite)-$(target)
 	$(info building a native library for os:$(OS_NAME) arch:$(OS_ARCH))
-	unzip -qo $(WORK)/dl/$(sqlite)-amal.zip -d $(BUILD)/$(sqlite)-$*
+	unzip -qo $(WORK)/dl/$(sqlite)-amal.zip -d $(BUILD)/$(sqlite)-$(target)
 	perl -pi -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
-	    $(BUILD)/$(sqlite)-$*/sqlite3ext.h
+	    $(SQLITE_BUILD_DIR)/sqlite3ext.h
 # insert a code for loading extension functions
 	perl -pi -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
-	    $(BUILD)/$(sqlite)-$*/sqlite3.c
-	cat src/main/ext/*.c >> $(BUILD)/$(sqlite)-$*/sqlite3.c
-	(cd $(BUILD)/$(sqlite)-$*; $(CC) -o sqlite3.o -c $(CFLAGS) \
+	    $(SQLITE_BUILD_DIR)/sqlite3.c
+	cat src/main/ext/*.c >> $(SQLITE_BUILD_DIR)/sqlite3.c
+	(cd $(SQLITE_BUILD_DIR); $(CC) -o sqlite3.o -c $(CFLAGS) \
 	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
 	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
@@ -93,9 +97,11 @@ $(BUILD)/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(BUILD)
 	$(JAVAC) -source 1.5 -target 1.5 -sourcepath src/main/java -d $(BUILD) $<
 
+
+
 $(WORK)/dl/$(sqlite)-amal.zip:
 	@mkdir -p $(dir $@)
 	curl -o$@ \
-	http://www.sqlite.org/sqlite-amalgamation-$(subst .,_,$(version)).zip
+	http://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip
 
 
