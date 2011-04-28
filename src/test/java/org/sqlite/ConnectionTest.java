@@ -43,6 +43,7 @@ public class ConnectionTest
 
     @Test
     public void readOnly() throws SQLException {
+
         // set read only mode
         SQLiteConfig config = new SQLiteConfig();
         config.setReadOnly(true);
@@ -61,7 +62,6 @@ public class ConnectionTest
             stat.close();
             conn.close();
         }
-
         fail("read only flag is not properly set");
     }
 
@@ -73,8 +73,7 @@ public class ConnectionTest
         Statement stat = conn.createStatement();
 
         try {
-            stat
-                    .executeUpdate("create table track(id integer primary key, name, aid, foreign key (aid) references artist(id))");
+            stat.executeUpdate("create table track(id integer primary key, name, aid, foreign key (aid) references artist(id))");
             stat.executeUpdate("create table artist(id integer primary key, name)");
 
             stat.executeUpdate("insert into artist values(10, 'leo')");
@@ -134,11 +133,11 @@ public class ConnectionTest
 
     @Test
     public void openFile() throws SQLException {
-        File testdb = new File("test.db");
+        File testdb = new File("target/test.db");
         if (testdb.exists())
             testdb.delete();
         assertFalse(testdb.exists());
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:test.db");
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:target/test.db");
         conn.close();
         assertTrue(testdb.exists());
         testdb.delete();

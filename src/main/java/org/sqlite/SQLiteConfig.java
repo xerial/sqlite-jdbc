@@ -258,10 +258,12 @@ public class SQLiteConfig
     public void setReadOnly(boolean readOnly) {
         if (readOnly) {
             setOpenMode(SQLiteOpenMode.READONLY);
+            resetOpenMode(SQLiteOpenMode.CREATE);
             resetOpenMode(SQLiteOpenMode.READWRITE);
         }
         else {
             setOpenMode(SQLiteOpenMode.READWRITE);
+            setOpenMode(SQLiteOpenMode.CREATE);
             resetOpenMode(SQLiteOpenMode.READONLY);
         }
     }
