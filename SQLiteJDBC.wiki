@@ -2,21 +2,63 @@
 
 = SQLite JDBC Driver =
 
-SQLite JDBC driver, which is developed by [wiki:leo Taro L. Saito], is an extension of [http://www.zentus.com/sqlitejdbc Zentus's SQLite JDBC driver] that enables you to access [http://sqlite.org SQLite] database files in Java codes.
+SQLite JDBC driver developed by [wiki:leo Taro L. Saito] is an extension of [http://www.zentus.com/sqlitejdbc Zentus's SQLite JDBC driver] that enables Java to access [http://sqlite.org SQLite] database files.
 
-Our SQLiteJDBC library, which is developed as a part of [http://www.xerial.org Xerial project], requires no configuration, since all native libraries for Windows, Mac OS X, Linux, Soralis, etc. and the pure-java SQLite, which works in any enviroment, are assembled into a single JAR (Java Archive) file. Usage is quite simple; [#Download Download] our sqlite-jdbc library, then append the jar file to your class path. 
+Our SQLiteJDBC library, developed as a part of [http://www.xerial.org Xerial project], requires no configuration since all native libraries for Windows, Mac OS X, Linux and pure-java SQLite, which works in any OS enviroment, are assembled into a single JAR (Java Archive) file. The usage is quite simple; [#Download Download] our sqlite-jdbc library, then append the library (JAR file) to your class path. See [#Usage the sample code]. 
 
 == What is different from Zentus's SQLite JDBC? ==
 
-The original Zentus's SQLite JDBC driver http://www.zentus.com/sqlitejdbc/ itself is an excellent utility for using [http://sqlite.org SQLite] databases from Java language, and our SQLiteJDBC library also relies on its implementation. However, SQLite JDBC driver's pure-java version, which totally translates c/c++ codes of SQLite into Java, is significantly slower than its native version, which uses SQLite native binaries compiled for each OS (win, mac, linux). 
+The original Zentus's SQLite JDBC driver http://www.zentus.com/sqlitejdbc/ itself is an excellent utility for using [http://sqlite.org SQLite] databases from Java language, and our SQLiteJDBC library also relies on its implementation. However, its pure-java version, which totally translates c/c++ codes of SQLite into Java, is significantly slower compared to its native version, which uses SQLite binaries compiled for each OS (win, mac, linux). 
 
-On the other hand, in order to use the native version, user has to set a path to the native codes (dll, jnilib, so files, which are JNDI C programs) by using command-line arguments, e.g., -Djava.library.path=(path to the dll, jnilib, etc.), or -Dorg.sqlite.lib.path, etc. This process is error-prone, and bothersome to tell every user to set these variables. Our SQLiteJDBC library completely does away these inconveniences. 
+To use the native version of sqlite-jdbc, user had to set a path to the native codes (dll, jnilib, so files, which are JNDI C programs) by using command-line arguments, e.g., -Djava.library.path=(path to the dll, jnilib, etc.), or -Dorg.sqlite.lib.path, etc. This process was error-prone and bothersome to tell every user to set these variables. Our SQLiteJDBC library completely does away these inconveniences. 
 
+Another difference is that we are keeping this SQLiteJDBC libray up-to-date to the newest version of SQLite engine, because we are one of the hottest users of this library. For example, SQLite JDBC is a core component of [http://utgenome.org/ UTGB (University of Tokyo Genome Browser) Toolkit], which is our utility to create personalized genome browsers.
 
 == Public Discussion Forum == 
- * Post bug reports or feature requests to [http://groups.google.com/group/xerial Xerial Public Discussion Group] 
+ * Post bug reports or feature requests to [http://groups.google.com/group/xerial?hl=en Xerial Public Discussion Group] 
 
 == News ==
+  * 2010 August 27th: sqlite-jdbc-3.7.2 release: http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.7.2/
+  * 2010 April 3rd: beta release of sqlite-jdbc-3.6.23.1-SNAPSHOT: http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/
+    * Added online backup/restore functions. Syntax: backup to (file name),  restore from (file name).
+  * 2009 December 10th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.20.1/ sqlite-jdbc-3.6.20.1] release. 
+    * Read-only conection, recursive trigger, foreign key validation support etc. using SQLiteConfig class.
+{{{
+#!java
+SQLiteConfig config = new SQLiteConfig();
+// config.setReadOnly(true);   
+config.setSharedCache(true);
+config.recursiveTriggers(true);
+// ... other configuration can be set via SQLiteConfig object
+Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.toProperties());
+}}}
+  * 2009 November 12th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.19/ sqlite-jdbc-3.6.19] release. 
+    * added 64-bit OS support: 64-bit native SQLite binaries for Windows (x86_64), Mac (x86_64) and Linux (adm64) are available.
+  * 2009 August 19th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.17.1/ sqlite-jdbc-3.6.17.1] released. 
+  * 2009 July 2nd: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.16/ sqlite-jdbc-3.6.16] release. 
+  * 2009 June 4th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.2/ sqlite-jdbc-3.6.14.2] released. 
+  * 2009 May 19th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.1/ sqlite-jdbc-3.6.14.1] released. This version supports "jdbc:sqlite::resource:" syntax to access read-only DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the [http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76 detailes]) 
+
+  * 2009 February 18th: sqlite-jdbc-3.6.11 released. 
+    * Fixed a bug in !PrepStmt, which does not clear the batch contents after executeBatch(). [http://groups.google.com/group/xerial/browse_thread/thread/1fa83eb36f6d5dab Discussion].
+
+  * 2009 January 19th: sqlite-jdbc-3.6.10 released. This version is compatible with sqlite version 3.6.10. http://www.sqlite.org/releaselog/3_6_10.html
+    * Added READ_UNCOMMITTED mode support for better query performance: (see also http://www.sqlite.org/sharedcache.html )
+{{{
+#!java
+ // READ_UNCOMMITTED mode works only in shared_cache mode.
+ Properties prop = new Properties();
+ prop.setProperty("shared_cache", "true");
+ Connection conn = DriverManager.getConnection("jdbc:sqlite:", prop);
+ conn.setTransactionIsolation(Conn.TRANSACTION_READ_UNCOMMITTED);
+}}}
+  * 2008 December 17th: sqlite-jdbc-3.6.7 released. Related information: http://www.sqlite.org/releaselog/3_6_7.html
+  * 2008 December 1st: sqlite-jdbc-3.6.6.2 released, which fixed a bug incorporated in the version 3.6.6 http://www.sqlite.org/releaselog/3_6_6_2.html 
+  * 2008 November 20th: sqlite-jdbc-3.6.6 release. sqlite-3.6.6 changes: http://www.sqlite.org/releaselog/3_6_6.html
+@* 2008 November 11th: sqlite-jdbc-3.6.4.1. A bug fix release 
+    * Pure-java version didn't work correctly. Fixed in both 3.6.4.1 and 3.6.4. If you have already downloaded 3.6.4, please obtain the latest one on the download page.
+ * 2008 October 16th: sqlite-jdbc-3.6.4 released. Changes from SQLite 3.6.3: http://www.sqlite.org/releaselog/3_6_4.html 
+   * R*-Tree index and UPDATE/DELTE syntax with LIMIT clause are available from this build.
  * 2008 October 14th: sqlite-jdbc-3.6.3 released. Compatible with SQLite 3.6.3.
  * 2008 September 18th: sqlite-jdbc-3.6.2 released. Compatible with SQLite 3.6.2 and contains pure-java and native versions.
  * 2008 July 17th: sqlite-jdbc-3.6.0 released. Compatible with SQLite 3.6.0, and includes both pure-java and native versions. 
@@ -35,16 +77,22 @@ On the other hand, in order to use the native version, user has to set a path to
 
 == Download ==
 Download the latest version of SQLiteJDBC from [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc here]. 
- * version 3.6.3 is the latest one. 
+ * version 3.6.x is the latest one. 
   * Do not use sqlite-jdbc-v0xx.jar, which are obsolete libraries but left here for users still using these versions. 
 
 If your are an [http://maven.apache.org Maven] user, follow the instruction described [#UsingSQLiteJDBCwithMaven2 here].
 
-== Supported Operating Systems ==
-Since the sqlite-jdbc-3.5.9-universal, any OSs that can run Java programs are supported. The natively compiled SQLite engines will be used in the following operating systems:
+=== Beta Release ===
 
- * Windows XP, Vista  (Windows, x86 architecture)
- * Mac OS X 10.4 (Tiger), 10.5(Leopard) (for i386, Intel CPU machines)
+The early releases (beta) of sqlite-jdbc with some advanced features are available from here:
+ * http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc 
+
+
+== Supported Operating Systems ==
+Since sqlite-jdbc-3.6.19, the natively compiled SQLite engines will be used for the following operating systems:
+
+ * Windows XP, Vista  (Windows, x86 architecture, x86_64)
+ * Mac OS X 10.4 (Tiger), 10.5(Leopard), 10.6 SnowLeopard (for i386, x86_64, Intel CPU machines)
  * Linux i386 (Intel), amd64 (64-bit X86 Intel processor) 
 
 In the other OSs not listed above, the pure-java SQLite is used.
@@ -60,7 +108,9 @@ If you want to use the native library for your OS, [#BuildfromSource build the s
  * Usage Example (Assuming sqlite-jdbc-(VERSION).jar is placed in the current directory)
 {{{
 > javac Sample.java
-> java -classpath ".:sqlite-jdbc-(VERSION).jar" Sample 
+> java -classpath ".;sqlite-jdbc-(VERSION).jar" Sample   # in Windows
+or 
+> java -classpath ".:sqlite-jdbc-(VERSION).jar" Sample   # in Mac or Linux
 name = leo
 id = 1
 name = yui
@@ -151,7 +201,7 @@ Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
 == How to test the running mode: Native or Pure-Java Version? ==
 {{{
 #!java
-import org.xerial.db.sql.sqlite.SQLiteJDBCLoader;
+import org.sqlite.SQLiteJDBCLoader;
 
 // in your function ...
 void test()
@@ -166,7 +216,7 @@ void test()
 
 In some OS (e.g., old Linux kernel), loading native library causes JVM crashes. In this case, set sqlite.purejava=true JVM variable:
 {{{
- > java -Dsqlite.purejava=true -cp .:sqlite-jdbc-3.6.3.jar Sample
+ > java -Dsqlite.purejava=true -cp .:sqlite-jdbc-3.6.10.jar Sample
 }}}
 
 Or, set this System property before loading the JDBC driver:
@@ -177,15 +227,45 @@ Or, set this System property before loading the JDBC driver:
 
 In this mode, sqlite-jdbc never uses native SQLite libraries.
 
+== How to use Online Backup and Restore Feature ==
+
+  * Take a backup of the whole database to "backup.db" file:
+{{{
+// Create a memory database
+Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+// Do some updates
+stmt.executeUpdate("create table sample(id, name)");
+stmt.executeUpdate("insert into sample values(1, \"leo\")");
+stmt.executeUpdate("insert into sample values(2, \"yui\")");
+// Dump the database contents to a file
+stmt.executeUpdate("backup to backup.db");
+}}}
+
+  * Restore the database from a backup file:
+{{{
+// Create a memory database
+Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+// Restore the database from a backup file
+Statement stat = conn.createStatement();
+stat.executeUpdate("restore from backup.db");
+}}}
+
+Another sample code is [http://code.google.com/p/xerial/source/browse/src/test/java/org/sqlite/BackupTest.java?repo=sqlite here].
+
 == How does SQLiteJDBC work? ==
 
 Our SQLite JDBC driver package (i.e., sqlite-jdbc-(VERSION).jar) contains three types of native SQLite libraries (sqlite-jdbc.dll, sqlite-jdbc.jnilib, sqlite-jdbc.so), each of them is compiled for Windows, Mac OS and Linux. An appropriate native library file is automatically extracted into your OS's temporary folder, when your program loads "org.sqlite.JDBC" driver.  
 
 == Source Codes ==
- * Subversion Repository: http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc/
-   * version 3.6.3 snapshot: http://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-3.6.3
+ * Mercurial Repository: http://code.google.com/p/xerial/source/checkout?repo=sqlite 
+{{{
+$ hg clone https://sqlite.xerial.googlecode.com/hg/ sqlite-jdbc
+}}}
 
-web viewer: http://www.xerial.org/trac/Xerial/browser/XerialJ/trunk/sqlite-jdbc
+ * (obsolete) Subversion Repository: http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc/
+   * source code snapshots for each version: http://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/
+   * version 3.6.11 snapshot: http://www.xerial.org/svn/project/XerialJ/tags/sqlite-jdbc/sqlite-jdbc-3.6.11
+   * web viewer: http://www.xerial.org/trac/Xerial/browser/XerialJ/trunk/sqlite-jdbc
 
 == License ==
 
@@ -220,7 +300,7 @@ If you are familier with [http://maven.apache.org Maven2], add the following XML
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
-      <version>3.6.3</version>
+      <version>3.6.16</version>
     </dependency>
   </dependencies>
 }}}
@@ -235,7 +315,7 @@ If you are using Maven for your web application, set the dependency scope as 'pr
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
-      <version>3.6.3</version>
+      <version>3.6.16</version>
       <scope>provided</scope>
     </dependency>
 }}}
@@ -245,16 +325,16 @@ If you are using Maven for your web application, set the dependency scope as 'pr
 If your OS is not supported, consider to build the [#SourceCodes source] from scratch. 
 
   * Install Java SDK (1.5 or higher) http://java.sun.com
-  * Install [wiki:Subversion Subversion]
+  * Install [http://mercurial.selenic.com/ Mercurial] (hg)
   * Install Maven2 (2.0.7 or higher) http://maven.apache.org
      * You need to set PATH variable so as to run mvn command. Here is an example setting for maven:
 {{{
 export MAVEN_HOME=$HOME/local/maven-2.0.7
 export PATH=$MAVEN_HOME/bin:$PATH
 }}}
-  * Checkout the subversion repository
+  * Clone the Mercurial repository 
 {{{ 
- svn checkout http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc sqlite-jdbc
+ hg clone https://sqlite.xerial.googlecode.com/hg/ sqlite-jdbc
 }}}
   * (If necessary) set the JAVA_HOME environment variable as your JDK folder (e.g. /usr/java/jdk1.5.0_13), and PATH so that you can run the javac command.
 {{{
@@ -266,7 +346,7 @@ export PATH=$MAVEN_HOME/bin:$PATH
 {{{
  > make 
 }}}
-  * An SQLite JDBC JAR file that can additionally support your OS is generated in target/sqlite-jdbc-(version).jar
+  * A new SQLite JDBC jar file that additionally supports your OS will be generated as target/sqlite-jdbc-(version).jar
 
 === Dependency Tests ===
  * Windows XP (32-bit)
