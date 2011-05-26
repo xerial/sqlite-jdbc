@@ -100,7 +100,6 @@ test-native:
 test:
 	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD) -DargLine='-Dsqlite.purejava=true'"
 
-	
 release:
 	mvn release:prepare
 	mvn release:perform
@@ -110,5 +109,3 @@ release-xerial:
 
 release-sourceforge:
 	mvn release:perform -Darguments="-P sourceforge" -Dtag=sqlite-jdbc-$(version)
-	
-	
