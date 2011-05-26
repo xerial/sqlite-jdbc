@@ -65,7 +65,7 @@ public class StatementTest
         assertTrue(rs.next());
         assertEquals(rs.getInt(1), Integer.MAX_VALUE);
         assertEquals(rs.getString(1), Integer.toString(Integer.MAX_VALUE));
-        assertEquals(rs.getDouble(1), new Integer(Integer.MAX_VALUE).doubleValue());
+        assertEquals(rs.getDouble(1), new Integer(Integer.MAX_VALUE).doubleValue(), 0.001);
         assertFalse(rs.next());
         rs.close();
     }
