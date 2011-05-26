@@ -21,7 +21,6 @@
       <resource>
         <directory>src/main/resources</directory>
         <includes>
-          <include>native/**</include>
           <include>org/**</include>
         </includes>
       </resource>

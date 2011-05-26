@@ -212,7 +212,7 @@ public class SQLiteJDBCLoader
         }
 
         // Load the os-dependent library from a jar file
-        sqliteNativeLibraryPath = "/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
+        sqliteNativeLibraryPath = "/org/sqlite/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
 
         if (SQLiteJDBCLoader.class.getResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName) == null) {
             // use nested VM version

@@ -68,7 +68,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 
 $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SQLITE_OUT)/org/sqlite/NativeDB.class $(SRC)/org/sqlite/NativeDB.c $(SQLITE_OUT)/NativeDB.h
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/NativeDB.c
+	$(CC) $(CFLAGS) -c -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/NativeDB.c
 	$(CC) $(CFLAGS) -o $@ $(SQLITE_OUT)/*.o $(LINKFLAGS)
 	$(STRIP) $@
 
@@ -95,7 +95,7 @@ package: native
 	$(MVN) package
 
 clean-native:
-	rm -rf $(SQLITE_BUILD_DIR) 
+	rm -rf $(SQLITE_OUT)
 
 
 # targets for building pure-java library
@@ -103,7 +103,7 @@ purejava: $(SQLITE_BUILD_DIR)/org/sqlite/SQLite.class
 	mkdir -p $(RESOURCE_DIR)/org/sqlite
 	cp $< $(RESOURCE_DIR)/org/sqlite/SQLite.class
 
-$(BUILD)/org/sqlite/SQLite.class: 
+$(TARGET)/classes/org/sqlite/SQLite.class: 
 	make -f Makefile.purejava
 
 test-purejava:
