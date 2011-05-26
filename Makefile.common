@@ -40,7 +40,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-i386 Linux-amd64 Mac-i386 Mac-x86_64 Windows-x86 Windows-amd64
+known_targets := Linux-i386 Linux-amd64 Mac-i386 Mac-x86_64 Windows-x86 Windows-amd64 Solaris-SunOS Solaris-sparcv9
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
