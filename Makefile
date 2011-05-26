@@ -65,8 +65,8 @@ $(SQLITE_DLL): $(SQLITE_BUILD_DIR)/sqlite3.o $(BUILD)/org/sqlite/NativeDB.class 
 		-o $(BUILD)/NativeDB.h org.sqlite.NativeDB
 	$(CC) $(CFLAGS) -c -o $(BUILD)/$(target)/NativeDB.o \
 		src/main/java/org/sqlite/NativeDB.c
-	$(CC) $(CFLAGS) $(LINKFLAGS) -o $@ \
-		$(BUILD)/$(target)/NativeDB.o $(SQLITE_BUILD_DIR)/*.o 
+	$(CC) $(CFLAGS) -o $@ \
+		$(BUILD)/$(target)/NativeDB.o $(SQLITE_BUILD_DIR)/*.o $(LINKFLAGS)
 	$(STRIP) $@
 
 

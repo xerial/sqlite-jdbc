@@ -56,42 +56,42 @@ Default_SQLITE_FLAGS  :=
 
 Linux-i386_CC  := gcc
 Linux-i386_STRIP  := strip
-Linux-i386_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
-Linux-i386_LINKFLAGS := -shared
+Linux-i386_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -O2 -fPIC
+Linux-i386_LINKFLAGS := -shared -static-libgcc
 Linux-i386_LIBNAME   := libsqlitejdbc.so
 Linux-i386_SQLITE_FLAGS  := 
 
 Linux-amd64_CC  := gcc
 Linux-amd64_STRIP  := strip
-Linux-amd64_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC
-Linux-amd64_LINKFLAGS := -shared
+Linux-amd64_CFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -O2 -fPIC
+Linux-amd64_LINKFLAGS := -shared -static-libgcc
 Linux-amd64_LIBNAME   := libsqlitejdbc.so
 Linux-amd64_SQLITE_FLAGS  := 
 
 Mac-i386_CC        := gcc -arch $(OS_ARCH) 
 Mac-i386_STRIP     := strip -x
-Mac-i386_CFLAGS    := -I$(JAVA_HOME)/include -Os -fPIC 
-Mac-i386_LINKFLAGS := -dynamiclib 
+Mac-i386_CFLAGS    := -I$(JAVA_HOME)/include -O2 -fPIC -mmacosx-version-min=10.4
+Mac-i386_LINKFLAGS := -dynamiclib -static-libgcc
 Mac-i386_LIBNAME   := libsqlitejdbc.jnilib
 Mac-i386_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
 
 Mac-x86_64_CC        := gcc -arch $(OS_ARCH) 
 Mac-x86_64_STRIP     := strip -x
-Mac-x86_64_CFLAGS    := -I$(JAVA_HOME)/include -Os -fPIC 
-Mac-x86_64_LINKFLAGS := -dynamiclib 
+Mac-x86_64_CFLAGS    := -I$(JAVA_HOME)/include -O2 -fPIC -mmacosx-version-min=10.5
+Mac-x86_64_LINKFLAGS := -dynamiclib -static-libgcc
 Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
 
 Windows-x86_CC           := mingw32-gcc
 Windows-x86_STRIP        := strip
-Windows-x86_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O
+Windows-x86_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
 Windows-x86_LINKFLAGS    := -Wl,--kill-at -shared
 Windows-x86_LIBNAME      := sqlitejdbc.dll
 Windows-x86_SQLITE_FLAGS := 
 
 Windows-amd64_CC           := x86_64-w64-mingw32-gcc 
 Windows-amd64_STRIP        := x86_64-w64-mingw32-strip
-Windows-amd64_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O
+Windows-amd64_CFLAGS       := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
 Windows-amd64_LINKFLAGS    := -Wl,--kill-at -shared
 Windows-amd64_LIBNAME      := sqlitejdbc.dll
 Windows-amd64_SQLITE_FLAGS := 
