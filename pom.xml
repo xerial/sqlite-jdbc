@@ -91,9 +91,9 @@
   </build>
 
   <scm>
-    <connection>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connection>
+    <connection>scm:hg:https://sqlite-jdbc.googlecode.com/hg/</connection>
     <developerConnection>scm:hg:default</developerConnection>
-    <url>scm:hg:https://sqlite.xerial.googlecode.com/hg/</url>
+    <url>scm:hg:https://sqlite-jdbc.googlecode.com/hg/</url>
   </scm>
 
 
