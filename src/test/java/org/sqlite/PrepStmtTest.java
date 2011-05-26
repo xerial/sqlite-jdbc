@@ -21,44 +21,40 @@ import org.junit.Test;
 /** These tests are designed to stress PreparedStatements on memory dbs. */
 public class PrepStmtTest
 {
-    static byte[] b1 = new byte[] { 1, 2, 7, 4, 2, 6, 2, 8, 5, 2, 3, 1, 5, 3, 6, 3, 3, 6, 2, 5 };
-    static byte[] b2 = "To be or not to be.".getBytes();
-    static byte[] b3 = "Question!#$%".getBytes();
-    static String utf01 = "\uD840\uDC40";
-    static String utf02 = "\uD840\uDC47 ";
-    static String utf03 = " \uD840\uDC43";
-    static String utf04 = " \uD840\uDC42 ";
-    static String utf05 = "\uD840\uDC40\uD840\uDC44";
-    static String utf06 = "Hello World, \uD840\uDC40 \uD880\uDC99";
-    static String utf07 = "\uD840\uDC41 testing \uD880\uDC99";
-    static String utf08 = "\uD840\uDC40\uD840\uDC44 testing";
+    static byte[]      b1    = new byte[] { 1, 2, 7, 4, 2, 6, 2, 8, 5, 2, 3, 1, 5, 3, 6, 3, 3, 6, 2, 5 };
+    static byte[]      b2    = "To be or not to be.".getBytes();
+    static byte[]      b3    = "Question!#$%".getBytes();
+    static String      utf01 = "\uD840\uDC40";
+    static String      utf02 = "\uD840\uDC47 ";
+    static String      utf03 = " \uD840\uDC43";
+    static String      utf04 = " \uD840\uDC42 ";
+    static String      utf05 = "\uD840\uDC40\uD840\uDC44";
+    static String      utf06 = "Hello World, \uD840\uDC40 \uD880\uDC99";
+    static String      utf07 = "\uD840\uDC41 testing \uD880\uDC99";
+    static String      utf08 = "\uD840\uDC40\uD840\uDC44 testing";
 
     private Connection conn;
-    private Statement stat;
+    private Statement  stat;
 
     @BeforeClass
-    public static void forName() throws Exception
-    {
+    public static void forName() throws Exception {
         Class.forName("org.sqlite.JDBC");
     }
 
     @Before
-    public void connect() throws Exception
-    {
+    public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
     }
 
     @After
-    public void close() throws SQLException
-    {
+    public void close() throws SQLException {
         stat.close();
         conn.close();
     }
 
     @Test
-    public void update() throws SQLException
-    {
+    public void update() throws SQLException {
         assertEquals(conn.prepareStatement("create table s1 (c1);").executeUpdate(), 0);
         PreparedStatement prep = conn.prepareStatement("insert into s1 values (?);");
         prep.setInt(1, 3);
@@ -77,13 +73,11 @@ public class PrepStmtTest
     }
 
     @Test
-    public void multiUpdate() throws SQLException
-    {
+    public void multiUpdate() throws SQLException {
         stat.executeUpdate("create table test (c1);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?);");
 
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             prep.setInt(1, i);
             prep.executeUpdate();
             prep.execute();
@@ -94,8 +88,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void emptyRS() throws SQLException
-    {
+    public void emptyRS() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select null limit 0;");
         ResultSet rs = prep.executeQuery();
         assertFalse(rs.next());
@@ -104,38 +97,35 @@ public class PrepStmtTest
     }
 
     @Test
-    public void singleRowRS() throws SQLException
-    {
+    public void singleRowRS() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ?;");
         prep.setInt(1, Integer.MAX_VALUE);
         ResultSet rs = prep.executeQuery();
         assertTrue(rs.next());
         assertEquals(rs.getInt(1), Integer.MAX_VALUE);
         assertEquals(rs.getString(1), Integer.toString(Integer.MAX_VALUE));
-        assertEquals(rs.getDouble(1), new Integer(Integer.MAX_VALUE).doubleValue());
+        assertEquals(rs.getDouble(1), new Integer(Integer.MAX_VALUE).doubleValue(), 0.0001);
         assertFalse(rs.next());
         rs.close();
         prep.close();
     }
 
     @Test
-    public void twoRowRS() throws SQLException
-    {
+    public void twoRowRS() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ? union all select ?;");
         prep.setDouble(1, Double.MAX_VALUE);
         prep.setDouble(2, Double.MIN_VALUE);
         ResultSet rs = prep.executeQuery();
         assertTrue(rs.next());
-        assertEquals(rs.getDouble(1), Double.MAX_VALUE);
+        assertEquals(rs.getDouble(1), Double.MAX_VALUE, 0.0001);
         assertTrue(rs.next());
-        assertEquals(rs.getDouble(1), Double.MIN_VALUE);
+        assertEquals(rs.getDouble(1), Double.MIN_VALUE, 0.0001);
         assertFalse(rs.next());
         rs.close();
     }
 
     @Test
-    public void stringRS() throws SQLException
-    {
+    public void stringRS() throws SQLException {
         String name = "Gandhi";
         PreparedStatement prep = conn.prepareStatement("select ?;");
         prep.setString(1, name);
@@ -147,15 +137,13 @@ public class PrepStmtTest
     }
 
     @Test
-    public void finalizePrep() throws SQLException
-    {
+    public void finalizePrep() throws SQLException {
         conn.prepareStatement("select null;");
         System.gc();
     }
 
     @Test
-    public void set() throws SQLException
-    {
+    public void set() throws SQLException {
         ResultSet rs;
         PreparedStatement prep = conn.prepareStatement("select ?, ?, ?;");
 
@@ -207,8 +195,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void colNameAccess() throws SQLException
-    {
+    public void colNameAccess() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ? as col1, ? as col2, ? as bingo;");
         prep.setNull(1, 0);
         prep.setFloat(2, Float.MIN_VALUE);
@@ -218,20 +205,18 @@ public class PrepStmtTest
         assertTrue(rs.next());
         assertNull(rs.getString("col1"));
         assertTrue(rs.wasNull());
-        assertEquals(rs.getFloat("col2"), Float.MIN_VALUE);
+        assertEquals(rs.getFloat("col2"), Float.MIN_VALUE, 0.0001);
         assertEquals(rs.getShort("bingo"), Short.MIN_VALUE);
         rs.close();
         prep.close();
     }
 
     @Test
-    public void insert1000() throws SQLException
-    {
+    public void insert1000() throws SQLException {
         stat.executeUpdate("create table in1000 (a);");
         PreparedStatement prep = conn.prepareStatement("insert into in1000 values (?);");
         conn.setAutoCommit(false);
-        for (int i = 0; i < 1000; i++)
-        {
+        for (int i = 0; i < 1000; i++) {
             prep.setInt(1, i);
             prep.executeUpdate();
         }
@@ -245,8 +230,7 @@ public class PrepStmtTest
 
     @Ignore
     @Test
-    public void getObject() throws SQLException
-    {
+    public void getObject() throws SQLException {
         stat.executeUpdate("create table testobj (" + "c1 integer, c2 float, c3, c4 varchar, c5 bit, c6, c7);");
         PreparedStatement prep = conn.prepareStatement("insert into testobj values (?,?,?,?,?,?,?);");
 
@@ -289,8 +273,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void tokens() throws SQLException
-    {
+    public void tokens() throws SQLException {
         /* checks for a bug where a substring is read by the driver as the
          * full original string, caused by my idiocyin assuming the
          * pascal-style string was null terminated. Thanks Oliver Randschau. */
@@ -306,8 +289,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void utf() throws SQLException
-    {
+    public void utf() throws SQLException {
         ResultSet rs = stat.executeQuery("select '" + utf01 + "','" + utf02 + "','" + utf03 + "','" + utf04 + "','"
                 + utf05 + "','" + utf06 + "','" + utf07 + "','" + utf08 + "';");
         assertEquals(rs.getString(1), utf01);
@@ -343,14 +325,12 @@ public class PrepStmtTest
     }
 
     @Test
-    public void batch() throws SQLException
-    {
+    public void batch() throws SQLException {
         ResultSet rs;
 
         stat.executeUpdate("create table test (c1, c2, c3, c4);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?,?,?,?);");
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             prep.setInt(1, Integer.MIN_VALUE + i);
             prep.setFloat(2, Float.MIN_VALUE + i);
             prep.setString(3, "Hello " + i);
@@ -361,21 +341,19 @@ public class PrepStmtTest
         prep.close();
 
         rs = stat.executeQuery("select * from test;");
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             assertTrue(rs.next());
             assertEquals(rs.getInt(1), Integer.MIN_VALUE + i);
-            assertEquals(rs.getFloat(2), Float.MIN_VALUE + i);
+            assertEquals(rs.getFloat(2), Float.MIN_VALUE + i, 0.0001);
             assertEquals(rs.getString(3), "Hello " + i);
-            assertEquals(rs.getDouble(4), Double.MAX_VALUE + i);
+            assertEquals(rs.getDouble(4), Double.MAX_VALUE + i, 0.0001);
         }
         rs.close();
         stat.executeUpdate("drop table test;");
     }
 
     @Test
-    public void testExecuteBatch() throws Exception
-    {
+    public void testExecuteBatch() throws Exception {
         stat.executeUpdate("create table t (c text);");
         PreparedStatement prep = conn.prepareStatement("insert into t values (?);");
         prep.setString(1, "a");
@@ -396,8 +374,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void dblock() throws SQLException
-    {
+    public void dblock() throws SQLException {
         stat.executeUpdate("create table test (c1);");
         stat.executeUpdate("insert into test values (1);");
         conn.prepareStatement("select * from test;").executeQuery().close();
@@ -406,8 +383,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void dbclose() throws SQLException
-    {
+    public void dbclose() throws SQLException {
         conn.prepareStatement("select ?;").setString(1, "Hello World");
         conn.prepareStatement("select null;").close();
         conn.prepareStatement("select null;").executeQuery().close();
@@ -416,12 +392,10 @@ public class PrepStmtTest
     }
 
     @Test
-    public void batchOneParam() throws SQLException
-    {
+    public void batchOneParam() throws SQLException {
         stat.executeUpdate("create table test (c1);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?);");
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             prep.setInt(1, Integer.MIN_VALUE + i);
             prep.addBatch();
         }
@@ -434,15 +408,13 @@ public class PrepStmtTest
     }
 
     @Test
-    public void paramMetaData() throws SQLException
-    {
+    public void paramMetaData() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ?,?,?,?;");
         assertEquals(prep.getParameterMetaData().getParameterCount(), 4);
     }
 
     @Test
-    public void metaData() throws SQLException
-    {
+    public void metaData() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ? as col1, ? as col2, ? as delta;");
         ResultSetMetaData meta = prep.getMetaData();
         assertEquals(meta.getColumnCount(), 3);
@@ -459,8 +431,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void date1() throws SQLException
-    {
+    public void date1() throws SQLException {
         Date d1 = new Date(987654321);
 
         stat.execute("create table t (c1);");
@@ -476,8 +447,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void date2() throws SQLException
-    {
+    public void date2() throws SQLException {
         Date d1 = new Date(1092941466000L);
         stat.execute("create table t (c1);");
         PreparedStatement prep = conn.prepareStatement("insert into t values (datetime(?/1000, 'unixepoch'));");
@@ -491,8 +461,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void changeSchema() throws SQLException
-    {
+    public void changeSchema() throws SQLException {
         stat.execute("create table t (c1);");
         PreparedStatement prep = conn.prepareStatement("insert into t values (?);");
         conn.createStatement().execute("create table t2 (c2);");
@@ -515,13 +484,11 @@ public class PrepStmtTest
     //    }
 
     @Test
-    public void reusingSetValues() throws SQLException
-    {
+    public void reusingSetValues() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ?,?;");
         prep.setInt(1, 9);
 
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             prep.setInt(2, i);
             ResultSet rs = prep.executeQuery();
             assertTrue(rs.next());
@@ -529,8 +496,7 @@ public class PrepStmtTest
             assertEquals(rs.getInt(2), i);
         }
 
-        for (int i = 0; i < 10; i++)
-        {
+        for (int i = 0; i < 10; i++) {
             prep.setInt(2, i);
             ResultSet rs = prep.executeQuery();
             assertTrue(rs.next());
@@ -543,29 +509,25 @@ public class PrepStmtTest
     }
 
     @Test(expected = SQLException.class)
-    public void noSuchTable() throws SQLException
-    {
+    public void noSuchTable() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select * from doesnotexist;");
         prep.executeQuery();
     }
 
     @Test(expected = SQLException.class)
-    public void noSuchCol() throws SQLException
-    {
+    public void noSuchCol() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select notacol from (select 1);");
         prep.executeQuery();
     }
 
     @Test(expected = SQLException.class)
-    public void noSuchColName() throws SQLException
-    {
+    public void noSuchColName() throws SQLException {
         ResultSet rs = conn.prepareStatement("select 1;").executeQuery();
         assertTrue(rs.next());
         rs.getInt("noSuchColName");
     }
 
-    private void assertArrayEq(byte[] a, byte[] b)
-    {
+    private void assertArrayEq(byte[] a, byte[] b) {
         assertNotNull(a);
         assertNotNull(b);
         assertEquals(a.length, b.length);
@@ -573,8 +535,7 @@ public class PrepStmtTest
             assertEquals(a[i], b[i]);
     }
 
-    private void assertArrayEq(int[] a, int[] b)
-    {
+    private void assertArrayEq(int[] a, int[] b) {
         assertNotNull(a);
         assertNotNull(b);
         assertEquals(a.length, b.length);
