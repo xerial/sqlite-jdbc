@@ -11,45 +11,33 @@ all: package
 deploy: 
 	mvn deploy 
 
-WORK:=target
-WORK_DIR=$(WORK)/dll/$(sqlite)/native
-UPDATE_FLAG=$(WORK)/dll/$(sqlite)/UPDATE
-BUILD:=$(WORK)/build
-NATIVE_DLL:=$(WORK_DIR)/$(LIB_FOLDER)/$(LIBNAME)
+MVN:=mvn
+SRC:=src/main/java
+SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
+SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
+SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
+SQLITE_AMAL_DIR=$(TARGET)/$(SQLITE_AMAL_PREFIX)
 
 
+CFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_AMAL_DIR) $(CFLAGS)
 
-SQLITE_DLL=$(BUILD)/$(target)/$(LIBNAME)
-SQLITE_BUILD_DIR=$(BUILD)/$(sqlite)-$(target)/$(SQLITE_AMAL_PREFIX)
+$(SQLITE_ARCHIVE):
+	@mkdir -p $(@D)
+	curl -o$@ http://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip
 
-
-$(UPDATE_FLAG): $(SQLITE_DLL)
-	mkdir -p $(WORK_DIR)/$(LIB_FOLDER)
-	cp $(SQLITE_DLL) $(WORK_DIR)/$(LIB_FOLDER) 
-	mkdir -p $(RESOURCE_DIR)/native/$(LIB_FOLDER)
-	cp $(NATIVE_DLL) $(RESOURCE_DIR)/native/$(LIB_FOLDER)
-	touch $(UPDATE_FLAG)
-
-native: $(UPDATE_FLAG)
-
-package: $(UPDATE_FLAG)
-	rm -rf target/dependency-maven-plugin-markers
-	mvn package
-
-clean-native:
-	rm -rf $(SQLITE_BUILD_DIR) $(UPDATE_FLAG)
+$(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
+	unzip -qo $< -d $(TARGET)
+	touch $@
 
 
+$(SQLITE_OUT)/org/sqlite/%.class: src/main/java/org/sqlite/%.java
+	@mkdir -p $(@D)
+	$(JAVAC) -source 1.5 -target 1.5 -sourcepath src/main/java -d $(SQLITE_OUT) $<
 
-purejava: $(BUILD)/org/sqlite/SQLite.class
-	mkdir -p $(RESOURCE_DIR)/org/sqlite
-	cp $< $(RESOURCE_DIR)/org/sqlite/SQLite.class
+jni-header: $(SRC)/org/sqlite/NativeDB.h
 
-$(BUILD)/org/sqlite/SQLite.class: 
-	make -f Makefile.purejava
-
-test-purejava:
-	mvn -DargLine="-Dsqlite.purejava=true" test	
+$(SQLITE_OUT)/NativeDB.h: $(SRC)/org/sqlite/NativeDB.java
+	$(JAVAH) -classpath $(SQLITE_OUT) -jni -o $@ org.sqlite.NativeDB
 
 test:
 	mvn test
@@ -58,30 +46,15 @@ clean:
 	rm -rf $(WORK)
 
 
-
-$(SQLITE_DLL): $(SQLITE_BUILD_DIR)/sqlite3.o $(BUILD)/org/sqlite/NativeDB.class src/main/java/org/sqlite/NativeDB.c
-	@mkdir -p $(dir $@)
-	$(JAVAH) -classpath $(BUILD) -jni \
-		-o $(BUILD)/NativeDB.h org.sqlite.NativeDB
-	$(CC) $(CFLAGS) -c -o $(BUILD)/$(target)/NativeDB.o \
-		src/main/java/org/sqlite/NativeDB.c
-	$(CC) $(CFLAGS) -o $@ \
-		$(BUILD)/$(target)/NativeDB.o $(SQLITE_BUILD_DIR)/*.o $(LINKFLAGS)
-	$(STRIP) $@
-
-
-
-$(BUILD)/$(sqlite)-$(target)/$(SQLITE_AMAL_PREFIX)/sqlite3.o: $(WORK)/dl/$(sqlite)-amal.zip
-	@mkdir -p $(BUILD)/$(sqlite)-$(target)
-	$(info building a native library for os:$(OS_NAME) arch:$(OS_ARCH))
-	unzip -qo $(WORK)/dl/$(sqlite)-amal.zip -d $(BUILD)/$(sqlite)-$(target)
-	perl -pi -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
-	    $(SQLITE_BUILD_DIR)/sqlite3ext.h
+$(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
+	@mkdir -p $(@D)
+	perl -p -e "s/sqlite3_api;/sqlite3_api = 0;/g" \
+	    $(SQLITE_AMAL_DIR)/sqlite3ext.h > $(SQLITE_OUT)/sqlite3ext.h
 # insert a code for loading extension functions
-	perl -pi -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
-	    $(SQLITE_BUILD_DIR)/sqlite3.c
-	cat src/main/ext/*.c >> $(SQLITE_BUILD_DIR)/sqlite3.c
-	(cd $(SQLITE_BUILD_DIR); $(CC) -o sqlite3.o -c $(CFLAGS) \
+	perl -p -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
+	    $(SQLITE_AMAL_DIR)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c
+	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
+	$(CC) -o $@ -c $(CFLAGS) \
 	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
 	    -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT \
 	    -DSQLITE_ENABLE_COLUMN_METADATA \
@@ -91,17 +64,48 @@ $(BUILD)/$(sqlite)-$(target)/$(SQLITE_AMAL_PREFIX)/sqlite3.o: $(WORK)/dl/$(sqlit
 	    -DSQLITE_ENABLE_RTREE \
 	    -DSQLITE_ENABLE_STAT2 \
 	    $(SQLITE_FLAGS) \
-	    sqlite3.c)
+	    $(SQLITE_OUT)/sqlite3.c
 
-$(BUILD)/org/sqlite/%.class: src/main/java/org/sqlite/%.java
-	@mkdir -p $(BUILD)
-	$(JAVAC) -source 1.5 -target 1.5 -sourcepath src/main/java -d $(BUILD) $<
+$(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SQLITE_OUT)/org/sqlite/NativeDB.class $(SRC)/org/sqlite/NativeDB.c $(SQLITE_OUT)/NativeDB.h
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/NativeDB.c
+	$(CC) $(CFLAGS) -o $@ $(SQLITE_OUT)/*.o $(LINKFLAGS)
+	$(STRIP) $@
 
 
+NATIVE_DIR=src/main/resources/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
-$(WORK)/dl/$(sqlite)-amal.zip:
-	@mkdir -p $(dir $@)
-	curl -o$@ \
-	http://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip
+native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
+$(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
+	@mkdir -p $(@D)
+	cp $< $@
+	@mkdir -p $(NATIVE_TARGET_DIR)
+	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
+
+
+win32: 
+	$(MAKE) native CC=mingw32-gcc OS_NAME=Windows OS_ARCH=x86
+
+
+package: native
+	rm -rf target/dependency-maven-plugin-markers
+	$(MVN) package
+
+clean-native:
+	rm -rf $(SQLITE_BUILD_DIR) 
+
+
+# targets for building pure-java library
+purejava: $(SQLITE_BUILD_DIR)/org/sqlite/SQLite.class
+	mkdir -p $(RESOURCE_DIR)/org/sqlite
+	cp $< $(RESOURCE_DIR)/org/sqlite/SQLite.class
+
+$(BUILD)/org/sqlite/SQLite.class: 
+	make -f Makefile.purejava
+
+test-purejava:
+	mvn -DargLine="-Dsqlite.purejava=true" test	
 

@@ -10,7 +10,7 @@ JAVA  := "$$JAVA_HOME/bin/java"
 JAVAC := "$$JAVA_HOME/bin/javac" -Xbootclasspath/p:$(libjdbc)
 JAVAH := "$$JAVA_HOME/bin/javah"
 
-WORK := target
+TARGET := target
 OSINFO_CLASS := org.sqlite.OSInfo
 OSINFO_PROG := lib/org/sqlite/OSInfo.class
 
@@ -103,10 +103,8 @@ CFLAGS    := $($(target)_CFLAGS)
 LINKFLAGS := $($(target)_LINKFLAGS) 
 LIBNAME   := $($(target)_LIBNAME)
 SQLITE_FLAGS := $($(target)_SQLITE_FLAGS)
-
 SQLITE_AMAL_PREFIX:=sqlite-amalgamation-$(subst .,0,$(version))
-
-CFLAGS := $(CFLAGS) -I$(WORK)/build/$(sqlite)-$(target)/$(SQLITE_AMAL_PREFIX) -I$(WORK)/build
+CFLAGS := $(CFLAGS) 
 ifneq ($(jni_include),)
 CFLAGS := $(CFLAGS) -I"$(jni_include)"
 endif
