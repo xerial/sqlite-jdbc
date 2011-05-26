@@ -92,11 +92,9 @@ win32:
 linux32:
 	$(MAKE) native OS_NAME=Linux OS_ARCH=i386
 
-solaris32:
-	$(MAKE) native OS_NAME=Solaris OS_ARCH=SunOS
 
-solaris64:
-	$(MAKE) native OS_NAME=Solaris OS_ARCH=sparcv9
+sparcv9:
+	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
 
 
 package: native
