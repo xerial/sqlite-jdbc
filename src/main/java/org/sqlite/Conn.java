@@ -44,6 +44,7 @@ class Conn implements Connection
     private boolean      autoCommit           = true;
     private int          transactionIsolation = TRANSACTION_SERIALIZABLE;
     private int          timeout              = 0;
+    private final int    openModeFlags;
 
     public Conn(String url, String fileName) throws SQLException {
         this(url, fileName, new Properties());
@@ -54,7 +55,8 @@ class Conn implements Connection
         this.fileName = fileName;
 
         SQLiteConfig config = new SQLiteConfig(prop);
-        open(config.getOpenModeFlags());
+        this.openModeFlags = config.getOpenModeFlags();
+        open(openModeFlags);
 
         boolean enableSharedCache = config.isEnabledSharedCache();
         boolean enableLoadExtension = config.isEnabledLoadExtension();
@@ -302,10 +304,15 @@ class Conn implements Connection
     }
 
     public boolean isReadOnly() throws SQLException {
-        return false;
-    } // FIXME
+        return (openModeFlags & SQLiteOpenMode.READONLY.flag) != 0;
+    }
 
-    public void setReadOnly(boolean ro) throws SQLException {}
+    public void setReadOnly(boolean ro) throws SQLException {
+        if (!isReadOnly()) {
+            throw new SQLException(
+                    "Cannot set read-only flag ofter establishing a connection. Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
+        }
+    }
 
     public DatabaseMetaData getMetaData() {
         if (meta == null)
