@@ -17,6 +17,7 @@ package org.sqlite;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -209,6 +210,25 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     }
 
     // DATA ACCESS FUNCTIONS ////////////////////////////////////////
+
+    public BigDecimal getBigDecimal(int col) throws SQLException {
+        final String stringValue = getString(col);
+		if (stringValue == null) {
+			return null;
+		}
+		else {
+			try {
+				return new BigDecimal(stringValue);
+			}
+			catch (NumberFormatException e) {
+				throw new SQLException("Bad value for type BigDecimal : " + stringValue);
+			}
+		}
+	}
+
+    public BigDecimal getBigDecimal(String col) throws SQLException {
+        return getBigDecimal(findColumn(col));
+    }
 
     public boolean getBoolean(int col) throws SQLException {
         return getInt(col) == 0 ? false : true;

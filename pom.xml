@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.7.6.3-SNAPSHOT</version>
+  <version>3.7.7.1-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -91,9 +91,9 @@
   </build>
 
   <scm>
-    <connection>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connection>
+    <connection>scm:hg:https://sqlite-jdbc.googlecode.com/hg/</connection>
     <developerConnection>scm:hg:default</developerConnection>
-    <url>scm:hg:https://sqlite.xerial.googlecode.com/hg/</url>
+    <url>scm:hg:https://sqlite-jdbc.googlecode.com/hg/</url>
   </scm>
 
 

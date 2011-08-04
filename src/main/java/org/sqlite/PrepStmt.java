@@ -18,6 +18,7 @@ package org.sqlite;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -173,6 +174,10 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
         batch[batchPos + pos - 1] = value;
     }
 
+    public void setBigDecimal(int pos, BigDecimal value) throws SQLException {
+		batch(pos, value == null ? null : value.toString());
+	}
+
     public void setBoolean(int pos, boolean value) throws SQLException {
         setInt(pos, value ? 1 : 0);
     }
@@ -234,6 +239,8 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
             setBoolean(pos, ((Boolean) value).booleanValue());
         else if (value instanceof byte[])
             batch(pos, value);
+		else if (value instanceof BigDecimal)
+			setBigDecimal(pos, (BigDecimal)value);
         else
             batch(pos, value.toString());
     }

@@ -51,9 +51,11 @@ public class ConnectionTest
         Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
         Statement stat = conn.createStatement();
         try {
+            assertTrue(conn.isReadOnly());
             // these updates must be forbidden in read-only mode
             stat.executeUpdate("create table A(id, name)");
             stat.executeUpdate("insert into A values(1, 'leo')");
+
         }
         catch (SQLException e) {
             return; // success
@@ -86,6 +88,23 @@ public class ConnectionTest
                 return; // successfully detect violation of foreign key constraints
             }
             fail("foreign key constraint must be enforced");
+        }
+        finally {
+            stat.close();
+            conn.close();
+        }
+
+    }
+
+    @Test
+    public void canWrite() throws SQLException {
+        SQLiteConfig config = new SQLiteConfig();
+        config.enforceForeignKeys(true);
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
+        Statement stat = conn.createStatement();
+
+        try {
+            assertFalse(conn.isReadOnly());
         }
         finally {
             stat.close();

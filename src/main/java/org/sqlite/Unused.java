@@ -54,8 +54,8 @@ abstract class Unused
         throws SQLException { throw unused(); }
     public void setAsciiStream(int parameterIndex, InputStream x, int length)
         throws SQLException { throw unused(); }
-    public void setBigDecimal(int parameterIndex, BigDecimal x)
-        throws SQLException { throw unused(); }
+//    public void setBigDecimal(int parameterIndex, BigDecimal x)
+//        throws SQLException { throw unused(); }
     public void setBinaryStream(int parameterIndex, InputStream x, int length)
         throws SQLException { throw unused(); }
     public void setBlob(int i, Blob x)
@@ -80,12 +80,12 @@ abstract class Unused
         throws SQLException { throw unused(); }
     public InputStream getAsciiStream(String col)
         throws SQLException { throw unused(); }
-    public BigDecimal getBigDecimal(int col)
-        throws SQLException { throw unused(); }
+//    public BigDecimal getBigDecimal(int col)
+//        throws SQLException { throw unused(); }
     public BigDecimal getBigDecimal(int col, int s)
         throws SQLException { throw unused(); }
-    public BigDecimal getBigDecimal(String col)
-        throws SQLException { throw unused(); }
+//    public BigDecimal getBigDecimal(String col)
+//        throws SQLException { throw unused(); }
     public BigDecimal getBigDecimal(String col, int s)
         throws SQLException { throw unused(); }
     public InputStream getBinaryStream(int col)

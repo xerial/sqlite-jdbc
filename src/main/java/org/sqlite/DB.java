@@ -380,7 +380,8 @@ abstract class DB implements Codes
 
     static SQLException newSQLException(int errorCode, String errorMessage) throws SQLException {
         SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
-        return new SQLException(String.format("%s (%s)", code, errorMessage));
+        SQLException e = new SQLException(String.format("%s (%s)", code, errorMessage), null, code.code);
+        return e;
     }
 
     private SQLException newSQLException(int errorCode) throws SQLException {
