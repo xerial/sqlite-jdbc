@@ -14,6 +14,7 @@ import java.sql.Statement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteConfig.SynchronousMode;
+import org.xerial.util.FileResource;
 
 /**
  * These tests check whether access to files is woring correctly and some
@@ -151,15 +152,13 @@ public class ConnectionTest
     }
 
     @Test
-    public void openFile() throws SQLException {
-        File testdb = new File("target/test.db");
-        if (testdb.exists())
-            testdb.delete();
-        assertFalse(testdb.exists());
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:target/test.db");
+    public void openFile() throws Exception {
+
+        File testDB = FileResource.copyToTemp(ConnectionTest.class, "sample.db", new File("target"));
+        testDB.deleteOnExit();
+        assertTrue(testDB.exists());
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB));
         conn.close();
-        assertTrue(testdb.exists());
-        testdb.delete();
     }
 
     @Test(expected = SQLException.class)
@@ -178,8 +177,12 @@ public class ConnectionTest
     }
 
     @Test
-    public void openResource() throws SQLException {
-        Connection conn = DriverManager.getConnection("jdbc:sqlite::resource:org/sqlite/sample.db");
+    public void openResource() throws Exception {
+        File testDB = FileResource.copyToTemp(ConnectionTest.class, "sample.db", new File("target"));
+        testDB.deleteOnExit();
+        assertTrue(testDB.exists());
+        Connection conn = DriverManager
+                .getConnection(String.format("jdbc:sqlite::resource:%s", testDB.toURI().toURL()));
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from coordinate");
         assertTrue(rs.next());
@@ -190,28 +193,19 @@ public class ConnectionTest
     }
 
     @Test
-    public void openHttpResource() throws SQLException {
-        Connection conn = DriverManager
-                .getConnection("jdbc:sqlite::resource:http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc/src/test/java/org/sqlite/sample.db");
+    public void openJARResource() throws Exception {
+        File testJAR = FileResource.copyToTemp(ConnectionTest.class, "testdb.jar", new File("target"));
+        testJAR.deleteOnExit();
+        assertTrue(testJAR.exists());
+
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite::resource:jar:%s!/sample.db", testJAR
+                .toURI().toURL()));
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from coordinate");
         assertTrue(rs.next());
         rs.close();
         stat.close();
         conn.close();
-
     }
 
-    @Test
-    public void openJARResource() throws SQLException {
-        Connection conn = DriverManager
-                .getConnection("jdbc:sqlite::resource:jar:http://www.xerial.org/svn/project/XerialJ/trunk/sqlite-jdbc/src/test/resources/testdb.jar!/sample.db");
-        Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery("select * from coordinate");
-        assertTrue(rs.next());
-        rs.close();
-        stat.close();
-        conn.close();
-
-    }
 }

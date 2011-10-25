@@ -97,6 +97,10 @@ sparcv9:
 	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
 
 
+mac32:
+	$(MAKE) native OS_NAME=Mac OS_ARCH=i386
+
+
 package: native
 	rm -rf target/dependency-maven-plugin-markers
 	$(MVN) package
