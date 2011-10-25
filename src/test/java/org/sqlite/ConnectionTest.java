@@ -3,6 +3,9 @@ package org.sqlite;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,7 +17,6 @@ import java.sql.Statement;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteConfig.SynchronousMode;
-import org.xerial.util.FileResource;
 
 /**
  * These tests check whether access to files is woring correctly and some
@@ -151,16 +153,6 @@ public class ConnectionTest
         assertTrue(conn.isClosed());
     }
 
-    @Test
-    public void openFile() throws Exception {
-
-        File testDB = FileResource.copyToTemp(ConnectionTest.class, "sample.db", new File("target"));
-        testDB.deleteOnExit();
-        assertTrue(testDB.exists());
-        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB));
-        conn.close();
-    }
-
     @Test(expected = SQLException.class)
     public void closeTest() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
@@ -178,8 +170,7 @@ public class ConnectionTest
 
     @Test
     public void openResource() throws Exception {
-        File testDB = FileResource.copyToTemp(ConnectionTest.class, "sample.db", new File("target"));
-        testDB.deleteOnExit();
+        File testDB = copyToTemp("sample.db");
         assertTrue(testDB.exists());
         Connection conn = DriverManager
                 .getConnection(String.format("jdbc:sqlite::resource:%s", testDB.toURI().toURL()));
@@ -194,8 +185,7 @@ public class ConnectionTest
 
     @Test
     public void openJARResource() throws Exception {
-        File testJAR = FileResource.copyToTemp(ConnectionTest.class, "testdb.jar", new File("target"));
-        testJAR.deleteOnExit();
+        File testJAR = copyToTemp("testdb.jar");
         assertTrue(testJAR.exists());
 
         Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite::resource:jar:%s!/sample.db", testJAR
@@ -206,6 +196,37 @@ public class ConnectionTest
         rs.close();
         stat.close();
         conn.close();
+    }
+
+    @Test
+    public void openFile() throws Exception {
+
+        File testDB = copyToTemp("sample.db");
+
+        assertTrue(testDB.exists());
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB));
+        conn.close();
+    }
+
+    public static File copyToTemp(String fileName) throws IOException {
+        InputStream in = ConnectionTest.class.getResourceAsStream(fileName);
+        File dir = new File("target");
+        if (!dir.exists())
+            dir.mkdirs();
+
+        File tmp = File.createTempFile(fileName, "", new File("target"));
+        tmp.deleteOnExit();
+        FileOutputStream out = new FileOutputStream(tmp);
+
+        byte[] buf = new byte[8192];
+        for (int readBytes = 0; (readBytes = in.read(buf)) != -1;) {
+            out.write(buf, 0, readBytes);
+        }
+        out.flush();
+        out.close();
+        in.close();
+
+        return tmp;
     }
 
 }
