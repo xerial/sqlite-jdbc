@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -122,10 +123,17 @@ class Conn implements Connection
         // tries to load native library first
         try {
             Class< ? > nativedb = Class.forName("org.sqlite.NativeDB");
-            if (((Boolean) nativedb.getDeclaredMethod("load", (Class< ? >[]) null).invoke((Object) null,
-                    (Object[]) null)).booleanValue())
-                db = (DB) nativedb.newInstance();
-
+            // getDeclaredMethod is not available in Android < 2.3
+            for (Method method: nativedb.getDeclaredMethods()) {
+            	if ("load".equals(method.getName()) && (
+            			method.getParameterTypes() == null || method.getParameterTypes().length == 0)) {
+                    if (((Boolean) method.invoke((Object) null,
+                            (Object[]) null)).booleanValue()) {
+                    	db = (DB) nativedb.newInstance();
+                    }
+                    break;
+            	}
+            }
         }
         catch (Exception e) {} // fall through to nested library
 
