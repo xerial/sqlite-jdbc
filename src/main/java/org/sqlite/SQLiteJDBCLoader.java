@@ -201,9 +201,13 @@ public class SQLiteJDBCLoader
         // Try loading library from org.sqlite.lib.path library path */
         String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
         String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
-        if (sqliteNativeLibraryName == null)
+	if (sqliteNativeLibraryName == null) {
             sqliteNativeLibraryName = System.mapLibraryName("sqlitejdbc");
-
+            if (sqliteNativeLibraryName != null && sqliteNativeLibraryName.endsWith("dylib")) {
+            	sqliteNativeLibraryName = sqliteNativeLibraryName.replace("dylib", "jnilib");
+            }
+        }
+	
         if (sqliteNativeLibraryPath != null) {
             if (loadNativeLibrary(sqliteNativeLibraryPath, sqliteNativeLibraryName)) {
                 extracted = true;
