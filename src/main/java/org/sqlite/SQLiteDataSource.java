@@ -50,6 +50,7 @@ public class SQLiteDataSource implements DataSource
     private int                   loginTimeout = 1;
 
     private String                url          = JDBC.PREFIX; // use memory database in default
+    private String                databaseName = ""; // the name of the current database
 
     public SQLiteDataSource() {
         this.config = new SQLiteConfig(); // default configuration
@@ -79,6 +80,22 @@ public class SQLiteDataSource implements DataSource
 
     public String getUrl() {
         return url;
+    }
+
+    /**
+    * Sets the database name.
+    * @param dbName the name of the database
+    */
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    /**
+    * Gets the name of the database if one was set.
+    * @see SQLiteDatabaseSource#setDatabaseName(String)
+    */
+    public String getDatabaseName() {
+        return databaseName;
     }
 
     public void setSharedCache(boolean enable) {
