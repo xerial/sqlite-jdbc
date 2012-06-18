@@ -44,6 +44,7 @@ public class SQLiteConfig
 {
     private final Properties pragmaTable;
     private int              openModeFlag = 0x00;
+    private TransactionMode  transactionMode; 
 
     public SQLiteConfig() {
         this(new Properties());
@@ -60,6 +61,8 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
+        transactionMode = TransactionMode.getMode(
+            prop.getProperty("transaction_mode", TransactionMode.DEFFERED.name()));
     }
 
     /**
@@ -112,6 +115,7 @@ public class SQLiteConfig
                 stat.close();
         }
 
+        ((Conn)conn).setTransactionMode(transactionMode);
     }
 
     private void set(Pragma pragma, boolean flag) {
@@ -219,7 +223,7 @@ public class SQLiteConfig
         }
 
         private Pragma(String pragmaName, String[] choices) {
-            this(pragmaName, null, null);
+            this(pragmaName, null, choices);
         }
 
         private Pragma(String pragmaName, String description, String[] choices) {
@@ -448,4 +452,27 @@ public class SQLiteConfig
         set(Pragma.USER_VERSION, version);
     }
 
+    public static enum TransactionMode implements PragmaValue {
+        DEFFERED, IMMEDIATE, EXCLUSIVE;
+
+        public String getValue() {
+            return name();
+        }
+
+        public static TransactionMode getMode(String mode) {
+            return TransactionMode.valueOf(mode.toUpperCase());
+        }
+    }
+
+    public void setTransactionMode(TransactionMode transactionMode) {
+        this.transactionMode = transactionMode;
+    }
+
+    public void setTransactionMode(String transactionMode) {
+        setTransactionMode(TransactionMode.getMode(transactionMode));
+    }
+
+    public TransactionMode getTransactionMode() {
+        return transactionMode;
+    }
 }

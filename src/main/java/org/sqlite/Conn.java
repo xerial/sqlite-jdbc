@@ -36,15 +36,21 @@ import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 
+import org.sqlite.SQLiteConfig.TransactionMode;
+
 class Conn implements Connection
 {
-    private final String url;
+    private final static String[] beginCommand      = new String[] {
+       "commit;", "commit immediate;", "commit exclusive"
+    };
+    private final String         url;
     private String       fileName;
     private DB           db                   = null;
     private MetaData     meta                 = null;
     private boolean      autoCommit           = true;
     private int          transactionIsolation = TRANSACTION_SERIALIZABLE;
     private int          timeout              = 0;
+    private int          transactionMode      = 0;
     private final int    openModeFlags;
 
     public Conn(String url, String fileName) throws SQLException {
@@ -303,6 +309,20 @@ class Conn implements Connection
         transactionIsolation = level;
     }
 
+    protected void setTransactionMode(TransactionMode mode) {
+        switch(mode) {
+            case DEFFERED:
+                transactionMode = 0;
+                break;
+            case IMMEDIATE:
+                transactionMode = 1;
+                break;
+            case EXCLUSIVE:
+                transactionMode = 2;
+                break;
+        }
+    }
+
     public Map getTypeMap() throws SQLException {
         throw new SQLException("not yet implemented");
     }
@@ -348,7 +368,7 @@ class Conn implements Connection
         if (autoCommit == ac)
             return;
         autoCommit = ac;
-        db.exec(autoCommit ? "commit;" : "begin;");
+        db.exec(autoCommit ? "commit;" : beginCommand[transactionMode]);
     }
 
     public void commit() throws SQLException {
@@ -356,7 +376,7 @@ class Conn implements Connection
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
         db.exec("commit;");
-        db.exec("begin;");
+        db.exec(beginCommand[transactionMode]);
     }
 
     public void rollback() throws SQLException {
@@ -364,7 +384,7 @@ class Conn implements Connection
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
         db.exec("rollback;");
-        db.exec("begin;");
+        db.exec(beginCommand[transactionMode]);
     }
 
     public Statement createStatement() throws SQLException {
