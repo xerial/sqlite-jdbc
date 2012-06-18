@@ -320,15 +320,24 @@ public class SQLiteConfig
     }
 
     public static enum Encoding implements PragmaValue {
-        UTF8("UTF-8"), UTF16("UTF-16"), UTF16_LITTLE_ENDIAN("UTF-16le"), UTF16_BIG_ENDIAN("UTF-16be");
+        UTF8("'UTF-8'"), UTF16("'UTF-16'"), UTF16_LITTLE_ENDIAN("'UTF-16le'"), UTF16_BIG_ENDIAN("'UTF-16be'"),
+        UTF_8(UTF8), UTF_16(UTF16), UTF_16LE(UTF16_LITTLE_ENDIAN), UTF_16BE(UTF16_BIG_ENDIAN);
         public final String typeName;
 
         private Encoding(String typeName) {
             this.typeName = typeName;
         }
 
+        private Encoding(Encoding encoding) {
+           this.typeName = encoding.getValue();
+        }
+
         public String getValue() {
             return typeName;
+        }
+
+        public static Encoding getEncoding(String value) {
+           return valueOf(value.replaceAll("-", "_").toUpperCase());
         }
     }
 
