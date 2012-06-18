@@ -34,70 +34,70 @@ public class OSInfo
 {
 
    public static void main(String[] args) {
-        if (args.length >= 1) {
-            if ("--os".equals(args[0])) {
-                System.out.print(getOSName());
-                return;
-            }
-            else if ("--arch".equals(args[0])) {
-                System.out.print(getArchName());
-                return;
-            }
-        }
+      if (args.length >= 1) {
+         if ("--os".equals(args[0])) {
+            System.out.print(getOSName());
+            return;
+         }
+         else if ("--arch".equals(args[0])) {
+            System.out.print(getArchName());
+            return;
+         }
+      }
 
-        System.out.print(getNativeLibFolderPathForCurrentOS());
-    }
+      System.out.print(getNativeLibFolderPathForCurrentOS());
+   }
 
-    /**
+   /**
     * Gets native library fold path name for the current operation system.
     * @return In the format of <code>OS_name/OS_architecture_name</code>
     */
    public static String getNativeLibFolderPathForCurrentOS() {
-        return getOSName() + "/" + getArchName();
-    }
+       return getOSName() + "/" + getArchName();
+   }
 
-    /**
+   /**
     * Gets the operating system name.
     * @return One of <code>Windows</code>, <code>Mac</code>,<code>Linux</code>
     */
    public static String getOSName() {
-        return translateOSNameToFolderName(System.getProperty("os.name"));
-    }
+       return translateOSNameToFolderName(System.getProperty("os.name"));
+   }
 
-    /**
+   /**
     * Gets the operation system architecture name.
     * @return
     */
    public static String getArchName() {
-        return translateArchNameToFolderName(System.getProperty("os.arch"));
-    }
+       return translateArchNameToFolderName(System.getProperty("os.arch"));
+   }
 
-    /**
+   /**
     * Extracts operating system name from given string.
     * @param osName
     * @return One of <code>Windows</code>, <code>Mac</code>,<code>Linux</code>
     */
    public static String translateOSNameToFolderName(String osName) {
-        if (osName.contains("Windows")) {
-            return "Windows";
-        }
-        else if (osName.contains("Mac")) {
-            return "Mac";
-        }
-        else if (osName.contains("Linux")) {
-            return "Linux";
-        }
-        else {
-            return osName.replaceAll("\\W", "");
-        }
-    }
+      if (osName.contains("Windows")) {
+          return "Windows";
+      }
+      else if (osName.contains("Mac")) {
+          return "Mac";
+      }
+      else if (osName.contains("Linux")) {
+          return "Linux";
+      }
+      else {
+          return osName.replaceAll("\\W", "");
+      }
+   }
 
-    /**
+   /**
     * Gets the operation system architecture name from giben string.
     * @param archName
     * @return
     */
    public static String translateArchNameToFolderName(String archName) {
-        return archName.replaceAll("\\W", "");
-    }
+       return archName.replaceAll("\\W", "");
+   }
 }

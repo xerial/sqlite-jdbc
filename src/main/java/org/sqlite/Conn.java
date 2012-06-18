@@ -38,574 +38,589 @@ import java.util.Properties;
 
 class Conn implements Connection
 {
-    private final String url;
-    private String       fileName;
-    private DB           db                   = null;
-    private MetaData     meta                 = null;
-    private boolean      autoCommit           = true;
-    private int          transactionIsolation = TRANSACTION_SERIALIZABLE;
-    private int          timeout              = 0;
-    private final int    openModeFlags;
+   private final String url;
+   private String       fileName;
+   private DB           db                   = null;
+   private MetaData     meta                 = null;
+   private boolean      autoCommit           = true;
+   private int          transactionIsolation = TRANSACTION_SERIALIZABLE;
+   private int          timeout              = 0;
+   private final int    openModeFlags;
 
-   public Conn(String url, String fileName) throws SQLException {
-        this(url, fileName, new Properties());
-    }
-
-   public Conn(String url, String fileName, Properties prop) throws SQLException {
-        this.url = url;
-        this.fileName = fileName;
-
-        SQLiteConfig config = new SQLiteConfig(prop);
-        this.openModeFlags = config.getOpenModeFlags();
-        open(openModeFlags);
-
-        boolean enableSharedCache = config.isEnabledSharedCache();
-        boolean enableLoadExtension = config.isEnabledLoadExtension();
-        db.shared_cache(enableSharedCache);
-        db.enable_load_extension(enableLoadExtension);
-
-        // set pragmas
-        config.apply(this);
-    }
-
-    private static final String RESOURCE_NAME_PREFIX = ":resource:";
-
-    /**
-    * Create a new database connection.
-    * @param openModeFlags
+   /**
+    * Constructor that applies the location and name of the database file.
+    * @param url The location of the database file.
+    * @param fileName The database file name.
     * @throws SQLException
     */
+   public Conn(String url, String fileName) throws SQLException {
+       this(url, fileName, new Properties());
+   }
+
+   /**
+    * Constructor that applies the location and name of the database file and Property object.
+    * @param url The location of the database file.
+    * @param fileName The database file name.
+    * @param prop The Property object.
+    * @throws SQLException
+    */
+   public Conn(String url, String fileName, Properties prop) throws SQLException {
+      this.url = url;
+      this.fileName = fileName;
+
+      SQLiteConfig config = new SQLiteConfig(prop);
+      this.openModeFlags = config.getOpenModeFlags();
+      open(openModeFlags);
+
+      boolean enableSharedCache = config.isEnabledSharedCache();
+      boolean enableLoadExtension = config.isEnabledLoadExtension();
+      db.shared_cache(enableSharedCache);
+      db.enable_load_extension(enableLoadExtension);
+
+      // set pragmas
+      config.apply(this);
+   }
+
+   private static final String RESOURCE_NAME_PREFIX = ":resource:";
+
+   /**
+    * Create a new database connection.
+    * @param openModeFlags Flags for file open operations
+    * @throws SQLException
+    * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
+    */
    private void open(int openModeFlags) throws SQLException {
-        // check the path to the file exists
-        if (!":memory:".equals(fileName)) {
-            if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
-                String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
+      // check the path to the file exists
+      if (!":memory:".equals(fileName)) {
+         if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
+            String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
 
-                // search the class path
-                ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
-                URL resourceAddr = contextCL.getResource(resourceName);
-                if (resourceAddr == null) {
-                    try {
-                        resourceAddr = new URL(resourceName);
-                    }
-                    catch (MalformedURLException e) {
-                        throw new SQLException(String.format("resource %s not found: %s", resourceName, e));
-                    }
-                }
-
+            // search the class path
+            ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+            URL resourceAddr = contextCL.getResource(resourceName);
+            if (resourceAddr == null) {
                 try {
-                    fileName = extractResource(resourceAddr).getAbsolutePath();
+                    resourceAddr = new URL(resourceName);
                 }
-                catch (IOException e) {
-                    throw new SQLException(String.format("failed to load %s: %s", resourceName, e));
+                catch (MalformedURLException e) {
+                    throw new SQLException(String.format("resource %s not found: %s", resourceName, e));
                 }
             }
-            else {
-                File file = new File(fileName).getAbsoluteFile();
-                File parent = file.getParentFile();
-                if (parent != null && !parent.exists()) {
-                    for (File up = parent; up != null && !up.exists();) {
-                        parent = up;
-                        up = up.getParentFile();
-                    }
-                    throw new SQLException("path to '" + fileName + "': '" + parent + "' does not exist");
-                }
 
-                // check write access if file does not exist
-                try {
-                    // The extra check to exists() is necessary as createNewFile()
-                    // does not follow the JavaDoc when used on read-only shares.
-                    if (!file.exists() && file.createNewFile())
-                        file.delete();
-                }
-                catch (Exception e) {
-                    throw new SQLException("opening db: '" + fileName + "': " + e.getMessage());
-                }
-                fileName = file.getAbsolutePath();
-            }
-        }
-
-        // tries to load native library first
-        try {
-            Class< ? > nativedb = Class.forName("org.sqlite.NativeDB");
-            // getDeclaredMethod is not available in Android < 2.3
-            for (Method method: nativedb.getDeclaredMethods()) {
-            	if ("load".equals(method.getName()) && (
-            			method.getParameterTypes() == null || method.getParameterTypes().length == 0)) {
-                    if (((Boolean) method.invoke((Object) null,
-                            (Object[]) null)).booleanValue()) {
-                    	db = (DB) nativedb.newInstance();
-                    }
-                    break;
-            	}
-            }
-        }
-        catch (Exception e) {} // fall through to nested library
-
-        // load nested library (pure-java SQLite)
-        if (db == null) {
             try {
-                db = (DB) Class.forName("org.sqlite.NestedDB").newInstance();
+                fileName = extractResource(resourceAddr).getAbsolutePath();
+            }
+            catch (IOException e) {
+                throw new SQLException(String.format("failed to load %s: %s", resourceName, e));
+            }
+         }
+         else {
+            File file = new File(fileName).getAbsoluteFile();
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                for (File up = parent; up != null && !up.exists();) {
+                    parent = up;
+                    up = up.getParentFile();
+                }
+                throw new SQLException("path to '" + fileName + "': '" + parent + "' does not exist");
+            }
+
+            // check write access if file does not exist
+            try {
+                // The extra check to exists() is necessary as createNewFile()
+                // does not follow the JavaDoc when used on read-only shares.
+                if (!file.exists() && file.createNewFile())
+                    file.delete();
             }
             catch (Exception e) {
-                throw new SQLException("no SQLite library found");
+                throw new SQLException("opening db: '" + fileName + "': " + e.getMessage());
             }
-        }
+            fileName = file.getAbsolutePath();
+         }
+      }
 
-        db.open(this, fileName, openModeFlags);
-        setTimeout(3000);
-    }
+      // tries to load native library first
+      try {
+         Class< ? > nativedb = Class.forName("org.sqlite.NativeDB");
+         // getDeclaredMethod is not available in Android < 2.3
+         for (Method method: nativedb.getDeclaredMethods()) {
+         	if ("load".equals(method.getName()) && (
+         			method.getParameterTypes() == null || method.getParameterTypes().length == 0)) {
+                 if (((Boolean) method.invoke((Object) null,
+                         (Object[]) null)).booleanValue()) {
+                 	db = (DB) nativedb.newInstance();
+                 }
+                 break;
+         	}
+         }
+      }
+      catch (Exception e) {} // fall through to nested library
 
-    /**
+      // load nested library (pure-java SQLite)
+      if (db == null) {
+         try {
+            db = (DB) Class.forName("org.sqlite.NestedDB").newInstance();
+         }
+         catch (Exception e) {
+            throw new SQLException("no SQLite library found");
+         }
+      }
+
+      db.open(this, fileName, openModeFlags);
+      setTimeout(3000);
+   }
+
+   /**
      * Extract file name from given resource address.
-     * @param resourceAddr
-     * @return extracted file name
+     * @param resourceAddr Given resource address of database file.
+     * @return The extracted file name.
      * @throws IOException
      */
    private File extractResource(URL resourceAddr) throws IOException {
-        if (resourceAddr.getProtocol().equals("file")) {
-            try {
-                return new File(resourceAddr.toURI());
-            }
-            catch (URISyntaxException e) {
-                throw new IOException(e.getMessage());
-            }
-        }
+      if (resourceAddr.getProtocol().equals("file")) {
+         try {
+             return new File(resourceAddr.toURI());
+         }
+         catch (URISyntaxException e) {
+             throw new IOException(e.getMessage());
+         }
+      }
 
-        String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
-        String dbFileName = String.format("sqlite-jdbc-tmp-%d.db", resourceAddr.hashCode());
-        File dbFile = new File(tempFolder, dbFileName);
+      String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
+      String dbFileName = String.format("sqlite-jdbc-tmp-%d.db", resourceAddr.hashCode());
+      File dbFile = new File(tempFolder, dbFileName);
 
-        if (dbFile.exists()) {
-            long resourceLastModified = resourceAddr.openConnection().getLastModified();
-            long tmpFileLastModified = dbFile.lastModified();
-            if (resourceLastModified < tmpFileLastModified) {
-                return dbFile;
-            }
-            else {
-                // remove the old DB file
-                boolean deletionSucceeded = dbFile.delete();
-                if (!deletionSucceeded) {
-                    throw new IOException("failed to remove existing DB file: " + dbFile.getAbsolutePath());
-                }
-            }
+      if (dbFile.exists()) {
+         long resourceLastModified = resourceAddr.openConnection().getLastModified();
+         long tmpFileLastModified = dbFile.lastModified();
+         if (resourceLastModified < tmpFileLastModified) {
+             return dbFile;
+         }
+         else {
+             // remove the old DB file
+             boolean deletionSucceeded = dbFile.delete();
+             if (!deletionSucceeded) {
+                 throw new IOException("failed to remove existing DB file: " + dbFile.getAbsolutePath());
+             }
+         }
 
-            //            String md5sum1 = SQLiteJDBCLoader.md5sum(resourceAddr.openStream());
-            //            String md5sum2 = SQLiteJDBCLoader.md5sum(new FileInputStream(dbFile));
-            //
-            //            if (md5sum1.equals(md5sum2))
-            //                return dbFile; // no need to extract the DB file
-            //            else
-            //            {
-            //            }
-        }
+         //            String md5sum1 = SQLiteJDBCLoader.md5sum(resourceAddr.openStream());
+         //            String md5sum2 = SQLiteJDBCLoader.md5sum(new FileInputStream(dbFile));
+         //
+         //            if (md5sum1.equals(md5sum2))
+         //                return dbFile; // no need to extract the DB file
+         //            else
+         //            {
+         //            }
+      }
 
-        byte[] buffer = new byte[8192]; // 8K buffer
-        FileOutputStream writer = new FileOutputStream(dbFile);
-        InputStream reader = resourceAddr.openStream();
-        try {
-            int bytesRead = 0;
-            while ((bytesRead = reader.read(buffer)) != -1) {
-                writer.write(buffer, 0, bytesRead);
-            }
-            return dbFile;
-        }
-        finally {
-            writer.close();
-            reader.close();
-        }
+      byte[] buffer = new byte[8192]; // 8K buffer
+      FileOutputStream writer = new FileOutputStream(dbFile);
+      InputStream reader = resourceAddr.openStream();
+      try {
+          int bytesRead = 0;
+          while ((bytesRead = reader.read(buffer)) != -1) {
+              writer.write(buffer, 0, bytesRead);
+          }
+          return dbFile;
+      }
+      finally {
+          writer.close();
+          reader.close();
+      }
 
-    }
+   }
 
-    /**
+   /**
     * Gets the timeout value for the connection.
-    * @return
+    * @return The timeou value
     */
    int getTimeout() {
-        return timeout;
-    }
+       return timeout;
+   }
 
-    /**
+   /**
     * Sets the timeout value for the connection.
-    * @param ms
+    * @param ms The timeout value in milliseconds.
     * @throws SQLException
     */
    void setTimeout(int ms) throws SQLException {
-        timeout = ms;
-        db.busy_timeout(ms);
-    }
+       timeout = ms;
+       db.busy_timeout(ms);
+   }
 
-    /**
+   /**
     * Gets URL for the connection.
-    * @return
+    * @return The location of the database file.
     */
    String url() {
-        return url;
-    }
+       return url;
+   }
 
-    /**
-    * Retrieves the database version.
-    * @return
+   /**
+    * Retrieves the compile-time library version numbers.
+    * @return Compile-time library version numbers.
     * @throws SQLException
+    * @see <a href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
     */
    String libversion() throws SQLException {
-        return db.libversion();
-    }
+       return db.libversion();
+   }
 
-    /**
-    * Gets the database instance.
-    * @return
+   /**
+    * Gets the SQLite database instance.
+    * @return The SQLite database instance.
     */
    DB db() {
-        return db;
-    }
+       return db;
+   }
 
-    /**
+   /**
     * Checks database connection.
     * @throws SQLException Throwed when the database connection is closed
     */
    private void checkOpen() throws SQLException {
-        if (db == null)
-            throw new SQLException("database connection closed");
-    }
+      if (db == null)
+         throw new SQLException("database connection closed");
+   }
 
-    /**
+   /**
     * Checks cursor.
-    * @param rst
-    * @param rsc
-    * @param rsh
+    * @param rst The int value that corresponds to the constants of java.sql.ResultSet.
+    * @param rsc The int value that corresponds to the constants of java.sql.ResultSet.
+    * @param rsh The int value that corresponds to the constants of java.sql.ResultSet.
     * @throws SQLException With one of the message:<code>"SQLite only supports TYPE_FORWARD_ONLY cursors"</code>, 
     * <code>"SQLite only supports CONCUR_READ_ONLY cursors"</code>, 
     * <code>"SQLite only supports closing cursors at commit"</code>
     */
    private void checkCursor(int rst, int rsc, int rsh) throws SQLException {
-        if (rst != ResultSet.TYPE_FORWARD_ONLY)
-            throw new SQLException("SQLite only supports TYPE_FORWARD_ONLY cursors");
-        if (rsc != ResultSet.CONCUR_READ_ONLY)
-            throw new SQLException("SQLite only supports CONCUR_READ_ONLY cursors");
-        if (rsh != ResultSet.CLOSE_CURSORS_AT_COMMIT)
-            throw new SQLException("SQLite only supports closing cursors at commit");
-    }
+      if (rst != ResultSet.TYPE_FORWARD_ONLY)
+         throw new SQLException("SQLite only supports TYPE_FORWARD_ONLY cursors");
+      if (rsc != ResultSet.CONCUR_READ_ONLY)
+         throw new SQLException("SQLite only supports CONCUR_READ_ONLY cursors");
+      if (rsh != ResultSet.CLOSE_CURSORS_AT_COMMIT)
+         throw new SQLException("SQLite only supports closing cursors at commit");
+   }
 
-    /**
+   /**
     * @see java.lang.Object#finalize()
     */
    @Override
-    public void finalize() throws SQLException {
-        close();
-    }
+   public void finalize() throws SQLException {
+       close();
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#close()
     */
    public void close() throws SQLException {
-        if (db == null)
-            return;
-        if (meta != null)
-            meta.close();
+      if (db == null)
+          return;
+      if (meta != null)
+          meta.close();
 
-        db.close();
-        db = null;
-    }
+      db.close();
+      db = null;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#isClosed()
     */
    public boolean isClosed() throws SQLException {
-        return db == null;
-    }
+       return db == null;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#getCatalog()
     */
    public String getCatalog() throws SQLException {
-        checkOpen();
-        return null;
-    }
+       checkOpen();
+       return null;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#setCatalog(java.lang.String)
     */
    public void setCatalog(String catalog) throws SQLException {
-        checkOpen();
-    }
+       checkOpen();
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#getHoldability()
     */
    public int getHoldability() throws SQLException {
-        checkOpen();
-        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
-    }
+       checkOpen();
+       return ResultSet.CLOSE_CURSORS_AT_COMMIT;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#setHoldability(int)
     */
    public void setHoldability(int h) throws SQLException {
-        checkOpen();
-        if (h != ResultSet.CLOSE_CURSORS_AT_COMMIT)
-            throw new SQLException("SQLite only supports CLOSE_CURSORS_AT_COMMIT");
-    }
+       checkOpen();
+       if (h != ResultSet.CLOSE_CURSORS_AT_COMMIT)
+           throw new SQLException("SQLite only supports CLOSE_CURSORS_AT_COMMIT");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#getTransactionIsolation()
     */
    public int getTransactionIsolation() {
-        return transactionIsolation;
-    }
+       return transactionIsolation;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#setTransactionIsolation(int)
     */
    public void setTransactionIsolation(int level) throws SQLException {
-        switch (level) {
-        case TRANSACTION_SERIALIZABLE:
-            db.exec("PRAGMA read_uncommitted = false;");
-            break;
-        case TRANSACTION_READ_UNCOMMITTED:
-            db.exec("PRAGMA read_uncommitted = true;");
-            break;
-        default:
-            throw new SQLException("SQLite supports only TRANSACTION_SERIALIZABLE and TRANSACTION_READ_UNCOMMITTED.");
-        }
-        transactionIsolation = level;
-    }
+      switch (level) {
+      case TRANSACTION_SERIALIZABLE:
+          db.exec("PRAGMA read_uncommitted = false;");
+          break;
+      case TRANSACTION_READ_UNCOMMITTED:
+          db.exec("PRAGMA read_uncommitted = true;");
+          break;
+      default:
+          throw new SQLException("SQLite supports only TRANSACTION_SERIALIZABLE and TRANSACTION_READ_UNCOMMITTED.");
+      }
+      transactionIsolation = level;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#getTypeMap()
     */
    public Map getTypeMap() throws SQLException {
-        throw new SQLException("not yet implemented");
-    }
+       throw new SQLException("not yet implemented");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#setTypeMap(java.util.Map)
     */
    public void setTypeMap(Map map) throws SQLException {
-        throw new SQLException("not yet implemented");
-    }
+       throw new SQLException("not yet implemented");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#isReadOnly()
     */
    public boolean isReadOnly() throws SQLException {
-        return (openModeFlags & SQLiteOpenMode.READONLY.flag) != 0;
-    }
+       return (openModeFlags & SQLiteOpenMode.READONLY.flag) != 0;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#setReadOnly(boolean)
     */
    public void setReadOnly(boolean ro) throws SQLException {
-        if (!isReadOnly()) {
-            throw new SQLException(
-                    "Cannot set read-only flag ofter establishing a connection. Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
-        }
-    }
+      if (!isReadOnly()) {
+         throw new SQLException(
+                "Cannot set read-only flag ofter establishing a connection. Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
+      }
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#getMetaData()
     */
    public DatabaseMetaData getMetaData() {
-        if (meta == null)
-            meta = new MetaData(this);
-        return meta;
-    }
+       if (meta == null)
+           meta = new MetaData(this);
+       return meta;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#nativeSQL(java.lang.String)
     */
    public String nativeSQL(String sql) {
-        return sql;
-    }
+       return sql;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#clearWarnings()
     */
    public void clearWarnings() throws SQLException {}
 
-    /**
+   /**
     * @see java.sql.Connection#getWarnings()
     */
    public SQLWarning getWarnings() throws SQLException {
-        return null;
-    }
+       return null;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#getAutoCommit()
     */
    public boolean getAutoCommit() throws SQLException {
-        checkOpen();
-        return autoCommit;
-    }
+       checkOpen();
+       return autoCommit;
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#setAutoCommit(boolean)
     */
    public void setAutoCommit(boolean ac) throws SQLException {
-        checkOpen();
-        if (autoCommit == ac)
-            return;
-        autoCommit = ac;
-        db.exec(autoCommit ? "commit;" : "begin;");
-    }
+       checkOpen();
+       if (autoCommit == ac)
+           return;
+       autoCommit = ac;
+       db.exec(autoCommit ? "commit;" : "begin;");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#commit()
     */
    public void commit() throws SQLException {
-        checkOpen();
-        if (autoCommit)
-            throw new SQLException("database in auto-commit mode");
-        db.exec("commit;");
-        db.exec("begin;");
-    }
+       checkOpen();
+       if (autoCommit)
+           throw new SQLException("database in auto-commit mode");
+       db.exec("commit;");
+       db.exec("begin;");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#rollback()
     */
    public void rollback() throws SQLException {
-        checkOpen();
-        if (autoCommit)
-            throw new SQLException("database in auto-commit mode");
-        db.exec("rollback;");
-        db.exec("begin;");
-    }
+       checkOpen();
+       if (autoCommit)
+           throw new SQLException("database in auto-commit mode");
+       db.exec("rollback;");
+       db.exec("begin;");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#createStatement()
     */
    public Statement createStatement() throws SQLException {
-        return createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
-                ResultSet.CLOSE_CURSORS_AT_COMMIT);
-    }
+       return createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
+               ResultSet.CLOSE_CURSORS_AT_COMMIT);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#createStatement(int, int)
     */
    public Statement createStatement(int rsType, int rsConcurr) throws SQLException {
-        return createStatement(rsType, rsConcurr, ResultSet.CLOSE_CURSORS_AT_COMMIT);
-    }
+       return createStatement(rsType, rsConcurr, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#createStatement(int, int, int)
     */
    public Statement createStatement(int rst, int rsc, int rsh) throws SQLException {
-        checkCursor(rst, rsc, rsh);
-        return new Stmt(this);
-    }
+       checkCursor(rst, rsc, rsh);
+       return new Stmt(this);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareCall(java.lang.String)
     */
    public CallableStatement prepareCall(String sql) throws SQLException {
-        return prepareCall(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
-                ResultSet.CLOSE_CURSORS_AT_COMMIT);
-    }
+       return prepareCall(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
+               ResultSet.CLOSE_CURSORS_AT_COMMIT);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareCall(java.lang.String, int, int)
     */
    public CallableStatement prepareCall(String sql, int rst, int rsc) throws SQLException {
-        return prepareCall(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
-    }
+       return prepareCall(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareCall(java.lang.String, int, int, int)
     */
    public CallableStatement prepareCall(String sql, int rst, int rsc, int rsh) throws SQLException {
-        throw new SQLException("SQLite does not support Stored Procedures");
-    }
+       throw new SQLException("SQLite does not support Stored Procedures");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareStatement(java.lang.String)
     */
    public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    }
+       return prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareStatement(java.lang.String, int)
     */
    public PreparedStatement prepareStatement(String sql, int autoC) throws SQLException {
-        return prepareStatement(sql);
-    }
+       return prepareStatement(sql);
+   }
 
-    /**
-    * @see java.sql.Connection#prepareStatement(java.lang.String, int[])
-    */
-   public PreparedStatement prepareStatement(String sql, int[] colInds) throws SQLException {
-        return prepareStatement(sql);
-    }
+   /**
+     * @see java.sql.Connection#prepareStatement(java.lang.String, int[])
+     */
+    public PreparedStatement prepareStatement(String sql, int[] colInds) throws SQLException {
+       return prepareStatement(sql);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareStatement(java.lang.String, java.lang.String[])
     */
    public PreparedStatement prepareStatement(String sql, String[] colNames) throws SQLException {
-        return prepareStatement(sql);
-    }
+       return prepareStatement(sql);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
     */
    public PreparedStatement prepareStatement(String sql, int rst, int rsc) throws SQLException {
-        return prepareStatement(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
-    }
+       return prepareStatement(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
     */
    public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh) throws SQLException {
-        checkCursor(rst, rsc, rsh);
-        return new PrepStmt(this, sql);
-    }
+       checkCursor(rst, rsc, rsh);
+       return new PrepStmt(this, sql);
+   }
 
-    /** Used to supply DatabaseMetaData.getDriverVersion(). */
-    /**
-    * @return
+   /** 
+    * Retrieves SQLite JDBC driver version (used to supply DatabaseMetaData.getDriverVersion()).
+    * @return One of "pure", "native", or "unloaded".
     */
    String getDriverVersion() {
-        if (db != null) {
-            String dbname = db.getClass().getName();
-            if (dbname.indexOf("NestedDB") >= 0)
-                return "pure";
-            if (dbname.indexOf("NativeDB") >= 0)
-                return "native";
-        }
-        return "unloaded";
-    }
+       if (db != null) {
+           String dbname = db.getClass().getName();
+           if (dbname.indexOf("NestedDB") >= 0)
+               return "pure";
+           if (dbname.indexOf("NativeDB") >= 0)
+               return "native";
+       }
+       return "unloaded";
+   }
 
-    // UNUSED FUNCTIONS /////////////////////////////////////////////
+   // UNUSED FUNCTIONS /////////////////////////////////////////////
 
-    /**
+   /**
     * @see java.sql.Connection#setSavepoint()
     */
    public Savepoint setSavepoint() throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
-    }
+       throw new SQLException("unsupported by SQLite: savepoints");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#setSavepoint(java.lang.String)
-    */
-   public Savepoint setSavepoint(String name) throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
-    }
+   */
+    public Savepoint setSavepoint(String name) throws SQLException {
+       throw new SQLException("unsupported by SQLite: savepoints");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint)
     */
    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
-    }
+       throw new SQLException("unsupported by SQLite: savepoints");
+   }
 
-    /**
+   /**
     * @see java.sql.Connection#rollback(java.sql.Savepoint)
     */
    public void rollback(Savepoint savepoint) throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
-    }
+       throw new SQLException("unsupported by SQLite: savepoints");
+   }
 
    /** Not implemented yet */
    public Struct createStruct(String t, Object[] attr) throws SQLException {
-        throw new SQLException("unsupported by SQLite");
-    }
+       throw new SQLException("unsupported by SQLite");
+   }
 }

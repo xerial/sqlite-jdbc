@@ -25,67 +25,67 @@ import java.util.Properties;
 
 public class JDBC implements Driver
 {
-    public static final String PREFIX = "jdbc:sqlite:";
+   public static final String PREFIX = "jdbc:sqlite:";
 
-    static {
-        try {
-            DriverManager.registerDriver(new JDBC());
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+   static {
+      try {
+          DriverManager.registerDriver(new JDBC());
+      }
+      catch (SQLException e) {
+          e.printStackTrace();
+      }
+   }
 
-    /**
+   /**
     * @see java.sql.Driver#getMajorVersion()
     */
    public int getMajorVersion() {
-        return SQLiteJDBCLoader.getMajorVersion();
-    }
+       return SQLiteJDBCLoader.getMajorVersion();
+   }
 
-    /**
+   /**
     * @see java.sql.Driver#getMinorVersion()
     */
    public int getMinorVersion() {
-        return SQLiteJDBCLoader.getMinorVersion();
-    }
+       return SQLiteJDBCLoader.getMinorVersion();
+   }
 
-    /**
+   /**
     * @see java.sql.Driver#jdbcCompliant()
     */
    public boolean jdbcCompliant() {
-        return false;
-    }
+       return false;
+   }
 
-    /**
+   /**
     * @see java.sql.Driver#acceptsURL(java.lang.String)
     */
    public boolean acceptsURL(String url) {
-        return isValidURL(url);
-    }
+       return isValidURL(url);
+   }
 
-    /**
+   /**
     * Validates a URL
     * @param url
     * @return true if the URL is valid, false otherwise
     */
    public static boolean isValidURL(String url) {
-        return url != null && url.toLowerCase().startsWith(PREFIX);
-    }
+       return url != null && url.toLowerCase().startsWith(PREFIX);
+   }
 
-    /**
+   /**
     * @see java.sql.Driver#getPropertyInfo(java.lang.String, java.util.Properties)
     */
    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
-        return SQLiteConfig.getDriverPropertyInfo();
-    }
+       return SQLiteConfig.getDriverPropertyInfo();
+   }
 
    /**
     * @see java.sql.Driver#connect(java.lang.String, java.util.Properties)
     */
    public Connection connect(String url, Properties info) throws SQLException {
-        return createConnection(url, info);
-    }
+       return createConnection(url, info);
+   }
 
    /**
     * Gets address from the given URL.
@@ -94,11 +94,11 @@ public class JDBC implements Driver
     *  is returned.
     */
    static String extractAddress(String url) {
-        // if no file name is given use a memory database
-        return PREFIX.equalsIgnoreCase(url) ? ":memory:" : url.substring(PREFIX.length());
-    }
+      // if no file name is given use a memory database
+      return PREFIX.equalsIgnoreCase(url) ? ":memory:" : url.substring(PREFIX.length());
+   }
 
-    /**
+   /**
     * Creates a new database connection to a given URL.
     * @param url the URL
     * @param prop the properties
@@ -107,10 +107,10 @@ public class JDBC implements Driver
     * @see java.sql.Driver#connect(java.lang.String, java.util.Properties)
     */
    public static Connection createConnection(String url, Properties prop) throws SQLException {
-        if (!isValidURL(url))
-            throw new SQLException("invalid database address: " + url);
+      if (!isValidURL(url))
+          throw new SQLException("invalid database address: " + url);
 
-        url = url.trim();
-        return new Conn(url, extractAddress(url), prop);
-    }
+      url = url.trim();
+      return new Conn(url, extractAddress(url), prop);
+   }
 }
