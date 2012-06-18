@@ -47,11 +47,11 @@ class Conn implements Connection
     private int          timeout              = 0;
     private final int    openModeFlags;
 
-    public Conn(String url, String fileName) throws SQLException {
+   public Conn(String url, String fileName) throws SQLException {
         this(url, fileName, new Properties());
     }
 
-    public Conn(String url, String fileName, Properties prop) throws SQLException {
+   public Conn(String url, String fileName, Properties prop) throws SQLException {
         this.url = url;
         this.fileName = fileName;
 
@@ -70,7 +70,12 @@ class Conn implements Connection
 
     private static final String RESOURCE_NAME_PREFIX = ":resource:";
 
-    private void open(int openModeFlags) throws SQLException {
+    /**
+    * Create a new database connection.
+    * @param openModeFlags
+    * @throws SQLException
+    */
+   private void open(int openModeFlags) throws SQLException {
         // check the path to the file exists
         if (!":memory:".equals(fileName)) {
             if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
@@ -152,11 +157,12 @@ class Conn implements Connection
     }
 
     /**
+     * Extract file name from given resource address.
      * @param resourceAddr
      * @return extracted file name
      * @throws IOException
      */
-    private File extractResource(URL resourceAddr) throws IOException {
+   private File extractResource(URL resourceAddr) throws IOException {
         if (resourceAddr.getProtocol().equals("file")) {
             try {
                 return new File(resourceAddr.toURI());
@@ -211,33 +217,68 @@ class Conn implements Connection
 
     }
 
-    int getTimeout() {
+    /**
+    * Gets the timeout value for the connection.
+    * @return
+    */
+   int getTimeout() {
         return timeout;
     }
 
-    void setTimeout(int ms) throws SQLException {
+    /**
+    * Sets the timeout value for the connection.
+    * @param ms
+    * @throws SQLException
+    */
+   void setTimeout(int ms) throws SQLException {
         timeout = ms;
         db.busy_timeout(ms);
     }
 
-    String url() {
+    /**
+    * Gets URL for the connection.
+    * @return
+    */
+   String url() {
         return url;
     }
 
-    String libversion() throws SQLException {
+    /**
+    * Retrieves the database version.
+    * @return
+    * @throws SQLException
+    */
+   String libversion() throws SQLException {
         return db.libversion();
     }
 
-    DB db() {
+    /**
+    * Gets the database instance.
+    * @return
+    */
+   DB db() {
         return db;
     }
 
-    private void checkOpen() throws SQLException {
+    /**
+    * Checks database connection.
+    * @throws SQLException Throwed when the database connection is closed
+    */
+   private void checkOpen() throws SQLException {
         if (db == null)
             throw new SQLException("database connection closed");
     }
 
-    private void checkCursor(int rst, int rsc, int rsh) throws SQLException {
+    /**
+    * Checks cursor.
+    * @param rst
+    * @param rsc
+    * @param rsh
+    * @throws SQLException With one of the message:<code>"SQLite only supports TYPE_FORWARD_ONLY cursors"</code>, 
+    * <code>"SQLite only supports CONCUR_READ_ONLY cursors"</code>, 
+    * <code>"SQLite only supports closing cursors at commit"</code>
+    */
+   private void checkCursor(int rst, int rsc, int rsh) throws SQLException {
         if (rst != ResultSet.TYPE_FORWARD_ONLY)
             throw new SQLException("SQLite only supports TYPE_FORWARD_ONLY cursors");
         if (rsc != ResultSet.CONCUR_READ_ONLY)
@@ -246,12 +287,18 @@ class Conn implements Connection
             throw new SQLException("SQLite only supports closing cursors at commit");
     }
 
-    @Override
+    /**
+    * @see java.lang.Object#finalize()
+    */
+   @Override
     public void finalize() throws SQLException {
         close();
     }
 
-    public void close() throws SQLException {
+    /**
+    * @see java.sql.Connection#close()
+    */
+   public void close() throws SQLException {
         if (db == null)
             return;
         if (meta != null)
@@ -261,35 +308,56 @@ class Conn implements Connection
         db = null;
     }
 
-    public boolean isClosed() throws SQLException {
+    /**
+    * @see java.sql.Connection#isClosed()
+    */
+   public boolean isClosed() throws SQLException {
         return db == null;
     }
 
-    public String getCatalog() throws SQLException {
+    /**
+    * @see java.sql.Connection#getCatalog()
+    */
+   public String getCatalog() throws SQLException {
         checkOpen();
         return null;
     }
 
-    public void setCatalog(String catalog) throws SQLException {
+    /**
+    * @see java.sql.Connection#setCatalog(java.lang.String)
+    */
+   public void setCatalog(String catalog) throws SQLException {
         checkOpen();
     }
 
-    public int getHoldability() throws SQLException {
+    /**
+    * @see java.sql.Connection#getHoldability()
+    */
+   public int getHoldability() throws SQLException {
         checkOpen();
         return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
-    public void setHoldability(int h) throws SQLException {
+    /**
+    * @see java.sql.Connection#setHoldability(int)
+    */
+   public void setHoldability(int h) throws SQLException {
         checkOpen();
         if (h != ResultSet.CLOSE_CURSORS_AT_COMMIT)
             throw new SQLException("SQLite only supports CLOSE_CURSORS_AT_COMMIT");
     }
 
-    public int getTransactionIsolation() {
+    /**
+    * @see java.sql.Connection#getTransactionIsolation()
+    */
+   public int getTransactionIsolation() {
         return transactionIsolation;
     }
 
-    public void setTransactionIsolation(int level) throws SQLException {
+    /**
+    * @see java.sql.Connection#setTransactionIsolation(int)
+    */
+   public void setTransactionIsolation(int level) throws SQLException {
         switch (level) {
         case TRANSACTION_SERIALIZABLE:
             db.exec("PRAGMA read_uncommitted = false;");
@@ -303,47 +371,77 @@ class Conn implements Connection
         transactionIsolation = level;
     }
 
-    public Map getTypeMap() throws SQLException {
+    /**
+    * @see java.sql.Connection#getTypeMap()
+    */
+   public Map getTypeMap() throws SQLException {
         throw new SQLException("not yet implemented");
     }
 
-    public void setTypeMap(Map map) throws SQLException {
+    /**
+    * @see java.sql.Connection#setTypeMap(java.util.Map)
+    */
+   public void setTypeMap(Map map) throws SQLException {
         throw new SQLException("not yet implemented");
     }
 
-    public boolean isReadOnly() throws SQLException {
+    /**
+    * @see java.sql.Connection#isReadOnly()
+    */
+   public boolean isReadOnly() throws SQLException {
         return (openModeFlags & SQLiteOpenMode.READONLY.flag) != 0;
     }
 
-    public void setReadOnly(boolean ro) throws SQLException {
+    /**
+    * @see java.sql.Connection#setReadOnly(boolean)
+    */
+   public void setReadOnly(boolean ro) throws SQLException {
         if (!isReadOnly()) {
             throw new SQLException(
                     "Cannot set read-only flag ofter establishing a connection. Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
         }
     }
 
-    public DatabaseMetaData getMetaData() {
+    /**
+    * @see java.sql.Connection#getMetaData()
+    */
+   public DatabaseMetaData getMetaData() {
         if (meta == null)
             meta = new MetaData(this);
         return meta;
     }
 
-    public String nativeSQL(String sql) {
+    /**
+    * @see java.sql.Connection#nativeSQL(java.lang.String)
+    */
+   public String nativeSQL(String sql) {
         return sql;
     }
 
-    public void clearWarnings() throws SQLException {}
+    /**
+    * @see java.sql.Connection#clearWarnings()
+    */
+   public void clearWarnings() throws SQLException {}
 
-    public SQLWarning getWarnings() throws SQLException {
+    /**
+    * @see java.sql.Connection#getWarnings()
+    */
+   public SQLWarning getWarnings() throws SQLException {
         return null;
     }
 
-    public boolean getAutoCommit() throws SQLException {
+    /**
+    * @see java.sql.Connection#getAutoCommit()
+    */
+   public boolean getAutoCommit() throws SQLException {
         checkOpen();
         return autoCommit;
     }
 
-    public void setAutoCommit(boolean ac) throws SQLException {
+    /**
+    * @see java.sql.Connection#setAutoCommit(boolean)
+    */
+   public void setAutoCommit(boolean ac) throws SQLException {
         checkOpen();
         if (autoCommit == ac)
             return;
@@ -351,7 +449,10 @@ class Conn implements Connection
         db.exec(autoCommit ? "commit;" : "begin;");
     }
 
-    public void commit() throws SQLException {
+    /**
+    * @see java.sql.Connection#commit()
+    */
+   public void commit() throws SQLException {
         checkOpen();
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
@@ -359,7 +460,10 @@ class Conn implements Connection
         db.exec("begin;");
     }
 
-    public void rollback() throws SQLException {
+    /**
+    * @see java.sql.Connection#rollback()
+    */
+   public void rollback() throws SQLException {
         checkOpen();
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
@@ -367,60 +471,99 @@ class Conn implements Connection
         db.exec("begin;");
     }
 
-    public Statement createStatement() throws SQLException {
+    /**
+    * @see java.sql.Connection#createStatement()
+    */
+   public Statement createStatement() throws SQLException {
         return createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    public Statement createStatement(int rsType, int rsConcurr) throws SQLException {
+    /**
+    * @see java.sql.Connection#createStatement(int, int)
+    */
+   public Statement createStatement(int rsType, int rsConcurr) throws SQLException {
         return createStatement(rsType, rsConcurr, ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    public Statement createStatement(int rst, int rsc, int rsh) throws SQLException {
+    /**
+    * @see java.sql.Connection#createStatement(int, int, int)
+    */
+   public Statement createStatement(int rst, int rsc, int rsh) throws SQLException {
         checkCursor(rst, rsc, rsh);
         return new Stmt(this);
     }
 
-    public CallableStatement prepareCall(String sql) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareCall(java.lang.String)
+    */
+   public CallableStatement prepareCall(String sql) throws SQLException {
         return prepareCall(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    public CallableStatement prepareCall(String sql, int rst, int rsc) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareCall(java.lang.String, int, int)
+    */
+   public CallableStatement prepareCall(String sql, int rst, int rsc) throws SQLException {
         return prepareCall(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    public CallableStatement prepareCall(String sql, int rst, int rsc, int rsh) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareCall(java.lang.String, int, int, int)
+    */
+   public CallableStatement prepareCall(String sql, int rst, int rsc, int rsh) throws SQLException {
         throw new SQLException("SQLite does not support Stored Procedures");
     }
 
-    public PreparedStatement prepareStatement(String sql) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareStatement(java.lang.String)
+    */
+   public PreparedStatement prepareStatement(String sql) throws SQLException {
         return prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     }
 
-    public PreparedStatement prepareStatement(String sql, int autoC) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareStatement(java.lang.String, int)
+    */
+   public PreparedStatement prepareStatement(String sql, int autoC) throws SQLException {
         return prepareStatement(sql);
     }
 
-    public PreparedStatement prepareStatement(String sql, int[] colInds) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareStatement(java.lang.String, int[])
+    */
+   public PreparedStatement prepareStatement(String sql, int[] colInds) throws SQLException {
         return prepareStatement(sql);
     }
 
-    public PreparedStatement prepareStatement(String sql, String[] colNames) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareStatement(java.lang.String, java.lang.String[])
+    */
+   public PreparedStatement prepareStatement(String sql, String[] colNames) throws SQLException {
         return prepareStatement(sql);
     }
 
-    public PreparedStatement prepareStatement(String sql, int rst, int rsc) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
+    */
+   public PreparedStatement prepareStatement(String sql, int rst, int rsc) throws SQLException {
         return prepareStatement(sql, rst, rsc, ResultSet.CLOSE_CURSORS_AT_COMMIT);
     }
 
-    public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh) throws SQLException {
+    /**
+    * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
+    */
+   public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh) throws SQLException {
         checkCursor(rst, rsc, rsh);
         return new PrepStmt(this, sql);
     }
 
     /** Used to supply DatabaseMetaData.getDriverVersion(). */
-    String getDriverVersion() {
+    /**
+    * @return
+    */
+   String getDriverVersion() {
         if (db != null) {
             String dbname = db.getClass().getName();
             if (dbname.indexOf("NestedDB") >= 0)
@@ -433,23 +576,36 @@ class Conn implements Connection
 
     // UNUSED FUNCTIONS /////////////////////////////////////////////
 
-    public Savepoint setSavepoint() throws SQLException {
+    /**
+    * @see java.sql.Connection#setSavepoint()
+    */
+   public Savepoint setSavepoint() throws SQLException {
         throw new SQLException("unsupported by SQLite: savepoints");
     }
 
-    public Savepoint setSavepoint(String name) throws SQLException {
+    /**
+    * @see java.sql.Connection#setSavepoint(java.lang.String)
+    */
+   public Savepoint setSavepoint(String name) throws SQLException {
         throw new SQLException("unsupported by SQLite: savepoints");
     }
 
-    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+    /**
+    * @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint)
+    */
+   public void releaseSavepoint(Savepoint savepoint) throws SQLException {
         throw new SQLException("unsupported by SQLite: savepoints");
     }
 
-    public void rollback(Savepoint savepoint) throws SQLException {
+    /**
+    * @see java.sql.Connection#rollback(java.sql.Savepoint)
+    */
+   public void rollback(Savepoint savepoint) throws SQLException {
         throw new SQLException("unsupported by SQLite: savepoints");
     }
 
-    public Struct createStruct(String t, Object[] attr) throws SQLException {
+   /** Not implemented yet */
+   public Struct createStruct(String t, Object[] attr) throws SQLException {
         throw new SQLException("unsupported by SQLite");
     }
 }

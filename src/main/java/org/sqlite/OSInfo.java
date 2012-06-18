@@ -32,7 +32,8 @@ package org.sqlite;
  */
 public class OSInfo
 {
-    public static void main(String[] args) {
+
+   public static void main(String[] args) {
         if (args.length >= 1) {
             if ("--os".equals(args[0])) {
                 System.out.print(getOSName());
@@ -47,19 +48,36 @@ public class OSInfo
         System.out.print(getNativeLibFolderPathForCurrentOS());
     }
 
-    public static String getNativeLibFolderPathForCurrentOS() {
+    /**
+    * Gets native library fold path name for the current operation system.
+    * @return In the format of <code>OS_name/OS_architecture_name</code>
+    */
+   public static String getNativeLibFolderPathForCurrentOS() {
         return getOSName() + "/" + getArchName();
     }
 
-    public static String getOSName() {
+    /**
+    * Gets the operating system name.
+    * @return One of <code>Windows</code>, <code>Mac</code>,<code>Linux</code>
+    */
+   public static String getOSName() {
         return translateOSNameToFolderName(System.getProperty("os.name"));
     }
 
-    public static String getArchName() {
+    /**
+    * Gets the operation system architecture name.
+    * @return
+    */
+   public static String getArchName() {
         return translateArchNameToFolderName(System.getProperty("os.arch"));
     }
 
-    public static String translateOSNameToFolderName(String osName) {
+    /**
+    * Extracts operating system name from given string.
+    * @param osName
+    * @return One of <code>Windows</code>, <code>Mac</code>,<code>Linux</code>
+    */
+   public static String translateOSNameToFolderName(String osName) {
         if (osName.contains("Windows")) {
             return "Windows";
         }
@@ -74,7 +92,12 @@ public class OSInfo
         }
     }
 
-    public static String translateArchNameToFolderName(String archName) {
+    /**
+    * Gets the operation system architecture name from giben string.
+    * @param archName
+    * @return
+    */
+   public static String translateArchNameToFolderName(String archName) {
         return archName.replaceAll("\\W", "");
     }
 }

@@ -36,40 +36,77 @@ public class JDBC implements Driver
         }
     }
 
-    public int getMajorVersion() {
+    /**
+    * @see java.sql.Driver#getMajorVersion()
+    */
+   public int getMajorVersion() {
         return SQLiteJDBCLoader.getMajorVersion();
     }
 
-    public int getMinorVersion() {
+    /**
+    * @see java.sql.Driver#getMinorVersion()
+    */
+   public int getMinorVersion() {
         return SQLiteJDBCLoader.getMinorVersion();
     }
 
-    public boolean jdbcCompliant() {
+    /**
+    * @see java.sql.Driver#jdbcCompliant()
+    */
+   public boolean jdbcCompliant() {
         return false;
     }
 
-    public boolean acceptsURL(String url) {
+    /**
+    * @see java.sql.Driver#acceptsURL(java.lang.String)
+    */
+   public boolean acceptsURL(String url) {
         return isValidURL(url);
     }
 
-    public static boolean isValidURL(String url) {
+    /**
+    * Validates a URL
+    * @param url
+    * @return true if the URL is valid, false otherwise
+    */
+   public static boolean isValidURL(String url) {
         return url != null && url.toLowerCase().startsWith(PREFIX);
     }
 
-    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+    /**
+    * @see java.sql.Driver#getPropertyInfo(java.lang.String, java.util.Properties)
+    */
+   public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
         return SQLiteConfig.getDriverPropertyInfo();
     }
 
-    public Connection connect(String url, Properties info) throws SQLException {
+   /**
+    * @see java.sql.Driver#connect(java.lang.String, java.util.Properties)
+    */
+   public Connection connect(String url, Properties info) throws SQLException {
         return createConnection(url, info);
     }
 
-    static String extractAddress(String url) {
+   /**
+    * Gets address from the given URL.
+    * @param url
+    * @return <code>:memory:</code> - use a memory database if no address (file name) in the URL; otherwise, the address
+    *  is returned.
+    */
+   static String extractAddress(String url) {
         // if no file name is given use a memory database
         return PREFIX.equalsIgnoreCase(url) ? ":memory:" : url.substring(PREFIX.length());
     }
 
-    public static Connection createConnection(String url, Properties prop) throws SQLException {
+    /**
+    * Creates a new database connection to a given URL.
+    * @param url the URL
+    * @param prop the properties
+    * @return a Connection object that represents a connection to the URL
+    * @throws SQLException
+    * @see java.sql.Driver#connect(java.lang.String, java.util.Properties)
+    */
+   public static Connection createConnection(String url, Properties prop) throws SQLException {
         if (!isValidURL(url))
             throw new SQLException("invalid database address: " + url);
 
