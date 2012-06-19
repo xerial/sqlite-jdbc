@@ -27,311 +27,314 @@ import org.sqlite.ExtendedCommand.SQLExtension;
 
 class Stmt extends Unused implements Statement, Codes
 {
-    final Conn conn;
-    final DB   db;
-    final RS   rs;
+   final Conn conn;
+   final DB   db;
+   final RS   rs;
 
-    long       pointer;
-    String     sql            = null;
+   long       pointer;
+   String     sql            = null;
 
-    int        batchPos;
-    Object[]   batch          = null;
-    boolean    resultsWaiting = false;
+   int        batchPos;
+   Object[]   batch          = null;
+   boolean    resultsWaiting = false;
 
-    Stmt(Conn c) {
-        conn = c;
-        db = conn.db();
-        rs = new RS(this);
-    }
+   Stmt(Conn c) {
+      conn = c;
+      db = conn.db();
+      rs = new RS(this);
+   }
 
-    protected final void checkOpen() throws SQLException {
-        if (pointer == 0)
-            throw new SQLException("statement is not executing");
-    }
+   protected final void checkOpen() throws SQLException {
+      if (pointer == 0)
+          throw new SQLException("statement is not executing");
+   }
 
-    boolean isOpen() throws SQLException {
-        return (pointer != 0);
-    }
+   boolean isOpen() throws SQLException {
+      return (pointer != 0);
+   }
 
-    /** Calls sqlite3_step() and sets up results. Expects a clean stmt. */
-    protected boolean exec() throws SQLException {
-        if (sql == null)
-            throw new SQLException("SQLiteJDBC internal error: sql==null");
-        if (rs.isOpen())
-            throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
+   /** Calls sqlite3_step() and sets up results. Expects a clean stmt. */
+   protected boolean exec() throws SQLException {
+      if (sql == null)
+          throw new SQLException("SQLiteJDBC internal error: sql==null");
+      if (rs.isOpen())
+          throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
-        boolean rc = false;
-        try {
-            rc = db.execute(this, null);
-        }
-        finally {
-            resultsWaiting = rc;
-        }
+      boolean rc = false;
+      try {
+          rc = db.execute(this, null);
+      }
+      finally {
+          resultsWaiting = rc;
+      }
 
-        return db.column_count(pointer) != 0;
-    }
+      return db.column_count(pointer) != 0;
+   }
 
-    protected boolean exec(String sql) throws SQLException {
-        if (sql == null)
-            throw new SQLException("SQLiteJDBC internal error: sql==null");
-        if (rs.isOpen())
-            throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
+   protected boolean exec(String sql) throws SQLException {
+      if (sql == null)
+          throw new SQLException("SQLiteJDBC internal error: sql==null");
+      if (rs.isOpen())
+          throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
-        boolean rc = false;
-        try {
-            rc = db.execute(sql);
-        }
-        finally {
-            resultsWaiting = rc;
-        }
+      boolean rc = false;
+      try {
+          rc = db.execute(sql);
+      }
+      finally {
+          resultsWaiting = rc;
+      }
 
-        return db.column_count(pointer) != 0;
-    }
+      return db.column_count(pointer) != 0;
+   }
 
-    // PUBLIC INTERFACE /////////////////////////////////////////////
+   // PUBLIC INTERFACE /////////////////////////////////////////////
 
-    public void close() throws SQLException {
-        if (pointer == 0)
-            return;
-        rs.close();
-        batch = null;
-        batchPos = 0;
-        int resp = db.finalize(this);
-        if (resp != SQLITE_OK && resp != SQLITE_MISUSE)
-            db.throwex();
-    }
+   public void close() throws SQLException {
+      if (pointer == 0)
+          return;
+      rs.close();
+      batch = null;
+      batchPos = 0;
+      int resp = db.finalize(this);
+      if (resp != SQLITE_OK && resp != SQLITE_MISUSE)
+          db.throwex();
+   }
 
-    @Override
-    protected void finalize() throws SQLException {
-        close();
-    }
+   @Override
+   protected void finalize() throws SQLException {
+      close();
+   }
 
-    public boolean execute(String sql) throws SQLException {
-        close();
-        this.sql = sql;
+   public boolean execute(String sql) throws SQLException {
+      close();
+      this.sql = sql;
 
-        db.prepare(this);
-        return exec();
-    }
+      db.prepare(this);
+      return exec();
+   }
 
-    public ResultSet executeQuery(String sql) throws SQLException {
-        close();
-        this.sql = sql;
+   public ResultSet executeQuery(String sql) throws SQLException {
+      close();
+      this.sql = sql;
 
-        db.prepare(this);
-        if (!exec()) {
-            close();
-            throw new SQLException("query does not return ResultSet");
-        }
-        return getResultSet();
-    }
+      db.prepare(this);
+      if (!exec()) {
+          close();
+          throw new SQLException("query does not return ResultSet");
+      }
+      return getResultSet();
+   }
 
-    static class BackupObserver implements ProgressObserver
-    {
-        public void progress(int remaining, int pageCount) {
-            System.out.println(String.format("remaining:%d, page count:%d", remaining, pageCount));
-        }
-    }
+   static class BackupObserver implements ProgressObserver
+   {
+      public void progress(int remaining, int pageCount) {
+          System.out.println(String.format("remaining:%d, page count:%d", remaining, pageCount));
+      }
+   }
 
-    public int executeUpdate(String sql) throws SQLException {
-        close();
-        this.sql = sql;
+   public int executeUpdate(String sql) throws SQLException {
+      close();
+      this.sql = sql;
 
-        int changes = 0;
-        SQLExtension ext = ExtendedCommand.parse(sql);
-        if (ext != null) {
-            // execute extended command 
-            ext.execute(db);
-        }
-        else {
-            try {
-                //db.prepare(this);
-                //changes = db.executeUpdate(this, null);
+      int changes = 0;
+      SQLExtension ext = ExtendedCommand.parse(sql);
+      if (ext != null) {
+          // execute extended command 
+          ext.execute(db);
+      }
+      else {
+         try {
+            //db.prepare(this);
+            //changes = db.executeUpdate(this, null);
 
-                // directly invokes the exec API to support multiple SQL statements 
-                int statusCode = db._exec(sql);
-                if (statusCode != SQLITE_OK)
-                    throw DB.newSQLException(statusCode, "");
+            // directly invokes the exec API to support multiple SQL statements 
+            int statusCode = db._exec(sql);
+            if (statusCode != SQLITE_OK)
+                throw DB.newSQLException(statusCode, "");
 
-                changes = db.changes();
+            changes = db.changes();
+         }
+         finally {
+             close();
+         }
+      }
+      return changes;
+   }
+
+   public ResultSet getResultSet() throws SQLException {
+      checkOpen();
+      if (rs.isOpen())
+          throw new SQLException("ResultSet already requested");
+      if (db.column_count(pointer) == 0)
+          throw new SQLException("no ResultSet available");
+      if (rs.colsMeta == null)
+          rs.colsMeta = db.column_names(pointer);
+      rs.cols = rs.colsMeta;
+
+      rs.open = resultsWaiting;
+      resultsWaiting = false;
+      return rs;
+   }
+
+   /*
+    * This function has a complex behaviour best understood by carefully
+    * reading the JavaDoc for getMoreResults() and considering the test
+    * StatementTest.execute().
+    */
+   public int getUpdateCount() throws SQLException {
+       if (pointer != 0 && !rs.isOpen() && !resultsWaiting && db.column_count(pointer) == 0)
+           return db.changes();
+       return -1;
+   }
+
+   public void addBatch(String sql) throws SQLException {
+      close();
+      if (batch == null || batchPos + 1 >= batch.length) {
+         Object[] nb = new Object[Math.max(10, batchPos * 2)];
+         if (batch != null)
+             System.arraycopy(batch, 0, nb, 0, batch.length);
+         batch = nb;
+      }
+      batch[batchPos++] = sql;
+   }
+
+   public void clearBatch() throws SQLException {
+      batchPos = 0;
+      if (batch != null)
+         for (int i = 0; i < batch.length; i++)
+             batch[i] = null;
+   }
+
+   /**
+    * @see java.sql.Statement#executeBatch()
+    */
+   public int[] executeBatch() throws SQLException {
+      // TODO: optimize
+      close();
+      if (batch == null || batchPos == 0)
+          return new int[] {};
+
+      int[] changes = new int[batchPos];
+
+      synchronized (db) {
+         try {
+            for (int i = 0; i < changes.length; i++) {
+               try {
+                  this.sql = (String) batch[i];
+                  db.prepare(this);
+                  changes[i] = db.executeUpdate(this, null);
+               }
+               catch (SQLException e) {
+                   throw new BatchUpdateException("batch entry " + i + ": " + e.getMessage(), changes);
+               }
+               finally {
+                   db.finalize(this);
+               }
             }
-            finally {
-                close();
-            }
-        }
-        return changes;
-    }
+         }
+         finally {
+             clearBatch();
+         }
+      }
 
-    public ResultSet getResultSet() throws SQLException {
-        checkOpen();
-        if (rs.isOpen())
-            throw new SQLException("ResultSet already requested");
-        if (db.column_count(pointer) == 0)
-            throw new SQLException("no ResultSet available");
-        if (rs.colsMeta == null)
-            rs.colsMeta = db.column_names(pointer);
-        rs.cols = rs.colsMeta;
+      return changes;
+   }
 
-        rs.open = resultsWaiting;
-        resultsWaiting = false;
-        return rs;
-    }
+   public void setCursorName(String name) {}
 
-    /*
-     * This function has a complex behaviour best understood by carefully
-     * reading the JavaDoc for getMoreResults() and considering the test
-     * StatementTest.execute().
-     */
-    public int getUpdateCount() throws SQLException {
-        if (pointer != 0 && !rs.isOpen() && !resultsWaiting && db.column_count(pointer) == 0)
-            return db.changes();
-        return -1;
-    }
+   public SQLWarning getWarnings() throws SQLException {
+      return null;
+   }
 
-    public void addBatch(String sql) throws SQLException {
-        close();
-        if (batch == null || batchPos + 1 >= batch.length) {
-            Object[] nb = new Object[Math.max(10, batchPos * 2)];
-            if (batch != null)
-                System.arraycopy(batch, 0, nb, 0, batch.length);
-            batch = nb;
-        }
-        batch[batchPos++] = sql;
-    }
+   public void clearWarnings() throws SQLException {}
 
-    public void clearBatch() throws SQLException {
-        batchPos = 0;
-        if (batch != null)
-            for (int i = 0; i < batch.length; i++)
-                batch[i] = null;
-    }
+   public Connection getConnection() throws SQLException {
+      return conn;
+   }
 
-    public int[] executeBatch() throws SQLException {
-        // TODO: optimize
-        close();
-        if (batch == null || batchPos == 0)
-            return new int[] {};
+   public void cancel() throws SQLException {
+      rs.checkOpen();
+      db.interrupt();
+   }
 
-        int[] changes = new int[batchPos];
+   public int getQueryTimeout() throws SQLException {
+      return conn.getTimeout();
+   }
 
-        synchronized (db) {
-            try {
-                for (int i = 0; i < changes.length; i++) {
-                    try {
-                        this.sql = (String) batch[i];
-                        db.prepare(this);
-                        changes[i] = db.executeUpdate(this, null);
-                    }
-                    catch (SQLException e) {
-                        throw new BatchUpdateException("batch entry " + i + ": " + e.getMessage(), changes);
-                    }
-                    finally {
-                        db.finalize(this);
-                    }
-                }
-            }
-            finally {
-                clearBatch();
-            }
-        }
+   public void setQueryTimeout(int seconds) throws SQLException {
+      if (seconds < 0)
+         throw new SQLException("query timeout must be >= 0");
+      conn.setTimeout(1000 * seconds);
+   }
 
-        return changes;
-    }
+   // TODO: write test
+   public int getMaxRows() throws SQLException {
+      //checkOpen();
+      return rs.maxRows;
+   }
 
-    public void setCursorName(String name) {}
+   public void setMaxRows(int max) throws SQLException {
+      //checkOpen();
+      if (max < 0)
+         throw new SQLException("max row count must be >= 0");
+      rs.maxRows = max;
+   }
 
-    public SQLWarning getWarnings() throws SQLException {
-        return null;
-    }
+   public int getMaxFieldSize() throws SQLException {
+      return 0;
+   }
 
-    public void clearWarnings() throws SQLException {}
+   public void setMaxFieldSize(int max) throws SQLException {
+      if (max < 0)
+         throw new SQLException("max field size " + max + " cannot be negative");
+   }
 
-    public Connection getConnection() throws SQLException {
-        return conn;
-    }
+   public int getFetchSize() throws SQLException {
+      return rs.getFetchSize();
+   }
 
-    public void cancel() throws SQLException {
-        rs.checkOpen();
-        db.interrupt();
-    }
+   public void setFetchSize(int r) throws SQLException {
+      rs.setFetchSize(r);
+   }
 
-    public int getQueryTimeout() throws SQLException {
-        return conn.getTimeout();
-    }
+   public int getFetchDirection() throws SQLException {
+      return rs.getFetchDirection();
+   }
 
-    public void setQueryTimeout(int seconds) throws SQLException {
-        if (seconds < 0)
-            throw new SQLException("query timeout must be >= 0");
-        conn.setTimeout(1000 * seconds);
-    }
+   public void setFetchDirection(int d) throws SQLException {
+      rs.setFetchDirection(d);
+   }
 
-    // TODO: write test
-    public int getMaxRows() throws SQLException {
-        //checkOpen();
-        return rs.maxRows;
-    }
+   /**
+    * As SQLite's last_insert_rowid() function is DB-specific not statement
+    * specific, this function introduces a race condition if the same
+    * connection is used by two threads and both insert.
+    */
+   public ResultSet getGeneratedKeys() throws SQLException {
+      return ((MetaData) conn.getMetaData()).getGeneratedKeys();
+   }
 
-    public void setMaxRows(int max) throws SQLException {
-        //checkOpen();
-        if (max < 0)
-            throw new SQLException("max row count must be >= 0");
-        rs.maxRows = max;
-    }
+   /** SQLite does not support multiple results from execute(). */
+   public boolean getMoreResults() throws SQLException {
+      return getMoreResults(0);
+   }
 
-    public int getMaxFieldSize() throws SQLException {
-        return 0;
-    }
+   public boolean getMoreResults(int c) throws SQLException {
+      checkOpen();
+      close(); // as we never have another result, clean up pointer
+      return false;
+   }
 
-    public void setMaxFieldSize(int max) throws SQLException {
-        if (max < 0)
-            throw new SQLException("max field size " + max + " cannot be negative");
-    }
+   public int getResultSetConcurrency() throws SQLException {
+      return ResultSet.CONCUR_READ_ONLY;
+   }
 
-    public int getFetchSize() throws SQLException {
-        return rs.getFetchSize();
-    }
+   public int getResultSetHoldability() throws SQLException {
+      return ResultSet.CLOSE_CURSORS_AT_COMMIT;
+   }
 
-    public void setFetchSize(int r) throws SQLException {
-        rs.setFetchSize(r);
-    }
-
-    public int getFetchDirection() throws SQLException {
-        return rs.getFetchDirection();
-    }
-
-    public void setFetchDirection(int d) throws SQLException {
-        rs.setFetchDirection(d);
-    }
-
-    /**
-     * As SQLite's last_insert_rowid() function is DB-specific not statement
-     * specific, this function introduces a race condition if the same
-     * connection is used by two threads and both insert.
-     */
-    public ResultSet getGeneratedKeys() throws SQLException {
-        return ((MetaData) conn.getMetaData()).getGeneratedKeys();
-    }
-
-    /** SQLite does not support multiple results from execute(). */
-    public boolean getMoreResults() throws SQLException {
-        return getMoreResults(0);
-    }
-
-    public boolean getMoreResults(int c) throws SQLException {
-        checkOpen();
-        close(); // as we never have another result, clean up pointer
-        return false;
-    }
-
-    public int getResultSetConcurrency() throws SQLException {
-        return ResultSet.CONCUR_READ_ONLY;
-    }
-
-    public int getResultSetHoldability() throws SQLException {
-        return ResultSet.CLOSE_CURSORS_AT_COMMIT;
-    }
-
-    public int getResultSetType() throws SQLException {
-        return ResultSet.TYPE_FORWARD_ONLY;
-    }
+   public int getResultSetType() throws SQLException {
+      return ResultSet.TYPE_FORWARD_ONLY;
+   }
 }

@@ -44,12 +44,12 @@ final class NativeDB extends DB
     * @return True if the SQLite JDBC driver is successfully loaded; false otherwise.
     */
    static boolean load() {
-       if (isLoaded)
-           return loadSucceeded == true;
+      if (isLoaded)
+         return loadSucceeded == true;
 
-       loadSucceeded = SQLiteJDBCLoader.initialize();
-       isLoaded = true;
-       return loadSucceeded;
+      loadSucceeded = SQLiteJDBCLoader.initialize();
+      isLoaded = true;
+      return loadSucceeded;
    }
 
    /** linked list of all instanced UDFDatas */

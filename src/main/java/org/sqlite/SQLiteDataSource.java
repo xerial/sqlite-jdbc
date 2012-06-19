@@ -118,8 +118,7 @@ public class SQLiteDataSource implements DataSource
     * Enables or disables the sharing of the database cache and schema data structures between connections to the same
     * database. 
     * @param enable Sharing is enabled if the argument is true and disabled if the argument is false.
-    * @see <a href="http://www.sqlite.org/c3ref/enable_shared_cache.html">
-    * http://www.sqlite.org/c3ref/enable_shared_cache.html</a>
+    * @see <a href="http://www.sqlite.org/c3ref/enable_shared_cache.html">http://www.sqlite.org/c3ref/enable_shared_cache.html</a>
     */
    public void setSharedCache(boolean enable) {
        config.setSharedCache(enable);
@@ -452,9 +451,9 @@ public class SQLiteDataSource implements DataSource
    }
 
   /**
-   * Determines if the given object is a instance of current class.
-   * @param iface
-   * @return True if the given object is the instance of the current class; false otherwise.
+   * Determines if this object wraps a given class.
+   * @param iface The class to check.
+   * @return True if it is an instance of the current class; false otherwise.
    * @throws SQLException
    */
    public boolean isWrapperFor(Class< ? > iface) throws SQLException {
@@ -462,9 +461,9 @@ public class SQLiteDataSource implements DataSource
    }
 
    /**
-    * 
-    * @param iface
-    * @return
+    * Casts this object to the given class.
+    * @param iface The class to cast to.
+    * @return The casted class.
     * @throws SQLException
     */
    @SuppressWarnings("unchecked")

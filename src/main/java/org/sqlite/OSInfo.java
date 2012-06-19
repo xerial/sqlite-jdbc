@@ -49,7 +49,7 @@ public class OSInfo
    }
 
    /**
-    * Gets native library fold path name for the current operation system.
+    * Gets native library fold path for the current operation system.
     * @return In the format of <code>OS_name/OS_architecture_name</code>
     */
    public static String getNativeLibFolderPathForCurrentOS() {
@@ -74,7 +74,7 @@ public class OSInfo
 
    /**
     * Extracts operating system name from given string.
-    * @param osName
+    * @param osName The given string that contains operating system name.
     * @return One of <code>Windows</code>, <code>Mac</code>,<code>Linux</code>
     */
    public static String translateOSNameToFolderName(String osName) {
@@ -93,7 +93,7 @@ public class OSInfo
    }
 
    /**
-    * Gets the operation system architecture name from giben string.
+    * Gets the operation system architecture name from given string.
     * @param archName
     * @return
     */

@@ -34,69 +34,69 @@ import java.net.URL;
  */
 public class ResourceFinder
 {
-    /**
-     * Gets the {@link URL} of the file resource
-     * 
-     * @param referenceClass
-     *            the base class for finding resources files. This method will
-     *            search the package containing the given referenceClass.
-     * @param resourceFileName
-     *            the resource file name relative to the package of the
-     *            referenceClass
-     * @return the URL of the file resource
-     */
-    public static URL find(Class< ? > referenceClass, String resourceFileName)
-    {
-        return find(referenceClass.getClassLoader(), referenceClass.getPackage(), resourceFileName);
-    }
+   /**
+    * Gets the {@link URL} of the file resource
+    * 
+    * @param referenceClass
+    *            the base class for finding resources files. This method will
+    *            search the package containing the given referenceClass.
+    * @param resourceFileName
+    *            the resource file name relative to the package of the
+    *            referenceClass
+    * @return the URL of the file resource
+    */
+   public static URL find(Class< ? > referenceClass, String resourceFileName)
+   {
+       return find(referenceClass.getClassLoader(), referenceClass.getPackage(), resourceFileName);
+   }
 
-    /**
-     * Finds the {@link URL} of the resource
-     * 
-     * @param basePackage
-     *            the base package to find the resource
-     * @param resourceFileName
-     *            the resource file name relative to the package folder
-     * @return the URL of the specified resource
-     */
-    public static URL find(ClassLoader classLoader, Package basePackage, String resourceFileName)
-    {
-        return find(classLoader, basePackage.getName(), resourceFileName);
-    }
+   /**
+    * Finds the {@link URL} of the resource
+    * 
+    * @param basePackage
+    *            the base package to find the resource
+    * @param resourceFileName
+    *            the resource file name relative to the package folder
+    * @return the URL of the specified resource
+    */
+   public static URL find(ClassLoader classLoader, Package basePackage, String resourceFileName)
+   {
+       return find(classLoader, basePackage.getName(), resourceFileName);
+   }
 
-    /**
-     * Finds the {@link URL} of the resource
-     * 
-     * @param packageName
-     *            the base package name to find the resource
-     * @param resourceFileName
-     *            the resource file name relative to the package folder
-     * @return the URL of the specified resource
-     */
-    public static URL find(ClassLoader classLoader, String packageName, String resourceFileName)
-    {
-        String packagePath = packagePath(packageName);
-        String resourcePath = packagePath + resourceFileName;
-        if (!resourcePath.startsWith("/"))
-            resourcePath = "/" + resourcePath;
+   /**
+    * Finds the {@link URL} of the resource
+    * 
+    * @param packageName
+    *            the base package name to find the resource
+    * @param resourceFileName
+    *            the resource file name relative to the package folder
+    * @return the URL of the specified resource
+    */
+   public static URL find(ClassLoader classLoader, String packageName, String resourceFileName)
+   {
+       String packagePath = packagePath(packageName);
+       String resourcePath = packagePath + resourceFileName;
+       if (!resourcePath.startsWith("/"))
+           resourcePath = "/" + resourcePath;
 
-        return classLoader.getResource(resourcePath);
-    }
+       return classLoader.getResource(resourcePath);
+   }
 
-    private static String packagePath(Class< ? > referenceClass)
-    {
-        return packagePath(referenceClass.getPackage());
-    }
+   private static String packagePath(Class< ? > referenceClass)
+   {
+       return packagePath(referenceClass.getPackage());
+   }
 
-    private static String packagePath(Package basePackage)
-    {
-        return packagePath(basePackage.getName());
-    }
+   private static String packagePath(Package basePackage)
+   {
+       return packagePath(basePackage.getName());
+   }
 
-    private static String packagePath(String packageName)
-    {
-        String packageAsPath = packageName.replaceAll("\\.", "/");
-        return packageAsPath.endsWith("/") ? packageAsPath : packageAsPath + "/";
-    }
+   private static String packagePath(String packageName)
+   {
+       String packageAsPath = packageName.replaceAll("\\.", "/");
+       return packageAsPath.endsWith("/") ? packageAsPath : packageAsPath + "/";
+   }
 
 }
