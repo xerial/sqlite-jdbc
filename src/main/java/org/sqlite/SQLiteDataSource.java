@@ -127,7 +127,7 @@ public class SQLiteDataSource implements DataSource
     }
 
     public void setEncoding(String encoding) {
-        config.setEncoding(Encoding.valueOf(encoding));
+        config.setEncoding(Encoding.getEncoding(encoding));
     }
 
     public void setEnforceForeinKeys(boolean enforce) {
