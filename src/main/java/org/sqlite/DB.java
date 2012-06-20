@@ -98,6 +98,7 @@ abstract class DB implements Codes
     * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
     * @throws SQLException
     * @see <a href="http://www.sqlite.org/c3ref/enable_shared_cache.html">http://www.sqlite.org/c3ref/enable_shared_cache.html</a>
+    * @see org.sqlite.SQLiteErrorCode
     */
    abstract int shared_cache(boolean enable) throws SQLException;
 

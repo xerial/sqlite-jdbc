@@ -65,7 +65,7 @@ public class SQLiteConfig
    /**
     * Create a new JDBC connection using the current configuration
     * 
-    * @return
+    * @return Database Connection object .
     * @throws SQLException
     */
    public Connection createConnection(String url) throws SQLException {
@@ -75,7 +75,7 @@ public class SQLiteConfig
    /**
     * Apply the current configuration to connection
     * 
-    * @param conn
+    * @param conn Database Connection object .
     * @throws SQLException
     */
    public void apply(Connection conn) throws SQLException {
@@ -113,32 +113,45 @@ public class SQLiteConfig
       }
    }
 
+   /**
+    * Sets a pragma to the given boolean value.
+    * @param pragma Pragma object.
+    * @param flag The boolean value to be set for the pragma.
+    */
    private void set(Pragma pragma, boolean flag) {
       setPragma(pragma, Boolean.toString(flag));
    }
 
+   /**
+    * Sets a pragma to the given int value.
+    * @param pragma Pragma object.
+    * @param num The int value to be set for the pragma.
+    */
    private void set(Pragma pragma, int num) {
       setPragma(pragma, Integer.toString(num));
    }
 
    /**
-    * @param pragma
-    * @param defaultValue
-    * @return
+    * Checks if the given value is the default value of the given Pragma object.
+    * @param pragma  Pragma object.
+    * @param defaultValue The given value
+    * @return True if the given value is the default value of the given Pragma object; false otherwise.
     */
    private boolean getBoolean(Pragma pragma, String defaultValue) {
       return Boolean.parseBoolean(pragmaTable.getProperty(pragma.pragmaName, defaultValue));
    }
 
    /**
-    * @return
+    * Checks if the share cache of SQLite database is enabled. 
+    * @return True if the share cache of SQLite database is ebabled; false otherwise.
     */
    public boolean isEnabledSharedCache() {
       return getBoolean(Pragma.SHARED_CACHE, "false");
    }
 
    /**
-    * @return
+    * Checks if the Load Extension of SQLite database is enabled. 
+    * @return  True if the Load Extension of SQLite database is ebabled; false otherwise.
     */
    public boolean isEnabledLoadExtension() {
       return getBoolean(Pragma.LOAD_EXTENSION, "false");

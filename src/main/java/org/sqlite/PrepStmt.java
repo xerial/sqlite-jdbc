@@ -36,6 +36,12 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
    private int columnCount;
    private int paramCount;
 
+   /**
+    * Constructs a prepared statement and applies the Connection object and the SQL command.
+    * @param conn Connection object.
+    * @param sql String of SQL command
+    * @throws SQLException
+    */
    PrepStmt(Conn conn, String sql) throws SQLException {
       super(conn);
 

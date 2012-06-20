@@ -695,17 +695,41 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
    private final int[] p0 = new int[] {}, p1 = new int[] { 0 }, p2 = new int[] { 0, 0 }, p3 = new int[] { 0, 0, 0 },
            p4 = new int[] { 0, 0, 0, 0 }, p5 = new int[] { 0, 0, 0, 0, 0 };
 
+   /**
+    * Calls a native function with function name and 1 argument.
+    * @param addr  Native function name.
+    * @param a0 Argument 0
+    * @return What the native function returns.
+    * @throws SQLException
+    */
    private int call(String addr, int a0) throws SQLException {
       p1[0] = a0;
       return call(addr, p1);
    }
 
+   /**
+    * Calls a native function with function name and 2 arguments.
+    * @param addr  Native function name.
+    * @param a0 Argument 0
+    * @param a1 Argument 1
+    * @return What the native function returns.
+    * @throws SQLException
+    */
    private int call(String addr, int a0, int a1) throws SQLException {
       p2[0] = a0;
       p2[1] = a1;
       return call(addr, p2);
    }
 
+   /**
+    * Calls a native function with function name and 3 arguments.
+    * @param addr  Native function name.
+    * @param a0 Argument 0
+    * @param a1 Argument 1
+    * @param a2 Argument 2
+    * @return What the native function returns.
+    * @throws SQLException
+    */
    private int call(String addr, int a0, int a1, int a2) throws SQLException {
       p3[0] = a0;
       p3[1] = a1;
@@ -713,6 +737,16 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       return call(addr, p3);
    }
 
+   /**
+    * Calls a native function with function name and 4 arguments.
+    * @param addr  Native function name.
+    * @param a0 Argument 0
+    * @param a1 Argument 1
+    * @param a2 Argument 2
+    * @param a3 Argument 3
+    * @return What the native function returns.
+    * @throws SQLException
+    */
    private int call(String addr, int a0, int a1, int a2, int a3) throws SQLException {
       p4[0] = a0;
       p4[1] = a1;
@@ -721,6 +755,17 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       return call(addr, p4);
    }
 
+   /**
+    * Calls a native function with function name and 5 arguments.
+    * @param addr  Native function name.
+    * @param a0 Argument 0
+    * @param a1 Argument 1
+    * @param a2 Argument 2
+    * @param a3 Argument 3
+    * @param a4 Argument 4
+    * @return What the native function returns.
+    * @throws SQLException
+    */
    private int call(String addr, int a0, int a1, int a2, int a3, int a4) throws SQLException {
       p5[0] = a0;
       p5[1] = a1;
@@ -730,6 +775,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
        return call(addr, p5);
    }
 
+   /**
+    * Calls a native function with function name and array of arguments.
+    * @param func Native function name.
+    * @param args Array of arguments for the native function.
+    * @return What the native function returns.
+    * @throws SQLException
+    */
    private int call(String func, int[] args) throws SQLException {
       try {
           return rt.call(func, args);
@@ -754,6 +806,12 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       }
    }
 
+   /**
+    * Copies UTF string from memory area which is pointed by pointer str.
+    * @param str Pointer that points to the memory area of the UTF string.
+    * @return String copied from the memory area.
+    * @throws SQLException
+    */
    private String utfstring(int str) throws SQLException {
       try {
           return rt.utfstring(str);
@@ -763,6 +821,12 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       }
    }
 
+   /**
+    * Copies string from memory area which is pointed by pointer str.
+    * @param str pointer that points to the memory area of the string.
+    * @return String copied from the memory area.
+    * @throws SQLException
+    */
    private String cstring(int str) throws SQLException {
       try {
           return rt.cstring(str);
@@ -772,6 +836,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       }
    }
 
+   /**
+    * Copies bytes from memory area to buffer with a given length.
+    * @param addr Pointer to the memory area
+    * @param buf The Bytes buffer.
+    * @param count Number of copied bytes 
+    * @throws SQLException
+    */
    private void copyin(int addr, byte[] buf, int count) throws SQLException {
       try {
           rt.copyin(addr, buf, count);
@@ -781,6 +852,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       }
    }
 
+   /**
+    * Copies bytes from buffer to memory area with a given length.
+    * @param addr Pointer to the memory area
+    * @param buf The Bytes buffer.
+    * @param count Number of copied bytes 
+    * @throws SQLException
+    */
    private void copyout(byte[] buf, int addr, int count) throws SQLException {
       try {
           rt.copyout(buf, addr, count);
@@ -795,37 +873,59 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
    {
       private final Exception cause;
 
+      /**
+       * Constructor that applies the Exception e.
+       * @param e
+       */
       CausedSQLException(Exception e) {
           if (e == null)
               throw new RuntimeException("null exception cause");
           cause = e;
       }
 
+      /**
+       * @see java.lang.Throwable#getCause()
+       */
       @Override
       public Throwable getCause() {
           return cause;
       }
 
+      /**
+       * @see java.lang.Throwable#printStackTrace()
+       */
       @Override
       public void printStackTrace() {
           cause.printStackTrace();
       }
 
+      /**
+       * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
+       */
       @Override
       public void printStackTrace(PrintWriter s) {
           cause.printStackTrace(s);
       }
 
+      /**
+       * @see java.lang.Throwable#fillInStackTrace()
+       */
       @Override
       public Throwable fillInStackTrace() {
           return cause.fillInStackTrace();
       }
 
+      /**
+       * @see java.lang.Throwable#getStackTrace()
+       */
       @Override
       public StackTraceElement[] getStackTrace() {
           return cause.getStackTrace();
       }
 
+      /**
+       * @see java.lang.Throwable#getMessage()
+       */
       @Override
       public String getMessage() {
           return cause.getMessage();

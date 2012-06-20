@@ -38,12 +38,12 @@ public class ResourceFinder
     * Gets the {@link URL} of the file resource
     * 
     * @param referenceClass
-    *            the base class for finding resources files. This method will
+    *            The base class for finding resources files. This method will
     *            search the package containing the given referenceClass.
     * @param resourceFileName
-    *            the resource file name relative to the package of the
+    *            The resource file name relative to the package of the
     *            referenceClass
-    * @return the URL of the file resource
+    * @return The URL of the file resource
     */
    public static URL find(Class< ? > referenceClass, String resourceFileName)
    {
@@ -54,10 +54,10 @@ public class ResourceFinder
     * Finds the {@link URL} of the resource
     * 
     * @param basePackage
-    *            the base package to find the resource
+    *            The base package to find the resource
     * @param resourceFileName
-    *            the resource file name relative to the package folder
-    * @return the URL of the specified resource
+    *            The resource file name relative to the package folder
+    * @return The URL of the specified resource
     */
    public static URL find(ClassLoader classLoader, Package basePackage, String resourceFileName)
    {
@@ -68,10 +68,10 @@ public class ResourceFinder
     * Finds the {@link URL} of the resource
     * 
     * @param packageName
-    *            the base package name to find the resource
+    *            The base package name to find the resource
     * @param resourceFileName
-    *            the resource file name relative to the package folder
-    * @return the URL of the specified resource
+    *            The resource file name relative to the package folder
+    * @return The URL of the specified resource
     */
    public static URL find(ClassLoader classLoader, String packageName, String resourceFileName)
    {
@@ -83,16 +83,31 @@ public class ResourceFinder
        return classLoader.getResource(resourcePath);
    }
 
+   /**
+    * Gets package path String from given reference class string and changes the package path to the unix-like format.
+    * @param referenceClass Reference class.
+    * @return Package path String in the unix-like format.
+    */
    private static String packagePath(Class< ? > referenceClass)
    {
        return packagePath(referenceClass.getPackage());
    }
 
+   /**
+    * Gets package path String from given Package object string and changes the package path to the unix-like format.
+    * @param basePackage Package object
+    * @return Package path String in the unix-like format.
+    */
    private static String packagePath(Package basePackage)
    {
        return packagePath(basePackage.getName());
    }
 
+   /**
+    * Gets package path String from given package name string and changes the package path to the unix-like format.
+    * @param packageName Package name string
+    * @return Package path String in the unix-like format.
+    */
    private static String packagePath(String packageName)
    {
        String packageAsPath = packageName.replaceAll("\\.", "/");

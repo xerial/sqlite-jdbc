@@ -38,6 +38,10 @@ class MetaData implements DatabaseMetaData
    /** Used by PrepStmt to save generating a new statement every call. */
    private PreparedStatement getGeneratedKeys = null;
 
+   /**
+    * Constructor that applies the Connection object.
+    * @param conn Connection object.
+    */
    MetaData(Conn conn) {
        this.conn = conn;
    }
@@ -1710,7 +1714,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @return
+    * Retrieves the generated row id of the last INSERT command.
+    * @return Generated row id of the last INSERT command.
     * @throws SQLException
     */
    ResultSet getGeneratedKeys() throws SQLException {
@@ -1720,7 +1725,7 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * Replace all instances of ' with ''
+    * Replaces all instances of ' with ''
     * @param val
     * @return
     */

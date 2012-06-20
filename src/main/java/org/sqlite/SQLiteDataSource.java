@@ -60,7 +60,7 @@ public class SQLiteDataSource implements DataSource
    }
 
    /**
-    * Constructors a data source and applies the passed in configuration.
+    * Constructs a data source and applies the passed in configuration.
     * @param config The configuration object.
     */
    public SQLiteDataSource(SQLiteConfig config) {

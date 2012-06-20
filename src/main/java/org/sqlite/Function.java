@@ -58,8 +58,13 @@ public abstract class Function
    long value = 0;       // pointer sqlite3_value**
    int args = 0;
 
-   /** Registers the given function with the Connection using the
-    *  provided name. */
+   /**
+    * Registers the given function with the Connection using the provided name.
+    * @param conn Connection object.
+    * @param name Function name.
+    * @param f Function object.
+    * @throws SQLException
+    */
    public static final void create(Connection conn, String name, Function f)
           throws SQLException {
       if (conn == null || !(conn instanceof Conn))
@@ -77,7 +82,12 @@ public abstract class Function
           throw new SQLException("error creating function");
    }
 
-   /** Removes the named function form the Connection. */
+   /**
+    * De-register the named function form the Connection.
+    * @param conn Connection object.
+    * @param name Function name.
+    * @throws SQLException
+    */
    public static final void destroy(Connection conn, String name)
           throws SQLException {
       if (conn == null || !(conn instanceof Conn))
@@ -171,10 +181,29 @@ public abstract class Function
            extends Function
            implements Cloneable
    {
+      /**
+       * @see org.sqlite.Function#xFunc()
+       */
       protected final void xFunc() {}
+      
+      
+      /**
+       * Defines the abstract aggregate callback function  
+       * @throws SQLException
+       * @see <a href="http://www.sqlite.org/c3ref/aggregate_context.html">http://www.sqlite.org/c3ref/aggregate_context.html</a>
+       */
       protected abstract void xStep() throws SQLException;
+      
+      /**
+       * Defines the abstract aggregate callback function  
+       * @throws SQLException
+       * @see <a href="http://www.sqlite.org/c3ref/aggregate_context.html">http://www.sqlite.org/c3ref/aggregate_context.html</a>
+       */
       protected abstract void xFinal() throws SQLException;
 
+      /**
+       * @see java.lang.Object#clone()
+       */
       public Object clone() throws CloneNotSupportedException {
           return super.clone();
       }
