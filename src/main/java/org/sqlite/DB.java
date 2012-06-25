@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-/**
+/*
  * This class is the interface to SQLite. It provides some helper functions
  * used by other parts of the driver. The goal of the helper functions here
  * are not only to provide functionality, but to handle contractual
@@ -34,7 +34,6 @@ import java.util.Map;
  * The two subclasses, NativeDB and NestedDB, provide the actual access to
  * SQLite functions.
  */
-
 abstract class DB implements Codes
 {
    /** The JDBC Connection that 'owns' this database instance. */
@@ -57,8 +56,8 @@ abstract class DB implements Codes
    abstract void interrupt() throws SQLException;
 
    /**
-    * Sets a <a href="http://www.sqlite.org/c3ref/busy_handler.html">busy handler</a> that sleeps for a specified amount 
-    * of time when a table is locked.
+     * Sets a <a href="http://www.sqlite.org/c3ref/busy_handler.html">busy handler</a> that sleeps
+     * for a specified amount of time when a table is locked.
     * @param ms The time length in milliseconds for setting the timeout value.
     * @throws SQLException
     * @see <a href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
@@ -74,8 +73,8 @@ abstract class DB implements Codes
    abstract String errmsg() throws SQLException;
 
    /**
-    * Returns the information as the SQLITE_VERSION, SQLITE_VERSION_NUMBER, and SQLITE_SOURCE_ID C preprocessor 
-    * macros but are associated with the library instead of the header file.
+     * Returns the information as the SQLITE_VERSION, SQLITE_VERSION_NUMBER, and SQLITE_SOURCE_ID C
+     * preprocessor macros but are associated with the library instead of the header file.
     * @return The compile-time SQLite version information.
     * @throws SQLException
     * @see <a href="http://www.sqlite.org/c3ref/libversion.html">http://www.sqlite.org/c3ref/libversion.html</a>
@@ -84,7 +83,8 @@ abstract class DB implements Codes
    abstract String libversion() throws SQLException;
 
    /**
-    * Returns the number of database rows that were changed or inserted or deleted by the SQL statement.
+     * Returns the number of database rows that were changed or inserted or deleted by the SQL
+     * statement.
     * @return The number of database rows
     * @throws SQLException
     * @see <a href="http://www.sqlite.org/c3ref/changes.html">http://www.sqlite.org/c3ref/changes.html</a>
@@ -92,8 +92,8 @@ abstract class DB implements Codes
    abstract int changes() throws SQLException;
 
    /**
-    * Enables or disables the sharing of the database cache and schema data structures between connections to the same
-    * database.
+     * Enables or disables the sharing of the database cache and schema data structures between
+     * connections to the same database.
     * @param enable True for enabling; false otherwise.
     * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
     * @throws SQLException
@@ -112,7 +112,8 @@ abstract class DB implements Codes
    abstract int enable_load_extension(boolean enable) throws SQLException;
 
    /**
-    * Executes an SQL statement using the process of compiling, evaluating, and destroying the prepared statement object.. 
+     * Executes an SQL statement using the process of compiling, evaluating, and destroying the
+     * prepared statement object..
     * @param sql The SQL statement to be executed.
     * @throws SQLException
     * @see <a href=""></a>
@@ -163,8 +164,7 @@ abstract class DB implements Codes
     *  0x00080000 (SQLITE_OPEN_WAL)
     * @throws SQLException
     * @see <a href="http://www.sqlite.org/c3ref/open.html">http://www.sqlite.org/c3ref/open.html</a> 
-    * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">
-    * http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
+     * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html"> http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
     */
    final synchronized void open(Conn conn, String file, int openFlags) throws SQLException {
        this.conn = conn;
@@ -172,7 +172,8 @@ abstract class DB implements Codes
    }
 
    /**
-    * Closes a database connection and finalizes any remaining statements before the closing operation. 
+     * Closes a database connection and finalizes any remaining statements before the closing
+     * operation.
     * @throws SQLException
     * @see <a href="http://www.sqlite.org/c3ref/close.html">http://www.sqlite.org/c3ref/close.html</a>
     */
@@ -294,8 +295,8 @@ abstract class DB implements Codes
    protected abstract int step(long stmt) throws SQLException;
 
    /**
-    * Reset a prepared statement object back to its initial state, ready to be re-executed with the pointer to the 
-    * statement object.
+     * Reset a prepared statement object back to its initial state, ready to be re-executed with the
+     * pointer to the statement object.
     * @param stmt Pointer to the statement object.
     * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
     * @throws SQLException
@@ -304,8 +305,8 @@ abstract class DB implements Codes
    protected abstract int reset(long stmt) throws SQLException;
 
    /**
-    * Reset all bindings on a prepared statement (reset all host parameters to NULL) with the pointer to the statement. 
-    * object.
+     * Reset all bindings on a prepared statement (reset all host parameters to NULL) with the
+     * pointer to the statement object.
     * @param stmt Pointer to the statement object.
     * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
     * @throws SQLException
@@ -314,7 +315,8 @@ abstract class DB implements Codes
    abstract int clear_bindings(long stmt) throws SQLException; // TODO remove?
 
    /**
-    * Gets the number of parameters in a prepared SQL statement with the pointer to the statement object.
+     * Gets the number of parameters in a prepared SQL statement with the pointer to the statement
+     * object.
     * @param stmt Pointer to the statement object.
     * @throws SQLException
     * @see <a href="http://www.sqlite.org/c3ref/bind_parameter_count.html">http://www.sqlite.org/c3ref/bind_parameter_count.html</a>
@@ -322,7 +324,7 @@ abstract class DB implements Codes
    abstract int bind_parameter_count(long stmt) throws SQLException;
 
    /**
-    * Gets the number of columns in the result set returned by the prepared statement with the pointer to the 
+     * Gets the number of columns in the result set returned by the prepared statement with the
     * statement object.
     * @param stmt Pointer to the statement object.
     * @return The number of columns in the result set
@@ -332,7 +334,7 @@ abstract class DB implements Codes
    abstract int column_count(long stmt) throws SQLException;
 
    /**
-    * Gets the datatype code for the initial data type of the result column with the pointer to the statement object and
+     * Gets the datatype code for the initial data type of the result column with the pointer to the
     * the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
@@ -343,8 +345,8 @@ abstract class DB implements Codes
    abstract int column_type(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the declared type of the table column for prepared statement with the pointer to the statement object and
-    * the number of the column.
+     * Gets the declared type of the table column for prepared statement with the pointer to the
+     * statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The declared type
@@ -354,8 +356,8 @@ abstract class DB implements Codes
    abstract String column_decltype(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the original text which is the declared type of the column in the CREATE TABLE statement with the pointer to 
-    * the statement object and the number of the column.
+     * Gets the original text which is the declared type of the column in the CREATE TABLE statement
+     * with the pointer to the statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The original column name.
@@ -365,8 +367,8 @@ abstract class DB implements Codes
    abstract String column_table_name(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the name assigned to a particular column in the result set of a SELECT statement with the pointer to the 
-    * statement object and the number of the column.
+     * Gets the name assigned to a particular column in the result set of a SELECT statement with
+     * the pointer to the statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The column name.
@@ -376,8 +378,8 @@ abstract class DB implements Codes
    abstract String column_name(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the text of column in the result set of a SELECT statement with the pointer to the statement object and the 
-    * number of the column.
+     * Gets the text of column in the result set of a SELECT statement with the pointer to the
+     * statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The value of the column as text data type.
@@ -387,8 +389,8 @@ abstract class DB implements Codes
    abstract String column_text(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the BLOB value of column in the result set of a SELECT statement with the pointer to the statement object and 
-    * the number of the column.
+     * Gets the BLOB value of column in the result set of a SELECT statement with the pointer to the
+     * statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The value of the column as blob data type.
@@ -398,8 +400,8 @@ abstract class DB implements Codes
    abstract byte[] column_blob(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the double value of column in the result set of a SELECT statement with the pointer to the statement object 
-    * and the number of the column.
+     * Gets the double value of column in the result set of a SELECT statement with the pointer to
+     * the statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The value of the column as double data type.
@@ -409,8 +411,8 @@ abstract class DB implements Codes
    abstract double column_double(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the long value of column in the result set of a SELECT statement with the pointer to the statement object and 
-    * the number of the column.
+     * Gets the long value of column in the result set of a SELECT statement with the pointer to the
+     * statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The value of the column as long data type.
@@ -420,8 +422,8 @@ abstract class DB implements Codes
    abstract long column_long(long stmt, int col) throws SQLException;
 
    /**
-    * Gets the int value of column in the result set of a SELECT statement with the pointer to the statement object and 
-    * the number of the column.
+     * Gets the int value of column in the result set of a SELECT statement with the pointer to the
+     * statement object and the number of the column.
     * @param stmt Pointer to the statement object.
     * @param col The number of column.
     * @return The value of the column as int data type.
@@ -431,8 +433,8 @@ abstract class DB implements Codes
    abstract int column_int(long stmt, int col) throws SQLException;
 
    /**
-    * Binds NULL value to prepared statements with the pointer to the statement object and 
-    * the index of the SQL parameter to be set to NULL.
+     * Binds NULL value to prepared statements with the pointer to the statement object and the
+     * index of the SQL parameter to be set to NULL.
     * @param stmt Pointer to the statement object.
     * @param pos The index of the SQL parameter to be set to NULL.
     * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
@@ -441,8 +443,8 @@ abstract class DB implements Codes
    abstract int bind_null(long stmt, int pos) throws SQLException;
 
    /**
-    * Binds int value to prepared statements with the pointer to the statement object, the index of the SQL parameter to 
-    * be set and the value to bind to the parameter.
+     * Binds int value to prepared statements with the pointer to the statement object, the index of
+     * the SQL parameter to be set and the value to bind to the parameter.
     * @param stmt Pointer to the statement object.
     * @param pos The index of the SQL parameter to be set.
     * @param v The value to bind to the parameter.
@@ -453,8 +455,8 @@ abstract class DB implements Codes
    abstract int bind_int(long stmt, int pos, int v) throws SQLException;
 
    /**
-    * Binds long value to prepared statements with the pointer to the statement object, the index of the SQL parameter to 
-    * be set and the value to bind to the parameter.
+     * Binds long value to prepared statements with the pointer to the statement object, the index
+     * of the SQL parameter to be set and the value to bind to the parameter.
     * @param stmt Pointer to the statement object.
     * @param pos The index of the SQL parameter to be set.
     * @param v The value to bind to the parameter.
@@ -465,8 +467,8 @@ abstract class DB implements Codes
    abstract int bind_long(long stmt, int pos, long v) throws SQLException;
 
    /**
-    * Binds double value to prepared statements with the pointer to the statement object, the index of the SQL parameter 
-    * to be set and the value to bind to the parameter.
+     * Binds double value to prepared statements with the pointer to the statement object, the index
+     * of the SQL parameter to be set and the value to bind to the parameter.
     * @param stmt Pointer to the statement object.
     * @param pos The index of the SQL parameter to be set.
     * @param v The value to bind to the parameter.
@@ -477,8 +479,8 @@ abstract class DB implements Codes
    abstract int bind_double(long stmt, int pos, double v) throws SQLException;
 
    /**
-    * Binds text value to prepared statements with the pointer to the statement object, the index of the SQL parameter to 
-    * be set and the value to bind to the parameter.
+     * Binds text value to prepared statements with the pointer to the statement object, the index
+     * of the SQL parameter to be set and the value to bind to the parameter.
     * @param stmt Pointer to the statement object.
     * @param pos The index of the SQL parameter to be set.
     * @param v The value to bind to the parameter.
@@ -489,8 +491,8 @@ abstract class DB implements Codes
    abstract int bind_text(long stmt, int pos, String v) throws SQLException;
 
    /**
-    * Binds blob value to prepared statements with the pointer to the statement object, the index of the SQL parameter to 
-    * be set and the value to bind to the parameter.
+     * Binds blob value to prepared statements with the pointer to the statement object, the index
+     * of the SQL parameter to be set and the value to bind to the parameter.
     * @param stmt Pointer to the statement object.
     * @param pos The index of the SQL parameter to be set.
     * @param v The value to bind to the parameter.
@@ -509,8 +511,8 @@ abstract class DB implements Codes
    abstract void result_null(long context) throws SQLException;
 
    /**
-    * Sets the result of an SQL function as text data type with the pointer to the SQLite database context and the the 
-    * result value of String.
+     * Sets the result of an SQL function as text data type with the pointer to the SQLite database
+     * context and the the result value of String.
     * @param context Pointer to the SQLite database context.
     * @param val The result value of an SQL function.
     * @throws SQLException
@@ -519,8 +521,8 @@ abstract class DB implements Codes
    abstract void result_text(long context, String val) throws SQLException;
 
    /**
-    * Sets the result of an SQL function as blob data type with the pointer to the SQLite database context and the the 
-    * result value of byte array. 
+     * Sets the result of an SQL function as blob data type with the pointer to the SQLite database
+     * context and the the result value of byte array.
     * @param context Pointer to the SQLite database context.
     * @param val The result value of an SQL function.
     * @throws SQLException
@@ -529,8 +531,8 @@ abstract class DB implements Codes
    abstract void result_blob(long context, byte[] val) throws SQLException;
 
    /**
-    * Sets the result of an SQL function as double data type with the pointer to the SQLite database context and the the 
-    * result value of double.
+     * Sets the result of an SQL function as double data type with the pointer to the SQLite
+     * database context and the the result value of double.
     * @param context Pointer to the SQLite database context.
     * @param val The result value of an SQL function.
     * @throws SQLException
@@ -539,8 +541,8 @@ abstract class DB implements Codes
    abstract void result_double(long context, double val) throws SQLException;
 
    /**
-    * Sets the result of an SQL function as long data type with the pointer to the SQLite database context and the the 
-    * result value of long.
+     * Sets the result of an SQL function as long data type with the pointer to the SQLite database
+     * context and the the result value of long.
     * @param context Pointer to the SQLite database context.
     * @param val The result value of an SQL function.
     * @throws SQLException
@@ -549,8 +551,8 @@ abstract class DB implements Codes
    abstract void result_long(long context, long val) throws SQLException;
 
    /**
-    * Sets the result of an SQL function as int data type with the pointer to the SQLite database context and the the 
-    * result value of int.
+     * Sets the result of an SQL function as int data type with the pointer to the SQLite database
+     * context and the the result value of int.
     * @param context Pointer to the SQLite database context.
     * @param val The result value of an SQL function.
     * @throws SQLException
@@ -559,8 +561,8 @@ abstract class DB implements Codes
    abstract void result_int(long context, int val) throws SQLException;
 
    /**
-    * Sets the result of an SQL function as an error with the pointer to the SQLite database context and the the error 
-    * of String.
+     * Sets the result of an SQL function as an error with the pointer to the SQLite database
+     * context and the the error of String.
     * @param context Pointer to the SQLite database context.
     * @param err The error result of an SQL function.
     * @throws SQLException
@@ -569,8 +571,8 @@ abstract class DB implements Codes
    abstract void result_error(long context, String err) throws SQLException;
 
    /**
-    * Accesses the parameter value on the function or aggregate in bytes data type with the function object and the 
-    * parameter value.
+     * Accesses the parameter value on the function or aggregate in bytes data type with the
+     * function object and the parameter value.
     * @param f The function object.
     * @param arg The parameter value of the function or aggregate.
     * @return The parameter value of the function or aggregate.
@@ -580,8 +582,8 @@ abstract class DB implements Codes
    abstract int value_bytes(Function f, int arg) throws SQLException;
 
    /**
-    * Accesses the parameter values on the function or aggregate in text data type with the function object and the 
-    * parameter value.
+     * Accesses the parameter values on the function or aggregate in text data type with the
+     * function object and the parameter value.
     * @param f The function object.
     * @param arg The parameter value of the function or aggregate.
     * @return The parameter value of the function or aggregate.
@@ -591,8 +593,8 @@ abstract class DB implements Codes
    abstract String value_text(Function f, int arg) throws SQLException;
 
    /**
-    * Accesses the parameter values on the function or aggregate in blob data type with the function object and the 
-    * parameter value.
+     * Accesses the parameter values on the function or aggregate in blob data type with the
+     * function object and the parameter value.
     * @param f The function object.
     * @param arg The parameter value of the function or aggregate.
     * @return The parameter value of the function or aggregate.
@@ -602,8 +604,8 @@ abstract class DB implements Codes
    abstract byte[] value_blob(Function f, int arg) throws SQLException;
 
    /**
-    * Accesses the parameter values on the function or aggregate in double data type with the function object and the 
-    * parameter value.
+     * Accesses the parameter values on the function or aggregate in double data type with the
+     * function object and the parameter value.
     * @param f The function object.
     * @param arg The parameter value of the function or aggregate.
     * @return The parameter value of the function or aggregate.
@@ -613,8 +615,8 @@ abstract class DB implements Codes
    abstract double value_double(Function f, int arg) throws SQLException;
 
    /**
-    * Accesses the parameter values on the function or aggregate in long data type with the function object and the 
-    * parameter value.
+     * Accesses the parameter values on the function or aggregate in long data type with the
+     * function object and the parameter value.
     * @param f The function object.
     * @param arg The parameter value of the function or aggregate.
     * @return The parameter value of the function or aggregate.
@@ -624,8 +626,8 @@ abstract class DB implements Codes
    abstract long value_long(Function f, int arg) throws SQLException;
 
    /**
-    * Accesses the parameter values on the function or aggregate in int data type with the function object and the 
-    * parameter value.
+     * Accesses the parameter values on the function or aggregate in int data type with the function
+     * object and the parameter value.
     *@param f The function object.
     * @param arg The parameter value of the function or aggregate.
     * @return The parameter value of the function or aggregate.
@@ -635,8 +637,8 @@ abstract class DB implements Codes
    abstract int value_int(Function f, int arg) throws SQLException;
 
    /**
-    * Accesses the parameter values on the function or aggregate in NONE data type with the function object and the 
-    * parameter value.
+     * Accesses the parameter values on the function or aggregate in NONE data type with the
+     * function object and the parameter value.
     * @param f The function object.
     * @param arg The parameter value of the function or aggregate.
     * @return The parameter value of the function or aggregate.
@@ -698,13 +700,13 @@ abstract class DB implements Codes
    }
 
    /**
-    * Returns an array describing the attributes (not null, primary key and auto increment) of a column.
+     * Returns an array describing the attributes (not null, primary key and auto increment) of a
+     * column.
     * @param stmt Pointer to the statement object.
-    * @return  The column attribute arrary.<br/>
+     * @return The column attribute array.<br/>
     * index[col][0] = true if column constrained NOT NULL;<br/>
     * index[col][1] = true if column is part of the primary key; <br/>
     * index[col][2] = true if column is auto-increment.
-    * 
     * @throws SQLException
     */
    abstract boolean[][] column_metadata(long stmt) throws SQLException;
@@ -770,8 +772,8 @@ abstract class DB implements Codes
     * @param stmt The pointer of Stmt object.
     * @param count The number of SQL statements.
     * @param vals The array of parameter values.
-    * @return Array of the number of rows changed or inserted or deleted for each command if all commands execute 
-    * successfully;
+     * @return Array of the number of rows changed or inserted or deleted for each command if all
+     *         commands execute successfully;
     * @throws SQLException
     */
    final synchronized int[] executeBatch(long stmt, int count, Object[] vals) throws SQLException {
@@ -844,6 +846,7 @@ abstract class DB implements Codes
            finalize(stmt);
            throw newSQLException(statusCode);
        }
+
    }
 
    /**
@@ -869,11 +872,12 @@ abstract class DB implements Codes
    }
 
    /**
-    * Execute an SQL INSERT, UPDATE or DELETE statement with the Stmt object and an array of parameter values of the SQL 
-    * statement..
+     * Execute an SQL INSERT, UPDATE or DELETE statement with the Stmt object and an array of
+     * parameter values of the SQL statement..
     * @param stmt Stmt object.
     * @param vals Array of parameter values.
-    * @return The number of database rows that were changed or inserted or deleted by the most recently completed SQL.
+     * @return The number of database rows that were changed or inserted or deleted by the most
+     *         recently completed SQL.
     * @throws SQLException
     */
    final synchronized int executeUpdate(Stmt stmt, Object[] vals) throws SQLException {
@@ -933,7 +937,7 @@ abstract class DB implements Codes
        return newSQLException(errorCode, errmsg());
    }
 
-   /**
+    /*
     * SQLite and the JDBC API have very different ideas about the meaning
     * of auto-commit. Under JDBC, when executeUpdate() returns in
     * auto-commit mode (the default), the programmer assumes the data has

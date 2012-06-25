@@ -80,7 +80,7 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       rt.free(passback);
    }
 
-   /* callback for Runtime.CallJavaCB above */
+    // callback for Runtime.CallJavaCB above
    /**
     * @see org.ibex.nestedvm.Runtime.CallJavaCB#call(int, int, int, int)
     */
@@ -522,7 +522,8 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
    }
 
    /**
-    * Dereferences a pointer to the argument of a Function object and returns the value of the argument.
+     * Dereferences a pointer to the argument of a Function object and returns the value of the
+     * argument.
     * @param f Function object.
     * @param arg number of the argument in the function.
     * @return Value of the argument.
@@ -594,12 +595,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       return rc;
    }
 
-   /* unused as we use the user_data pointer to store a single word */
    /**
     * @see org.sqlite.DB#free_functions()
     */
    @Override
-   synchronized void free_functions() {}
+    synchronized void free_functions() {
+        //unused as we use the user_data pointer to store a single word
+    }
 
    /**
     * Callback used by xFunc (1), xStep (2) and xFinal (3).
@@ -651,7 +653,8 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       }
    }
 
-   /** Calls support function found in upstream/sqlite-metadata.patch 
+    /**
+     * Calls support function found in upstream/sqlite-metadata.patch
     * @see org.sqlite.DB#column_metadata(long)
     */
    @Override
@@ -682,7 +685,8 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
    }
 
    /**
-    * @see org.sqlite.DB#restore(java.lang.String, java.lang.String, org.sqlite.DB.ProgressObserver)
+     * @see org.sqlite.DB#restore(java.lang.String, java.lang.String,
+     *      org.sqlite.DB.ProgressObserver)
     */
    @Override
    int restore(String dbName, String sourceFileName, ProgressObserver observer) throws SQLException {
@@ -868,7 +872,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
       }
    }
 
-   /** Maps any exception onto an SQLException. */
+    /** 
+     * Maps any exception onto an SQLException.
+     */
    private static final class CausedSQLException extends SQLException
    {
       private final Exception cause;

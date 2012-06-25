@@ -135,10 +135,9 @@ public class SQLiteDataSource implements DataSource
 
    /**
     * Sets the database to be opened in read-only mode 
-    * @param readOnly The database is set to read-only mode if the argument is true and read-only mode is disabled if 
-    * the argument is false.
-    * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html
-    * </a>
+     * @param readOnly The database is set to read-only mode if the argument is true and read-only mode is disabled
+     * if the argument is false.
+     * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
     */
    public void setReadOnly(boolean readOnly) {
        config.setReadOnly(readOnly);
@@ -171,8 +170,7 @@ public class SQLiteDataSource implements DataSource
     * statements return no data. When count-changes is enabled, each of these commands returns a single row of data 
     * consisting of one integer value - the number of rows inserted, modified or deleted by the command.
     * @param enable The count-changes flag is enabled if the argument is true and disabled if the argument is false.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_count_changes">
-    * http://www.sqlite.org/pragma.html#pragma_count_changes</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_count_changes">http://www.sqlite.org/pragma.html#pragma_count_changes</a>
     */
    public void setCountChanges(boolean enable) {
        config.enableCountChanges(enable);
@@ -182,8 +180,7 @@ public class SQLiteDataSource implements DataSource
     * Sets the default maximum number of database disk pages that SQLite will hold in memory at once per open database 
     * file. 
     * @param numberOfPages The default suggested cache size.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">
-    * http://www.sqlite.org/pragma.html#pragma_cache_size</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">http://www.sqlite.org/pragma.html#pragma_cache_size</a>
     */
    public void setDefaultCacheSize(int numberOfPages) {
        config.setDefaultCacheSize(numberOfPages);
@@ -216,8 +213,7 @@ public class SQLiteDataSource implements DataSource
     * way SQLite assigns names to result columns of SELECT statements.
     * @param enable The full_column_names flag is enabled if the argument is true and full_column_names is disabled if 
     * the argument is false.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_full_column_names">
-    * http://www.sqlite.org/pragma.html#pragma_full_column_names</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_full_column_names">http://www.sqlite.org/pragma.html#pragma_full_column_names</a>
     */
    public void setFullColumnNames(boolean enable) {
        config.enableFullColumnNames(enable);
@@ -228,8 +224,7 @@ public class SQLiteDataSource implements DataSource
     * on systems that support it.
     * @param enable The fullfsync flag is enabled if the argument is true and fullfsync is disabled if 
     * the argument is false.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_fullfsync">
-    * http://www.sqlite.org/pragma.html#pragma_fullfsync</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_fullfsync">http://www.sqlite.org/pragma.html#pragma_fullfsync</a>
     */
    public void setFullSync(boolean enable) {
        config.enableFullSync(enable);
@@ -273,8 +268,7 @@ public class SQLiteDataSource implements DataSource
     * databases are created using the latest file format which might not be readable or writable by versions of SQLite 
     * prior to 3.3.0.
     * @param use The legacy_file_format flag is ON if the argument is true and OFF if the argument is false.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_legacy_file_format">
-    * http://www.sqlite.org/pragma.html#pragma_legacy_file_format</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_legacy_file_format">http://www.sqlite.org/pragma.html#pragma_legacy_file_format</a>
     */
    public void setLegacyFileFormat(boolean use) {
        config.useLegacyFileFormat(use);
@@ -314,8 +308,7 @@ public class SQLiteDataSource implements DataSource
     * Set READ UNCOMMITTED isolation
     * @param useReadUncommitedIsolationMode READ UNCOMMITTED isolation mode is set if the argument is true and the mode 
     * is cleared if the argument is false. 
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_read_uncommitted">
-    * http://www.sqlite.org/pragma.html#pragma_read_uncommitted</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_read_uncommitted">http://www.sqlite.org/pragma.html#pragma_read_uncommitted</a>
     */
    public void setReadUncommited(boolean useReadUncommitedIsolationMode) {
        config.setReadUncommited(useReadUncommitedIsolationMode);
@@ -326,8 +319,7 @@ public class SQLiteDataSource implements DataSource
     * of all statements prepared using the database connection, including those prepared before the setting was changed.
     * @param enable The recursive trigger capability is enabled if the argument is true and the capability is disabled if 
     * the argument is false.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_recursive_triggers">
-    * http://www.sqlite.org/pragma.html#pragma_recursive_triggers</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_recursive_triggers">http://www.sqlite.org/pragma.html#pragma_recursive_triggers</a>
     */
    public void setRecursiveTriggers(boolean enable) {
        config.enableRecursiveTriggers(enable);
@@ -338,8 +330,7 @@ public class SQLiteDataSource implements DataSource
     * ORDER BY clause to emit their results in the reverse order of what they normally would.
     * @param enable The reverse_unordered_selects is enabled if the argument is true and is disabled if the argument is 
     * false.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects">
-    * http://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects">http://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects</a>
     */
    public void setReverseUnorderedSelects(boolean enable) {
        config.enableReverseUnorderedSelects(enable);
@@ -350,10 +341,8 @@ public class SQLiteDataSource implements DataSource
     * SELECT statements.
     * @param enable The short_column_names flag is enabled if the argument is true and the short_column_names is disabled 
     * if the argument is false.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_short_column_names">
-    * http://www.sqlite.org/pragma.html#pragma_short_column_names</a>
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_fullfsync">
-    * http://www.sqlite.org/pragma.html#pragma_fullfsync</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_short_column_names">http://www.sqlite.org/pragma.html#pragma_short_column_names</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_fullfsync">http://www.sqlite.org/pragma.html#pragma_fullfsync</a>
     */
    public void setShortColumnNames(boolean enable) {
        config.enableShortColumnNames(enable);
@@ -370,10 +359,9 @@ public class SQLiteDataSource implements DataSource
    }
 
    /**
-    * Set the temp_store type which is used to determine where temporary tables and indices are stored..
+     * Set the temp_store type which is used to determine where temporary tables and indices are stored.
     * @param storeType One of "DEFAULT", "FILE", "MEMORY"
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_temp_store">
-    * http://www.sqlite.org/pragma.html#pragma_temp_store</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_temp_store">http://www.sqlite.org/pragma.html#pragma_temp_store</a>
     */
    public void setTempStore(String storeType) {
        config.setTempStore(TempStore.valueOf(storeType));
@@ -383,8 +371,7 @@ public class SQLiteDataSource implements DataSource
     * Set the value of the sqlite3_temp_directory global variable, which many operating-system interface backends use to 
     * determine where to store temporary tables and indices.
     * @param directoryName The temporary directory name.
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_temp_store_directory">
-    * http://www.sqlite.org/pragma.html#pragma_temp_store_directory</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_temp_store_directory">http://www.sqlite.org/pragma.html#pragma_temp_store_directory</a>
     */
    public void setTempStoreDirectory(String directoryName) {
        config.setTempStoreDirectory(directoryName);
@@ -394,8 +381,7 @@ public class SQLiteDataSource implements DataSource
     * sets the value of the user-version, which is big-endian 32-bit signed integers stored in the database header at 
     * offsets 60. 
     * @param version
-    * @see <a href="http://www.sqlite.org/pragma.html#pragma_schema_version">
-    * http://www.sqlite.org/pragma.html#pragma_schema_version</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_schema_version">http://www.sqlite.org/pragma.html#pragma_schema_version</a>
     */
    public void setUserVersion(int version) {
        config.setUserVersion(version);
@@ -470,4 +456,5 @@ public class SQLiteDataSource implements DataSource
    public <T> T unwrap(Class<T> iface) throws SQLException {
        return (T) this;
    }
+
 }

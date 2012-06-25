@@ -233,7 +233,7 @@ class Conn implements Connection
 
    /**
     * Gets the timeout value for the connection.
-    * @return The timeou value
+     * @return The timeout value
     */
    int getTimeout() {
        return timeout;
@@ -261,7 +261,8 @@ class Conn implements Connection
     * Retrieves the compile-time library version numbers.
     * @return Compile-time library version numbers.
     * @throws SQLException
-    * @see <a href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
+     * @see <a
+     *      href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
     */
    String libversion() throws SQLException {
        return db.libversion();
@@ -289,7 +290,8 @@ class Conn implements Connection
     * @param rst The int value that corresponds to the constants of java.sql.ResultSet.
     * @param rsc The int value that corresponds to the constants of java.sql.ResultSet.
     * @param rsh The int value that corresponds to the constants of java.sql.ResultSet.
-    * @throws SQLException With one of the message:<code>"SQLite only supports TYPE_FORWARD_ONLY cursors"</code>, 
+     * @throws SQLException With one of the
+     *             message:<code>"SQLite only supports TYPE_FORWARD_ONLY cursors"</code>,
     * <code>"SQLite only supports CONCUR_READ_ONLY cursors"</code>, 
     * <code>"SQLite only supports closing cursors at commit"</code>
     */
@@ -619,7 +621,6 @@ class Conn implements Connection
        throw new SQLException("unsupported by SQLite: savepoints");
    }
 
-   /** Not implemented yet */
    public Struct createStruct(String t, Object[] attr) throws SQLException {
        throw new SQLException("unsupported by SQLite");
    }

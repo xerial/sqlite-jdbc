@@ -32,7 +32,6 @@ package org.sqlite;
  */
 public class OSInfo
 {
-
    public static void main(String[] args) {
       if (args.length >= 1) {
          if ("--os".equals(args[0])) {

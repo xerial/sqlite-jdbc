@@ -30,12 +30,20 @@ import java.util.Iterator;
 class MetaData implements DatabaseMetaData
 {
    private Conn              conn;
-   private PreparedStatement getTables        = null, getTableTypes = null, getTypeInfo = null, getCatalogs = null,
-           getSchemas = null, getUDTs = null, getColumnsTblName = null, getSuperTypes = null, getSuperTables = null,
-           getTablePrivileges = null, getIndexInfo = null, getProcedures = null, getProcedureColumns = null,
-           getAttributes = null, getBestRowIdentifier = null, getVersionColumns = null, getColumnPrivileges = null;
+    private PreparedStatement 
+        getTables             = null,   getTableTypes        = null,
+        getTypeInfo           = null,   getCatalogs          = null,
+        getSchemas            = null,   getUDTs              = null,
+        getColumnsTblName     = null,   getSuperTypes        = null,
+        getSuperTables        = null,   getTablePrivileges   = null,
+        getIndexInfo          = null,   getProcedures        = null,
+        getProcedureColumns   = null,   getAttributes        = null,
+        getBestRowIdentifier  = null,   getVersionColumns    = null,
+        getColumnPrivileges   = null;
 
-   /** Used by PrepStmt to save generating a new statement every call. */
+    /**
+     * Used by PrepStmt to save generating a new statement every call.
+     */
    private PreparedStatement getGeneratedKeys = null;
 
    /**
@@ -1132,7 +1140,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getAttributes(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getAttributes(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
     */
    public ResultSet getAttributes(String c, String s, String t, String a) throws SQLException {
       if (getAttributes == null)
@@ -1147,7 +1156,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getBestRowIdentifier(java.lang.String, java.lang.String, java.lang.String, int, boolean)
+     * @see java.sql.DatabaseMetaData#getBestRowIdentifier(java.lang.String, java.lang.String,
+     *      java.lang.String, int, boolean)
     */
    public ResultSet getBestRowIdentifier(String c, String s, String t, int scope, boolean n) throws SQLException {
       if (getBestRowIdentifier == null)
@@ -1158,7 +1168,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getColumnPrivileges(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getColumnPrivileges(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
     */
    public ResultSet getColumnPrivileges(String c, String s, String t, String colPat) throws SQLException {
       if (getColumnPrivileges == null)
@@ -1169,7 +1180,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
     */
    public ResultSet getColumns(String c, String s, String tbl, String colPat) throws SQLException {
       Statement stat = conn.createStatement();
@@ -1306,7 +1318,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getPrimaryKeys(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getPrimaryKeys(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getPrimaryKeys(String c, String s, String table) throws SQLException {
       String sql;
@@ -1350,7 +1363,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getExportedKeys(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getExportedKeys(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
 
@@ -1437,7 +1451,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getImportedKeys(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getImportedKeys(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
      String sql;
@@ -1493,7 +1508,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getIndexInfo(java.lang.String, java.lang.String, java.lang.String, boolean, boolean)
+     * @see java.sql.DatabaseMetaData#getIndexInfo(java.lang.String, java.lang.String,
+     *      java.lang.String, boolean, boolean)
     */
    public ResultSet getIndexInfo(String c, String s, String t, boolean u, boolean approximate) throws SQLException {
       String sql;
@@ -1550,7 +1566,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getProcedureColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getProcedureColumns(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
     */
    public ResultSet getProcedureColumns(String c, String s, String p, String colPat) throws SQLException {
       if (getProcedures == null)
@@ -1564,7 +1581,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getProcedures(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getProcedures(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getProcedures(String c, String s, String p) throws SQLException {
       if (getProcedures == null)
@@ -1575,7 +1593,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getSuperTables(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getSuperTables(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getSuperTables(String c, String s, String t) throws SQLException {
       if (getSuperTables == null)
@@ -1585,7 +1604,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getSuperTypes(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getSuperTypes(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getSuperTypes(String c, String s, String t) throws SQLException {
       if (getSuperTypes == null)
@@ -1596,7 +1616,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getTablePrivileges(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getTablePrivileges(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getTablePrivileges(String c, String s, String t) throws SQLException {
       if (getTablePrivileges == null)
@@ -1607,7 +1628,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getTables(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+     * @see java.sql.DatabaseMetaData#getTables(java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String[])
     */
    public synchronized ResultSet getTables(String c, String s, String t, String[] types) throws SQLException {
       checkOpen();
@@ -1690,7 +1712,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getUDTs(java.lang.String, java.lang.String, java.lang.String, int[])
+     * @see java.sql.DatabaseMetaData#getUDTs(java.lang.String, java.lang.String, java.lang.String,
+     *      int[])
     */
    public ResultSet getUDTs(String c, String s, String t, int[] types) throws SQLException {
       if (getUDTs == null)
@@ -1703,7 +1726,8 @@ class MetaData implements DatabaseMetaData
    }
 
    /**
-    * @see java.sql.DatabaseMetaData#getVersionColumns(java.lang.String, java.lang.String, java.lang.String)
+     * @see java.sql.DatabaseMetaData#getVersionColumns(java.lang.String, java.lang.String,
+     *      java.lang.String)
     */
    public ResultSet getVersionColumns(String c, String s, String t) throws SQLException {
       if (getVersionColumns == null)

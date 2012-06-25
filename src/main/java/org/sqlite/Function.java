@@ -59,11 +59,11 @@ public abstract class Function
    int args = 0;
 
    /**
-    * Registers the given function with the Connection using the provided name.
-    * @param conn Connection object.
-    * @param name Function name.
-    * @param f Function object.
-    * @throws SQLException
+     * Registers the given function with the Connection using the
+     * provided name.
+     * @param conn The connection.
+     * @param name The name of the function.
+     * @param f The function to register.
     */
    public static final void create(Connection conn, String name, Function f)
           throws SQLException {
@@ -83,9 +83,9 @@ public abstract class Function
    }
 
    /**
-    * De-register the named function form the Connection.
-    * @param conn Connection object.
-    * @param name Function name.
+     * Removes a named function from the given connection.
+     * @param conn The connection to remove the function from. 
+     * @param name The name of the function.
     * @throws SQLException
     */
    public static final void destroy(Connection conn, String name)
@@ -96,79 +96,131 @@ public abstract class Function
    }
 
 
-   /** Called by SQLite as a custom function. Should access arguments
+    /** 
+     * Called by SQLite as a custom function. Should access arguments
     *  through <tt>value_*(int)</tt>, return results with
-    *  <tt>result(*)</tt> and throw errors with <tt>error(String)</tt>. */
+     * <tt>result(*)</tt> and throw errors with <tt>error(String)</tt>.
+     */
    protected abstract void xFunc() throws SQLException;
 
 
-   /** Returns the number of arguments passed to the function.
-    *  Can only be called from <tt>xFunc()</tt>. */
+    /**
+     * Returns the number of arguments passed to the function.
+     * Can only be called from <tt>xFunc()</tt>.
+     */
    protected synchronized final int args()
        throws SQLException { checkContext(); return args; }
 
-   /** Called by <tt>xFunc</tt> to return a value. */
+    /**
+     * Called by <tt>xFunc</tt> to return a value.
+     * @param value
+     */
    protected synchronized final void result(byte[] value)
        throws SQLException { checkContext(); db.result_blob(context, value); }
 
-   /** Called by <tt>xFunc</tt> to return a value. */
+    /**
+     * Called by <tt>xFunc</tt> to return a value.
+     * @param value
+     */
    protected synchronized final void result(double value)
        throws SQLException { checkContext(); db.result_double(context,value);}
 
-   /** Called by <tt>xFunc</tt> to return a value. */
+    /**
+     * Called by <tt>xFunc</tt> to return a value.
+     * @param value
+     */
    protected synchronized final void result(int value)
        throws SQLException { checkContext(); db.result_int(context, value); }
 
-   /** Called by <tt>xFunc</tt> to return a value. */
+    /**
+     * Called by <tt>xFunc</tt> to return a value.
+     * @param value
+     */
    protected synchronized final void result(long value)
        throws SQLException { checkContext(); db.result_long(context, value); }
 
-   /** Called by <tt>xFunc</tt> to return a value. */
+    /**
+     * Called by <tt>xFunc</tt> to return a value.
+     */
    protected synchronized final void result()
        throws SQLException { checkContext(); db.result_null(context); }
 
-   /** Called by <tt>xFunc</tt> to return a value. */
+    /**
+     * Called by <tt>xFunc</tt> to return a value.
+     * @param value
+     */
    protected synchronized final void result(String value)
        throws SQLException { checkContext(); db.result_text(context, value); }
 
-   /** Called by <tt>xFunc</tt> to throw an error. */
+    /**
+     * Called by <tt>xFunc</tt> to throw an error.
+     * @param err
+     */
    protected synchronized final void error(String err)
        throws SQLException { checkContext(); db.result_error(context, err); }
 
-   /** Called by <tt>xFunc</tt> to access the value of an argument. */
+    /**
+     * Called by <tt>xFunc</tt> to access the value of an argument.
+     * @param arg
+     */
    protected synchronized final int value_bytes(int arg)
        throws SQLException {checkValue(arg); return db.value_bytes(this,arg);}
 
-   /** Called by <tt>xFunc</tt> to access the value of an argument. */
+    /**
+     * Called by <tt>xFunc</tt> to access the value of an argument.
+     * @param arg
+     */
    protected synchronized final String value_text(int arg)
        throws SQLException {checkValue(arg); return db.value_text(this,arg);}
 
-   /** Called by <tt>xFunc</tt> to access the value of an argument. */
+    /**
+     * Called by <tt>xFunc</tt> to access the value of an argument.
+     * @param arg
+     */
    protected synchronized final byte[] value_blob(int arg)
        throws SQLException {checkValue(arg); return db.value_blob(this,arg); }
 
-   /** Called by <tt>xFunc</tt> to access the value of an argument. */
+    /**
+     * Called by <tt>xFunc</tt> to access the value of an argument.
+     * @param arg
+     */
    protected synchronized final double value_double(int arg)
        throws SQLException {checkValue(arg); return db.value_double(this,arg);}
 
-   /** Called by <tt>xFunc</tt> to access the value of an argument. */
+    /**
+     * Called by <tt>xFunc</tt> to access the value of an argument.
+     * @param arg
+     */
    protected synchronized final int value_int(int arg)
        throws SQLException {checkValue(arg); return db.value_int(this, arg); }
 
-   /** Called by <tt>xFunc</tt> to access the value of an argument. */
+    /**
+     * Called by <tt>xFunc</tt> to access the value of an argument.
+     * @param arg
+     */
    protected synchronized final long value_long(int arg)
        throws SQLException { checkValue(arg); return db.value_long(this,arg); }
 
-   /** Called by <tt>xFunc</tt> to access the value of an argument. */
+    /**
+     * Called by <tt>xFunc</tt> to access the value of an argument.
+     * @param arg
+     */
    protected synchronized final int value_type(int arg)
        throws SQLException {checkValue(arg); return db.value_type(this,arg); }
 
 
+    /**
+     * @throws SQLException
+     */
    private void checkContext() throws SQLException {
        if (conn == null || conn.db() == null || context == 0)
            throw new SQLException("no context, not allowed to read value");
    }
 
+    /**
+     * @param arg
+     * @throws SQLException
+     */
    private void checkValue(int arg) throws SQLException {
        if (conn == null || conn.db() == null || value == 0)
            throw new SQLException("not in value access state");
@@ -177,6 +229,10 @@ public abstract class Function
    }
 
 
+    /**
+     * Provides an interface for creating SQLite user-defined aggregate functions.
+     * @see Function
+     */
    public static abstract class Aggregate
            extends Function
            implements Cloneable
@@ -185,7 +241,6 @@ public abstract class Function
        * @see org.sqlite.Function#xFunc()
        */
       protected final void xFunc() {}
-      
       
       /**
        * Defines the abstract aggregate callback function  

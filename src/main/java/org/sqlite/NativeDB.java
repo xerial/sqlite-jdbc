@@ -100,9 +100,9 @@ final class NativeDB extends DB
    native synchronized void busy_timeout(int ms);
 
    /**
-    * native synchronized void exec(String sql) throws SQLException;
     * @see org.sqlite.DB#prepare(java.lang.String)
     */
+    //native synchronized void exec(String sql) throws SQLException;
    @Override
    protected native synchronized long prepare(String sql) throws SQLException;
 
@@ -359,7 +359,8 @@ final class NativeDB extends DB
    native synchronized int backup(String dbName, String destFileName, ProgressObserver observer) throws SQLException;
 
    /**
-    * @see org.sqlite.DB#restore(java.lang.String, java.lang.String, org.sqlite.DB.ProgressObserver)
+     * @see org.sqlite.DB#restore(java.lang.String, java.lang.String,
+     *      org.sqlite.DB.ProgressObserver)
     */
    @Override
    native synchronized int restore(String dbName, String sourceFileName, ProgressObserver observer)
@@ -378,7 +379,7 @@ final class NativeDB extends DB
 
    /**
     * Throws an SQLException
-    * @param msg Message for the SQLExceotion.
+     * @param msg Message for the SQLException.
     * @throws SQLException
     */
    static void throwex(String msg) throws SQLException {

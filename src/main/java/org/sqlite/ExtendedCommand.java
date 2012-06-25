@@ -28,10 +28,10 @@ public class ExtendedCommand
 
    /**
     * Parses extend commands of "backup" or "restore" for SQLite database.  
-    * @param sql One of the extended commands:<br/>backup sourceDatabaseName to destinationFileName<br/>OR
-    * <br>restore targetDatabaseName from sourceFileName
-    * @return BackupCommand object if the argument is a backup command; RestoreCommand object if the argument is a 
-    * restore command; 
+     * @param sql One of the extended commands:<br/>
+     *      backup sourceDatabaseName to destinationFileName OR restore targetDatabaseName from sourceFileName
+     * @return BackupCommand object if the argument is a backup command; RestoreCommand object if
+     *         the argument is a restore command;
     * @throws SQLException
     */
    public static SQLExtension parse(String sql) throws SQLException {
@@ -153,4 +153,5 @@ public class ExtendedCommand
           db.restore(targetDB, srcFile, null);
       }
    }
+
 }
