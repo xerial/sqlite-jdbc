@@ -68,12 +68,22 @@ public enum SQLiteErrorCode {
     public final int code;
     public final String message;
 
+    /**
+     * Constructor that applies error code and message.
+     * @param code Error code.
+     * @param message Message for the error.
+     */
     private SQLiteErrorCode(int code, String message)
     {
         this.code = code;
         this.message = message;
     }
 
+    /**
+     * Gets the error message for the given error code.
+     * @param errorCode Error code.
+     * @return Error message.
+     */
     public static SQLiteErrorCode getErrorCode(int errorCode)
     {
         for (SQLiteErrorCode each : SQLiteErrorCode.values())
@@ -84,6 +94,9 @@ public enum SQLiteErrorCode {
         return UNKNOWN_ERROR;
     }
 
+    /**
+     * @see java.lang.Enum#toString()
+     */
     @Override
     public String toString()
     {

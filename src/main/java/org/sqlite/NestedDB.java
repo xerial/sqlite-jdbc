@@ -37,6 +37,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
+    /**
+     * @see org.sqlite.DB#_open(java.lang.String, int)
+     */
     @Override
     protected synchronized void _open(String filename, int openFlags) throws SQLException {
         if (handle != 0)
@@ -77,12 +80,18 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         rt.free(passback);
     }
 
-    /* callback for Runtime.CallJavaCB above */
+    // callback for Runtime.CallJavaCB above
+    /**
+     * @see org.ibex.nestedvm.Runtime.CallJavaCB#call(int, int, int, int)
+     */
     public int call(int xType, int context, int args, int value) {
         xUDF(xType, context, args, value);
         return 0;
     }
 
+    /**
+     * @see org.sqlite.DB#_close()
+     */
     @Override
     protected synchronized void _close() throws SQLException {
         if (handle == 0)
@@ -98,6 +107,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
+    /**
+     * @see org.sqlite.DB#shared_cache(boolean)
+     */
     @Override
     int shared_cache(boolean enable) throws SQLException {
         // The shared cache is per-process, so it is useless as
@@ -105,6 +117,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return -1;
     }
 
+    /**
+     * @see org.sqlite.DB#enable_load_extension(boolean)
+     */
     @Override
     int enable_load_extension(boolean enable) throws SQLException {
         // TODO enable_load_extension is not supported  in pure-java mode
@@ -112,16 +127,25 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return 1;
     }
 
+    /**
+     * @see org.sqlite.DB#interrupt()
+     */
     @Override
     synchronized void interrupt() throws SQLException {
         call("sqlite3_interrupt", handle);
     }
 
+    /**
+     * @see org.sqlite.DB#busy_timeout(int)
+     */
     @Override
     synchronized void busy_timeout(int ms) throws SQLException {
         call("sqlite3_busy_timeout", handle, ms);
     }
 
+    /**
+     * @see org.sqlite.DB#prepare(java.lang.String)
+     */
     @Override
     protected synchronized long prepare(String sql) throws SQLException {
 
@@ -138,21 +162,33 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return pointer;
     }
 
+    /**
+     * @see org.sqlite.DB#errmsg()
+     */
     @Override
     synchronized String errmsg() throws SQLException {
         return cstring(call("sqlite3_errmsg", handle));
     }
 
+    /**
+     * @see org.sqlite.DB#libversion()
+     */
     @Override
     synchronized String libversion() throws SQLException {
         return cstring(call("sqlite3_libversion", handle));
     }
 
+    /**
+     * @see org.sqlite.DB#changes()
+     */
     @Override
     synchronized int changes() throws SQLException {
         return call("sqlite3_changes", handle);
     }
 
+    /**
+     * @see org.sqlite.DB#_exec(java.lang.String)
+     */
     @Override
     protected synchronized int _exec(String sql) throws SQLException {
         if (rt == null)
@@ -170,51 +206,81 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return status;
     }
 
+    /**
+     * @see org.sqlite.DB#finalize(long)
+     */
     @Override
     protected synchronized int finalize(long stmt) throws SQLException {
         return call("sqlite3_finalize", (int) stmt);
     }
 
+    /**
+     * @see org.sqlite.DB#step(long)
+     */
     @Override
     protected synchronized int step(long stmt) throws SQLException {
         return call("sqlite3_step", (int) stmt);
     }
 
+    /**
+     * @see org.sqlite.DB#reset(long)
+     */
     @Override
     protected synchronized int reset(long stmt) throws SQLException {
         return call("sqlite3_reset", (int) stmt);
     }
 
+    /**
+     * @see org.sqlite.DB#clear_bindings(long)
+     */
     @Override
     synchronized int clear_bindings(long stmt) throws SQLException {
         return call("sqlite3_clear_bindings", (int) stmt);
     }
 
+    /**
+     * @see org.sqlite.DB#bind_parameter_count(long)
+     */
     @Override
     synchronized int bind_parameter_count(long stmt) throws SQLException {
         return call("sqlite3_bind_parameter_count", (int) stmt);
     }
 
+    /**
+     * @see org.sqlite.DB#column_count(long)
+     */
     @Override
     synchronized int column_count(long stmt) throws SQLException {
         return call("sqlite3_column_count", (int) stmt);
     }
 
+    /**
+     * @see org.sqlite.DB#column_type(long, int)
+     */
     @Override
     synchronized int column_type(long stmt, int col) throws SQLException {
         return call("sqlite3_column_type", (int) stmt, col);
     }
 
+    /**
+     * @see org.sqlite.DB#column_name(long, int)
+     */
     @Override
     synchronized String column_name(long stmt, int col) throws SQLException {
         return utfstring(call("sqlite3_column_name", (int) stmt, col));
     }
 
+    /**
+     * @see org.sqlite.DB#column_text(long, int)
+     */
     @Override
     synchronized String column_text(long stmt, int col) throws SQLException {
         return utfstring(call("sqlite3_column_text", (int) stmt, col));
     }
 
+    /**
+     * @see org.sqlite.DB#column_blob(long, int)
+     */
     @Override
     synchronized byte[] column_blob(long stmt, int col) throws SQLException {
         int addr = call("sqlite3_column_blob", (int) stmt, col);
@@ -225,6 +291,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return blob;
     }
 
+    /**
+     * @see org.sqlite.DB#column_double(long, int)
+     */
     @Override
     synchronized double column_double(long stmt, int col) throws SQLException {
         try {
@@ -235,6 +304,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         } // TODO
     }
 
+    /**
+     * @see org.sqlite.DB#column_long(long, int)
+     */
     @Override
     synchronized long column_long(long stmt, int col) throws SQLException {
         try {
@@ -245,41 +317,65 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         } // TODO
     }
 
+    /**
+     * @see org.sqlite.DB#column_int(long, int)
+     */
     @Override
     synchronized int column_int(long stmt, int col) throws SQLException {
         return call("sqlite3_column_int", (int) stmt, col);
     }
 
+    /**
+     * @see org.sqlite.DB#column_decltype(long, int)
+     */
     @Override
     synchronized String column_decltype(long stmt, int col) throws SQLException {
         return utfstring(call("sqlite3_column_decltype", (int) stmt, col));
     }
 
+    /**
+     * @see org.sqlite.DB#column_table_name(long, int)
+     */
     @Override
     synchronized String column_table_name(long stmt, int col) throws SQLException {
         return utfstring(call("sqlite3_column_table_name", (int) stmt, col));
     }
 
+    /**
+     * @see org.sqlite.DB#bind_null(long, int)
+     */
     @Override
     synchronized int bind_null(long stmt, int pos) throws SQLException {
         return call("sqlite3_bind_null", (int) stmt, pos);
     }
 
+    /**
+     * @see org.sqlite.DB#bind_int(long, int, int)
+     */
     @Override
     synchronized int bind_int(long stmt, int pos, int v) throws SQLException {
         return call("sqlite3_bind_int", (int) stmt, pos, v);
     }
 
+    /**
+     * @see org.sqlite.DB#bind_long(long, int, long)
+     */
     @Override
     synchronized int bind_long(long stmt, int pos, long v) throws SQLException {
         return bind_text(stmt, pos, Long.toString(v)); // TODO
     }
 
+    /**
+     * @see org.sqlite.DB#bind_double(long, int, double)
+     */
     @Override
     synchronized int bind_double(long stmt, int pos, double v) throws SQLException {
         return bind_text(stmt, pos, Double.toString(v)); // TODO
     }
 
+    /**
+     * @see org.sqlite.DB#bind_text(long, int, java.lang.String)
+     */
     @Override
     synchronized int bind_text(long stmt, int pos, String v) throws SQLException {
         if (v == null)
@@ -287,6 +383,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return call("sqlite3_bind_text", (int) stmt, pos, rt.strdup(v), -1, rt.lookupSymbol("free"));
     }
 
+    /**
+     * @see org.sqlite.DB#bind_blob(long, int, byte[])
+     */
     @Override
     synchronized int bind_blob(long stmt, int pos, byte[] buf) throws SQLException {
         if (buf == null || buf.length < 1)
@@ -297,16 +396,25 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return call("sqlite3_bind_blob", (int) stmt, pos, blob, len, rt.lookupSymbol("free"));
     }
 
+    /**
+     * @see org.sqlite.DB#result_null(long)
+     */
     @Override
     synchronized void result_null(long cxt) throws SQLException {
         call("sqlite3_result_null", (int) cxt);
     }
 
+    /**
+     * @see org.sqlite.DB#result_text(long, java.lang.String)
+     */
     @Override
     synchronized void result_text(long cxt, String val) throws SQLException {
         call("sqlite3_result_text", (int) cxt, rt.strdup(val), -1, rt.lookupSymbol("free"));
     }
 
+    /**
+     * @see org.sqlite.DB#result_blob(long, byte[])
+     */
     @Override
     synchronized void result_blob(long cxt, byte[] val) throws SQLException {
         if (val == null || val.length == 0) {
@@ -318,21 +426,33 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         call("sqlite3_result_blob", (int) cxt, blob, val.length, rt.lookupSymbol("free"));
     }
 
+    /**
+     * @see org.sqlite.DB#result_double(long, double)
+     */
     @Override
     synchronized void result_double(long cxt, double val) throws SQLException {
         result_text(cxt, Double.toString(val));
     } // TODO
 
+    /**
+     * @see org.sqlite.DB#result_long(long, long)
+     */
     @Override
     synchronized void result_long(long cxt, long val) throws SQLException {
         result_text(cxt, Long.toString(val));
     } // TODO
 
+    /**
+     * @see org.sqlite.DB#result_int(long, int)
+     */
     @Override
     synchronized void result_int(long cxt, int val) throws SQLException {
         call("sqlite3_result_int", (int) cxt, val);
     }
 
+    /**
+     * @see org.sqlite.DB#result_error(long, java.lang.String)
+     */
     @Override
     synchronized void result_error(long cxt, String err) throws SQLException {
         int str = rt.strdup(err);
@@ -340,16 +460,25 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         rt.free(str);
     }
 
+    /**
+     * @see org.sqlite.DB#value_bytes(org.sqlite.Function, int)
+     */
     @Override
     synchronized int value_bytes(Function f, int arg) throws SQLException {
         return call("sqlite3_value_bytes", value(f, arg));
     }
 
+    /**
+     * @see org.sqlite.DB#value_text(org.sqlite.Function, int)
+     */
     @Override
     synchronized String value_text(Function f, int arg) throws SQLException {
         return utfstring(call("sqlite3_value_text", value(f, arg)));
     }
 
+    /**
+     * @see org.sqlite.DB#value_blob(org.sqlite.Function, int)
+     */
     @Override
     synchronized byte[] value_blob(Function f, int arg) throws SQLException {
         int addr = call("sqlite3_value_blob", value(f, arg));
@@ -360,30 +489,53 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return blob;
     }
 
+    /**
+     * @see org.sqlite.DB#value_double(org.sqlite.Function, int)
+     */
     @Override
     synchronized double value_double(Function f, int arg) throws SQLException {
         return Double.parseDouble(value_text(f, arg)); // TODO
     }
 
+    /**
+     * @see org.sqlite.DB#value_long(org.sqlite.Function, int)
+     */
     @Override
     synchronized long value_long(Function f, int arg) throws SQLException {
         return Long.parseLong(value_text(f, arg)); // TODO
     }
 
+    /**
+     * @see org.sqlite.DB#value_int(org.sqlite.Function, int)
+     */
     @Override
     synchronized int value_int(Function f, int arg) throws SQLException {
         return call("sqlite3_value_int", value(f, arg));
     }
 
+    /**
+     * @see org.sqlite.DB#value_type(org.sqlite.Function, int)
+     */
     @Override
     synchronized int value_type(Function f, int arg) throws SQLException {
         return call("sqlite3_value_type", value(f, arg));
     }
 
+    /**
+     * Dereferences a pointer to the argument of a Function object and returns the value of the
+     * argument.
+     * @param f Function object.
+     * @param arg number of the argument in the function.
+     * @return Value of the argument.
+     * @throws SQLException
+     */
     private int value(Function f, int arg) throws SQLException {
         return deref((int) f.value + (arg * 4));
     }
 
+    /**
+     * @see org.sqlite.DB#create_function(java.lang.String, org.sqlite.Function)
+     */
     @Override
     synchronized int create_function(String name, Function func) throws SQLException {
         if (functions == null) {
@@ -416,6 +568,9 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return rc;
     }
 
+    /**
+     * @see org.sqlite.DB#destroy_function(java.lang.String)
+     */
     @Override
     synchronized int destroy_function(String name) throws SQLException {
         if (name == null)
@@ -440,11 +595,16 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return rc;
     }
 
-    /* unused as we use the user_data pointer to store a single word */
+    /**
+     * unused as we use the user_data pointer to store a single word
+     * @see org.sqlite.DB#free_functions()
+     */
     @Override
     synchronized void free_functions() {}
 
-    /** Callback used by xFunc (1), xStep (2) and xFinal (3). */
+    /**
+     * Callback used by xFunc (1), xStep (2) and xFinal (3).
+     */
     synchronized void xUDF(int xType, int context, int args, int value) {
         Function func = null;
 
@@ -492,7 +652,10 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
-    /** Calls support function found in upstream/sqlite-metadata.patch */
+    /**
+     * Calls support function found in upstream/sqlite-metadata.patch
+     * @see org.sqlite.DB#column_metadata(long)
+     */
     @Override
     synchronized boolean[][] column_metadata(long stmt) throws SQLException {
         int colCount = call("sqlite3_column_count", (int) stmt);
@@ -512,11 +675,18 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return meta;
     }
 
+    /**
+     * @see org.sqlite.DB#backup(java.lang.String, java.lang.String, org.sqlite.DB.ProgressObserver)
+     */
     @Override
     int backup(String dbName, String destFileName, ProgressObserver observer) throws SQLException {
         throw new SQLException("backup command is not supported in pure-java mode");
     }
 
+    /**
+     * @see org.sqlite.DB#restore(java.lang.String, java.lang.String,
+     *      org.sqlite.DB.ProgressObserver)
+     */
     @Override
     int restore(String dbName, String sourceFileName, ProgressObserver observer) throws SQLException {
         throw new SQLException("restore command is not supported in pure-java mode");
@@ -528,17 +698,41 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
     private final int[] p0 = new int[] {}, p1 = new int[] { 0 }, p2 = new int[] { 0, 0 }, p3 = new int[] { 0, 0, 0 },
             p4 = new int[] { 0, 0, 0, 0 }, p5 = new int[] { 0, 0, 0, 0, 0 };
 
+    /**
+     * Calls a native function with function name and 1 argument.
+     * @param addr  Native function name.
+     * @param a0 Argument 0
+     * @return What the native function returns.
+     * @throws SQLException
+     */
     private int call(String addr, int a0) throws SQLException {
         p1[0] = a0;
         return call(addr, p1);
     }
 
+    /**
+     * Calls a native function with function name and 2 arguments.
+     * @param addr  Native function name.
+     * @param a0 Argument 0
+     * @param a1 Argument 1
+     * @return What the native function returns.
+     * @throws SQLException
+     */
     private int call(String addr, int a0, int a1) throws SQLException {
         p2[0] = a0;
         p2[1] = a1;
         return call(addr, p2);
     }
 
+    /**
+     * Calls a native function with function name and 3 arguments.
+     * @param addr  Native function name.
+     * @param a0 Argument 0
+     * @param a1 Argument 1
+     * @param a2 Argument 2
+     * @return What the native function returns.
+     * @throws SQLException
+     */
     private int call(String addr, int a0, int a1, int a2) throws SQLException {
         p3[0] = a0;
         p3[1] = a1;
@@ -546,6 +740,16 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return call(addr, p3);
     }
 
+    /**
+     * Calls a native function with function name and 4 arguments.
+     * @param addr  Native function name.
+     * @param a0 Argument 0
+     * @param a1 Argument 1
+     * @param a2 Argument 2
+     * @param a3 Argument 3
+     * @return What the native function returns.
+     * @throws SQLException
+     */
     private int call(String addr, int a0, int a1, int a2, int a3) throws SQLException {
         p4[0] = a0;
         p4[1] = a1;
@@ -554,6 +758,17 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return call(addr, p4);
     }
 
+    /**
+     * Calls a native function with function name and 5 arguments.
+     * @param addr  Native function name.
+     * @param a0 Argument 0
+     * @param a1 Argument 1
+     * @param a2 Argument 2
+     * @param a3 Argument 3
+     * @param a4 Argument 4
+     * @return What the native function returns.
+     * @throws SQLException
+     */
     private int call(String addr, int a0, int a1, int a2, int a3, int a4) throws SQLException {
         p5[0] = a0;
         p5[1] = a1;
@@ -563,6 +778,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         return call(addr, p5);
     }
 
+    /**
+     * Calls a native function with function name and array of arguments.
+     * @param func Native function name.
+     * @param args Array of arguments for the native function.
+     * @return What the native function returns.
+     * @throws SQLException
+     */
     private int call(String func, int[] args) throws SQLException {
         try {
             return rt.call(func, args);
@@ -572,7 +794,12 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
-    /** Dereferences a pointer, returning the word it points to. */
+    /**
+     * Dereferences a pointer, returning the word it points to.
+     * @param pointer
+     * @return The word that the pointer points to
+     * @throws SQLException
+     */
     private int deref(int pointer) throws SQLException {
         try {
             return rt.memRead(pointer);
@@ -582,6 +809,12 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
+    /**
+     * Copies UTF string from memory area which is pointed by pointer str.
+     * @param str Pointer that points to the memory area of the UTF string.
+     * @return String copied from the memory area.
+     * @throws SQLException
+     */
     private String utfstring(int str) throws SQLException {
         try {
             return rt.utfstring(str);
@@ -591,6 +824,12 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
+    /**
+     * Copies string from memory area which is pointed by pointer str.
+     * @param str pointer that points to the memory area of the string.
+     * @return String copied from the memory area.
+     * @throws SQLException
+     */
     private String cstring(int str) throws SQLException {
         try {
             return rt.cstring(str);
@@ -600,6 +839,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
+    /**
+     * Copies bytes from memory area to buffer with a given length.
+     * @param addr Pointer to the memory area
+     * @param buf The Bytes buffer.
+     * @param count Number of copied bytes 
+     * @throws SQLException
+     */
     private void copyin(int addr, byte[] buf, int count) throws SQLException {
         try {
             rt.copyin(addr, buf, count);
@@ -609,6 +855,13 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
+    /**
+     * Copies bytes from buffer to memory area with a given length.
+     * @param addr Pointer to the memory area
+     * @param buf The Bytes buffer.
+     * @param count Number of copied bytes 
+     * @throws SQLException
+     */
     private void copyout(byte[] buf, int addr, int count) throws SQLException {
         try {
             rt.copyout(buf, addr, count);
@@ -618,42 +871,66 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
         }
     }
 
-    /** Maps any exception onto an SQLException. */
+    /** 
+     * Maps any exception onto an SQLException.
+     */
     private static final class CausedSQLException extends SQLException
     {
         private final Exception cause;
 
+        /**
+         * Constructor that applies the Exception e.
+         * @param e
+         */
         CausedSQLException(Exception e) {
             if (e == null)
                 throw new RuntimeException("null exception cause");
             cause = e;
         }
 
+        /**
+         * @see java.lang.Throwable#getCause()
+         */
         @Override
         public Throwable getCause() {
             return cause;
         }
 
+        /**
+         * @see java.lang.Throwable#printStackTrace()
+         */
         @Override
         public void printStackTrace() {
             cause.printStackTrace();
         }
 
+        /**
+         * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
+         */
         @Override
         public void printStackTrace(PrintWriter s) {
             cause.printStackTrace(s);
         }
 
+        /**
+         * @see java.lang.Throwable#fillInStackTrace()
+         */
         @Override
         public Throwable fillInStackTrace() {
             return cause.fillInStackTrace();
         }
 
+        /**
+         * @see java.lang.Throwable#getStackTrace()
+         */
         @Override
         public StackTraceElement[] getStackTrace() {
             return cause.getStackTrace();
         }
 
+        /**
+         * @see java.lang.Throwable#getMessage()
+         */
         @Override
         public String getMessage() {
             return cause.getMessage();
