@@ -65,7 +65,6 @@ public class SQLiteJDBCLoader
     }
 
     /**
-     * Retrieves the PureJava flag of SQLite JDBC driver is set to pure Java mode. 
      * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise. 
      */
     static boolean getPureJavaFlag() {
@@ -94,10 +93,9 @@ public class SQLiteJDBCLoader
     }
 
     /**
-     * Computes the MD5 value of the input stream
-     * 
-     * @param input
-     * @return
+     * Computes the MD5 value of the input stream.
+     * @param input InputStream.
+     * @return Encrypted string for the InputStream.
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
@@ -123,11 +121,10 @@ public class SQLiteJDBCLoader
     }
 
     /**
-     * Extract the specified library file to the target folder
-     * 
-     * @param libFolderForCurrentOS
-     * @param libraryFileName
-     * @param targetFolder
+     * Extracts and loads the specified library file to the target folder
+     * @param libFolderForCurrentOS Library path.
+     * @param libraryFileName Library name.
+     * @param targetFolder Target folder.
      * @return
      */
     private static boolean extractAndLoadLibraryFile(String libFolderForCurrentOS, String libraryFileName,
@@ -267,7 +264,6 @@ public class SQLiteJDBCLoader
     }
 
     /**
-     * Retrieves the major version of the SQLite JDBC driver.
      * @return The major version of the SQLite JDBC driver.
      */
     public static int getMajorVersion() {
@@ -276,7 +272,6 @@ public class SQLiteJDBCLoader
     }
 
     /**
-     * Retrieves the minor version of the SQLite JDBC driver.
      * @return The minor version of the SQLite JDBC driver.
      */
     public static int getMinorVersion() {
@@ -285,7 +280,6 @@ public class SQLiteJDBCLoader
     }
 
     /**
-     * Retrieves the version of the SQLite JDBC driver.
      * @return The version of the SQLite JDBC driver.
      */
     public static String getVersion() {

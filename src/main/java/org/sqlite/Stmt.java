@@ -45,8 +45,7 @@ class Stmt extends Unused implements Statement, Codes
     }
 
     /**
-     * Checks if the database is opened. if not throws the SQLException.
-     * @throws SQLException
+     * @throws SQLException If the database is not opened.
      */
     protected final void checkOpen() throws SQLException {
         if (pointer == 0)
@@ -54,8 +53,7 @@ class Stmt extends Unused implements Statement, Codes
     }
 
     /**
-     * Checks if the database is opened.
-     * @return Trur  if the database is opened; false otherwise.
+     * @return True if the database is opened; false otherwise.
      * @throws SQLException
      */
     boolean isOpen() throws SQLException {
@@ -286,27 +284,48 @@ class Stmt extends Unused implements Statement, Codes
         return changes;
     }
 
+    /**
+     * @see java.sql.Statement#setCursorName(java.lang.String)
+     */
     public void setCursorName(String name) {}
 
+    /**
+     * @see java.sql.Statement#getWarnings()
+     */
     public SQLWarning getWarnings() throws SQLException {
         return null;
     }
 
+    /**
+     * @see java.sql.Statement#clearWarnings()
+     */
     public void clearWarnings() throws SQLException {}
 
+    /**
+     * @see java.sql.Statement#getConnection()
+     */
     public Connection getConnection() throws SQLException {
         return conn;
     }
 
+    /**
+     * @see java.sql.Statement#cancel()
+     */
     public void cancel() throws SQLException {
         rs.checkOpen();
         db.interrupt();
     }
 
+    /**
+     * @see java.sql.Statement#getQueryTimeout()
+     */
     public int getQueryTimeout() throws SQLException {
         return conn.getTimeout();
     }
 
+    /**
+     * @see java.sql.Statement#setQueryTimeout(int)
+     */
     public void setQueryTimeout(int seconds) throws SQLException {
         if (seconds < 0)
             throw new SQLException("query timeout must be >= 0");
@@ -314,11 +333,17 @@ class Stmt extends Unused implements Statement, Codes
     }
 
     // TODO: write test
+    /**
+     * @see java.sql.Statement#getMaxRows()
+     */
     public int getMaxRows() throws SQLException {
         //checkOpen();
         return rs.maxRows;
     }
 
+    /**
+     * @see java.sql.Statement#setMaxRows(int)
+     */
     public void setMaxRows(int max) throws SQLException {
         //checkOpen();
         if (max < 0)
@@ -326,27 +351,45 @@ class Stmt extends Unused implements Statement, Codes
         rs.maxRows = max;
     }
 
+    /**
+     * @see java.sql.Statement#getMaxFieldSize()
+     */
     public int getMaxFieldSize() throws SQLException {
         return 0;
     }
 
+    /**
+     * @see java.sql.Statement#setMaxFieldSize(int)
+     */
     public void setMaxFieldSize(int max) throws SQLException {
         if (max < 0)
             throw new SQLException("max field size " + max + " cannot be negative");
     }
 
+    /**
+     * @see java.sql.Statement#getFetchSize()
+     */
     public int getFetchSize() throws SQLException {
         return rs.getFetchSize();
     }
 
+    /**
+     * @see java.sql.Statement#setFetchSize(int)
+     */
     public void setFetchSize(int r) throws SQLException {
         rs.setFetchSize(r);
     }
 
+    /**
+     * @see java.sql.Statement#getFetchDirection()
+     */
     public int getFetchDirection() throws SQLException {
         return rs.getFetchDirection();
     }
 
+    /**
+     * @see java.sql.Statement#setFetchDirection(int)
+     */
     public void setFetchDirection(int d) throws SQLException {
         rs.setFetchDirection(d);
     }
@@ -360,25 +403,40 @@ class Stmt extends Unused implements Statement, Codes
         return ((MetaData) conn.getMetaData()).getGeneratedKeys();
     }
 
-    /** SQLite does not support multiple results from execute(). */
+    /**
+     * SQLite does not support multiple results from execute().
+     * @see java.sql.Statement#getMoreResults()
+     */
     public boolean getMoreResults() throws SQLException {
         return getMoreResults(0);
     }
 
+    /**
+     * @see java.sql.Statement#getMoreResults(int)
+     */
     public boolean getMoreResults(int c) throws SQLException {
         checkOpen();
         close(); // as we never have another result, clean up pointer
         return false;
     }
 
+    /**
+     * @see java.sql.Statement#getResultSetConcurrency()
+     */
     public int getResultSetConcurrency() throws SQLException {
         return ResultSet.CONCUR_READ_ONLY;
     }
 
+    /**
+     * @see java.sql.Statement#getResultSetHoldability()
+     */
     public int getResultSetHoldability() throws SQLException {
         return ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
+    /**
+     * @see java.sql.Statement#getResultSetType()
+     */
     public int getResultSetType() throws SQLException {
         return ResultSet.TYPE_FORWARD_ONLY;
     }

@@ -27,7 +27,7 @@ public class ExtendedCommand
     }
 
     /**
-     * Parses extend commands of "backup" or "restore" for SQLite database.  
+     * Parses extended commands of "backup" or "restore" for SQLite database.  
      * @param sql One of the extended commands:<br/>
      *      backup sourceDatabaseName to destinationFileName OR restore targetDatabaseName from sourceFileName
      * @return BackupCommand object if the argument is a backup command; RestoreCommand object if
@@ -67,7 +67,7 @@ public class ExtendedCommand
         public final String destFile;
 
         /**
-         * Constructs a BackupCommand instance and applies the source database name and the destination file name. 
+         * Constructs a BackupCommand instance that backup the database to a target file. 
          * @param srcDB Source database name.
          * @param destFile Target file name.
          */
@@ -114,7 +114,7 @@ public class ExtendedCommand
                                                   .compile("restore(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+from\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)");
 
         /**
-         * Constructs a RestoreCommand instance and applies the target database name and the source file name. 
+         * Constructs a RestoreCommand instance that restores the database from a given source file. 
          * @param targetDB Target database name
          * @param srcFile Source file name
          */

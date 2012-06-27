@@ -48,24 +48,22 @@ public class OSInfo
     }
 
     /**
-     * Gets native library fold path for the current operation system.
-     * @return In the format of <code>OS_name/OS_architecture_name</code>
+     * @return Native library fold path for the current operation system in the format 
+     * of <code>OS_name/OS_architecture_name</code>
      */
     public static String getNativeLibFolderPathForCurrentOS() {
         return getOSName() + "/" + getArchName();
     }
 
     /**
-     * Gets the operating system name.
-     * @return One of <code>Windows</code>, <code>Mac</code>,<code>Linux</code>
+     * @return Operating system name: <code>"Windows"</code>, <code>"Mac"</code>, or <code>"Linux"</code>.
      */
     public static String getOSName() {
         return translateOSNameToFolderName(System.getProperty("os.name"));
     }
 
     /**
-     * Gets the operation system architecture name.
-     * @return
+     * @return Operation system architecture name.
      */
     public static String getArchName() {
         return translateArchNameToFolderName(System.getProperty("os.arch"));
@@ -74,7 +72,7 @@ public class OSInfo
     /**
      * Extracts operating system name from given string.
      * @param osName The given string that contains operating system name.
-     * @return One of <code>Windows</code>, <code>Mac</code>, <code>Linux</code>
+     * @return Operating system name: <code>"Windows"</code>, <code>"Mac"</code>, or <code>"Linux"</code>.
      */
     public static String translateOSNameToFolderName(String osName) {
         if (osName.contains("Windows")) {
@@ -92,9 +90,8 @@ public class OSInfo
     }
 
     /**
-     * Gets the operation system architecture name from given string.
      * @param archName
-     * @return
+     * @return Operation system architecture name.
      */
     public static String translateArchNameToFolderName(String archName) {
         return archName.replaceAll("\\W", "");

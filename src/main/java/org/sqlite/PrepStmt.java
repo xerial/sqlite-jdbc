@@ -37,7 +37,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     private int paramCount;
 
     /**
-     * Constructs a prepared statement and applies the Connection object and the SQL command.
+     * Constructs a PrepStmt instance for the given SQL statement.
      * @param conn Connection object.
      * @param sql String of SQL command
      * @throws SQLException
@@ -482,8 +482,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     }
 
     /**
-     * Creates an SQLiteException.
-     * @return An SQLiteException.
+     * @return An SQLiteException with the error message.
      */
     private SQLException unused() {
         return new SQLException("not supported by PreparedStatment");

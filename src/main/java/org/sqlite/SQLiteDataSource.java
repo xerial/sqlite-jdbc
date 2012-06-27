@@ -91,7 +91,6 @@ public class SQLiteDataSource implements DataSource
     }
 
     /**
-     * Gets the location of the database file.
      * @return The location of the database file.
      */
     public String getUrl() {
@@ -107,7 +106,7 @@ public class SQLiteDataSource implements DataSource
     }
 
     /**
-     * Gets the name of the database if one was set.
+     * @return The name of the database if one was set.
      * @see SQLiteDatabaseSource#setDatabaseName(String)
      */
     public String getDatabaseName() {

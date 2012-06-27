@@ -45,10 +45,17 @@ public class SQLiteConfig
     private final Properties pragmaTable;
     private int              openModeFlag = 0x00;
 
+    /**
+     * Default constructor.
+     */
     public SQLiteConfig() {
         this(new Properties());
     }
 
+    /**
+     * Constructor that applies the object of java.util.Properties. 
+     * @param prop
+     */
     public SQLiteConfig(Properties prop) {
         this.pragmaTable = prop;
         String openMode = pragmaTable.getProperty(Pragma.OPEN_MODE.pragmaName);
@@ -157,7 +164,7 @@ public class SQLiteConfig
     }
 
     /**
-     * @return
+     * @return Int value of the openModeFlag.
      */
     public int getOpenModeFlags() {
         return openModeFlag;
@@ -165,7 +172,6 @@ public class SQLiteConfig
 
     /**
      * Sets a pragma value. To take effect the pragma settings,
-     * 
      * @param pragma
      * @param value
      */
@@ -174,9 +180,8 @@ public class SQLiteConfig
     }
 
     /**
-     * Convert this SQLiteConfig settings into a Properties object, that can be
+     * Convert this SQLiteConfig settings into a Properties object, which can be
      * passed to the {@link DriverManager#getConnection(String, Properties)}.
-     * 
      * @return properties representation of this configuration
      */
     public Properties toProperties() {
@@ -185,6 +190,9 @@ public class SQLiteConfig
         return pragmaTable;
     }
 
+    /**
+     * @return Array of DriverPropertyInfo objects. 
+     */
     static DriverPropertyInfo[] getDriverPropertyInfo() {
         Pragma[] pragma = Pragma.values();
         DriverPropertyInfo[] result = new DriverPropertyInfo[pragma.length];
@@ -263,7 +271,7 @@ public class SQLiteConfig
     }
 
     /**
-     * ReSets the specified database open mode flag
+     * Re-sets the specified database open mode flag
      * @param mode <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">Flags for file open operations.</a>
      */
     public void resetOpenMode(SQLiteOpenMode mode) {
@@ -308,7 +316,8 @@ public class SQLiteConfig
     }
 
     /**
-     * Changes the suggested maximum number of database disk pages that SQLite will hold in memory at once per open database file using PRAGMA statement.
+     * Changes the suggested maximum number of database disk pages that SQLite will hold in memory at once per open 
+     * database file using PRAGMA statement.
      * @param numberOfPages Cache size in number of pages.
      * @See <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
      */

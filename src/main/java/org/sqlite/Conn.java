@@ -48,9 +48,9 @@ class Conn implements Connection
     private final int    openModeFlags;
 
     /**
-     * Constructor that applies the location and name of the database file.
-     * @param url The location of the database file.
-     * @param fileName The database file name.
+     * Constructor to create a connection to a database at the given location.
+     * @param url The location of the database.
+     * @param fileName The database.
      * @throws SQLException
      */
     public Conn(String url, String fileName) throws SQLException {
@@ -58,10 +58,11 @@ class Conn implements Connection
     }
 
     /**
-     * Constructor that applies the location and name of the database file and Property object.
+     * Constructor to create a pre-configured connection to a database at the
+     * given location.
      * @param url The location of the database file.
-     * @param fileName The database file name.
-     * @param prop The Property object.
+     * @param fileName The database.
+     * @param prop The configurations to apply.
      * @throws SQLException
      */
     public Conn(String url, String fileName, Properties prop) throws SQLException {
@@ -84,8 +85,8 @@ class Conn implements Connection
     private static final String RESOURCE_NAME_PREFIX = ":resource:";
 
     /**
-     * Create a new database connection.
-     * @param openModeFlags Flags for file open operations
+     * Opens a connection to the database using an SQLite library.
+     * @param openModeFlags Flags for file open operations.
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
@@ -171,8 +172,8 @@ class Conn implements Connection
     }
 
     /**
-     * Extract file name from given resource address.
-     * @param resourceAddr Given resource address of database file.
+     * Returns a file name from the given resource address.
+     * @param resourceAddr The resource address.
      * @return The extracted file name.
      * @throws IOException
      */
@@ -232,8 +233,7 @@ class Conn implements Connection
     }
 
     /**
-     * Gets the timeout value for the connection.
-     * @return The timeout value
+     * @return The timeout value for the connection.
      */
     int getTimeout() {
         return timeout;
@@ -250,35 +250,31 @@ class Conn implements Connection
     }
 
     /**
-     * Gets URL for the connection.
-     * @return The location of the database file.
+     * @return Where the database is located.
      */
     String url() {
         return url;
     }
 
     /**
-     * Retrieves the compile-time library version numbers.
      * @return Compile-time library version numbers.
      * @throws SQLException
-     * @see <a
-     *      href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
+     * @see <a href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
      */
     String libversion() throws SQLException {
         return db.libversion();
     }
 
     /**
-     * Gets the SQLite database instance.
-     * @return The SQLite database instance.
+     * @return The class interface to SQLite.
      */
     DB db() {
         return db;
     }
 
     /**
-     * Checks database connection.
-     * @throws SQLException Throwed when the database connection is closed
+     * Whether an SQLite library interface to the database has been established.
+     * @throws SQLException.
      */
     private void checkOpen() throws SQLException {
         if (db == null)
@@ -286,14 +282,16 @@ class Conn implements Connection
     }
 
     /**
-     * Checks cursor.
-     * @param rst The int value that corresponds to the constants of java.sql.ResultSet.
-     * @param rsc The int value that corresponds to the constants of java.sql.ResultSet.
-     * @param rsh The int value that corresponds to the constants of java.sql.ResultSet.
-     * @throws SQLException With one of the
-     *             message:<code>"SQLite only supports TYPE_FORWARD_ONLY cursors"</code>,
-     * <code>"SQLite only supports CONCUR_READ_ONLY cursors"</code>, 
-     * <code>"SQLite only supports closing cursors at commit"</code>
+     * Checks whether the type, concurrency, and holdability settings for a
+     * {@link ResultSet} are supported by the SQLite interface. Supported
+     * settings are:<ul>
+     *  <li>type: {@link ResultSet.TYPE_FORWARD_ONLY}</li>
+     *  <li>concurrency: {@link ResultSet.CONCUR_READ_ONLY})</li>
+     *  <li>holdability: {@link ResultSet.CLOSE_CURSORS_AT_COMMIT}</li></ul>
+     * @param rst the type setting.
+     * @param rsc the concurrency setting.
+     * @param rsh the holdability setting.
+     * @throws SQLException
      */
     private void checkCursor(int rst, int rsc, int rsh) throws SQLException {
         if (rst != ResultSet.TYPE_FORWARD_ONLY)
@@ -577,10 +575,10 @@ class Conn implements Connection
     }
 
     /** 
-     * Retrieves SQLite JDBC driver version (used to supply DatabaseMetaData.getDriverVersion()).
      * @return One of "pure", "native", or "unloaded".
      */
     String getDriverVersion() {
+        // Used to supply DatabaseMetaData.getDriverVersion()
         if (db != null) {
             String dbname = db.getClass().getName();
             if (dbname.indexOf("NestedDB") >= 0)

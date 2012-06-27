@@ -89,11 +89,7 @@ public class ResourceFinder
     }
 
     /**
-     * Gets package path String from given Package object string and changes the package path to the
-     * unix-like format.
-     *
-     * @param basePackage
-     *           Package object
+     * @param basePackage Package object
      * @return Package path String in the unix-like format.
      */
     private static String packagePath(Package basePackage)
@@ -102,11 +98,7 @@ public class ResourceFinder
     }
 
     /**
-     * Gets package path String from given package name string and changes the package path to the
-     * unix-like format.
-     *
-     * @param packageName
-     *           Package name string
+     * @param packageName Package name string
      * @return Package path String in the unix-like format.
      */
     private static String packagePath(String packageName)

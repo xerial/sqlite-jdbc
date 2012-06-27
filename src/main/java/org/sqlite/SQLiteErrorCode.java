@@ -80,7 +80,6 @@ public enum SQLiteErrorCode {
     }
 
     /**
-     * Gets the error message for the given error code.
      * @param errorCode Error code.
      * @return Error message.
      */
