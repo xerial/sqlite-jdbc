@@ -83,8 +83,8 @@ class Stmt extends Unused implements Statement, Codes
     }
 
     /**
-     * Executes SQL statement and throws SQLExceptions if the given SQL statement is null or no
-     * database is open.
+     * Executes SQL statement and throws SQLExceptions if the given SQL
+     * statement is null or no database is open.
      * @param sql SQL statement.
      * @return True if the ResultSet has at least one row; false otherwise. 
      * @throws SQLException If the given SQL statement is null or no database is open.

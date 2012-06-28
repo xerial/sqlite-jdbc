@@ -40,7 +40,7 @@ final class NativeDB extends DB
     }
 
     /**
-     * Loads SQLite JDBC driver.
+     * Loads the SQLite interface backend.
      * @return True if the SQLite JDBC driver is successfully loaded; false otherwise.
      */
     static boolean load() {
@@ -369,7 +369,8 @@ final class NativeDB extends DB
     // COMPOUND FUNCTIONS (for optimisation) /////////////////////////
 
     /**
-     * Provides metadata for the columns of a statement. Returns: <br/>
+     * Provides metadata for table columns.
+     * @returns For each column returns: <br/>
      * res[col][0] = true if column constrained NOT NULL<br/>
      * res[col][1] = true if column is part of the primary key<br/>
      * res[col][2] = true if column is auto-increment.

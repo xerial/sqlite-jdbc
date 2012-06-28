@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -48,8 +48,8 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     private int        lastCol;         // last column accessed, for wasNull(). -1 if none
 
     /**
-     * Default constructor for the given statement object.
-     * @param stmt Statement object.
+     * Default constructor for a given statement.
+     * @param stmt The statement.
      */
     RS(Stmt stmt) {
         this.stmt = stmt;
@@ -59,8 +59,8 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     // INTERNAL FUNCTIONS ///////////////////////////////////////////
 
     /**
-     * Checks the status of the ResulstSet.
-     * @return True if having results and can iterate them; false otherwise. 
+     * Checks the status of the result set.
+     * @return True if has results and can iterate them; false otherwise.
      */
     boolean isOpen() {
         return open;
@@ -70,21 +70,24 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @throws SQLException if ResultSet is not open.
      */
     void checkOpen() throws SQLException {
-        if (!open)
+        if (!open) {
             throw new SQLException("ResultSet closed");
+        }
     }
 
     /**
      * Takes col in [1,x] form, returns in [0,x-1] form
      * @param col
-     * @return 
+     * @return
      * @throws SQLException
      */
     private int checkCol(int col) throws SQLException {
-        if (colsMeta == null)
+        if (colsMeta == null) {
             throw new IllegalStateException("SQLite JDBC: inconsistent internal state");
-        if (col < 1 || col > colsMeta.length)
+        }
+        if (col < 1 || col > colsMeta.length) {
             throw new SQLException("column " + col + " out of bounds [1," + colsMeta.length + "]");
+        }
         return --col;
     }
 
@@ -106,8 +109,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      */
     private void checkMeta() throws SQLException {
         checkCol(1);
-        if (meta == null)
+        if (meta == null) {
             meta = db.column_metadata(stmt.pointer);
+        }
     }
 
     // ResultSet Functions //////////////////////////////////////////
@@ -124,10 +128,12 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         row = 0;
         lastCol = -1;
 
-        if (stmt == null)
+        if (stmt == null) {
             return;
-        if (stmt != null && stmt.pointer != 0)
+        }
+        if (stmt != null && stmt.pointer != 0) {
             db.reset(stmt.pointer);
+        }
     }
 
     /**
@@ -141,16 +147,20 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
             if (col.equalsIgnoreCase(cols[i])
                     || (cols[i].toUpperCase().endsWith(col.toUpperCase()) && cols[i].charAt(cols[i].length()
                             - col.length()) == '.')) {
-                if (c == -1)
+                if (c == -1) {
                     c = i;
-                else
+                }
+                else {
                     throw new SQLException("ambiguous column: '" + col + "'");
+                }
             }
         }
-        if (c == -1)
+        if (c == -1) {
             throw new SQLException("no such column: '" + col + "'");
-        else
+        }
+        else {
             return c + 1;
+        }
     }
 
     /**
@@ -158,7 +168,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      */
     public boolean next() throws SQLException {
         if (!open)
+         {
             return false; // finished ResultSet
+        }
         lastCol = -1;
 
         // first row is loaded by execute(), so do not step() again
@@ -168,8 +180,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         }
 
         // check if we are row limited by the statement or the ResultSet
-        if (maxRows != 0 && row > maxRows)
+        if (maxRows != 0 && row > maxRows) {
             return false;
+        }
 
         // do the real work
         int statusCode = db.step(stmt.pointer);
@@ -205,8 +218,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#setFetchSize(int)
      */
     public void setFetchSize(int rows) throws SQLException {
-        if (0 > rows || (maxRows != 0 && rows > maxRows))
+        if (0 > rows || (maxRows != 0 && rows > maxRows)) {
             throw new SQLException("fetch size " + rows + " out of bounds " + maxRows);
+        }
         limitRows = rows;
     }
 
@@ -223,8 +237,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      */
     public void setFetchDirection(int d) throws SQLException {
         checkOpen();
-        if (d != ResultSet.FETCH_FORWARD)
+        if (d != ResultSet.FETCH_FORWARD) {
             throw new SQLException("only FETCH_FORWARD direction supported");
+        }
     }
 
     /**
@@ -364,8 +379,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getDate(int)
      */
     public Date getDate(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return null;
+        }
         return new Date(db.column_long(stmt.pointer, markCol(col)));
     }
 
@@ -373,10 +389,12 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getDate(int, java.util.Calendar)
      */
     public Date getDate(int col, Calendar cal) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return null;
-        if (cal == null)
+        }
+        if (cal == null) {
             return getDate(col);
+        }
         cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)));
         return new Date(cal.getTime().getTime());
     }
@@ -399,8 +417,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getDouble(int)
      */
     public double getDouble(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return 0;
+        }
         return db.column_double(stmt.pointer, markCol(col));
     }
 
@@ -415,8 +434,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getFloat(int)
      */
     public float getFloat(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return 0;
+        }
         return (float) db.column_double(stmt.pointer, markCol(col));
     }
 
@@ -487,8 +507,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getTime(int)
      */
     public Time getTime(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return null;
+        }
         return new Time(db.column_long(stmt.pointer, markCol(col)));
     }
 
@@ -496,10 +517,12 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getTime(int, java.util.Calendar)
      */
     public Time getTime(int col, Calendar cal) throws SQLException {
-        if (cal == null)
+        if (cal == null) {
             return getTime(col);
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        }
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return null;
+        }
         cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)));
         return new Time(cal.getTime().getTime());
     }
@@ -522,8 +545,9 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getTimestamp(int)
      */
     public Timestamp getTimestamp(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return null;
+        }
         return new Timestamp(db.column_long(stmt.pointer, markCol(col)));
     }
 
@@ -531,10 +555,12 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar)
      */
     public Timestamp getTimestamp(int col, Calendar cal) throws SQLException {
-        if (cal == null)
+        if (cal == null) {
             return getTimestamp(col);
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        }
+        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL) {
             return null;
+        }
         cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)));
         return new Timestamp(cal.getTime().getTime());
     }
@@ -560,10 +586,12 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         switch (db.column_type(stmt.pointer, checkCol(col))) {
         case SQLITE_INTEGER:
             long val = getLong(col);
-            if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE)
+            if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
                 return new Long(val);
-            else
+            }
+            else {
                 return new Integer((int) val);
+            }
         case SQLITE_FLOAT:
             return new Double(getDouble(col));
         case SQLITE_BLOB:

@@ -30,7 +30,7 @@ import java.util.Iterator;
 class MetaData implements DatabaseMetaData
 {
     private Conn              conn;
-    private PreparedStatement 
+    private PreparedStatement
             getTables             = null,   getTableTypes        = null,
             getTypeInfo           = null,   getCatalogs          = null,
             getSchemas            = null,   getUDTs              = null,
@@ -58,54 +58,74 @@ class MetaData implements DatabaseMetaData
      * @throws SQLException
      */
     void checkOpen() throws SQLException {
-        if (conn == null)
+        if (conn == null) {
             throw new SQLException("connection closed");
+        }
     }
 
     /**
      * @throws SQLException
      */
     synchronized void close() throws SQLException {
-        if (conn == null)
+        if (conn == null) {
             return;
+        }
 
         try {
-            if (getTables != null)
+            if (getTables != null) {
                 getTables.close();
-            if (getTableTypes != null)
+            }
+            if (getTableTypes != null) {
                 getTableTypes.close();
-            if (getTypeInfo != null)
+            }
+            if (getTypeInfo != null) {
                 getTypeInfo.close();
-            if (getCatalogs != null)
+            }
+            if (getCatalogs != null) {
                 getCatalogs.close();
-            if (getSchemas != null)
+            }
+            if (getSchemas != null) {
                 getSchemas.close();
-            if (getUDTs != null)
+            }
+            if (getUDTs != null) {
                 getUDTs.close();
-            if (getColumnsTblName != null)
+            }
+            if (getColumnsTblName != null) {
                 getColumnsTblName.close();
-            if (getSuperTypes != null)
+            }
+            if (getSuperTypes != null) {
                 getSuperTypes.close();
-            if (getSuperTables != null)
+            }
+            if (getSuperTables != null) {
                 getSuperTables.close();
-            if (getTablePrivileges != null)
+            }
+            if (getTablePrivileges != null) {
                 getTablePrivileges.close();
-            if (getIndexInfo != null)
+            }
+            if (getIndexInfo != null) {
                 getIndexInfo.close();
-            if (getProcedures != null)
+            }
+            if (getProcedures != null) {
                 getProcedures.close();
-            if (getProcedureColumns != null)
+            }
+            if (getProcedureColumns != null) {
                 getProcedureColumns.close();
-            if (getAttributes != null)
+            }
+            if (getAttributes != null) {
                 getAttributes.close();
-            if (getBestRowIdentifier != null)
+            }
+            if (getBestRowIdentifier != null) {
                 getBestRowIdentifier.close();
-            if (getVersionColumns != null)
+            }
+            if (getVersionColumns != null) {
                 getVersionColumns.close();
-            if (getColumnPrivileges != null)
+            }
+            if (getColumnPrivileges != null) {
                 getColumnPrivileges.close();
-            if (getGeneratedKeys != null)
+            }
+            if (getGeneratedKeys != null) {
                 getGeneratedKeys.close();
+            }
 
             getTables = null;
             getTableTypes = null;
@@ -1144,7 +1164,7 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String, java.lang.String)
      */
     public ResultSet getAttributes(String c, String s, String t, String a) throws SQLException {
-        if (getAttributes == null)
+        if (getAttributes == null) {
             getAttributes = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
                     + "null as TYPE_NAME, " + "null as ATTR_NAME, " + "null as DATA_TYPE, "
                     + "null as ATTR_TYPE_NAME, " + "null as ATTR_SIZE, " + "null as DECIMAL_DIGITS, "
@@ -1152,6 +1172,7 @@ class MetaData implements DatabaseMetaData
                     + "null as SQL_DATA_TYPE, " + "null as SQL_DATETIME_SUB, " + "null as CHAR_OCTET_LENGTH, "
                     + "null as ORDINAL_POSITION, " + "null as IS_NULLABLE, " + "null as SCOPE_CATALOG, "
                     + "null as SCOPE_SCHEMA, " + "null as SCOPE_TABLE, " + "null as SOURCE_DATA_TYPE limit 0;");
+        }
         return getAttributes.executeQuery();
     }
 
@@ -1160,10 +1181,11 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String, int, boolean)
      */
     public ResultSet getBestRowIdentifier(String c, String s, String t, int scope, boolean n) throws SQLException {
-        if (getBestRowIdentifier == null)
+        if (getBestRowIdentifier == null) {
             getBestRowIdentifier = conn.prepareStatement("select " + "null as SCOPE, " + "null as COLUMN_NAME, "
                     + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as COLUMN_SIZE, "
                     + "null as BUFFER_LENGTH, " + "null as DECIMAL_DIGITS, " + "null as PSEUDO_COLUMN limit 0;");
+        }
         return getBestRowIdentifier.executeQuery();
     }
 
@@ -1172,10 +1194,11 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String, java.lang.String)
      */
     public ResultSet getColumnPrivileges(String c, String s, String t, String colPat) throws SQLException {
-        if (getColumnPrivileges == null)
+        if (getColumnPrivileges == null) {
             getColumnPrivileges = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
                     + "null as TABLE_NAME, " + "null as COLUMN_NAME, " + "null as GRANTOR, " + "null as GRANTEE, "
                     + "null as PRIVILEGE, " + "null as IS_GRANTABLE limit 0;");
+        }
         return getColumnPrivileges.executeQuery();
     }
 
@@ -1190,14 +1213,16 @@ class MetaData implements DatabaseMetaData
 
         checkOpen();
 
-        if (getColumnsTblName == null)
+        if (getColumnsTblName == null) {
             getColumnsTblName = conn.prepareStatement("select tbl_name from sqlite_master where tbl_name like ?;");
+        }
 
         // determine exact table name
         getColumnsTblName.setString(1, tbl);
         rs = getColumnsTblName.executeQuery();
-        if (!rs.next())
+        if (!rs.next()) {
             return rs;
+        }
         tbl = rs.getString(1);
         rs.close();
 
@@ -1222,10 +1247,12 @@ class MetaData implements DatabaseMetaData
             String colNotNull = rs.getString(4);
 
             int colNullable = 2;
-            if (colNotNull != null)
+            if (colNotNull != null) {
                 colNullable = colNotNull.equals("0") ? 1 : 0;
-            if (colFound)
+            }
+            if (colFound) {
                 sql += " union all ";
+            }
             colFound = true;
 
             //            colType = colType == null ? "TEXT" : colType.toUpperCase();
@@ -1248,23 +1275,26 @@ class MetaData implements DatabaseMetaData
             colType = colType == null ? "TEXT" : colType.toUpperCase();
             int colJavaType = -1;
             // rule #1 + boolean
-            if (colType.matches(".*(INT|BOOL).*"))
+            if (colType.matches(".*(INT|BOOL).*")) {
                 colJavaType = Types.INTEGER;
-            // rule #2 + blob
-            else if (colType.matches(".*(CHAR|CLOB|TEXT|BLOB).*"))
+            }
+            else if (colType.matches(".*(CHAR|CLOB|TEXT|BLOB).*")) {
                 colJavaType = Types.VARCHAR;
-            // rule #4 + decimal, numeric
-            else if (colType.matches(".*(REAL|FLOA|DOUB|DEC|NUM).*"))
+            }
+            else if (colType.matches(".*(REAL|FLOA|DOUB|DEC|NUM).*")) {
                 colJavaType = Types.FLOAT;
-            else
-                // catch-all               
+            }
+            else {
+                // catch-all
                 colJavaType = Types.VARCHAR;
+            }
 
             sql += "select " + i + " as ordpos, " + colNullable + " as colnullable, '" + colJavaType + "' as ct, '"
                     + escape(colName) + "' as cn, '" + escape(colType) + "' as tn";
 
-            if (colPat != null)
+            if (colPat != null) {
                 sql += " where upper(cn) like upper('" + escape(colPat) + "')";
+            }
         }
         sql += colFound ? ");" : "select null as ordpos, null as colnullable, " + "null as cn, null as tn) limit 0;";
         rs.close();
@@ -1278,10 +1308,12 @@ class MetaData implements DatabaseMetaData
     public ResultSet getCrossReference(String pc, String ps, String pt, String fc, String fs, String ft)
             throws SQLException {
 
-        if (pt == null)
+        if (pt == null) {
             return getExportedKeys(fc, fs, ft);
-        if (ft == null)
+        }
+        if (ft == null) {
             return getImportedKeys(pc, ps, pt);
+        }
 
         StringBuilder query = new StringBuilder();
         query.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(pc),
@@ -1300,9 +1332,10 @@ class MetaData implements DatabaseMetaData
      * @see java.sql.DatabaseMetaData#getSchemas()
      */
     public ResultSet getSchemas() throws SQLException {
-        if (getSchemas == null)
+        if (getSchemas == null) {
             getSchemas = conn.prepareStatement("select " + "null as TABLE_SCHEM, " + "null as TABLE_CATALOG "
                     + "limit 0;");
+        }
         getSchemas.clearParameters();
         return getSchemas.executeQuery();
     }
@@ -1311,8 +1344,9 @@ class MetaData implements DatabaseMetaData
      * @see java.sql.DatabaseMetaData#getCatalogs()
      */
     public ResultSet getCatalogs() throws SQLException {
-        if (getCatalogs == null)
+        if (getCatalogs == null) {
             getCatalogs = conn.prepareStatement("select null as TABLE_CAT limit 0;");
+        }
         getCatalogs.clearParameters();
         return getCatalogs.executeQuery();
     }
@@ -1339,8 +1373,9 @@ class MetaData implements DatabaseMetaData
                 i--;
                 continue;
             }
-            if (i > 0)
+            if (i > 0) {
                 sql += " union all ";
+            }
 
             sql += "select '" + escape(colName) + "' as cn";
         }
@@ -1356,10 +1391,12 @@ class MetaData implements DatabaseMetaData
      * @return The quoted string.
      */
     private static String quote(String tableName) {
-        if (tableName == null)
+        if (tableName == null) {
             return "null";
-        else
+        }
+        else {
             return String.format("'%s'", tableName);
+        }
     }
 
     /**
@@ -1386,8 +1423,9 @@ class MetaData implements DatabaseMetaData
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(tableListQuery);
         ArrayList<String> tableList = new ArrayList<String>();
-        while (rs.next())
+        while (rs.next()) {
             tableList.add(rs.getString(1));
+        }
         rs.close();
 
         // find imported keys for each table
@@ -1405,11 +1443,13 @@ class MetaData implements DatabaseMetaData
                     String updateRule = fk.getString(6);
                     String deleteRule = fk.getString(7);
 
-                    if (PKTabName == null || !PKTabName.equals(table))
+                    if (PKTabName == null || !PKTabName.equals(table)) {
                         continue;
+                    }
 
-                    if (count > 0)
+                    if (count > 0) {
                         exportedKeysQuery.append(" union all ");
+                    }
 
                     exportedKeysQuery.append("select " + Integer.toString(keySeq) + " as ks," + "'"
                             + escape(targetTable) + "' as fkn," + "'" + escape(FKColName) + "' as fcn," + "'"
@@ -1478,8 +1518,9 @@ class MetaData implements DatabaseMetaData
                 String updateRule = rs.getString(6);
                 String deleteRule = rs.getString(7);
 
-                if (i > 0)
+                if (i > 0) {
                     sql += " union all ";
+                }
 
                 sql += String.format("select %d as ks,", keySeq)
                         + String.format("'%s' as ptn, '%s' as fcn, '%s' as pcn,", escape(PKTabName), escape(FKColName),
@@ -1547,8 +1588,9 @@ class MetaData implements DatabaseMetaData
                     int ordinalPosition = rs.getInt(1) + 1;
                     String colName = rs.getString(3);
 
-                    if (i > 0)
+                    if (i > 0) {
                         sql += " union all ";
+                    }
 
                     sql += "select " + Integer.toString(1 - unique) + " as un," + "'" + escape(indexName) + "' as n,"
                             + Integer.toString(ordinalPosition) + " as op," + "'" + escape(colName) + "' as cn";
@@ -1570,12 +1612,13 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String, java.lang.String)
      */
     public ResultSet getProcedureColumns(String c, String s, String p, String colPat) throws SQLException {
-        if (getProcedures == null)
+        if (getProcedures == null) {
             getProcedureColumns = conn.prepareStatement("select " + "null as PROCEDURE_CAT, "
                     + "null as PROCEDURE_SCHEM, " + "null as PROCEDURE_NAME, " + "null as COLUMN_NAME, "
                     + "null as COLUMN_TYPE, " + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as PRECISION, "
                     + "null as LENGTH, " + "null as SCALE, " + "null as RADIX, " + "null as NULLABLE, "
                     + "null as REMARKS limit 0;");
+        }
         return getProcedureColumns.executeQuery();
 
     }
@@ -1585,10 +1628,11 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String)
      */
     public ResultSet getProcedures(String c, String s, String p) throws SQLException {
-        if (getProcedures == null)
+        if (getProcedures == null) {
             getProcedures = conn.prepareStatement("select " + "null as PROCEDURE_CAT, " + "null as PROCEDURE_SCHEM, "
                     + "null as PROCEDURE_NAME, " + "null as UNDEF1, " + "null as UNDEF2, " + "null as UNDEF3, "
                     + "null as REMARKS, " + "null as PROCEDURE_TYPE limit 0;");
+        }
         return getProcedures.executeQuery();
     }
 
@@ -1597,9 +1641,10 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String)
      */
     public ResultSet getSuperTables(String c, String s, String t) throws SQLException {
-        if (getSuperTables == null)
+        if (getSuperTables == null) {
             getSuperTables = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
                     + "null as TABLE_NAME, " + "null as SUPERTABLE_NAME limit 0;");
+        }
         return getSuperTables.executeQuery();
     }
 
@@ -1608,10 +1653,11 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String)
      */
     public ResultSet getSuperTypes(String c, String s, String t) throws SQLException {
-        if (getSuperTypes == null)
+        if (getSuperTypes == null) {
             getSuperTypes = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
                     + "null as TYPE_NAME, " + "null as SUPERTYPE_CAT, " + "null as SUPERTYPE_SCHEM, "
                     + "null as SUPERTYPE_NAME limit 0;");
+        }
         return getSuperTypes.executeQuery();
     }
 
@@ -1620,10 +1666,11 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String)
      */
     public ResultSet getTablePrivileges(String c, String s, String t) throws SQLException {
-        if (getTablePrivileges == null)
+        if (getTablePrivileges == null) {
             getTablePrivileges = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
                     + "null as TABLE_NAME, " + "null as GRANTOR, " + "null as GRANTEE, " + "null as PRIVILEGE, "
                     + "null as IS_GRANTABLE limit 0;");
+        }
         return getTablePrivileges.executeQuery();
     }
 
@@ -1645,8 +1692,9 @@ class MetaData implements DatabaseMetaData
         if (types != null) {
             sql += " and TABLE_TYPE in (";
             for (int i = 0; i < types.length; i++) {
-                if (i > 0)
+                if (i > 0) {
                     sql += ", ";
+                }
                 sql += "'" + types[i].toUpperCase() + "'";
             }
             sql += ")";
@@ -1662,9 +1710,10 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getTableTypes() throws SQLException {
         checkOpen();
-        if (getTableTypes == null)
+        if (getTableTypes == null) {
             getTableTypes = conn.prepareStatement("select 'TABLE' as TABLE_TYPE"
                     + " union select 'VIEW' as TABLE_TYPE;");
+        }
         getTableTypes.clearParameters();
         return getTableTypes.executeQuery();
     }
@@ -1716,10 +1765,11 @@ class MetaData implements DatabaseMetaData
      *      int[])
      */
     public ResultSet getUDTs(String c, String s, String t, int[] types) throws SQLException {
-        if (getUDTs == null)
+        if (getUDTs == null) {
             getUDTs = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
                     + "null as TYPE_NAME, " + "null as CLASS_NAME, " + "null as DATA_TYPE, " + "null as REMARKS, "
                     + "null as BASE_TYPE " + "limit 0;");
+        }
 
         getUDTs.clearParameters();
         return getUDTs.executeQuery();
@@ -1730,28 +1780,29 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String)
      */
     public ResultSet getVersionColumns(String c, String s, String t) throws SQLException {
-        if (getVersionColumns == null)
+        if (getVersionColumns == null) {
             getVersionColumns = conn.prepareStatement("select " + "null as SCOPE, " + "null as COLUMN_NAME, "
                     + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as COLUMN_SIZE, "
                     + "null as BUFFER_LENGTH, " + "null as DECIMAL_DIGITS, " + "null as PSEUDO_COLUMN limit 0;");
+        }
         return getVersionColumns.executeQuery();
     }
 
     /**
-     * Retrieves the generated row id of the last INSERT command.
      * @return Generated row id of the last INSERT command.
      * @throws SQLException
      */
     ResultSet getGeneratedKeys() throws SQLException {
-        if (getGeneratedKeys == null)
+        if (getGeneratedKeys == null) {
             getGeneratedKeys = conn.prepareStatement("select last_insert_rowid();");
+        }
         return getGeneratedKeys.executeQuery();
     }
 
     /**
-     * Replaces all instances of ' with ''
-     * @param val
-     * @return
+     * Applies SQL escapes for special characters in a given string.
+     * @param val The string to escape.
+     * @return The SQL escaped string.
      */
     private String escape(final String val) {
         // TODO: this function is ugly, pass this work off to SQLite, then we
@@ -1760,8 +1811,9 @@ class MetaData implements DatabaseMetaData
         int len = val.length();
         StringBuffer buf = new StringBuffer(len);
         for (int i = 0; i < len; i++) {
-            if (val.charAt(i) == '\'')
+            if (val.charAt(i) == '\'') {
                 buf.append('\'');
+            }
             buf.append(val.charAt(i));
         }
         return buf.toString();

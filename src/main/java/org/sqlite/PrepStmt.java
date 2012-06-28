@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -37,9 +37,9 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     private int paramCount;
 
     /**
-     * Constructs a PrepStmt instance for the given SQL statement.
-     * @param conn Connection object.
-     * @param sql String of SQL command
+     * Constructs a prepared statement on a provided connection.
+     * @param conn Connection on which to create the prepared statement.
+     * @param sql The SQL script to prepare.
      * @throws SQLException
      */
     PrepStmt(Conn conn, String sql) throws SQLException {
@@ -87,8 +87,9 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     public ResultSet executeQuery() throws SQLException {
         checkOpen();
-        if (columnCount == 0)
+        if (columnCount == 0) {
             throw new SQLException("query does not return results");
+        }
         rs.close();
         db.reset(pointer);
         resultsWaiting = db.execute(this, batch);
@@ -100,8 +101,9 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     public int executeUpdate() throws SQLException {
         checkOpen();
-        if (columnCount != 0)
+        if (columnCount != 0) {
             throw new SQLException("query returns results");
+        }
         rs.close();
         db.reset(pointer);
         return db.executeUpdate(this, batch);
@@ -112,8 +114,9 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     @Override
     public int[] executeBatch() throws SQLException {
-        if (batchPos == 0)
+        if (batchPos == 0) {
             return new int[] {};
+        }
         try {
             return db.executeBatch(pointer, batchPos / paramCount, batch);
         }
@@ -128,8 +131,9 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     @Override
     public int getUpdateCount() throws SQLException {
         checkOpen();
-        if (pointer == 0 || resultsWaiting)
+        if (pointer == 0 || resultsWaiting) {
             return -1;
+        }
         return db.changes();
     }
 
@@ -231,15 +235,17 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     // PARAMETER FUNCTIONS //////////////////////////////////////////
 
     /**
-     * Assigns the Object value to the element at the specific position of Array batch.
+     * Assigns the object value to the element at the specific position of array
+     * batch.
      * @param pos
      * @param value
      * @throws SQLException
      */
     private void batch(int pos, Object value) throws SQLException {
         checkOpen();
-        if (batch == null)
+        if (batch == null) {
             batch = new Object[paramCount];
+        }
         batch[batchPos + pos - 1] = value;
     }
 
@@ -317,34 +323,48 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      * @see java.sql.PreparedStatement#setObject(int, java.lang.Object)
      */
     public void setObject(int pos, Object value) throws SQLException {
-        if (value == null)
+        if (value == null) {
             batch(pos, null);
-        else if (value instanceof java.util.Date)
+        }
+        else if (value instanceof java.util.Date) {
             batch(pos, new Long(((java.util.Date) value).getTime()));
-        else if (value instanceof Date)
+        }
+        else if (value instanceof Date) {
             batch(pos, new Long(((Date) value).getTime()));
-        else if (value instanceof Time)
+        }
+        else if (value instanceof Time) {
             batch(pos, new Long(((Time) value).getTime()));
-        else if (value instanceof Timestamp)
+        }
+        else if (value instanceof Timestamp) {
             batch(pos, new Long(((Timestamp) value).getTime()));
-        else if (value instanceof Long)
+        }
+        else if (value instanceof Long) {
             batch(pos, value);
-        else if (value instanceof Integer)
+        }
+        else if (value instanceof Integer) {
             batch(pos, value);
-        else if (value instanceof Short)
+        }
+        else if (value instanceof Short) {
             batch(pos, new Integer(((Short) value).intValue()));
-        else if (value instanceof Float)
+        }
+        else if (value instanceof Float) {
             batch(pos, value);
-        else if (value instanceof Double)
+        }
+        else if (value instanceof Double) {
             batch(pos, value);
-        else if (value instanceof Boolean)
+        }
+        else if (value instanceof Boolean) {
             setBoolean(pos, ((Boolean) value).booleanValue());
-        else if (value instanceof byte[])
+        }
+        else if (value instanceof byte[]) {
             batch(pos, value);
-		else if (value instanceof BigDecimal)
-			setBigDecimal(pos, (BigDecimal)value);
-        else
+        }
+        else if (value instanceof BigDecimal) {
+            setBigDecimal(pos, (BigDecimal)value);
+        }
+        else {
             batch(pos, value.toString());
+        }
     }
 
     /**

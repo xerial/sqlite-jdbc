@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -15,7 +15,8 @@
  */
 package org.sqlite;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /** Provides an interface for creating SQLite user-defined functions.
  *
@@ -59,44 +60,48 @@ public abstract class Function
     int args = 0;
 
     /**
-     * Registers the given function with the Connection using the
-     * provided name.
+     * Registers a given function with the connection.
      * @param conn The connection.
      * @param name The name of the function.
      * @param f The function to register.
      */
     public static final void create(Connection conn, String name, Function f)
             throws SQLException {
-        if (conn == null || !(conn instanceof Conn))
+        if (conn == null || !(conn instanceof Conn)) {
             throw new SQLException("connection must be to an SQLite db");
-        if (conn.isClosed())
+        }
+        if (conn.isClosed()) {
             throw new SQLException("connection closed");
+        }
 
         f.conn = (Conn)conn;
         f.db = f.conn.db();
 
-        if (name == null || name.length() > 255)
+        if (name == null || name.length() > 255) {
             throw new SQLException("invalid function name: '"+name+"'");
+        }
 
-        if (f.db.create_function(name, f) != Codes.SQLITE_OK)
+        if (f.db.create_function(name, f) != Codes.SQLITE_OK) {
             throw new SQLException("error creating function");
+        }
     }
 
     /**
      * Removes a named function from the given connection.
-     * @param conn The connection to remove the function from. 
+     * @param conn The connection to remove the function from.
      * @param name The name of the function.
      * @throws SQLException
      */
     public static final void destroy(Connection conn, String name)
             throws SQLException {
-        if (conn == null || !(conn instanceof Conn))
+        if (conn == null || !(conn instanceof Conn)) {
             throw new SQLException("connection must be to an SQLite db");
+        }
         ((Conn)conn).db().destroy_function(name);
     }
 
 
-    /** 
+    /**
      * Called by SQLite as a custom function. Should access arguments
      * through <tt>value_*(int)</tt>, return results with
      * <tt>result(*)</tt> and throw errors with <tt>error(String)</tt>.
@@ -213,8 +218,9 @@ public abstract class Function
      * @throws SQLException
      */
     private void checkContext() throws SQLException {
-        if (conn == null || conn.db() == null || context == 0)
+        if (conn == null || conn.db() == null || context == 0) {
             throw new SQLException("no context, not allowed to read value");
+        }
     }
 
     /**
@@ -222,10 +228,12 @@ public abstract class Function
      * @throws SQLException
      */
     private void checkValue(int arg) throws SQLException {
-        if (conn == null || conn.db() == null || value == 0)
+        if (conn == null || conn.db() == null || value == 0) {
             throw new SQLException("not in value access state");
-        if (arg >= args)
+        }
+        if (arg >= args) {
             throw new SQLException("arg "+arg+" out bounds [0,"+args+")");
+        }
     }
 
 
@@ -243,14 +251,14 @@ public abstract class Function
         protected final void xFunc() {}
 
         /**
-         * Defines the abstract aggregate callback function  
+         * Defines the abstract aggregate callback function
          * @throws SQLException
          * @see <a href="http://www.sqlite.org/c3ref/aggregate_context.html">http://www.sqlite.org/c3ref/aggregate_context.html</a>
          */
         protected abstract void xStep() throws SQLException;
 
         /**
-         * Defines the abstract aggregate callback function  
+         * Defines the abstract aggregate callback function
          * @throws SQLException
          * @see <a href="http://www.sqlite.org/c3ref/aggregate_context.html">http://www.sqlite.org/c3ref/aggregate_context.html</a>
          */

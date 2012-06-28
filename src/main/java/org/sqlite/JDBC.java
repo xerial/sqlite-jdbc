@@ -88,10 +88,9 @@ public class JDBC implements Driver
     }
 
     /**
-     * Gets address from the given URL.
-     * @param url
-     * @return <code>:memory:</code> - use a memory database if no address (file name) in the URL;
-     *         otherwise, the address is returned.
+     * Gets the location to the database from a given URL.
+     * @param url The URL to extract the location from.
+     * @return The location to the database.
      */
     static String extractAddress(String url) {
         // if no file name is given use a memory database
