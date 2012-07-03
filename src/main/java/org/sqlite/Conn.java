@@ -33,6 +33,7 @@ import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -40,17 +41,21 @@ import org.sqlite.SQLiteConfig.TransactionMode;
 
 class Conn implements Connection
 {
-    private final static String[] beginCommandArray      = new String[] {
-       "begin;", "begin immediate;", "begin exclusive;"
+    private final static Map<TransactionMode, String> beginCommandMap  = new HashMap<SQLiteConfig.TransactionMode, String>() {
+       {
+            put(TransactionMode.DEFFERED, "begin;");
+            put(TransactionMode.IMMEDIATE, "begin immediate;");
+            put(TransactionMode.EXCLUSIVE, "begin exclusive;");
+        }
     };
     private final String          url;
     private String                fileName;
     private DB                    db                     = null;
     private MetaData              meta                   = null;
     private boolean               autoCommit             = true;
-    private int                   transactionIsolation   = TRANSACTION_READ_UNCOMMITTED;
+    private int                   transactionIsolation   = TRANSACTION_SERIALIZABLE;
     private int                   timeout                = 0;
-    private int                   transactionMode        = 0;
+    private TransactionMode       transactionMode        = TransactionMode.DEFFERED;
     private final int             openModeFlags;
 
     public Conn(String url, String fileName) throws SQLException {
@@ -69,6 +74,8 @@ class Conn implements Connection
         boolean enableLoadExtension = config.isEnabledLoadExtension();
         db.shared_cache(enableSharedCache);
         db.enable_load_extension(enableLoadExtension);
+
+        this.transactionMode = config.getTransactionMode();
 
         // set pragmas
         config.apply(this);
@@ -310,17 +317,7 @@ class Conn implements Connection
     }
 
     protected void setTransactionMode(TransactionMode mode) {
-        switch(mode) {
-            case DEFFERED:
-                transactionMode = 0;
-                break;
-            case IMMEDIATE:
-                transactionMode = 1;
-                break;
-            case EXCLUSIVE:
-                transactionMode = 2;
-                break;
-        }
+        this.transactionMode = mode;
     }
 
     public Map getTypeMap() throws SQLException {
@@ -368,7 +365,7 @@ class Conn implements Connection
         if (autoCommit == ac)
             return;
         autoCommit = ac;
-        db.exec(autoCommit ? "commit;" : beginCommandArray[transactionMode]);
+        db.exec(autoCommit ? "commit;" : beginCommandMap.get(transactionMode));
     }
 
     public void commit() throws SQLException {
@@ -376,7 +373,7 @@ class Conn implements Connection
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
         db.exec("commit;");
-        db.exec(beginCommandArray[transactionMode]);
+        db.exec(beginCommandMap.get(transactionMode));
     }
 
     public void rollback() throws SQLException {
@@ -384,7 +381,7 @@ class Conn implements Connection
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
         db.exec("rollback;");
-        db.exec(beginCommandArray[transactionMode]);
+        db.exec(beginCommandMap.get(transactionMode));
     }
 
     public Statement createStatement() throws SQLException {

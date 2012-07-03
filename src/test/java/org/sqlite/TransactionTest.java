@@ -3,18 +3,21 @@ package org.sqlite;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sqlite.SQLiteConfig.TransactionMode;
 
 /**
  * These tests assume that Statements and PreparedStatements are working as per
@@ -267,4 +270,65 @@ public class TransactionTest
         conn1.rollback();
     }
 
+    @Test
+    public void transactionModes() throws Exception {
+        File tmpFile = File.createTempFile("test-trans", ".db");
+
+        Field transactionMode = Conn.class.getDeclaredField("transactionMode");
+        transactionMode.setAccessible(true);
+        Field beginCommandMap = Conn.class.getDeclaredField("beginCommandMap");
+        beginCommandMap.setAccessible(true);
+
+        SQLiteDataSource ds = new SQLiteDataSource();
+        ds.setUrl("jdbc:sqlite:" + tmpFile.getAbsolutePath());
+
+        // deffered
+        Conn con = (Conn)ds.getConnection();
+        assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
+        assertEquals("begin;", 
+                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
+        runUpdates(con, "tbl1");
+        
+        ds.setTransactionMode(TransactionMode.DEFFERED.name());
+        con = (Conn)ds.getConnection();
+        assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
+        assertEquals("begin;", 
+                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
+
+        // immediate
+        ds.setTransactionMode(TransactionMode.IMMEDIATE.name());
+        con = (Conn)ds.getConnection();
+        assertEquals(TransactionMode.IMMEDIATE, transactionMode.get(con));
+        assertEquals("begin immediate;", 
+                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.IMMEDIATE));
+        runUpdates(con, "tbl2");
+
+        // exclusive
+        ds.setTransactionMode(TransactionMode.EXCLUSIVE.name());
+        con = (Conn)ds.getConnection();
+        assertEquals(TransactionMode.EXCLUSIVE, transactionMode.get(con));
+        assertEquals("begin exclusive;", 
+                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.EXCLUSIVE));
+        runUpdates(con, "tbl3");
+
+        tmpFile.delete();
+    }
+
+    public void runUpdates(Connection con, String table) throws SQLException {
+        Statement stat = con.createStatement(); 
+
+        con.setAutoCommit(false);
+        stat.execute("create table " + table + "(id)");
+        stat.executeUpdate("insert into " + table + " values(1)");
+        stat.executeUpdate("insert into " + table + " values(2)");
+        con.commit();
+
+        ResultSet rs = stat.executeQuery("select * from " + table);
+        rs.next();
+        assertEquals(1, rs.getInt(1));
+        rs.next();
+        assertEquals(2, rs.getInt(1));
+        rs.close();
+        con.close();
+    }
 }

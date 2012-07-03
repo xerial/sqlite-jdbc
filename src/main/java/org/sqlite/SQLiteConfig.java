@@ -62,7 +62,7 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.CREATE);
         }
         transactionMode = TransactionMode.getMode(
-            prop.getProperty("transaction_mode", TransactionMode.DEFFERED.name()));
+            prop.getProperty(Pragma.TRANSACTION_MODE.pragmaName, TransactionMode.DEFFERED.name()));
     }
 
     /**
@@ -114,8 +114,6 @@ public class SQLiteConfig
             if (stat != null)
                 stat.close();
         }
-
-        ((Conn)conn).setTransactionMode(transactionMode);
     }
 
     private void set(Pragma pragma, boolean flag) {
@@ -160,6 +158,7 @@ public class SQLiteConfig
      */
     public Properties toProperties() {
         pragmaTable.setProperty(Pragma.OPEN_MODE.pragmaName, Integer.toString(openModeFlag));
+        pragmaTable.setProperty(Pragma.TRANSACTION_MODE.pragmaName, transactionMode.getValue());
 
         return pragmaTable;
     }
@@ -212,7 +211,10 @@ public class SQLiteConfig
         SYNCHRONOUS("synchronous", toStringArray(SynchronousMode.values())),
         TEMP_STORE("temp_store", toStringArray(TempStore.values())),
         TEMP_STORE_DIRECTORY("temp_store_directory"),
-        USER_VERSION("user_version");
+        USER_VERSION("user_version"),
+
+        // transaction mode
+        TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values()));
 
         public final String   pragmaName;
         public final String[] choices;
