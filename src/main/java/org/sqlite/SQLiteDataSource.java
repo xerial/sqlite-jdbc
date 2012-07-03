@@ -198,6 +198,10 @@ public class SQLiteDataSource implements DataSource
         config.setTempStoreDirectory(directoryName);
     }
 
+    public void setTransactionMode(String transactionMode) {
+        config.setTransactionMode(transactionMode);
+    }
+
     public void setUserVersion(int version) {
         config.setUserVersion(version);
     }
