@@ -26,6 +26,14 @@ public class ExtendedCommand
         public void execute(DB db) throws SQLException;
     }
 
+    /**
+     * Parses extended commands of "backup" or "restore" for SQLite database.  
+     * @param sql One of the extended commands:<br/>
+     *      backup sourceDatabaseName to destinationFileName OR restore targetDatabaseName from sourceFileName
+     * @return BackupCommand object if the argument is a backup command; RestoreCommand object if
+     *         the argument is a restore command;
+     * @throws SQLException
+     */
     public static SQLExtension parse(String sql) throws SQLException {
         if (sql == null)
             return null;
@@ -38,6 +46,11 @@ public class ExtendedCommand
         return null;
     }
 
+    /**
+     * Remove the quotation mark from string.
+     * @param s String with quotation mark.
+     * @return String with quotation mark removed.
+     */
     public static String removeQuotation(String s) {
         if (s == null)
             return s;
@@ -53,6 +66,11 @@ public class ExtendedCommand
         public final String srcDB;
         public final String destFile;
 
+        /**
+         * Constructs a BackupCommand instance that backup the database to a target file. 
+         * @param srcDB Source database name.
+         * @param destFile Target file name.
+         */
         public BackupCommand(String srcDB, String destFile) {
             this.srcDB = srcDB;
             this.destFile = destFile;
@@ -61,6 +79,12 @@ public class ExtendedCommand
         private static Pattern backupCmd = Pattern
                                                  .compile("backup(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+to\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)");
 
+        /**
+         * Parses SQLite database backup command and creates a BackupCommand object.
+         * @param sql SQLite database backup command.
+         * @return BackupCommand object.
+         * @throws SQLException
+         */
         public static BackupCommand parse(String sql) throws SQLException {
             if (sql != null) {
                 Matcher m = backupCmd.matcher(sql);
@@ -89,11 +113,22 @@ public class ExtendedCommand
         private static Pattern restoreCmd = Pattern
                                                   .compile("restore(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+from\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)");
 
+        /**
+         * Constructs a RestoreCommand instance that restores the database from a given source file. 
+         * @param targetDB Target database name
+         * @param srcFile Source file name
+         */
         public RestoreCommand(String targetDB, String srcFile) {
             this.targetDB = targetDB;
             this.srcFile = srcFile;
         }
 
+        /**
+         * Parses SQLite database restore command and creates a RestoreCommand object.
+         * @param sql SQLite restore backup command
+         * @return RestoreCommand object.
+         * @throws SQLException
+         */
         public static RestoreCommand parse(String sql) throws SQLException {
             if (sql != null) {
                 Matcher m = restoreCmd.matcher(sql);
@@ -108,6 +143,9 @@ public class ExtendedCommand
             throw new SQLException("syntax error: " + sql);
         }
 
+        /**
+         * @see org.sqlite.ExtendedCommand.SQLExtension#execute(org.sqlite.DB)
+         */
         public void execute(DB db) throws SQLException {
             db.restore(targetDB, srcFile, null);
         }

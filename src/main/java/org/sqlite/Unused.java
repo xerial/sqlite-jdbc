@@ -22,7 +22,9 @@ import java.net.*;
 import java.sql.*;
 import java.util.Map;
 
-/** Unused JDBC functions from Statement, PreparedStatement and ResultSet.  */
+/**
+ * Unused JDBC functions from Statement, PreparedStatement and ResultSet.
+ */
 abstract class Unused
 {
     private SQLException unused() {
