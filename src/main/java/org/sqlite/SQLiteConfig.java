@@ -44,6 +44,7 @@ public class SQLiteConfig
 {
     private final Properties pragmaTable;
     private int              openModeFlag = 0x00;
+    private TransactionMode  transactionMode; 
 
     /**
      * Default constructor.
@@ -68,6 +69,8 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
+        transactionMode = TransactionMode.getMode(
+            prop.getProperty(Pragma.TRANSACTION_MODE.pragmaName, TransactionMode.DEFFERED.name()));
     }
 
     /**
@@ -190,6 +193,7 @@ public class SQLiteConfig
      */
     public Properties toProperties() {
         pragmaTable.setProperty(Pragma.OPEN_MODE.pragmaName, Integer.toString(openModeFlag));
+        pragmaTable.setProperty(Pragma.TRANSACTION_MODE.pragmaName, transactionMode.getValue());
 
         return pragmaTable;
     }
@@ -245,7 +249,10 @@ public class SQLiteConfig
         SYNCHRONOUS("synchronous", toStringArray(SynchronousMode.values())),
         TEMP_STORE("temp_store", toStringArray(TempStore.values())),
         TEMP_STORE_DIRECTORY("temp_store_directory"),
-        USER_VERSION("user_version");
+        USER_VERSION("user_version"),
+
+        // transaction mode
+        TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values()));
 
         public final String   pragmaName;
         public final String[] choices;
@@ -256,7 +263,7 @@ public class SQLiteConfig
         }
 
         private Pragma(String pragmaName, String[] choices) {
-            this(pragmaName, null, null);
+            this(pragmaName, null, choices);
         }
 
         private Pragma(String pragmaName, String description, String[] choices) {
@@ -671,4 +678,40 @@ public class SQLiteConfig
         set(Pragma.USER_VERSION, version);
     }
 
+    public static enum TransactionMode implements PragmaValue {
+        DEFFERED, IMMEDIATE, EXCLUSIVE;
+
+        public String getValue() {
+            return name();
+        }
+
+        public static TransactionMode getMode(String mode) {
+            return TransactionMode.valueOf(mode.toUpperCase());
+        }
+    }
+
+    /**
+     * Sets the mode that will be used to start transactions.
+     * @param transactionMode One of {@link TransactionMode}.
+     * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     */
+    public void setTransactionMode(TransactionMode transactionMode) {
+        this.transactionMode = transactionMode;
+    }
+
+    /**
+     * Sets the mode that will be used to start transactions.
+     * @param transactionMode One of DEFFERED, IMMEDIATE or EXCLUSIVE.
+     * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     */
+    public void setTransactionMode(String transactionMode) {
+        setTransactionMode(TransactionMode.getMode(transactionMode));
+    }
+
+    /**
+     * @return The transaction mode.
+     */
+    public TransactionMode getTransactionMode() {
+        return transactionMode;
+    }
 }
