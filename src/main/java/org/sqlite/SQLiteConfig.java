@@ -97,7 +97,6 @@ public class SQLiteConfig
 
         Statement stat = conn.createStatement();
         try {
-            int count = 0;
             for (Object each : pragmaTable.keySet()) {
                 String key = each.toString();
                 if (!pragmaParams.contains(key)) {
@@ -106,13 +105,8 @@ public class SQLiteConfig
 
                 String value = pragmaTable.getProperty(key);
                 if (value != null) {
-                    String sql = String.format("pragma %s=%s", key, value);
-                    stat.addBatch(sql);
-                    count++;
+                    stat.execute(String.format("pragma %s=%s", key, value));
                 }
-            }
-            if (count > 0) {
-                stat.executeBatch();
             }
         }
         finally {
@@ -422,7 +416,7 @@ public class SQLiteConfig
     }
 
     public static enum JournalMode implements PragmaValue {
-        DELETE, TRUNCATE, PERSIST, MEMORY, OFF;
+        DELETE, TRUNCATE, PERSIST, MEMORY, WAL, OFF;
 
         public String getValue() {
             return name();
