@@ -127,6 +127,10 @@ SQLITE_EXTENSION_INIT1
 #include <stdlib.h>
 #include <assert.h>
 
+#ifndef _SQLITEINT_H_
+#include "sqliteInt.h"
+#endif
+
 #ifndef _MAP_H_
 #define _MAP_H_
 
