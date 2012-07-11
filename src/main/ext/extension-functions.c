@@ -99,16 +99,29 @@ Original code 2006 June 05 by relicoder.
 //#include "config.h"
 
 //#define COMPILE_SQLITE_EXTENSIONS_AS_LOADABLE_MODULE 1
+
+#if SQLITE_OS_WIN==0 || SQLITE_OS_WIN==1 && !defined(_MSC_VER)
 #define HAVE_ACOSH 1
 #define HAVE_ASINH 1
 #define HAVE_ATANH 1
+#define HAVE_ISBLANK 1
+#endif /* SQLITE_OS_WIN==0 || SQLITE_OS_WIN==1 && !defined(_MSC_VER) */
+
 #define HAVE_SINH 1
 #define HAVE_COSH 1
 #define HAVE_TANH 1
 #define HAVE_LOG10 1
-#define HAVE_ISBLANK 1
 #define SQLITE_SOUNDEX 1
 #define HAVE_TRIM 1		/* LMH 2007-03-25 if sqlite has trim functions */
+
+#ifndef SQLITE_HAVE_ISNAN
+/* copied from src/util.c */
+int isnan(double x){
+  volatile double y = x;
+  volatile double z = y;
+  return (y!=z);
+}
+#endif
 
 #ifdef COMPILE_SQLITE_EXTENSIONS_AS_LOADABLE_MODULE
 #include "sqlite3ext.h"
@@ -122,8 +135,8 @@ SQLITE_EXTENSION_INIT1
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>		/* LMH 2007-03-25 */
-
+/* LMH 2007-03-25 */
+#include <errno.h>
 #include <stdlib.h>
 #include <assert.h>
 
