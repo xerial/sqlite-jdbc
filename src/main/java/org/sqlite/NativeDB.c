@@ -174,7 +174,7 @@ static void xFunc_error(sqlite3_context *context, JNIEnv *env)
 }
 
 /* used to call xFunc, xStep and xFinal */
-static xCall(
+static void xCall(
     sqlite3_context *context,
     int args,
     sqlite3_value** value,
@@ -388,7 +388,9 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB__1exec(
         JNIEnv *env, jobject this, jstring sql)
 {
     sqlite3* db = gethandle(env, this);
-    sqlite3_stmt* stmt;
+    const char *strsql;
+    char* errorMsg;
+    int status;
 	
 	if(!db)
 	{
@@ -396,9 +398,8 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB__1exec(
 		return 21;
 	}
 
-    const char *strsql = (*env)->GetStringUTFChars(env, sql, 0);
-    char* errorMsg;
-    int status = sqlite3_exec(db, strsql, 0, 0, &errorMsg);
+    strsql = (*env)->GetStringUTFChars(env, sql, 0);
+    status = sqlite3_exec(db, strsql, 0, 0, &errorMsg);
     
     (*env)->ReleaseStringUTFChars(env, sql, strsql);
 
@@ -755,11 +756,15 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_create_1function(
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_destroy_1function(
         JNIEnv *env, jobject this, jstring name)
 {
+    jint ret = 0;
     const char* strname = (*env)->GetStringUTFChars(env, name, 0);
-    sqlite3_create_function(
+    
+    ret = sqlite3_create_function(
         gethandle(env, this), strname, -1, SQLITE_UTF16, 0, 0, 0, 0
     );
     (*env)->ReleaseStringUTFChars(env, name, strname);
+
+    return ret;
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_NativeDB_free_1functions(
