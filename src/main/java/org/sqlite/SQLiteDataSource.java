@@ -374,6 +374,15 @@ public class SQLiteDataSource implements DataSource
     }
 
     /**
+     * Sets the mode that will be used to start transactions for this database.
+     * @param transactionMode One of DEFFERED, IMMEDIATE or EXCLUSIVE.
+     * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     */
+    public void setTransactionMode(String transactionMode) {
+        config.setTransactionMode(transactionMode);
+    }
+
+    /**
      * Sets the value of the user-version. It is a big-endian 32-bit signed
      * integer stored in the database header at offset 60. 
      * @param version

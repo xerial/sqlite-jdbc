@@ -33,11 +33,22 @@ import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.sqlite.SQLiteConfig.TransactionMode;
+
 class Conn implements Connection
 {
+    private final static Map<TransactionMode, String> beginCommandMap  = new HashMap<SQLiteConfig.TransactionMode, String>() {
+       {
+            put(TransactionMode.DEFFERED, "begin;");
+            put(TransactionMode.IMMEDIATE, "begin immediate;");
+            put(TransactionMode.EXCLUSIVE, "begin exclusive;");
+        }
+    };
+
     private final String url;
     private String       fileName;
     private DB           db                   = null;
@@ -46,6 +57,8 @@ class Conn implements Connection
     private int          transactionIsolation = TRANSACTION_SERIALIZABLE;
     private int          timeout              = 0;
     private final int    openModeFlags;
+    private TransactionMode
+                         transactionMode      = TransactionMode.DEFFERED;
 
     /**
      * Constructor to create a connection to a database at the given location.
@@ -77,6 +90,8 @@ class Conn implements Connection
         boolean enableLoadExtension = config.isEnabledLoadExtension();
         db.shared_cache(enableSharedCache);
         db.enable_load_extension(enableLoadExtension);
+
+        this.transactionMode = config.getTransactionMode();
 
         // set pragmas
         config.apply(this);
@@ -387,6 +402,15 @@ class Conn implements Connection
     }
 
     /**
+     * Sets the mode that will be used to start transactions on this connection.
+     * @param mode One of {@link TransactionMode}
+     * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     */
+    protected void setTransactionMode(TransactionMode mode) {
+        this.transactionMode = mode;
+    }
+
+    /**
      * @see java.sql.Connection#getTypeMap()
      */
     public Map getTypeMap() throws SQLException {
@@ -461,7 +485,7 @@ class Conn implements Connection
         if (autoCommit == ac)
             return;
         autoCommit = ac;
-        db.exec(autoCommit ? "commit;" : "begin;");
+        db.exec(autoCommit ? "commit;" : beginCommandMap.get(transactionMode));
     }
 
     /**
@@ -472,7 +496,7 @@ class Conn implements Connection
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
         db.exec("commit;");
-        db.exec("begin;");
+        db.exec(beginCommandMap.get(transactionMode));
     }
 
     /**
@@ -483,7 +507,7 @@ class Conn implements Connection
         if (autoCommit)
             throw new SQLException("database in auto-commit mode");
         db.exec("rollback;");
-        db.exec("begin;");
+        db.exec(beginCommandMap.get(transactionMode));
     }
 
     /**
