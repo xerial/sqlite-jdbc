@@ -440,4 +440,12 @@ class Stmt extends Unused implements Statement, Codes
     public int getResultSetType() throws SQLException {
         return ResultSet.TYPE_FORWARD_ONLY;
     }
+
+    /**
+     * @see java.sql.Statement#setEscapeProcessing(boolean)
+     */
+    public void setEscapeProcessing(boolean enable) throws SQLException {
+        // Escape processing is not implemented so this method is a no-op
+    }
+
 }

@@ -34,8 +34,6 @@ abstract class Unused
 
     // Statement ////////////////////////////////////////////////////
 
-    public void setEscapeProcessing(boolean enable)
-        throws SQLException { throw unused(); }
     public boolean execute(String sql, int[] colinds)
         throws SQLException { throw unused(); }
     public boolean execute(String sql, String[] colnames)
