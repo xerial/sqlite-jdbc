@@ -125,6 +125,12 @@ final class NativeDB extends DB
     native synchronized int changes();
 
     /**
+     * @see org.sqlite.DB#total_changes()
+     */
+    @Override
+    native synchronized int total_changes();
+
+    /**
      * @see org.sqlite.DB#finalize(long)
      */
     @Override

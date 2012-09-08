@@ -41,7 +41,7 @@ public class StatementTest
     }
 
     @Test
-    public void stmtUpdate() throws SQLException {
+    public void executeUpdate() throws SQLException {
         assertEquals(stat.executeUpdate("create table s1 (c1);"), 0);
         assertEquals(stat.executeUpdate("insert into s1 values (0);"), 1);
         assertEquals(stat.executeUpdate("insert into s1 values (1);"), 1);
@@ -49,7 +49,24 @@ public class StatementTest
         assertEquals(stat.executeUpdate("update s1 set c1 = 5;"), 3);
         // count_changes_pgrama. truncate_optimization
         assertEquals(stat.executeUpdate("delete from s1;"), 3);
-        assertEquals(stat.executeUpdate("drop table s1;"), 3);
+
+        // multiple SQL statements
+        assertEquals(
+            stat.executeUpdate("insert into s1 values (11);" +
+                               "insert into s1 values (12)"),
+            2);
+        assertEquals(
+            stat.executeUpdate("update s1 set c1 = 21 where c1 = 11;" +
+                               "update s1 set c1 = 22 where c1 = 12;" +
+                               "update s1 set c1 = 23 where c1 = 13"),
+            2); // c1 = 13 does not exist
+        assertEquals(
+            stat.executeUpdate("delete from s1 where c1 = 21;" +
+                               "delete from s1 where c1 = 22;" +
+                               "delete from s1 where c1 = 23"),
+            2); // c1 = 23 does not exist
+
+        assertEquals(stat.executeUpdate("drop table s1;"), 0);
     }
 
     @Test

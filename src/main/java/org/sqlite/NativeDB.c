@@ -429,6 +429,12 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_changes(
     return sqlite3_changes(gethandle(env, this));
 }
 
+JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_total_1changes(
+        JNIEnv *env, jobject this)
+{
+    return sqlite3_total_changes(gethandle(env, this));
+}
+
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_finalize(
         JNIEnv *env, jobject this, jlong stmt)
 {

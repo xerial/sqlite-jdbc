@@ -187,6 +187,14 @@ final class NestedDB extends DB implements Runtime.CallJavaCB
     }
 
     /**
+     * @see org.sqlite.DB#total_changes()
+     */
+    @Override
+    synchronized int total_changes() throws SQLException {
+        return call("sqlite3_total_changes", handle);
+    }
+
+    /**
      * @see org.sqlite.DB#_exec(java.lang.String)
      */
     @Override

@@ -178,6 +178,7 @@ class Stmt extends Unused implements Statement, Codes
         }
         else {
             try {
+                changes = db.total_changes();
                 //db.prepare(this);
                 //changes = db.executeUpdate(this, null);
 
@@ -186,7 +187,7 @@ class Stmt extends Unused implements Statement, Codes
                 if (statusCode != SQLITE_OK)
                     throw DB.newSQLException(statusCode, "");
 
-                changes = db.changes();
+                changes = db.total_changes() - changes;
             }
             finally {
                 close();
