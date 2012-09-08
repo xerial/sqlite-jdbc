@@ -130,7 +130,9 @@ public class SQLiteJDBCLoader
     private static boolean extractAndLoadLibraryFile(String libFolderForCurrentOS, String libraryFileName,
             String targetFolder) {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
-        final String prefix = "sqlite-" + getVersion() + "-";
+        // Include architecture name in temporary filename in order to avoid conflicts
+        // when multiple JVMs with different architectures running at the same time
+        final String prefix = "sqlite-" + getVersion() + "-" + OSInfo.getArchName() + "-";
 
         String extractedLibFileName = prefix + libraryFileName;
         File extractedLibFile = new File(targetFolder, extractedLibFileName);
