@@ -32,7 +32,7 @@ public class DBMetaDataTest
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
-        stat.executeUpdate("create table test (id integer primary key, fn float, sn);");
+        stat.executeUpdate("create table test (id integer primary key, fn float, sn not null);");
         stat.executeUpdate("create view testView as select * from test;");
         meta = conn.getMetaData();
     }
@@ -122,11 +122,13 @@ public class DBMetaDataTest
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "fn");
         assertEquals(rs.getInt("DATA_TYPE"), Types.FLOAT);
+        assertEquals(rs.getString("IS_NULLABLE"), "YES");
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "sn");
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "sn");
+        assertEquals(rs.getString("IS_NULLABLE"), "NO");
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "%");
