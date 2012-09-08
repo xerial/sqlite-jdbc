@@ -435,9 +435,11 @@ class Conn implements Connection
      * @see java.sql.Connection#setReadOnly(boolean)
      */
     public void setReadOnly(boolean ro) throws SQLException {
-        if (!isReadOnly()) {
+        // trying to change read-only flag
+        if (ro != isReadOnly()) {
             throw new SQLException(
-                    "Cannot set read-only flag ofter establishing a connection. Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
+                "Cannot change read-only flag after establishing a connection." +
+                " Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
         }
     }
 

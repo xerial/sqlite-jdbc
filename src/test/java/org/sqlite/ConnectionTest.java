@@ -59,15 +59,28 @@ public class ConnectionTest
             stat.executeUpdate("create table A(id, name)");
             stat.executeUpdate("insert into A values(1, 'leo')");
 
+            fail("read only flag is not properly set");
         }
         catch (SQLException e) {
-            return; // success
+            // success
         }
         finally {
             stat.close();
             conn.close();
         }
-        fail("read only flag is not properly set");
+
+        config.setReadOnly(true); // should be a no-op
+
+        try{
+            conn.setReadOnly(false);
+            fail("should not change read only flag after opening connection");
+        }
+        catch (SQLException e) {
+           assert(e.getMessage().contains("Cannot change read-only flag after establishing a connection.")); 
+        }
+        finally {
+            conn.close();
+        }
     }
 
     @Test
