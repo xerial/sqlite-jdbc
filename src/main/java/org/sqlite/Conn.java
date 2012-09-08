@@ -34,6 +34,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -59,6 +60,7 @@ class Conn implements Connection
     private final int    openModeFlags;
     private TransactionMode
                          transactionMode      = TransactionMode.DEFFERED;
+    private List         statements           = null;
 
     /**
      * Constructor to create a connection to a database at the given location.

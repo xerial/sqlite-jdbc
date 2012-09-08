@@ -155,7 +155,7 @@ public class StatementTest
         assertEquals(rs.getString("surname"), "Smith");
         assertFalse(rs.next());
         rs.close();
-        assertEquals(stat.executeUpdate("drop table tab;"), 1);
+        assertEquals(stat.executeUpdate("drop table tab;"), 0);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class StatementTest
         assertEquals(rs.getInt(1), 1000);
         rs.close();
 
-        assertEquals(stat.executeUpdate("drop table in1000;"), 1);
+        assertEquals(stat.executeUpdate("drop table in1000;"), 0);
     }
 
     private void assertArrayEq(int[] a, int[] b) {
