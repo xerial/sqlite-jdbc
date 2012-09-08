@@ -25,6 +25,13 @@
         </includes>
       </resource>
       <resource>
+        <directory>src/main/resources</directory>
+        <targetPath>META-INF/services</targetPath>
+        <includes>
+          <include>java.sql.Driver</include>
+        </includes>
+      </resource>
+      <resource>
         <directory>${basedir}</directory>
         <targetPath>META-INF/maven/${project.groupId}/${project.artifactId}</targetPath>
         <includes>
