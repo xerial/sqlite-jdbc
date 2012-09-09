@@ -1243,7 +1243,7 @@ class MetaData implements DatabaseMetaData
         sql = "select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, " + "'" + escape(tbl) + "' as TABLE_NAME, "
                 + "cn as COLUMN_NAME, " + "ct as DATA_TYPE, " + "tn as TYPE_NAME, " + "2000000000 as COLUMN_SIZE, "
                 + "2000000000 as BUFFER_LENGTH, " + "10   as DECIMAL_DIGITS, " + "10   as NUM_PREC_RADIX, "
-                + "colnullable as NULLABLE, " + "null as REMARKS, " + "null as COLUMN_DEF, "
+                + "colnullable as NULLABLE, " + "null as REMARKS, " + "colDefault as COLUMN_DEF, "
                 + "0    as SQL_DATA_TYPE, " + "0    as SQL_DATETIME_SUB, " + "2000000000 as CHAR_OCTET_LENGTH, "
                 + "ordpos as ORDINAL_POSITION, " + "(case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)"
                 + "    as IS_NULLABLE, " + "null as SCOPE_CATLOG, " + "null as SCOPE_SCHEMA, "
@@ -1259,6 +1259,7 @@ class MetaData implements DatabaseMetaData
             String colName = rs.getString(2);
             String colType = rs.getString(3);
             String colNotNull = rs.getString(4);
+            String colDefault = rs.getString(5);
 
             int colNullable = 2;
             if (colNotNull != null) {
@@ -1303,14 +1304,18 @@ class MetaData implements DatabaseMetaData
                 colJavaType = Types.VARCHAR;
             }
 
-            sql += "select " + i + " as ordpos, " + colNullable + " as colnullable, '" + colJavaType + "' as ct, '"
-                    + escape(colName) + "' as cn, '" + escape(colType) + "' as tn";
+            sql += "select " + i + " as ordpos, "
+                    + colNullable + " as colnullable, '"
+                    + colJavaType + "' as ct, '"
+                    + escape(colName) + "' as cn, '"
+                    + escape(colType) + "' as tn, "
+                    + quote(colDefault == null ? null : escape(colDefault)) + " as colDefault";
 
             if (colPat != null) {
                 sql += " where upper(cn) like upper('" + escape(colPat) + "')";
             }
         }
-        sql += colFound ? ");" : "select null as ordpos, null as colnullable, " + "null as cn, null as tn) limit 0;";
+        sql += colFound ? ");" : "select null as ordpos, null as colnullable, null as cn, null as tn, null as colDefault) limit 0;";
         rs.close();
 
         return stat.executeQuery(sql);

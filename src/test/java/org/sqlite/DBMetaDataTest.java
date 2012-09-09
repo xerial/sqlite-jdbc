@@ -32,7 +32,7 @@ public class DBMetaDataTest
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
-        stat.executeUpdate("create table test (id integer primary key, fn float, sn not null);");
+        stat.executeUpdate("create table test (id integer primary key, fn float default 0.0, sn not null);");
         stat.executeUpdate("create view testView as select * from test;");
         meta = conn.getMetaData();
     }
@@ -115,6 +115,8 @@ public class DBMetaDataTest
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "test");
         assertEquals(rs.getString("COLUMN_NAME"), "id");
+        assertEquals(rs.getString("IS_NULLABLE"), "YES");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
         assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
         assertFalse(rs.next());
 
@@ -123,12 +125,14 @@ public class DBMetaDataTest
         assertEquals(rs.getString("COLUMN_NAME"), "fn");
         assertEquals(rs.getInt("DATA_TYPE"), Types.FLOAT);
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
+        assertEquals(rs.getString("COLUMN_DEF"), "0.0");
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "sn");
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "sn");
         assertEquals(rs.getString("IS_NULLABLE"), "NO");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "%");
