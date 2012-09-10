@@ -500,11 +500,4 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     public void addBatch(String sql) throws SQLException {
         throw unused();
     }
-
-    /**
-     * @return An SQLiteException with the error message.
-     */
-    private SQLException unused() {
-        return new SQLException("not supported by PreparedStatment");
-    }
 }

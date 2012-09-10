@@ -445,7 +445,9 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#setEscapeProcessing(boolean)
      */
     public void setEscapeProcessing(boolean enable) throws SQLException {
-        // Escape processing is not implemented so this method is a no-op
+        if(enable) {
+          throw unused();
+        }
     }
 
 }

@@ -362,4 +362,14 @@ public class StatementTest
     public void maxRows() throws SQLException {
         stat.setMaxRows(1);
     }
+
+    @Test 
+    public void setEscapeProcessingToFals() throws SQLException {
+        stat.setEscapeProcessing(false);
+    }
+
+    @Test(expected=SQLException.class) 
+    public void setEscapeProcessingToTrue() throws SQLException {
+        stat.setEscapeProcessing(true);
+    }
 }
