@@ -27,15 +27,13 @@ import java.util.Map;
  */
 abstract class Unused
 {
-    private SQLException unused() {
+    protected SQLException unused() {
         return new SQLException("not implemented by SQLite JDBC driver");
     }
 
 
     // Statement ////////////////////////////////////////////////////
 
-    public void setEscapeProcessing(boolean enable)
-        throws SQLException { throw unused(); }
     public boolean execute(String sql, int[] colinds)
         throws SQLException { throw unused(); }
     public boolean execute(String sql, String[] colnames)
