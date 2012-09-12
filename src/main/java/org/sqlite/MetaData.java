@@ -1519,13 +1519,14 @@ class MetaData implements DatabaseMetaData
                     count++;
                 }
 
-                exportedKeysQuery.append(");");
                 fk.close();
             }
             catch (SQLException e) {
                 // continue
             }
         }
+
+        exportedKeysQuery.append(");");
 
         String sql = (count > 0) ? exportedKeysQuery.toString() : (String.format(
                 "select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(catalog), quote(schema),
