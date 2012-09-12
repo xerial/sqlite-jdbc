@@ -851,11 +851,4 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     public boolean rowUpdated() throws SQLException {
         return false;
     }
-
-    /**
-     * @see java.sql.ResultSet#setEscapeProcessing(boolean)
-     */
-    public void setEscapeProcessing(boolean enable) throws SQLException {
-        // Escape processing is not implemented so this method is a no-op
-    }
 }
