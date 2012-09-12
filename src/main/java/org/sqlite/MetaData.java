@@ -855,7 +855,7 @@ class MetaData implements DatabaseMetaData
      * @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys()
      */
     public boolean supportsGetGeneratedKeys() {
-        return false;
+        return true;
     }
 
     /**
