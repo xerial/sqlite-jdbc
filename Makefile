@@ -87,7 +87,7 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 
 
 win32: 
-	$(MAKE) native CC=mingw32-gcc OS_NAME=Windows OS_ARCH=x86
+	$(MAKE) native CC=i686-w64-mingw32-gcc OS_NAME=Windows OS_ARCH=x86
 
 linux32:
 	$(MAKE) native OS_NAME=Linux OS_ARCH=i386
