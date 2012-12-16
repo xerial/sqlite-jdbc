@@ -1615,21 +1615,21 @@ class MetaData implements DatabaseMetaData
 
         // Use a try catch block to avoid "query does not return ResultSet" error
         try {
-            ArrayList<ArrayList> indexList = new ArrayList<ArrayList>();
+            ArrayList<ArrayList<Object>> indexList = new ArrayList<ArrayList<Object>>();
 
             rs = stat.executeQuery("pragma index_list('" + escape(t) + "');");
             while (rs.next()) {
-                indexList.add(new ArrayList());
+                indexList.add(new ArrayList<Object>());
                 indexList.get(indexList.size() - 1).add(rs.getString(2));
                 indexList.get(indexList.size() - 1).add(rs.getInt(3));
             }
             rs.close();
 
             int i = 0;
-            Iterator indexIterator = indexList.iterator();
-            ArrayList currentIndex;
+            Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
+            ArrayList<Object> currentIndex;
             while (indexIterator.hasNext()) {
-                currentIndex = (ArrayList) indexIterator.next();
+                currentIndex = indexIterator.next();
                 String indexName = currentIndex.get(0).toString();
                 int unique = (Integer) currentIndex.get(1);
 

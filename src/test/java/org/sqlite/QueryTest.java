@@ -29,13 +29,13 @@ public class QueryTest
         Class.forName("org.sqlite.JDBC");
     }
 
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:sqlite::memory:");
+    }
+
     @Test
     public void createTable() throws Exception {
-        String driver = "org.sqlite.JDBC";
-        String url = "jdbc:sqlite::memory:";
-        //String url = "jdbc:sqlite:file.db";
-
-        Connection conn = DriverManager.getConnection(url);
+        Connection conn = getConnection();
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLE IF NOT EXISTS sample " + "(id INTEGER PRIMARY KEY, descr VARCHAR(40))");
         stmt.close();
@@ -55,11 +55,9 @@ public class QueryTest
 
     @Test
     public void setFloatTest() throws Exception {
-        String driver = "org.sqlite.JDBC";
-        String url = "jdbc:sqlite::memory:";
-
         float f = 3.141597f;
-        Connection conn = DriverManager.getConnection(url);
+        Connection conn = getConnection();
+
         conn.createStatement().execute("create table sample (data NOAFFINITY)");
         PreparedStatement prep = conn.prepareStatement("insert into sample values(?)");
         prep.setFloat(1, f);
@@ -76,10 +74,8 @@ public class QueryTest
 
     @Test
     public void dateTimeTest() throws Exception {
-        String url = "jdbc:sqlite::memory:";
+        Connection conn = getConnection();
 
-        float f = 3.141597f;
-        Connection conn = DriverManager.getConnection(url);
         conn.createStatement().execute("create table sample (start_time datetime)");
 
         Date now = new Date();
@@ -94,7 +90,7 @@ public class QueryTest
 
     @Test
     public void viewTest() throws Exception {
-        Connection conn = DriverManager.getConnection("jdbc:sqlite::memory:");
+        Connection conn = getConnection();
         Statement st1 = conn.createStatement();
         // drop table if it already exists
 
@@ -109,8 +105,7 @@ public class QueryTest
 
     @Test
     public void timeoutTest() throws Exception {
-
-        Connection conn = DriverManager.getConnection("jdbc:sqlite::memory:");
+        Connection conn = getConnection();
         Statement st1 = conn.createStatement();
 
         st1.setQueryTimeout(1);
@@ -121,11 +116,11 @@ public class QueryTest
     @Test
     public void concatTest() {
 
-        Connection connection = null;
+        Connection conn = null;
         try {
             // create a database connection
-            connection = DriverManager.getConnection("jdbc:sqlite::memory:");
-            Statement statement = connection.createStatement();
+            conn = getConnection();
+            Statement statement = conn.createStatement();
             statement.setQueryTimeout(30); // set timeout to 30 sec.
 
             statement.executeUpdate("drop table if exists person");
@@ -160,7 +155,7 @@ public class QueryTest
                 assertEquals("Y", rs.getString(1));
             }
 
-            PreparedStatement ps = connection
+            PreparedStatement ps = conn
                     .prepareStatement("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=? and mxp.pid=person.id and mxp.type='T'");
             ps.clearParameters();
             ps.setInt(1, new Integer(2));
@@ -185,8 +180,8 @@ public class QueryTest
         }
         finally {
             try {
-                if (connection != null)
-                    connection.close();
+                if (conn != null)
+                    conn.close();
             }
             catch (SQLException e) {
                 // connection close failed.

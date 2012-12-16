@@ -43,7 +43,7 @@ final class NativeDB extends DB
      * Loads the SQLite interface backend.
      * @return True if the SQLite JDBC driver is successfully loaded; false otherwise.
      */
-    static boolean load() {
+    static boolean load() throws Exception {
         if (isLoaded)
             return loadSucceeded == true;
 

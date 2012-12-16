@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -34,7 +33,6 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -42,14 +40,6 @@ import org.sqlite.SQLiteConfig.TransactionMode;
 
 class Conn implements Connection
 {
-    private final static Map<TransactionMode, String> beginCommandMap  = new HashMap<SQLiteConfig.TransactionMode, String>() {
-       {
-            put(TransactionMode.DEFFERED, "begin;");
-            put(TransactionMode.IMMEDIATE, "begin immediate;");
-            put(TransactionMode.EXCLUSIVE, "begin exclusive;");
-        }
-    };
-
     private final String url;
     private String       fileName;
     private DB           db                   = null;
@@ -60,7 +50,15 @@ class Conn implements Connection
     private final int    openModeFlags;
     private TransactionMode
                          transactionMode      = TransactionMode.DEFFERED;
-    private List         statements           = null;
+
+    private final static Map<TransactionMode, String> beginCommandMap =
+        new HashMap<SQLiteConfig.TransactionMode, String>();
+
+    static{
+        beginCommandMap.put(TransactionMode.DEFFERED, "begin;");
+        beginCommandMap.put(TransactionMode.IMMEDIATE, "begin immediate;");
+        beginCommandMap.put(TransactionMode.EXCLUSIVE, "begin exclusive;");
+    }
 
     /**
      * Constructor to create a connection to a database at the given location.
@@ -157,31 +155,15 @@ class Conn implements Connection
             }
         }
 
-        // tries to load native library first
+        // load the native DB
         try {
-            Class< ? > nativedb = Class.forName("org.sqlite.NativeDB");
-            // getDeclaredMethod is not available in Android < 2.3
-            for (Method method: nativedb.getDeclaredMethods()) {
-            	if ("load".equals(method.getName()) && (
-            			method.getParameterTypes() == null || method.getParameterTypes().length == 0)) {
-                    if (((Boolean) method.invoke((Object) null,
-                            (Object[]) null)).booleanValue()) {
-                    	db = (DB) nativedb.newInstance();
-                    }
-                    break;
-            	}
-            }
+            NativeDB.load();
+            db = new NativeDB();
         }
-        catch (Exception e) {} // fall through to nested library
-
-        // load nested library (pure-java SQLite)
-        if (db == null) {
-            try {
-                db = (DB) Class.forName("org.sqlite.NestedDB").newInstance();
-            }
-            catch (Exception e) {
-                throw new SQLException("no SQLite library found");
-            }
+        catch (Exception e) {
+            SQLException err = new SQLException("Error opening connection");
+            err.initCause(e);
+            throw err;
         }
 
         db.open(this, fileName, openModeFlags);
@@ -415,13 +397,14 @@ class Conn implements Connection
     /**
      * @see java.sql.Connection#getTypeMap()
      */
-    public Map getTypeMap() throws SQLException {
+    public Map<String,Class<?>> getTypeMap() throws SQLException {
         throw new SQLException("not yet implemented");
     }
 
     /**
      * @see java.sql.Connection#setTypeMap(java.util.Map)
      */
+    @SuppressWarnings("rawtypes")
     public void setTypeMap(Map map) throws SQLException {
         throw new SQLException("not yet implemented");
     }
@@ -603,18 +586,11 @@ class Conn implements Connection
     }
 
     /** 
-     * @return One of "pure", "native", or "unloaded".
+     * @return One of "native" or "unloaded".
      */
     String getDriverVersion() {
         // Used to supply DatabaseMetaData.getDriverVersion()
-        if (db != null) {
-            String dbname = db.getClass().getName();
-            if (dbname.indexOf("NestedDB") >= 0)
-                return "pure";
-            if (dbname.indexOf("NativeDB") >= 0)
-                return "native";
-        }
-        return "unloaded";
+        return  db != null ? "native" : "unloaded";
     }
 
     // UNUSED FUNCTIONS /////////////////////////////////////////////

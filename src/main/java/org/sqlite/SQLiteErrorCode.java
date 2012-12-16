@@ -28,7 +28,7 @@ package org.sqlite;
  * SQLite3 error code
  * 
  * @author leo
- * @see http://www.sqlite.org/c3ref/c_abort.html
+ * @see <a href="http://www.sqlite.org/c3ref/c_abort.html">http://www.sqlite.org/c3ref/c_abort.html</a>
  * 
  */
 public enum SQLiteErrorCode {

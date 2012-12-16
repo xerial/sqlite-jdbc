@@ -163,7 +163,7 @@ public class InsertQueryTest
                 // SQLite database insertion
                 statAddBD.setString(1, item.getFullId());
                 statAddBD.setString(2, item.getType());
-                statAddBD.setBytes(3, item.serializeBD(item));
+                statAddBD.setBytes(3, BD.serializeBD(item));
                 statAddBD.execute();
 
                 // Then, its resources tags
@@ -224,8 +224,6 @@ public class InsertQueryTest
 
         ResultSet rs = stat2.executeQuery("select count(*) from sample");
         rs.next();
-        long count = rs.getLong(1);
-        //System.out.println("count = " + count);
 
         conn.commit(); // causes "database is locked" (SQLITE_BUSY)
 

@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
     RSMetaDataTest.class,
     SQLiteDataSourceTest.class,
     SQLiteJDBCLoaderTest.class,
-    SQLitePureJavaTest.class,
     StatementTest.class,
     TransactionTest.class,
     UDFTest.class

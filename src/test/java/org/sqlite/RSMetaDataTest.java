@@ -66,9 +66,9 @@ public class RSMetaDataTest
         assertTrue(meta.isAutoIncrement(1));
         assertFalse(meta.isAutoIncrement(2));
         assertFalse(meta.isAutoIncrement(3));
-        assertEquals(meta.isNullable(1), meta.columnNoNulls);
-        assertEquals(meta.isNullable(2), meta.columnNullable);
-        assertEquals(meta.isNullable(3), meta.columnNullable);
+        assertEquals(meta.isNullable(1), ResultSetMetaData.columnNoNulls);
+        assertEquals(meta.isNullable(2), ResultSetMetaData.columnNullable);
+        assertEquals(meta.isNullable(3), ResultSetMetaData.columnNullable);
     }
 
     @Test

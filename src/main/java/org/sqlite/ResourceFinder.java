@@ -83,6 +83,7 @@ public class ResourceFinder
         return classLoader.getResource(resourcePath);
     }
 
+    @SuppressWarnings("unused")
     private static String packagePath(Class< ? > referenceClass)
     {
         return packagePath(referenceClass.getPackage());

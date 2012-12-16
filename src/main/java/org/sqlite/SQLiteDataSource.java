@@ -107,7 +107,7 @@ public class SQLiteDataSource implements DataSource
 
     /**
      * @return The name of the database if one was set.
-     * @see SQLiteDatabaseSource#setDatabaseName(String)
+     * @see SQLiteDataSource#setDatabaseName(String)
      */
     public String getDatabaseName() {
         return databaseName;

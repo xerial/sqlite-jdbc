@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.junit.After;
@@ -286,21 +286,21 @@ public class TransactionTest
         Conn con = (Conn)ds.getConnection();
         assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
         assertEquals("begin;", 
-                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
+                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
         runUpdates(con, "tbl1");
         
         ds.setTransactionMode(TransactionMode.DEFFERED.name());
         con = (Conn)ds.getConnection();
         assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
         assertEquals("begin;", 
-                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
+                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
 
         // immediate
         ds.setTransactionMode(TransactionMode.IMMEDIATE.name());
         con = (Conn)ds.getConnection();
         assertEquals(TransactionMode.IMMEDIATE, transactionMode.get(con));
         assertEquals("begin immediate;", 
-                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.IMMEDIATE));
+                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.IMMEDIATE));
         runUpdates(con, "tbl2");
 
         // exclusive
@@ -308,7 +308,7 @@ public class TransactionTest
         con = (Conn)ds.getConnection();
         assertEquals(TransactionMode.EXCLUSIVE, transactionMode.get(con));
         assertEquals("begin exclusive;", 
-                 ((HashMap)beginCommandMap.get(con)).get(TransactionMode.EXCLUSIVE));
+                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.EXCLUSIVE));
         runUpdates(con, "tbl3");
 
         tmpFile.delete();

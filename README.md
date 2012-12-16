@@ -1,8 +1,21 @@
 How to compile a new version of SQLiteJDBC
 ===========================================
-1. Edit the `VERSION` file
-2. Edit the version number in `pom.xml` file.
-3. Then, run make:
+Prerequisites
+-------------
+1. JDK 1.5
+2. Perl
+3. Maven
+4. make
+5. gcc
+6. curl
+7. unzip
+
+Build
+----- 
+1. Edit the `VERSION` file and set the SQLite version to use.
+2. Edit the version number in `pom.xml` to match `VERSION`.
+3. Then, run:
+
         $ make
 
 
@@ -11,7 +24,7 @@ How to submit a patch
 Bitbucket Pull Request
 ----------------------
 1. Fork this project on bitbucket
-2. (do some change)
+2. (make some change)
 3. `hg commit -m 'what changes are made to the source'`
 4. `hg push`
 5. Create a pull request
@@ -49,12 +62,20 @@ Here is the excerpt from <http://mingw-w64.sourceforge.net/>
 
 How to build pure-java library
 ==============================
+***The pure-java library is no longer supported as of version 3.7.15. 
+<https://bitbucket.org/xerial/sqlite-jdbc/issue/10/dropping-pure-java-support>***
+
 * Use Mac OS X or Linux with gcc-3.x
+
         make purejava
+
 * The build will fail due to the broken regex libray, so copy the non-corrupted
 archive I downloaded:
+
         $ cp archive/regex3.8a.tar.gz target/build/nestedvm-2009-08-09/upstream/downlolad/
+
 * then do 
+
         'make purejava' 
 
 

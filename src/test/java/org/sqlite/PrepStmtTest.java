@@ -248,8 +248,8 @@ public class PrepStmtTest
 
         assertEquals(rs.getInt(1), Integer.MAX_VALUE);
         assertEquals((int) rs.getLong(1), Integer.MAX_VALUE);
-        assertEquals(rs.getFloat(2), Float.MAX_VALUE);
-        assertEquals(rs.getDouble(3), Double.MAX_VALUE);
+        assertEquals(rs.getFloat(2), Float.MAX_VALUE, 0f);
+        assertEquals(rs.getDouble(3), Double.MAX_VALUE, 0d);
         assertEquals(rs.getLong(4), Long.MAX_VALUE);
         assertFalse(rs.getBoolean(5));
         assertEquals(rs.getByte(6), (byte) 7);

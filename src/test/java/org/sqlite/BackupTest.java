@@ -33,8 +33,8 @@ public class BackupTest
     @Test
     public void backupAndRestore() throws SQLException, IOException {
 
-        if (!SQLiteJDBCLoader.isNativeMode())
-            return; // skip this test in pure-java mode
+        //if (!SQLiteJDBCLoader.isNativeMode())
+        //    return; // skip this test in pure-java mode
 
         // create a memory database
         File tmpFile = File.createTempFile("backup-test", ".sqlite");

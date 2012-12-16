@@ -42,8 +42,7 @@ $(SQLITE_OUT)/NativeDB.h: $(SQLITE_OUT)/org/sqlite/NativeDB.class
 test:
 	mvn test
 
-clean:
-	rm -rf $(WORK)
+clean: clean-native clean-java clean-tests
 
 
 $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
@@ -108,15 +107,8 @@ package: native
 clean-native:
 	rm -rf $(SQLITE_OUT)
 
+clean-java:
+	rm -rf $(TARGET)/*classes
 
-# targets for building pure-java library
-purejava: $(SQLITE_BUILD_DIR)/org/sqlite/SQLite.class
-	mkdir -p $(RESOURCE_DIR)/org/sqlite
-	cp $< $(RESOURCE_DIR)/org/sqlite/SQLite.class
-
-$(TARGET)/classes/org/sqlite/SQLite.class: 
-	make -f Makefile.purejava
-
-test-purejava:
-	mvn -DargLine="-Dsqlite.purejava=true" test	
-
+clean-tests:
+	rm -rf $(TARGET)/{surefire*,testdb.jar*}

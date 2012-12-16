@@ -62,8 +62,6 @@ public class SQLiteJDBCLoaderTest
     @Test
     public void query() throws ClassNotFoundException
     {
-        //System.out.println(String.format("running in %s mode", SQLiteJDBCLoader.isNativeMode() ? "native" : "nested"));
-
         try
         {
             Statement statement = connection.createStatement();
@@ -77,8 +75,8 @@ public class SQLiteJDBCLoaderTest
             while (rs.next())
             {
                 // read the result set
-                int id = rs.getInt(1);
-                String name = rs.getString(2);
+                rs.getInt(1);
+                rs.getString(2);
             }
         }
         catch (SQLException e)

@@ -100,8 +100,10 @@ abstract class Unused
         throws SQLException { throw unused(); }
     public Clob getClob(String col)
         throws SQLException { throw unused(); }
+    @SuppressWarnings("rawtypes")
     public Object getObject(int col, Map map)
         throws SQLException { throw unused(); }
+    @SuppressWarnings("rawtypes")
     public Object getObject(String col, Map map)
         throws SQLException { throw unused(); }
     public Ref getRef(int i)

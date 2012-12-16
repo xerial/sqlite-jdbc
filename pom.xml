@@ -56,40 +56,12 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-		<version>2.2</version>
-        <executions>
-          <execution>
-            <id>unpack-dependency</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <excludes>META-INF,META-INF/**</excludes>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.xerial.thirdparty</groupId>
-                  <artifactId>nestedvm</artifactId>
-                  <version>1.0</version>
-                  <type>jar</type>
-                </artifactItem>
-              </artifactItems>
-              <overWrite>true</overWrite>
-              <outputDirectory>src/main/resources</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <artifactId>maven-release-plugin</artifactId>
 		<version>2.1</version>
         <configuration>
           <!--  do not run site-deploy goal, included in the default settings  -->
           <goals>deploy</goals>
-          <connectionUrl>scm:hg:https://sqlite.xerial.googlecode.com/hg/</connectionUrl>
+          <connectionUrl>scm:hg:ssh://hg@bitbucket.org/xerial/sqlite-jdbc</connectionUrl>
         </configuration>
       </plugin>
 
@@ -98,19 +70,12 @@
   </build>
 
   <scm>
-    <connection>scm:hg:https://sqlite-jdbc.googlecode.com/hg/</connection>
-    <developerConnection>scm:hg:default</developerConnection>
-    <url>scm:hg:https://sqlite-jdbc.googlecode.com/hg/</url>
+    <connection>scm:hg:https://bitbucket.org/xerial/sqlite-jdbc</connection>
+    <developerConnection>scm:hg:ssh://hg@bitbucket.org/xerial/sqlite-jdbc</developerConnection>
+    <url>https://bitbucket.org/xerial/sqlite-jdbc</url>
   </scm>
 
-
   <dependencies>
-    <dependency>
-      <groupId>org.xerial.thirdparty</groupId>
-      <artifactId>nestedvm</artifactId>
-      <version>1.0</version>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.xerial.thirdparty</groupId>
       <artifactId>jdbc-api</artifactId>

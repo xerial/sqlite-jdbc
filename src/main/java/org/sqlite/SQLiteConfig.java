@@ -278,7 +278,7 @@ public class SQLiteConfig
 
     /**
      * Re-sets the open mode flags.
-     * @param The open mode.
+     * @param mode The open mode.
      * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
     public void resetOpenMode(SQLiteOpenMode mode) {
@@ -325,7 +325,7 @@ public class SQLiteConfig
      * Changes the maximum number of database disk pages that SQLite will hold
      * in memory at once per open database file.
      * @param numberOfPages Cache size in number of pages.
-     * @See <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
      */
     public void setCacheSize(int numberOfPages) {
         set(Pragma.CACHE_SIZE, numberOfPages);
@@ -355,7 +355,7 @@ public class SQLiteConfig
      * hold in memory at once per open database file. The cache size set here
      * persists across database connections.
      * @param numberOfPages Cache size in number of pages.
-     * @See <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
+     * @see <a href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
      */
     public void setDefaultCacheSize(int numberOfPages) {
         set(Pragma.DEFAULT_CACHE_SIZE, numberOfPages);

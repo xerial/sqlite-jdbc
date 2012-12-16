@@ -31,8 +31,7 @@ import java.util.Map;
  * You'll still find lots of code in Stmt and PrepStmt that are doing
  * implicit contract conversions. Sorry.
  *
- * The two subclasses, NativeDB and NestedDB, provide the actual access to
- * SQLite functions.
+ * The subclass, NativeDB, provides the actual access to SQLite functions.
  */
 abstract class DB implements Codes
 {
@@ -167,11 +166,11 @@ abstract class DB implements Codes
     final synchronized void close() throws SQLException {
         // finalize any remaining statements before closing db
         synchronized (stmts) {
-            Iterator i = stmts.entrySet().iterator();
+            Iterator<Map.Entry<Long, Stmt>> i = stmts.entrySet().iterator();
             while (i.hasNext()) {
-                Map.Entry entry = (Map.Entry) i.next();
-                Stmt stmt = (Stmt) entry.getValue();
-                finalize(((Long) entry.getKey()).longValue());
+                Map.Entry<Long, Stmt> entry = i.next();
+                Stmt stmt = entry.getValue();
+                finalize(entry.getKey().longValue());
                 if (stmt != null) {
                     stmt.pointer = 0;
                 }
@@ -618,7 +617,6 @@ abstract class DB implements Codes
      * @param name Name of the function to de-registered.
      * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
      * @throws SQLException
-     * @see NestedDB.c
      */
     abstract int destroy_function(String name) throws SQLException;
 
