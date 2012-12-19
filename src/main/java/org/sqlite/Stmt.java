@@ -315,7 +315,6 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#cancel()
      */
     public void cancel() throws SQLException {
-        rs.checkOpen();
         db.interrupt();
     }
 

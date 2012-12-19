@@ -91,7 +91,7 @@ final class NativeDB extends DB
      * @see org.sqlite.DB#interrupt()
      */
     @Override
-    native synchronized void interrupt();
+    native void interrupt();
 
     /**
      * @see org.sqlite.DB#busy_timeout(int)
