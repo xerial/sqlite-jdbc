@@ -9,7 +9,7 @@ and pure-java SQLite, which works in any OS enviroment, are assembled into a sin
 JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads) 
 our sqlite-jdbc library, then append the library (JAR file) to your class path. 
 
-See [the sample code](#!usage). 
+See [the sample code](#usage).
 
 
 What is different from Zentus's SQLite JDBC?
@@ -40,9 +40,16 @@ Public Discussion Forum
 
 Usage
 =====
+The usage of SQLite-JDBC driver is the same as the original version. 
+See <http://www.zentus.com/sqlitejdbc/> for the general usage. For usage of JDBC, 
+see [my article](http://www.xerial.org/trac/Xerial/wiki/WebApplication/JDBC) about JDBC.
+
+** More usage examples are available at <https://bitbucket.org/xerial/sqlite-jdbc/wiki/Usage> **
+
 1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads), 
 then append this jar file into your classpath. 
 2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
+
 
 ** Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)**
 
@@ -114,13 +121,6 @@ then append this jar file into your classpath.
     }
     
 
-
-The usage of SQLite-JDBC driver is the same as the original version. 
-See <http://www.zentus.com/sqlitejdbc/> for the general usage. 
-
-For usage of JDBC, see [my article](http://www.xerial.org/trac/Xerial/wiki/WebApplication/JDBC) about JDBC.
-
-*** More usage examples are available at <https://bitbucket.org/xerial/sqlite-jdbc/wiki/Usage> ***
 
 How to Specify Database Files
 -----------------------------
