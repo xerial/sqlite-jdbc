@@ -339,7 +339,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.7.12</version>
+          <version>3.7.2</version>
         </dependency>
     </dependencies>
     
@@ -362,6 +362,6 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
     <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.7.12</version>
+        <version>3.7.2</version>
         <scope>provided</scope>
     </dependency>
