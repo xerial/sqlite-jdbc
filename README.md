@@ -147,6 +147,7 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2013 March 22nd: The repositories and documentations were moved to the bitbucket.
 *   2012 December 15th: [sqlite-jdbc-3.7.15-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT.jar) 
     *   Removed pure-java. 
 *   2010 August 27th: [sqlite-jdbc-3.7.2](http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/) released 
@@ -242,6 +243,7 @@ Beta Release
 The early releases (beta) of sqlite-jdbc with some advanced features are available 
 from [here](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
 
+*   The old releases are still available from [here](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
 
 Supported Operating Systems
 ===========================
@@ -337,9 +339,9 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.6.16</version>
+          <version>3.7.12</version>
         </dependency>
-      </dependencies>
+    </dependencies>
     
 
 Using SQLiteJDBC with Tomcat6 Web Server
@@ -358,8 +360,8 @@ If you are using Maven for your web application, set the dependency scope as 'pr
 and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
 
     <dependency>
-          <groupId>org.xerial</groupId>
-          <artifactId>sqlite-jdbc</artifactId>
-          <version>3.6.16</version>
-          <scope>provided</scope>
-        </dependency>
+        <groupId>org.xerial</groupId>
+        <artifactId>sqlite-jdbc</artifactId>
+        <version>3.7.12</version>
+        <scope>provided</scope>
+    </dependency>
