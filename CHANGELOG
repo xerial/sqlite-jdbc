@@ -1,0 +1,21 @@
+Release 3.7.15 changes.
+
+* Issue 33 - Fixed Statement.cancel() to work when called from another thread
+* Issue 10 - Dropped pure java support
+* Issue 22 - Fixed DatabaseMetaData.supportsGetGeneratedKeys to return true since it's already supported
+* Issue 17 - Enabled Statement.setEscapeProcessing(boolean) method so driver can be used in Ant tasks
+* Issue 20 - Fixed MetaData.getExportedKeys() to return all foreign keys.
+* Issue 14 - Fixed DatabaseMetaData.getColumns() resultSet to populate COLUMN_DEF with column default values.
+* Fixed Statement.close() so that calling it is a no-op on a closed connection.
+* Issue 13- Added support for Java Standard Edition Service Provider mechanism <http://docs.oracle.com/javase/6/docs/api/java/sql/DriverManager.html>
+* Issue 12 - Fixed MetaData.getColumns() to return "YES" or "NO" for IS_NULLABLE column
+* Issue 16 - Fixed Statement.executeUpdate() to return 0 for DDL and more accurate changes for DML. (Added sqlite3_total_changes to native library)
+* Issue 15 - Modified Connection.setReadOnly(boolean) to throw an Exception if readOnly mode is modified after opening a connection
+* Changed driver to include architecture name in temporary filename in order to avoid conflicts when multiple JVMs with different architectures running at the same time
+* Issue 11 - Enhanced MetaData.getPrimaryKeys():
+    1. Return named primary keys and correct key sequence.
+    2. Also result set is ordered by column name as per JDBC spec.
+* Issue 1 - Added support for WAL JournalMode. <http://www.sqlite.org/wal.html>
+* Issue 4 - Enhanced SQLiteDataSource, SQLiteConfig and Conn to enable setting the transaction mode. <http://www.sqlite.org/lang_transaction.html>
+* Issue 5 - Fixed NativeDB.c errors when compiling with Visual Studio 2010.
+* Issue 2 - Fixed issue where SQLiteDataSource: setEncoding not working. And also enabled using UTF-8, UTF-16, UTF-16le, and UTF-16be.
