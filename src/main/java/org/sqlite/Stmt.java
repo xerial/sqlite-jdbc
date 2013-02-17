@@ -31,6 +31,8 @@ class Stmt extends Unused implements Statement, Codes
     final DB   db;
     final RS   rs;
 
+    private MetaData metadata;
+
     long       pointer;
     String     sql            = null;
 
@@ -106,15 +108,10 @@ class Stmt extends Unused implements Statement, Codes
         return db.column_count(pointer) != 0;
     }
 
-    // PUBLIC INTERFACE /////////////////////////////////////////////
-
-    /**
-     * @see java.sql.Statement#close()
-     */
-    public void close() throws SQLException {
+    protected void internalClose() throws SQLException {
         if (db.conn.isClosed())
             throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
-        
+
         if (pointer == 0)
             return;
         
@@ -126,6 +123,17 @@ class Stmt extends Unused implements Statement, Codes
             db.throwex();
     }
 
+    // PUBLIC INTERFACE /////////////////////////////////////////////
+
+    /**
+     * @see java.sql.Statement#close()
+     */
+    public void close() throws SQLException {
+        if (metadata != null)
+            metadata.close();
+
+        internalClose();
+    }
     /**
      * @see java.lang.Object#finalize()
      */
@@ -138,7 +146,7 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#execute(java.lang.String)
      */
     public boolean execute(String sql) throws SQLException {
-        close();
+        internalClose();
         this.sql = sql;
 
         db.prepare(this);
@@ -149,12 +157,12 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#executeQuery(java.lang.String)
      */
     public ResultSet executeQuery(String sql) throws SQLException {
-        close();
+        internalClose();
         this.sql = sql;
 
         db.prepare(this);
         if (!exec()) {
-            close();
+            internalClose();
             throw new SQLException("query does not return ResultSet");
         }
         return getResultSet();
@@ -171,7 +179,7 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#executeUpdate(java.lang.String)
      */
     public int executeUpdate(String sql) throws SQLException {
-        close();
+        internalClose();
         this.sql = sql;
 
         int changes = 0;
@@ -192,7 +200,7 @@ class Stmt extends Unused implements Statement, Codes
                 changes = db.total_changes() - changes;
             }
             finally {
-                close();
+                internalClose();
             }
         }
         return changes;
@@ -232,7 +240,7 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#addBatch(java.lang.String)
      */
     public void addBatch(String sql) throws SQLException {
-        close();
+        internalClose();
         if (batch == null || batchPos + 1 >= batch.length) {
             Object[] nb = new Object[Math.max(10, batchPos * 2)];
             if (batch != null)
@@ -257,7 +265,7 @@ class Stmt extends Unused implements Statement, Codes
      */
     public int[] executeBatch() throws SQLException {
         // TODO: optimize
-        close();
+        internalClose();
         if (batch == null || batchPos == 0)
             return new int[] {};
 
@@ -400,9 +408,13 @@ class Stmt extends Unused implements Statement, Codes
      * As SQLite's last_insert_rowid() function is DB-specific not statement
      * specific, this function introduces a race condition if the same
      * connection is used by two threads and both insert.
+     * @see java.sql.Statement#getGeneratedKeys()
      */
     public ResultSet getGeneratedKeys() throws SQLException {
-        return ((MetaData) conn.getMetaData()).getGeneratedKeys();
+        if (metadata == null)
+            metadata = (MetaData) conn.getMetaData();
+
+        return metadata.getGeneratedKeys();
     }
 
     /**
@@ -418,7 +430,7 @@ class Stmt extends Unused implements Statement, Codes
      */
     public boolean getMoreResults(int c) throws SQLException {
         checkOpen();
-        close(); // as we never have another result, clean up pointer
+        internalClose(); // as we never have another result, clean up pointer
         return false;
     }
 
