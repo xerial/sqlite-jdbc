@@ -1,5 +1,6 @@
 Release 3.7.15 changes.
 
+* Issue 40 - Fixed case where a call to Statement.getGeneratedKeys() could lead to "database is locked" error.
 * Issue 33 - Fixed Statement.cancel() to work when called from another thread
 * Issue 10 - Dropped pure java support
 * Issue 22 - Fixed DatabaseMetaData.supportsGetGeneratedKeys to return true since it's already supported
