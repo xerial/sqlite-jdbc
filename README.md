@@ -147,7 +147,7 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
-*   2013 March 22nd: The repositories and documentations were moved to the bitbucket.
+*   2012 January 22nd: The repositories and documentations were moved to the bitbucket.
 *   2012 December 15th: [sqlite-jdbc-3.7.15-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT.jar) 
     *   Removed pure-java. 
 *   2010 August 27th: [sqlite-jdbc-3.7.2](http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/) released 
