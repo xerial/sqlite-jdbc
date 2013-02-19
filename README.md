@@ -34,6 +34,7 @@ Public Discussion Forum
 
 
 <a id="usage"></a>
+
 Usage
 ============ 
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
@@ -324,6 +325,7 @@ See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more det
 
 
 <a id="Maven"></a>
+
 Using SQLiteJDBC with Maven2
 ============================
 If you are familiar with [Maven2](http://maven.apache.org), add the following XML 
