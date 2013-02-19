@@ -40,18 +40,13 @@ Public Discussion Forum
 
 Usage
 =====
-SQLite JDBC is a library for accessing SQLite databases through the JDBC API. 
-
-For the general usage of JDBC, see: 
-* [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html)
-* [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html)
-
+SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
 1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads), 
 then append this jar file into your classpath. 
 2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
 
-* ** More usage examples are available at <https://bitbucket.org/xerial/sqlite-jdbc/wiki/Usage> **
+** More usage examples are available at <https://bitbucket.org/xerial/sqlite-jdbc/wiki/Usage> **
 
 ** Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)**
 
