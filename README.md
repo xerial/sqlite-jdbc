@@ -5,7 +5,7 @@ SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a libra
 Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads) 
 our sqlite-jdbc library, then append the library (JAR file) to your class path. 
 
-See [the sample code](#usage).
+See [the sample code](#markdown-header-usage).
 
 
 What is different from Zentus's SQLite JDBC?
@@ -33,13 +33,11 @@ Public Discussion Forum
 *  Post bug reports or feqture requests to [Issue Tracker](https://bitbucket.org/xerial/sqlite-jdbc/issues)
 
 
-<a id="usage"></a>
-
 Usage
 ============ 
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#Maven))
+1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#markdown-header-maven))
 then append this jar file into your classpath. 
 2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
 
@@ -324,7 +322,6 @@ It does not require you to:
 See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more details.
 
 
-<a id="Maven"></a>
 
 Using SQLiteJDBC with Maven2
 ============================
