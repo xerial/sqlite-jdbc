@@ -1,12 +1,8 @@
 SQLite JDBC Driver
 ==================
-SQLite JDBC driver developed by Taro L. Saito is an extension of [Zentus's SQLite JDBC driver](http://www.zentus.com/sqlitejdbc) 
-that enables Java to access [SQLite](http://sqlite.org) database files.
+SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
-Our SQLiteJDBC library, developed as a part of [Xerial project](http://www.xerial.org), 
-requires no configuration since all native libraries for Windows, Mac OS X, Linux 
-and pure-java SQLite, which works in any OS enviroment, are assembled into a single 
-JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads) 
+Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads) 
 our sqlite-jdbc library, then append the library (JAR file) to your class path. 
 
 See [the sample code](#usage).
@@ -14,14 +10,12 @@ See [the sample code](#usage).
 
 What is different from Zentus's SQLite JDBC?
 --------------------------------------------
-The original [Zentus's SQLite JDBC driver](http://www.zentus.com/sqlitejdbc/) itself 
-is an excellent utility for using [SQLite](http://sqlite.org) databases from Java language, 
-and our SQLiteJDBC library also relies on its implementation. However, its pure-java version, 
-which totally translates c/c++ codes of SQLite into Java, is significantly slower 
-compared to its native version, which uses SQLite binaries compiled for each OS (win, mac, linux). 
+The current sqlite-jdbc implementation is based on the code of [Zentus's SQLite JDBC driver (missing link)](http://www.zentus.com/sqlitejdbc/). We have improved it in two ways:
 
-To use the native version of sqlite-jdbc, user had to set a path to the native codes 
-(dll, jnilib, so files, which are JNDI C programs) by using command-line arguments, 
+* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
+* Remove manual configurations
+
+In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments, 
 e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc. 
 This process was error-prone and bothersome to tell every user to set these variables. 
 Our SQLiteJDBC library completely does away these inconveniences. 
@@ -38,11 +32,11 @@ Public Discussion Forum
 *  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en) 
 *  Post bug reports or feqture requests to [Issue Tracker](https://bitbucket.org/xerial/sqlite-jdbc/issues)
 
-Usage
-=====
+
+## <a id="usage"></a>Usage
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads), 
+1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#Maven))
 then append this jar file into your classpath. 
 2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
 
@@ -327,6 +321,7 @@ It does not require you to:
 See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more details.
 
 
+<a href="maven"></a>
 Using SQLiteJDBC with Maven2
 ============================
 If you are familiar with [Maven2](http://maven.apache.org), add the following XML 
