@@ -35,21 +35,23 @@ is our utility to create personalized genome browsers.
 
 Public Discussion Forum
 =======================
-*   Post bug reports or feature requests to [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en) 
-
+*  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en) 
+*  Post bug reports or feqture requests to [Issue Tracker](https://bitbucket.org/xerial/sqlite-jdbc/issues)
 
 Usage
 =====
-The usage of SQLite-JDBC driver is the same as the original version. 
-See <http://www.zentus.com/sqlitejdbc/> for the general usage. For usage of JDBC, 
-see [my article](http://www.xerial.org/trac/Xerial/wiki/WebApplication/JDBC) about JDBC.
+SQLite JDBC is a library for accessing SQLite databases through the JDBC API. 
 
-** More usage examples are available at <https://bitbucket.org/xerial/sqlite-jdbc/wiki/Usage> **
+For the general usage of JDBC, see: 
+* [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html)
+* [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html)
+
 
 1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads), 
 then append this jar file into your classpath. 
 2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
 
+* ** More usage examples are available at <https://bitbucket.org/xerial/sqlite-jdbc/wiki/Usage> **
 
 ** Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)**
 
