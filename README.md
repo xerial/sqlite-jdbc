@@ -37,7 +37,7 @@ Usage
 ============ 
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#markdown-header-maven))
+1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#markdown-header-using-sqlitejdbc-with-maven2))
 then append this jar file into your classpath. 
 2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
 
@@ -56,7 +56,8 @@ then append this jar file into your classpath.
     
 
 ** Sample.java**
-
+	
+	:::java
     import java.sql.Connection;
     import java.sql.DriverManager;
     import java.sql.ResultSet;
@@ -139,7 +140,7 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
-*   2012 January 22nd: The repositories and documentations were moved to the bitbucket.
+*   2013 January 22nd: The repositories and documentations were moved to the bitbucket.
 *   2012 December 15th: [sqlite-jdbc-3.7.15-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT.jar) 
     *   Removed pure-java. 
 *   2010 August 27th: [sqlite-jdbc-3.7.2](http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/) released 
