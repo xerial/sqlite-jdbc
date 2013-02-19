@@ -33,7 +33,9 @@ Public Discussion Forum
 *  Post bug reports or feqture requests to [Issue Tracker](https://bitbucket.org/xerial/sqlite-jdbc/issues)
 
 
-## <a id="usage"></a>Usage
+<a id="usage"></a>
+Usage
+============ 
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
 1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#Maven))
@@ -321,7 +323,7 @@ It does not require you to:
 See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more details.
 
 
-<a href="maven"></a>
+<a id="Maven"></a>
 Using SQLiteJDBC with Maven2
 ============================
 If you are familiar with [Maven2](http://maven.apache.org), add the following XML 
