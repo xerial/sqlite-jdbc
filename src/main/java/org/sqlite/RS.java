@@ -28,6 +28,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implements a JDBC ResultSet.
@@ -639,6 +642,21 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
 
     // ResultSetMetaData Functions //////////////////////////////////
 
+    /**
+     * Pattern used to extract the column type name from table column definition.
+     */
+    protected final static Pattern COLUMN_TYPENAME = Pattern.compile("([^\\(]*)");
+
+    /**
+     * Pattern used to extract the column type name from a cast(col as type)
+     */
+    protected final static Pattern COLUMN_TYPECAST = Pattern.compile("cast\\(.*?\\s+as\\s+(.*?)\\s*\\)");
+
+    /**
+     * Pattern used to extract the precision and scale from column meta returned by the JDBC driver.
+     */
+    protected final static Pattern COLUMN_PRECISION = Pattern.compile(".*?\\(((.*?)|\2,\2)\\)");
+
     // we do not need to check the RS is open, only that colsMeta
     // is not null, done with checkCol(int).
 
@@ -697,37 +715,123 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSetMetaData#getColumnType(int)
      */
     public int getColumnType(int col) throws SQLException {
-        switch (db.column_type(stmt.pointer, checkCol(col))) {
-        case SQLITE_INTEGER:
-            return Types.INTEGER;
-        case SQLITE_FLOAT:
-            return Types.FLOAT;
-        case SQLITE_BLOB:
-            return Types.BLOB;
-        case SQLITE_NULL:
-            return Types.NULL;
-        case SQLITE_TEXT:
-        default:
-            return Types.VARCHAR;
+        String typeName = getColumnTypeName(col);
+        int valueType = db.column_type(stmt.pointer, checkCol(col));
+
+        for (int i = (valueType == SQLITE_NULL) ? 1 : valueType ; i < 5; i++)
+        {
+            switch (i) {
+            case SQLITE_INTEGER:
+                if ("BOOLEAN".equals(typeName)) {
+                    return Types.BOOLEAN;
+                }
+                else if ("TINYINT".equals(typeName)) {
+                    return Types.TINYINT;
+                }
+                else if ("SMALLINT".equals(typeName) || "INT2".equals(typeName)) {
+                    return Types.SMALLINT;
+                }
+                else if ("BIGINT".equals(typeName) || "INT8".equals(typeName) ||
+                    "UNSIGNED BIG INT".equals(typeName)) {
+                    return  Types.BIGINT;
+                }
+                else if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
+                    return Types.DATE;
+                }
+
+                if (valueType == SQLITE_INTEGER ||
+                    "INT".equals(typeName) ||
+                    "INTEGER".equals(typeName) ||
+                    "MEDIUMINT".equals(typeName)) {
+                    return Types.INTEGER;
+                }
+
+                continue;
+
+            case SQLITE_FLOAT:
+                if ("DECIMAL".equals(typeName)) {
+                    return Types.DECIMAL;
+                }
+                else if ("DOUBLE".equals(typeName) || "DOUBLE PRECISION".equals(typeName)) {
+                    return Types.DOUBLE;
+                }
+                else if ("NUMERIC".equals(typeName)) {
+                    return Types.NUMERIC;
+                }
+                else if ("REAL".equals(typeName)) {
+                    return Types.REAL;
+                }
+
+                if (valueType == SQLITE_FLOAT ||
+                    "FLOAT".equals(typeName)) {
+                    return Types.FLOAT;
+                }
+
+                continue;
+
+            case SQLITE_TEXT:
+                if ("CHARACTER".equals(typeName) || "NCHAR".equals(typeName) ||
+                    "NATIVE CHARACTER".equals(typeName)) {
+                    return Types.CHAR;
+                }
+                else if ("BLOB".equals(typeName)) {
+                    return Types.BLOB;
+                }
+                else if ("CLOB".equals(typeName)) {
+                    return Types.CLOB;
+                }
+                else if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
+                    return Types.DATE;
+                }
+
+                if (valueType == SQLITE_TEXT ||
+                    "VARCHAR".equals(typeName) ||
+                    "VARYING CHARACTER".equals(typeName) ||
+                    "NVARCHAR".equals(typeName) ||
+                    "TEXT".equals(typeName)) {
+                        return Types.VARCHAR;
+                }
+
+                continue;
+
+            case SQLITE_BLOB:
+                if (valueType == SQLITE_BLOB ||
+                    "BLOB".equals(typeName)) {
+                    return Types.BLOB;
+                }
+            }
         }
+
+        return Types.NULL;
     }
 
     /**
+     * @return The data type from either the 'create table' statement,
+     * or CAST(expr AS TYPE) otherwise sqlite3_value_type.
      * @see java.sql.ResultSetMetaData#getColumnTypeName(int)
      */
     public String getColumnTypeName(int col) throws SQLException {
+        String declType = getColumnDeclType(col);
+
+        if (declType != null) {
+            Matcher matcher = COLUMN_TYPENAME.matcher(declType);
+
+            matcher.find();
+            return matcher.group(1).toUpperCase(Locale.ENGLISH);
+        }
+
         switch (db.column_type(stmt.pointer, checkCol(col))) {
         case SQLITE_INTEGER:
-            return "integer";
+            return "INTEGER";
         case SQLITE_FLOAT:
-            return "float";
+            return "FLOAT";
         case SQLITE_BLOB:
-            return "blob";
+            return "BLOB";
         case SQLITE_NULL:
-            return "null";
+            return "NULL";
         case SQLITE_TEXT:
         default:
-            return "text";
+            return "NULL";
         }
     }
 
@@ -735,13 +839,39 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSetMetaData#getPrecision(int)
      */
     public int getPrecision(int col) throws SQLException {
-        return 0;
-    } // FIXME
+        String declType = getColumnDeclType(col);
 
+        if (declType != null) {
+            Matcher matcher = COLUMN_PRECISION.matcher(declType);
+
+            return matcher.find() ? Integer.parseInt(matcher.group(1).split(",")[0]) : 0;
+        }
+
+        return 0;
+    }
+
+    private String getColumnDeclType(int col) throws SQLException {
+        String declType = db.column_decltype(stmt.pointer, checkCol(col));
+
+        if (declType == null) {
+            Matcher matcher = COLUMN_TYPECAST.matcher(db.column_name(stmt.pointer, checkCol(col)));
+            declType = matcher.find() ? matcher.group(1) : null;
+        }
+
+        return declType;
+    }
     /**
      * @see java.sql.ResultSetMetaData#getScale(int)
      */
     public int getScale(int col) throws SQLException {
+        String declType = getColumnDeclType(col);
+
+        if (declType != null) {
+            Matcher matcher = COLUMN_PRECISION.matcher(declType);
+
+            return matcher.find() ? Integer.parseInt(matcher.group(1).split(",")[1]) : 0;
+        }
+
         return 0;
     }
 

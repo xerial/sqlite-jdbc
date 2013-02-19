@@ -1,7 +1,19 @@
-Release 3.7.15 changes.
+Work in progress:
 
+* Implemented getPercision(int) and getScale(int) on ResultSetMetaData.
+* Issue 43 - ResultSetMetaData does not return the SQL Type if there are no results from the query.
+    1. ResultSetMetaData.getColumnTypeName() now gets type from either 'create table' statement or CAST(expr AS TYPE) otherwise sqlite3_value_type.
+    2. ResultSetMetaData.getColumnType() now parses the result from getColumnTypeName() to return a type.
+    3. Driver recognizes the types listed at <http://www.sqlite.org/datatype3.html#affname> under 'Affinity Name Examples'.
+* Issue 36 - Fixed case where a calling PreparedStatement.clearParameters() after a ResultSet is opened, caused subsequent calls to the ResultSet to return null.
+    1. PreparedStatement.clearParameters() now uses sqlite3_clear_bindings instead of sqlite3_reset.
+    2. PreparedStatement.clearParameters() does not reset current ResultSet.
+    3. PreparedStatement now checks if value(s) are bound to the statement parameters before executing; Throwing an exception if they are not.
 * Issue 40 - Fixed case where a call to Statement.getGeneratedKeys() could lead to "database is locked" error.
+    1. Calling Statement.Close() on a Statement on which getGeneratedKeys() was called, now releases all resources properly.
 * Issue 33 - Fixed Statement.cancel() to work when called from another thread
+
+Release 3.7.15-SNAPSHOT
 * Issue 10 - Dropped pure java support
 * Issue 22 - Fixed DatabaseMetaData.supportsGetGeneratedKeys to return true since it's already supported
 * Issue 17 - Enabled Statement.setEscapeProcessing(boolean) method so driver can be used in Ant tasks
