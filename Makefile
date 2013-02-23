@@ -105,7 +105,7 @@ package: native
 	$(MVN) package
 
 clean-native:
-	rm -rf $(SQLITE_OUT)
+	rm -rf $(TARGET)/$(sqlite)-$(OS_NAME)*
 
 clean-java:
 	rm -rf $(TARGET)/*classes
