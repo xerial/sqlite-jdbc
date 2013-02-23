@@ -50,7 +50,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
         rs.colsMeta = db.column_names(pointer);
         columnCount = db.column_count(pointer);
         paramCount = db.bind_parameter_count(pointer);
-        batch = new Object[paramCount];
+        batch = null;
         batchPos = 0;
     }
 
@@ -59,8 +59,8 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     public void clearParameters() throws SQLException {
         checkOpen();
-        db.reset(pointer);
-        clearBatch();
+        db.clear_bindings(pointer);
+        batch = null;
     }
 
     /**
@@ -72,12 +72,23 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     }
 
     /**
+     * Checks if values are bound to statement parameters.
+     * @throws SQLException
+     */
+    private void checkParameters() throws SQLException {
+        if (batch == null && paramCount > 0)
+            throw new SQLException("Values not bound to statement");
+    }
+
+    /**
      * @see java.sql.PreparedStatement#execute()
      */
     public boolean execute() throws SQLException {
         checkOpen();
         rs.close();
         db.reset(pointer);
+        checkParameters();
+
         resultsWaiting = db.execute(this, batch);
         return columnCount != 0;
     }
@@ -87,11 +98,15 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     public ResultSet executeQuery() throws SQLException {
         checkOpen();
+
         if (columnCount == 0) {
-            throw new SQLException("query does not return results");
+            throw new SQLException("Query does not return results");
         }
+
         rs.close();
         db.reset(pointer);
+        checkParameters();
+
         resultsWaiting = db.execute(this, batch);
         return getResultSet();
     }
@@ -101,11 +116,15 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     public int executeUpdate() throws SQLException {
         checkOpen();
+
         if (columnCount != 0) {
-            throw new SQLException("query returns results");
+            throw new SQLException("Query returns results");
         }
+
         rs.close();
         db.reset(pointer);
+        checkParameters();
+
         return db.executeUpdate(this, batch);
     }
 
@@ -117,6 +136,9 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
         if (batchPos == 0) {
             return new int[] {};
         }
+
+        checkParameters();
+
         try {
             return db.executeBatch(pointer, batchPos / paramCount, batch);
         }
@@ -131,9 +153,11 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     @Override
     public int getUpdateCount() throws SQLException {
         checkOpen();
+
         if (pointer == 0 || resultsWaiting) {
             return -1;
         }
+
         return db.changes();
     }
 
