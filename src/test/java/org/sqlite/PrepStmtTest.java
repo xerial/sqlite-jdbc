@@ -228,7 +228,6 @@ public class PrepStmtTest
         rs.close();
     }
 
-    @Ignore
     @Test
     public void getObject() throws SQLException {
         stat.executeUpdate("create table testobj (" + "c1 integer, c2 float, c3, c4 varchar, c5 bit, c6, c7);");
@@ -425,6 +424,7 @@ public class PrepStmtTest
         assertEquals(meta.getColumnType(2), Types.INTEGER);
         assertEquals(meta.getColumnType(3), Types.INTEGER);*/
 
+        prep.setInt(1, 2);prep.setInt(2, 3);prep.setInt(1, -1);
         meta = prep.executeQuery().getMetaData();
         assertEquals(meta.getColumnCount(), 3);
         prep.close();
@@ -506,6 +506,49 @@ public class PrepStmtTest
         }
 
         prep.close();
+    }
+
+    @Test
+    public void clearParameters() throws SQLException {
+        stat.executeUpdate("create table tbl (colid integer primary key AUTOINCREMENT, col varchar)");
+        stat.executeUpdate("insert into tbl(col) values (\"foo\")");
+
+        PreparedStatement prep = conn.prepareStatement("select colid from tbl where col = ?");
+
+        prep.setString(1, "foo");
+
+        ResultSet rs = prep.executeQuery();
+        prep.clearParameters();
+        rs.next();
+
+        assertEquals(1, rs.getInt(1));
+
+        rs.close();
+
+        try {
+            prep.execute();
+            fail("Returned result when values not bound to prepared statement");
+        } catch (Exception e) {
+            assertEquals("Values not bound to statement", e.getMessage());
+        }
+
+        try {
+            rs = prep.executeQuery();
+            fail("Returned result when values not bound to prepared statement");
+        } catch (Exception e) {
+            assertEquals("Values not bound to statement", e.getMessage());
+        }
+
+        prep.close();
+
+        try {
+            prep = conn.prepareStatement("insert into tbl(col) values (?)");
+            prep.clearParameters();
+            prep.executeUpdate();
+            fail("Returned result when values not bound to prepared statement");
+        } catch (Exception e) {
+            assertEquals("Values not bound to statement", e.getMessage());
+        }
     }
 
     @Test(expected = SQLException.class)

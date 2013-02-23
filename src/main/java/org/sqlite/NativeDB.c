@@ -456,13 +456,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_reset(
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_clear_1bindings(
         JNIEnv *env, jobject this, jlong stmt)
 {
-    int i;
-    int count = sqlite3_bind_parameter_count(toref(stmt));
-    jint rc = SQLITE_OK;
-    for(i=1; rc==SQLITE_OK && i <= count; i++) {
-        rc = sqlite3_bind_null(toref(stmt), i);
-    }
-    return rc;
+    return sqlite3_clear_bindings(toref(stmt));
 }
 
 JNIEXPORT jint JNICALL Java_org_sqlite_NativeDB_bind_1parameter_1count(
