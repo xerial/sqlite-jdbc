@@ -718,87 +718,90 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         String typeName = getColumnTypeName(col);
         int valueType = db.column_type(stmt.pointer, checkCol(col));
 
-        for (int i = (valueType == SQLITE_NULL) ? 1 : valueType ; i < 5; i++)
-        {
-            switch (i) {
-            case SQLITE_INTEGER:
-                if ("BOOLEAN".equals(typeName)) {
-                    return Types.BOOLEAN;
-                }
-                else if ("TINYINT".equals(typeName)) {
-                    return Types.TINYINT;
-                }
-                else if ("SMALLINT".equals(typeName) || "INT2".equals(typeName)) {
-                    return Types.SMALLINT;
-                }
-                else if ("BIGINT".equals(typeName) || "INT8".equals(typeName) ||
-                    "UNSIGNED BIG INT".equals(typeName)) {
-                    return  Types.BIGINT;
-                }
-                else if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
-                    return Types.DATE;
-                }
+        if (valueType == SQLITE_INTEGER || valueType == SQLITE_NULL) {
+            if ("BOOLEAN".equals(typeName)) {
+                return Types.BOOLEAN;
+            }
 
-                if (valueType == SQLITE_INTEGER ||
-                    "INT".equals(typeName) ||
-                    "INTEGER".equals(typeName) ||
-                    "MEDIUMINT".equals(typeName)) {
-                    return Types.INTEGER;
-                }
+            if ("TINYINT".equals(typeName)) {
+                return Types.TINYINT;
+            }
 
-                continue;
+            if ("SMALLINT".equals(typeName) || "INT2".equals(typeName)) {
+                return Types.SMALLINT;
+            }
 
-            case SQLITE_FLOAT:
-                if ("DECIMAL".equals(typeName)) {
-                    return Types.DECIMAL;
-                }
-                else if ("DOUBLE".equals(typeName) || "DOUBLE PRECISION".equals(typeName)) {
-                    return Types.DOUBLE;
-                }
-                else if ("NUMERIC".equals(typeName)) {
-                    return Types.NUMERIC;
-                }
-                else if ("REAL".equals(typeName)) {
-                    return Types.REAL;
-                }
+            if ("BIGINT".equals(typeName) || "INT8".equals(typeName) ||
+                "UNSIGNED BIG INT".equals(typeName)) {
+                return  Types.BIGINT;
+            }
 
-                if (valueType == SQLITE_FLOAT ||
-                    "FLOAT".equals(typeName)) {
-                    return Types.FLOAT;
-                }
+            if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
+                return Types.DATE;
+            }
+    
+            if (valueType == SQLITE_INTEGER ||
+                "INT".equals(typeName) ||
+                "INTEGER".equals(typeName) ||
+                "MEDIUMINT".equals(typeName)) {
+                return Types.INTEGER;
+            }
+        }
 
-                continue;
+        if (valueType == SQLITE_FLOAT || valueType == SQLITE_NULL) {
+            if ("DECIMAL".equals(typeName)) {
+                return Types.DECIMAL;
+            }
 
-            case SQLITE_TEXT:
-                if ("CHARACTER".equals(typeName) || "NCHAR".equals(typeName) ||
-                    "NATIVE CHARACTER".equals(typeName)) {
-                    return Types.CHAR;
-                }
-                else if ("BLOB".equals(typeName)) {
-                    return Types.BLOB;
-                }
-                else if ("CLOB".equals(typeName)) {
-                    return Types.CLOB;
-                }
-                else if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
-                    return Types.DATE;
-                }
+            if ("DOUBLE".equals(typeName) || "DOUBLE PRECISION".equals(typeName)) {
+                return Types.DOUBLE;
+            }
 
-                if (valueType == SQLITE_TEXT ||
-                    "VARCHAR".equals(typeName) ||
-                    "VARYING CHARACTER".equals(typeName) ||
-                    "NVARCHAR".equals(typeName) ||
-                    "TEXT".equals(typeName)) {
-                        return Types.VARCHAR;
-                }
+            if ("NUMERIC".equals(typeName)) {
+                return Types.NUMERIC;
+            }
 
-                continue;
+            if ("REAL".equals(typeName)) {
+                return Types.REAL;
+            }
+    
+            if (valueType == SQLITE_FLOAT ||
+                "FLOAT".equals(typeName)) {
+                return Types.FLOAT;
+            }
+        }
 
-            case SQLITE_BLOB:
-                if (valueType == SQLITE_BLOB ||
-                    "BLOB".equals(typeName)) {
-                    return Types.BLOB;
-                }
+        if (valueType == SQLITE_TEXT || valueType == SQLITE_NULL) {
+            if ("CHARACTER".equals(typeName) || "NCHAR".equals(typeName) ||
+                "NATIVE CHARACTER".equals(typeName)) {
+                return Types.CHAR;
+            }
+
+            if ("CLOB".equals(typeName)) {
+                return Types.CLOB;
+            }
+
+            if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
+                return Types.DATE;
+            }
+    
+            if (valueType == SQLITE_TEXT ||
+                "VARCHAR".equals(typeName) ||
+                "VARYING CHARACTER".equals(typeName) ||
+                "NVARCHAR".equals(typeName) ||
+                "TEXT".equals(typeName)) {
+                    return Types.VARCHAR;
+            }
+        }
+
+        if (valueType == SQLITE_BLOB || valueType == SQLITE_NULL) {
+            if ("BINARY".equals(typeName)) {
+                return Types.BINARY;
+            }
+
+            if (valueType == SQLITE_BLOB ||
+                "BLOB".equals(typeName)) {
+                return Types.BLOB;
             }
         }
 
