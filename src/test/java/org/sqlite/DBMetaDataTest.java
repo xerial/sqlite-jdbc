@@ -578,7 +578,7 @@ public class DBMetaDataTest
     @Test
     public void columnOrderOfgetExportedKeys() throws SQLException {
 
-        stat.executeUpdate("create table person (id integer)");
+        stat.executeUpdate("create table person (id integer primary key)");
         stat.executeUpdate("create table address (pid integer, name, foreign key(pid) references person(id))");
 
         ResultSet exportedKeys = meta.getExportedKeys("default", "global", "person");
@@ -598,9 +598,17 @@ public class DBMetaDataTest
         exportedKeys.close();
 
         exportedKeys = meta.getExportedKeys(null, null, "address");
-        assertTrue(!exportedKeys.next());
+        assertFalse(exportedKeys.next());
         exportedKeys.close();
 
+        // With explicit primary column defined.
+        stat.executeUpdate("create table REFERRED (ID integer primary key not null)");
+        stat.executeUpdate("create table REFERRING (ID integer, RID integer, foreign key (RID) references REFERRED(id))");
+
+        exportedKeys = meta.getExportedKeys(null, null, "referred");
+        assertEquals("referred", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("referring", exportedKeys.getString("FKTABLE_NAME"));
+        exportedKeys.close();
     }
 
     @Test

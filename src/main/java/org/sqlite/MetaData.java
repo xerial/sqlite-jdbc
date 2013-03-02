@@ -25,24 +25,15 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class MetaData implements DatabaseMetaData
 {
-    /**
-     * Pattern used to extract column order for an unnamed primary key.
-     */
-    protected final static Pattern PK_UNNAMED =
-            Pattern.compile(".* primary +key *\\((.*?,+.*?)\\).*", Pattern.CASE_INSENSITIVE);
-
-    /**
-    * Pattern used to extract a named primary key.
-    */
-    protected final static Pattern PK_NAMED =
-        Pattern.compile(".* constraint +(.*?) +primary +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
-
     private Conn              conn;
     private PreparedStatement
             getTables             = null,   getTableTypes        = null,
@@ -1375,64 +1366,30 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String)
      */
     public ResultSet getPrimaryKeys(String c, String s, String table) throws SQLException {
-        String[] columnNames = null;
-        String pkName = null;
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
+        String[] columns = pkFinder.getColumns();
+
+        Statement stat = conn.createStatement();
         StringBuilder sql = new StringBuilder(512);
         sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
            .append(escape(table))
            .append("' as TABLE_NAME, cn as COLUMN_NAME, ks as KEY_SEQ, pk as PK_NAME from (");
 
-        Statement stat = conn.createStatement();
-        // read create SQL script for table
-        ResultSet rs = stat.executeQuery("select sql from sqlite_master where" +
-            " upper(name) = upper('" + escape(table) + "')");
-        rs.next();
-
-        Matcher matcher = PK_NAMED.matcher(rs.getString(1));
-        if (matcher.find()){
-            pkName = '\'' + escape(matcher.group(1)) + '\'';
-            columnNames = matcher.group(2).split(",");
-        }
-        else {
-            matcher = PK_UNNAMED.matcher(rs.getString(1));
-            if (matcher.find()){
-                columnNames = matcher.group(1).split(",");
-            }
-        }
-        rs.close();
-
-        if (columnNames != null) {
-            for (int i = 0; i < columnNames.length; i++) {
-                if (i > 0) sql.append(" union ");
-                sql.append("select ").append(pkName).append(" as pk, '")
-                   .append(escape(columnNames[i].trim())).append("' as cn, ")
-                   .append(i).append(" as ks");
-            }
-
-            return stat.executeQuery(sql.append(") order by cn;").toString());
+        if (columns == null) {
+            sql.append("select null as cn, null as pk, 0 as ks) order by cn limit 0;");
+            return stat.executeQuery(sql.toString());
         }
 
-        rs = stat.executeQuery("pragma table_info('" + escape(table) + "');");
-        int i;
-        for (i = 0; rs.next(); i++) {
-            String colName = rs.getString(2);
+        String pkName = pkFinder.getName();
 
-            if (!rs.getBoolean(6)) {
-                i--;
-                continue;
-            }
-            if (i > 0) {
-                sql.append(" union all ");
-            }
-
-            sql.append("select null as pk, 0 as ks, '")
-               .append(escape(colName)).append("' as cn");
+        for (int i = 0; i < columns.length; i++) {
+            if (i > 0) sql.append(" union ");
+            sql.append("select ").append(pkName).append(" as pk, '")
+               .append(escape(columns[i].trim())).append("' as cn, ")
+               .append(i).append(" as ks");
         }
-        sql.append(i == 0 ? "select null as cn, null as pk, 0 as ks) order by cn limit 0;" :
-                            ") order by cn;");
-        rs.close();
 
-        return stat.executeQuery(sql.toString());
+        return stat.executeQuery(sql.append(") order by cn;").toString());
     }
 
     /**
@@ -1449,96 +1406,105 @@ class MetaData implements DatabaseMetaData
         }
     }
 
+    private final static Map<String, Integer> RULE_MAP = new HashMap<String, Integer>();
+
+    static {
+        RULE_MAP.put("NO ACTION", importedKeyNoAction);
+        RULE_MAP.put("CASCADE", importedKeyCascade);
+        RULE_MAP.put("RESTRICT", importedKeyRestrict);
+        RULE_MAP.put("SET NULL", importedKeySetNull);
+        RULE_MAP.put("SET DEFAULT", importedKeySetDefault);
+    }
+
     /**
      * @see java.sql.DatabaseMetaData#getExportedKeys(java.lang.String, java.lang.String,
      *      java.lang.String)
      */
     public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
+        String[] pkColumns = pkFinder.getColumns();
+        Stmt stat = (Stmt)conn.createStatement();
 
-        StringBuilder exportedKeysQuery = new StringBuilder();
-        exportedKeysQuery.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ",
-                quote(catalog), quote(schema), quote(table))
-                + String.format("pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(catalog),
-                        quote(schema))
-                + "fkn as FKTABLE_NAME, fcn as FKCOLUMN_NAME, "
-                + "ks as KEY_SEQ, "
-                + "ur as UPDATE_RULE, "
-                + "dr as DELETE_RULE, "
-                + "'' as FK_NAME, "
-                + "'' as PK_NAME, "
-                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (");
+        catalog = (catalog != null) ? quote(catalog) : null;
+        schema = (schema != null) ? quote(schema) : null;
 
-        // retrieve table list
-        String tableListQuery = String.format("select name from sqlite_master where type = 'table'");
-        Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(tableListQuery);
-        ArrayList<String> tableList = new ArrayList<String>();
-        while (rs.next()) {
-            tableList.add(rs.getString(1));
-        }
-        rs.close();
+        StringBuilder exportedKeysQuery = new StringBuilder(512);
 
-        // find imported keys for each table
         int count = 0;
-        for (String targetTable : tableList) {
-            String foreignKeyQuery = String.format("pragma foreign_key_list('%s');", escape(targetTable));
-
-            try {
-                ResultSet fk = stat.executeQuery(foreignKeyQuery);
-                for (; fk.next();) {
-                    int keySeq = fk.getInt(2) + 1;
-                    String PKTabName = fk.getString(3);
-                    String FKColName = fk.getString(4);
-                    String PKColName = fk.getString(5);
-                    String updateRule = fk.getString(6);
-                    String deleteRule = fk.getString(7);
-
-                    if (PKTabName == null || !PKTabName.equals(table)) {
-                        continue;
-                    }
-
-                    if (count > 0) {
-                        exportedKeysQuery.append(" union all ");
-                    }
-
-                    exportedKeysQuery.append("select " + Integer.toString(keySeq) + " as ks," + "'"
-                            + escape(targetTable) + "' as fkn," + "'" + escape(FKColName) + "' as fcn," + "'"
-                            + escape(PKColName) + "' as pcn," + String.format("case '%s' ", escape(updateRule))
-                            + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
-                            + String.format("when 'CASCADE' then %d ", importedKeyCascade)
-                            + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
-                            + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
-                            + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as ur,"
-                            + String.format("case '%s' ", escape(deleteRule))
-                            + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
-                            + String.format("when 'CASCADE' then %d ", importedKeyCascade)
-                            + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
-                            + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
-                            + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as dr");
-
-                    count++;
-                }
-
-                fk.close();
+        if (pkColumns != null) {
+            // retrieve table list
+            ResultSet rs = stat.executeQuery("select name from sqlite_master where type = 'table'");
+            ArrayList<String> tableList = new ArrayList<String>();
+            while (rs.next()) {
+                tableList.add(rs.getString(1));
             }
-            catch (SQLException e) {
-                // continue
+            rs.close();
+    
+            ResultSet fk = null;
+            String target = table.toLowerCase();
+            // find imported keys for each table
+            for (String tbl : tableList) {
+                try {
+                    fk = stat.executeQuery("pragma foreign_key_list('" + escape(tbl) + "')");
+                    while(fk.next()) {
+                        int keySeq = fk.getInt(2) + 1;
+                        String PKTabName = fk.getString(3).toLowerCase();
+    
+                        if (PKTabName == null || !PKTabName.equals(target)) {
+                            continue;
+                        }
+    
+                        String PKColName = fk.getString(5);
+                        PKColName = (PKColName == null) ? pkColumns[0] : PKColName.toLowerCase();
+
+                        exportedKeysQuery
+                            .append(count > 0 ? " union all select " : "select ")
+                            .append(Integer.toString(keySeq)).append(" as ks, lower('")
+                            .append(escape(tbl)).append("') as fkn, lower('")
+                            .append(escape(fk.getString(4))).append("') as fcn, '")
+                            .append(escape(PKColName)).append("' as pcn, ")
+                            .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
+                            .append(RULE_MAP.get(fk.getString(7))).append(" as dr");
+    
+                        count++;
+                    }
+                }
+                catch (SQLException e) {
+                    // continue
+                    //TODO:
+                }
+                finally {
+                    if (fk != null)
+                        try{
+                            fk.close();
+                        }catch(SQLException e) {}
+                }
             }
         }
 
-        exportedKeysQuery.append(");");
+        boolean exist = (count > 0);
+        StringBuilder sql = new StringBuilder(512);
+        sql.append("select ")
+            .append(catalog).append(" as PKTABLE_CAT, ")
+            .append(schema).append(" as PKTABLE_SCHEM, ")
+            .append(quote(table)).append(" as PKTABLE_NAME, ")
+            .append(exist ? "pcn" : "''").append(" as PKCOLUMN_NAME, ")
+            .append(catalog).append(" as FKTABLE_CAT, ")
+            .append(schema).append(" as FKTABLE_SCHEM, ")
+            .append(exist ? "fkn" : "''").append(" as FKTABLE_NAME, ")
+            .append(exist ? "fcn" : "''").append(" as FKCOLUMN_NAME, ")
+            .append(exist ? "ks" : "-1").append(" as KEY_SEQ, ")
+            .append(exist ? "ur" : "3").append(" as UPDATE_RULE, ")
+            .append(exist ? "dr" : "3").append(" as DELETE_RULE, ")
+            .append("'' as FK_NAME, ")
+            .append("'' as PK_NAME, ")
+            .append(Integer.toString(importedKeyInitiallyDeferred)) // FIXME: Check for pragma foreign_keys = true ?
+            .append(" as DEFERRABILITY ")
+            .append(exist ? "from (" : "limit 0");
+       if (exist)
+           sql.append(exportedKeysQuery).append(')');
 
-        String sql = (count > 0) ? exportedKeysQuery.toString() : (String.format(
-                "select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(catalog), quote(schema),
-                quote(table))
-                + "'' as PKCOLUMN_NAME, "
-                + String.format("%s as FKTABLE_CAT, %s as FKTABLE_SCHEM, ", quote(catalog), quote(schema))
-                + "'' as FKTABLE_NAME, "
-                + "'' as FKCOLUMN_NAME, "
-                + "-1 as KEY_SEQ, "
-                + "3 as UPDATE_RULE, "
-                + "3 as DELETE_RULE, " + "'' as FK_NAME, " + "'' as PK_NAME, " + "5 as DEFERRABILITY limit 0;");
-        return stat.executeQuery(sql);
+        return stat.executeQuery(sql.toString()); //FIXME: close stat
     }
 
     /**
@@ -1878,5 +1844,107 @@ class MetaData implements DatabaseMetaData
     /** Not implemented yet. */
     public ResultSet getFunctionColumns(String a, String b, String c, String d) throws SQLException {
         throw new SQLException("Not yet implemented by SQLite JDBC driver");
+    }
+
+    // inner classes
+
+    /**
+     * Pattern used to extract column order for an unnamed primary key.
+     */
+    protected final static Pattern PK_UNNAMED =
+            Pattern.compile(".* primary +key *\\((.*?,+.*?)\\).*", Pattern.CASE_INSENSITIVE);
+
+    /**
+    * Pattern used to extract a named primary key.
+    */
+    protected final static Pattern PK_NAMED =
+        Pattern.compile(".* constraint +(.*?) +primary +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Parses the sqlite_master table for a table's primary key
+     */
+    class PrimaryKeyFinder {
+        /** The table name. */
+        String table;
+
+        /** The primary key name. */
+        String pkName = null;
+
+        /** The column(s) for the primary key. */
+        String pkColumns[] = null;
+
+        /**
+         * Constructor.
+         * @param table The table for which to get find a primary key.
+         * @throws SQLException
+         */
+        public PrimaryKeyFinder(String table) throws SQLException {
+            this.table = table;
+
+            if (table == null || table.trim().length() == 0) {
+                throw new SQLException("Invalid table name: '" + this.table + "'");
+            }
+
+            Statement stat = null;
+            ResultSet rs = null;
+
+            try {
+                stat = conn.createStatement();
+                // read create SQL script for table
+                rs = stat.executeQuery("select sql from sqlite_master where" +
+                    " lower(name) = lower('" + escape(table) + "') and type = 'table'");
+
+                if (!rs.next())
+                    throw new SQLException("Table not found: '" + table + "'");
+
+                Matcher matcher = PK_NAMED.matcher(rs.getString(1));
+                if (matcher.find()){
+                    pkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
+                    pkColumns = matcher.group(2).split(",");
+                }
+                else {
+                    matcher = PK_UNNAMED.matcher(rs.getString(1));
+                    if (matcher.find()){
+                        pkColumns = matcher.group(1).split(",");
+                    }
+                }
+
+                if (pkColumns == null) {
+                    rs = stat.executeQuery("pragma table_info('" + escape(table) + "');");
+                    while(rs.next()) {
+                        if (rs.getBoolean(6))
+                            pkColumns = new String[]{rs.getString(2)};
+                    }
+                }
+
+                if (pkColumns != null)
+                    for (int i = 0; i < pkColumns.length; i++) {
+                        pkColumns[i] = pkColumns[i].toLowerCase();
+                    }
+                //FIXME: close stat
+            }
+            finally {
+                try {
+                    if (rs != null) rs.close();
+                } catch (Exception e1) {}
+                try {
+                    if (stat != null) stat.close();
+                } catch (Exception e1) {}
+            }
+        }
+
+        /**
+         * @return The primary key name if any.
+         */
+        public String getName() {
+            return pkName;
+        }
+
+        /**
+         * @return Array of primary key column(s) if any.
+         */
+        public String[] getColumns() {
+            return pkColumns;
+        }
     }
 }
