@@ -163,7 +163,7 @@ class Stmt extends Unused implements Statement, Codes
         db.prepare(this);
         if (!exec()) {
             internalClose();
-            throw new SQLException("query does not return ResultSet");
+            throw new SQLException("query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
         }
         return getResultSet();
     }

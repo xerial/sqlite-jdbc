@@ -241,46 +241,46 @@ public class DBMetaDataTest
         stat.executeUpdate("create table child1 (id1 integer, id2 integer, foreign key(id1) references parent(id1), foreign key(id2) references parent(id2))");
         stat.executeUpdate("create table child2 (id1 integer, id2 integer, foreign key(id2, id1) references parent(id2, id1))");
 
-        ResultSet importedKeys = meta.getExportedKeys(null, null, "parent");
+        ResultSet exportedKeys = meta.getExportedKeys(null, null, "parent");
 
         //1st fk (simple) - child1
-        assertTrue(importedKeys.next());
-        assertEquals("parent", importedKeys.getString("PKTABLE_NAME"));
-        assertEquals("id2", importedKeys.getString("PKCOLUMN_NAME"));
-        assertNotNull(importedKeys.getString("PK_NAME"));
-        assertNotNull(importedKeys.getString("FK_NAME"));
-        assertEquals("child1", importedKeys.getString("FKTABLE_NAME"));
-        assertEquals("id2", importedKeys.getString("FKCOLUMN_NAME"));
+        assertTrue(exportedKeys.next());
+        assertEquals("parent", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("id2", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertNotNull(exportedKeys.getString("PK_NAME"));
+        assertNotNull(exportedKeys.getString("FK_NAME"));
+        assertEquals("child1", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("id2", exportedKeys.getString("FKCOLUMN_NAME"));
 
         //2nd fk (simple) - child1
-        assertTrue(importedKeys.next());
-        assertEquals("parent", importedKeys.getString("PKTABLE_NAME"));
-        assertEquals("id1", importedKeys.getString("PKCOLUMN_NAME"));
-        assertNotNull(importedKeys.getString("PK_NAME"));
-        assertNotNull(importedKeys.getString("FK_NAME"));
-        assertEquals("child1", importedKeys.getString("FKTABLE_NAME"));
-        assertEquals("id1", importedKeys.getString("FKCOLUMN_NAME"));
+        assertTrue(exportedKeys.next());
+        assertEquals("parent", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("id1", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertNotNull(exportedKeys.getString("PK_NAME"));
+        assertNotNull(exportedKeys.getString("FK_NAME"));
+        assertEquals("child1", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("id1", exportedKeys.getString("FKCOLUMN_NAME"));
 
         //3rd fk (composite) - child2
-        assertTrue(importedKeys.next());
-        assertEquals("parent", importedKeys.getString("PKTABLE_NAME"));
-        assertEquals("id2", importedKeys.getString("PKCOLUMN_NAME"));
-        assertNotNull(importedKeys.getString("PK_NAME"));
-        assertNotNull(importedKeys.getString("FK_NAME"));
-        assertEquals("child2", importedKeys.getString("FKTABLE_NAME"));
-        assertEquals("id2", importedKeys.getString("FKCOLUMN_NAME"));
+        assertTrue(exportedKeys.next());
+        assertEquals("parent", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("id2", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertNotNull(exportedKeys.getString("PK_NAME"));
+        assertNotNull(exportedKeys.getString("FK_NAME"));
+        assertEquals("child2", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("id2", exportedKeys.getString("FKCOLUMN_NAME"));
 
-        assertTrue(importedKeys.next());
-        assertEquals("parent", importedKeys.getString("PKTABLE_NAME"));
-        assertEquals("id1", importedKeys.getString("PKCOLUMN_NAME"));
-        assertNotNull(importedKeys.getString("PK_NAME"));
-        assertNotNull(importedKeys.getString("FK_NAME"));
-        assertEquals("child2", importedKeys.getString("FKTABLE_NAME"));
-        assertEquals("id1", importedKeys.getString("FKCOLUMN_NAME"));
+        assertTrue(exportedKeys.next());
+        assertEquals("parent", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("id1", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertNotNull(exportedKeys.getString("PK_NAME"));
+        assertNotNull(exportedKeys.getString("FK_NAME"));
+        assertEquals("child2", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("id1", exportedKeys.getString("FKCOLUMN_NAME"));
 
-        assertFalse(importedKeys.next());
+        assertFalse(exportedKeys.next());
 
-        importedKeys.close();
+        exportedKeys.close();
     }
 
     @Test
@@ -603,11 +603,12 @@ public class DBMetaDataTest
 
         // With explicit primary column defined.
         stat.executeUpdate("create table REFERRED (ID integer primary key not null)");
-        stat.executeUpdate("create table REFERRING (ID integer, RID integer, foreign key (RID) references REFERRED(id))");
+        stat.executeUpdate("create table REFERRING (ID integer, RID integer, constraint fk foreign key (RID) references REFERRED(id))");
 
         exportedKeys = meta.getExportedKeys(null, null, "referred");
         assertEquals("referred", exportedKeys.getString("PKTABLE_NAME"));
         assertEquals("referring", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("fk", exportedKeys.getString("FK_NAME"));
         exportedKeys.close();
     }
 

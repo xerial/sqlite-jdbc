@@ -1,5 +1,8 @@
 Work in progress:
-
+* Issue 47 - MetaData.getExportedKeys() returns empty string for a named foreign key
+* Issue 46 - org.sqlite.MetaData.getExportedKeys constructs incorrect SQL
+* Issue 44 - getExportedKeys throws Null Exception for foreign key without explicit primary column name
+    1. Now returns keys for foreign key definitions like "create table referring (id, foreign key references referred)"
 * Implemented getPercision(int) and getScale(int) on ResultSetMetaData.
 * Issue 43 - ResultSetMetaData does not return the SQL Type if there are no results from the query.
     1. ResultSetMetaData.getColumnTypeName() now gets type from either 'create table' statement or CAST(expr AS TYPE) otherwise sqlite3_value_type.

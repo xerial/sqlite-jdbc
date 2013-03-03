@@ -1417,6 +1417,12 @@ class MetaData implements DatabaseMetaData
     }
 
     /**
+     * Pattern used to extract a named primary key.
+     */
+     protected final static Pattern FK_NAMED_PATTERN =
+         Pattern.compile(".* constraint +(.*?) +foreign +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+
+     /**
      * @see java.sql.DatabaseMetaData#getExportedKeys(java.lang.String, java.lang.String,
      *      java.lang.String)
      */
@@ -1446,38 +1452,62 @@ class MetaData implements DatabaseMetaData
             for (String tbl : tableList) {
                 try {
                     fk = stat.executeQuery("pragma foreign_key_list('" + escape(tbl) + "')");
+                } catch (SQLException e) {
+                    if (e.getErrorCode() == Codes.SQLITE_DONE) 
+                        continue; // expected if table has no foreign keys
+
+                    throw e;
+                }
+
+                Stmt stat2 = null;
+                try {
+                    stat2 = (Stmt)conn.createStatement();
                     while(fk.next()) {
                         int keySeq = fk.getInt(2) + 1;
                         String PKTabName = fk.getString(3).toLowerCase();
-    
+
                         if (PKTabName == null || !PKTabName.equals(target)) {
                             continue;
                         }
-    
+
                         String PKColName = fk.getString(5);
                         PKColName = (PKColName == null) ? pkColumns[0] : PKColName.toLowerCase();
 
                         exportedKeysQuery
                             .append(count > 0 ? " union all select " : "select ")
                             .append(Integer.toString(keySeq)).append(" as ks, lower('")
-                            .append(escape(tbl)).append("') as fkn, lower('")
+                            .append(escape(tbl)).append("') as fkt, lower('")
                             .append(escape(fk.getString(4))).append("') as fcn, '")
                             .append(escape(PKColName)).append("' as pcn, ")
                             .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
-                            .append(RULE_MAP.get(fk.getString(7))).append(" as dr");
-    
+                            .append(RULE_MAP.get(fk.getString(7))).append(" as dr, ");
+
+                        String fkName = "''";
+                        rs = stat2.executeQuery("select sql from sqlite_master where" +
+                            " lower(name) = lower('" + escape(tbl) + "')");
+                        if (rs.next())
+                        {
+                            Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
+                            if (matcher.find()){
+                                fkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
+                            }
+                        }
+                        rs.close();
+
+                        exportedKeysQuery.append(fkName).append(" as fkn");
                         count++;
                     }
                 }
-                catch (SQLException e) {
-                    // continue
-                    //TODO:
-                }
                 finally {
-                    if (fk != null)
-                        try{
-                            fk.close();
-                        }catch(SQLException e) {}
+                    try{
+                        if (rs != null) rs.close();
+                    }catch(SQLException e) {}
+                    try{
+                        if (stat2 != null) stat2.close();
+                    }catch(SQLException e) {}
+                    try{
+                        if (fk != null) fk.close();
+                    }catch(SQLException e) {}
                 }
             }
         }
@@ -1491,18 +1521,18 @@ class MetaData implements DatabaseMetaData
             .append(exist ? "pcn" : "''").append(" as PKCOLUMN_NAME, ")
             .append(catalog).append(" as FKTABLE_CAT, ")
             .append(schema).append(" as FKTABLE_SCHEM, ")
-            .append(exist ? "fkn" : "''").append(" as FKTABLE_NAME, ")
+            .append(exist ? "fkt" : "''").append(" as FKTABLE_NAME, ")
             .append(exist ? "fcn" : "''").append(" as FKCOLUMN_NAME, ")
             .append(exist ? "ks" : "-1").append(" as KEY_SEQ, ")
             .append(exist ? "ur" : "3").append(" as UPDATE_RULE, ")
             .append(exist ? "dr" : "3").append(" as DELETE_RULE, ")
-            .append("'' as FK_NAME, ")
-            .append("'' as PK_NAME, ")
+            .append(exist ? "fkn" : "''").append(" as FK_NAME, ")
+            .append(pkFinder.getName() != null ? pkFinder.getName() : "''").append(" as PK_NAME, ")
             .append(Integer.toString(importedKeyInitiallyDeferred)) // FIXME: Check for pragma foreign_keys = true ?
             .append(" as DEFERRABILITY ")
             .append(exist ? "from (" : "limit 0");
        if (exist)
-           sql.append(exportedKeysQuery).append(')');
+           sql.append(exportedKeysQuery).append(") order by fkt");
 
         return stat.executeQuery(sql.toString()); //FIXME: close stat
     }
@@ -1851,14 +1881,14 @@ class MetaData implements DatabaseMetaData
     /**
      * Pattern used to extract column order for an unnamed primary key.
      */
-    protected final static Pattern PK_UNNAMED =
+    protected final static Pattern PK_UNNAMED_PATTERN =
             Pattern.compile(".* primary +key *\\((.*?,+.*?)\\).*", Pattern.CASE_INSENSITIVE);
 
     /**
-    * Pattern used to extract a named primary key.
-    */
-    protected final static Pattern PK_NAMED =
-        Pattern.compile(".* constraint +(.*?) +primary +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+     * Pattern used to extract a named primary key.
+     */
+     protected final static Pattern PK_NAMED_PATTERN =
+         Pattern.compile(".* constraint +(.*?) +primary +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
 
     /**
      * Parses the sqlite_master table for a table's primary key
@@ -1897,13 +1927,13 @@ class MetaData implements DatabaseMetaData
                 if (!rs.next())
                     throw new SQLException("Table not found: '" + table + "'");
 
-                Matcher matcher = PK_NAMED.matcher(rs.getString(1));
+                Matcher matcher = PK_NAMED_PATTERN.matcher(rs.getString(1));
                 if (matcher.find()){
                     pkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
                     pkColumns = matcher.group(2).split(",");
                 }
                 else {
-                    matcher = PK_UNNAMED.matcher(rs.getString(1));
+                    matcher = PK_UNNAMED_PATTERN.matcher(rs.getString(1));
                     if (matcher.find()){
                         pkColumns = matcher.group(1).split(",");
                     }
@@ -1919,7 +1949,7 @@ class MetaData implements DatabaseMetaData
 
                 if (pkColumns != null)
                     for (int i = 0; i < pkColumns.length; i++) {
-                        pkColumns[i] = pkColumns[i].toLowerCase();
+                        pkColumns[i] = pkColumns[i].toLowerCase().trim();
                     }
                 //FIXME: close stat
             }
