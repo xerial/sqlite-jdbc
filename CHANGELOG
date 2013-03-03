@@ -1,4 +1,7 @@
 Work in progress:
+* Added support for URI filenames
+    1. <http://www.sqlite.org/uri.html> examples <http://www.sqlite.org/c3ref/open.html#urifilenameexamples>
+* Issue 42 - Using shared in-memory with URI filename
 * Issue 47 - MetaData.getExportedKeys() returns empty string for a named foreign key
 * Issue 46 - org.sqlite.MetaData.getExportedKeys constructs incorrect SQL
 * Issue 44 - getExportedKeys throws Null Exception for foreign key without explicit primary column name

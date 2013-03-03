@@ -86,10 +86,11 @@ class Conn implements Connection
         this.openModeFlags = config.getOpenModeFlags();
         open(openModeFlags);
 
-        boolean enableSharedCache = config.isEnabledSharedCache();
-        boolean enableLoadExtension = config.isEnabledLoadExtension();
-        db.shared_cache(enableSharedCache);
-        db.enable_load_extension(enableLoadExtension);
+        if (fileName.startsWith("file:") && !fileName.contains("cache="))
+        {   // URI cache overrides flags
+            db.shared_cache(config.isEnabledSharedCache());
+        }
+        db.enable_load_extension(config.isEnabledLoadExtension());
 
         this.transactionMode = config.getTransactionMode();
 
@@ -107,7 +108,7 @@ class Conn implements Connection
      */
     private void open(int openModeFlags) throws SQLException {
         // check the path to the file exists
-        if (!":memory:".equals(fileName)) {
+        if (!":memory:".equals(fileName) && !fileName.startsWith("file:") && !fileName.contains("mode=memory")) {
             if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
                 String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
 

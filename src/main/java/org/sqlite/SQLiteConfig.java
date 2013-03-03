@@ -69,6 +69,9 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
+        openMode = pragmaTable.getProperty(Pragma.SHARED_CACHE.pragmaName);
+        setOpenMode(SQLiteOpenMode.OPEN_URI); // Enable URI filenames
+
         transactionMode = TransactionMode.getMode(
             prop.getProperty(Pragma.TRANSACTION_MODE.pragmaName, TransactionMode.DEFFERED.name()));
     }

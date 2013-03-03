@@ -242,4 +242,36 @@ public class ConnectionTest
         return tmp;
     }
 
+    @Test
+    public void URIFilenames() throws SQLException {
+        Connection conn1 = DriverManager.getConnection("jdbc:sqlite:file:memdb1?mode=memory&cache=shared");
+        Statement stmt1 = conn1.createStatement();
+        stmt1.executeUpdate("create table tbl (col int)");
+        stmt1.executeUpdate("insert into tbl values(100)");
+        stmt1.close();
+
+        Connection conn2 = DriverManager.getConnection("jdbc:sqlite:file:memdb1?mode=memory&cache=shared");
+        Statement stmt2 = conn2.createStatement();
+        ResultSet rs = stmt2.executeQuery("select * from tbl");
+        assertTrue(rs.next());
+        assertEquals(100, rs.getInt(1));
+        stmt2.close();
+
+        Connection conn3 = DriverManager.getConnection("jdbc:sqlite:file::memory:?cache=shared");
+        Statement stmt3 = conn3.createStatement();
+        stmt3.executeUpdate("attach 'file:memdb1?mode=memory&cache=shared' as memdb1");
+        rs = stmt3.executeQuery("select * from memdb1.tbl");
+        assertTrue(rs.next());
+        assertEquals(100, rs.getInt(1));
+        stmt3.executeUpdate("create table tbl2(col int)");
+        stmt3.executeUpdate("insert into tbl2 values(200)");
+        stmt3.close();
+
+        Connection conn4 = DriverManager.getConnection("jdbc:sqlite:file::memory:?cache=shared");
+        Statement stmt4 = conn4.createStatement();
+        rs = stmt4.executeQuery("select * from tbl2");
+        assertTrue(rs.next());
+        assertEquals(200, rs.getInt(1));
+        
+    }
 }
