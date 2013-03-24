@@ -109,6 +109,7 @@ clean-native:
 
 clean-java:
 	rm -rf $(TARGET)/*classes
+	rm -rf $(TARGET)/sqlite-jdbc-*jar
 
 clean-tests:
 	rm -rf $(TARGET)/{surefire*,testdb.jar*}

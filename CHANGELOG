@@ -1,4 +1,8 @@
 Work in progress:
+
+
+Release 3.7.15-SNAPSHOT-2
+* Fixed clean target to remove previous driver builds
 * Added support for URI filenames
     1. <http://www.sqlite.org/uri.html> examples <http://www.sqlite.org/c3ref/open.html#urifilenameexamples>
 * Issue 42 - Using shared in-memory with URI filename
