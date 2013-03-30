@@ -272,6 +272,8 @@ public class ConnectionTest
         rs = stmt4.executeQuery("select * from tbl2");
         assertTrue(rs.next());
         assertEquals(200, rs.getInt(1));
-        
+        rs.close();
+        stmt4.close();
+        conn4.close();
     }
 }

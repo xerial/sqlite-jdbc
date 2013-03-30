@@ -16,7 +16,10 @@
 
 package org.sqlite;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -277,8 +280,69 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      * @see java.sql.PreparedStatement#setBigDecimal(int, java.math.BigDecimal)
      */
     public void setBigDecimal(int pos, BigDecimal value) throws SQLException {
-		batch(pos, value == null ? null : value.toString());
-	}
+        batch(pos, value == null ? null : value.toString());
+    }
+
+    /**
+     * Reads given number of bytes from an input stream.
+     * @param istream The input stream.
+     * @param length The number of bytes to read.
+     * @return byte array.
+     * @throws SQLException
+     */
+    private byte[] readBytes(InputStream istream, int length) throws SQLException {
+        if (length < 0) {
+            SQLException exception =
+                new SQLException("Error reading stream. Length should be non-negative");
+
+            throw exception;
+        } 
+        
+        byte[] bytes = new byte[length];
+
+        try 
+        {
+            istream.read(bytes);
+
+            return bytes;
+        } 
+        catch (IOException cause)
+        {
+            SQLException exception = new SQLException("Error reading stream");
+
+            exception.initCause(cause);
+            throw(exception);
+        }
+    }
+
+    /**
+     * @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream, int)
+     */
+    public void setBinaryStream(int pos, InputStream istream, int length) throws SQLException {
+        if (istream == null && length == 0) {
+            setBytes(pos, null);
+        }
+
+        setBytes(pos, readBytes(istream, length));
+    }
+
+    /**
+     * @see java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int)
+     */
+    public void setAsciiStream(int pos, InputStream istream, int length) throws SQLException {
+        setUnicodeStream(pos, istream, length);
+    }
+
+    /**
+     * @see java.sql.PreparedStatement#setUnicodeStream(int, java.io.InputStream, int)
+     */
+    public void setUnicodeStream(int pos, InputStream istream, int length) throws SQLException {
+        if (istream == null && length == 0) {
+            setString(pos, null);
+        }
+
+        setString(pos, new String(readBytes(istream, length)));
+    }
 
     /**
      * @see java.sql.PreparedStatement#setBoolean(int, boolean)

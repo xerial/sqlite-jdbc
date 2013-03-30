@@ -2,6 +2,8 @@ package org.sqlite;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -11,6 +13,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.StringTokenizer;
+
+import javax.naming.BinaryRefAddr;
 
 import org.junit.After;
 import org.junit.Before;
@@ -143,7 +147,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void set() throws SQLException {
+    public void set() throws SQLException, UnsupportedEncodingException {
         ResultSet rs;
         PreparedStatement prep = conn.prepareStatement("select ?, ?, ?;");
 
@@ -190,6 +194,23 @@ public class PrepStmtTest
         assertArrayEq(rs.getBytes(1), b1);
         assertArrayEq(rs.getBytes(2), b2);
         assertArrayEq(rs.getBytes(3), b3);
+        assertFalse(rs.next());
+        rs.close();
+
+        // streams
+        ByteArrayInputStream inByte = new ByteArrayInputStream(b1);
+        prep.setBinaryStream(1, inByte, b1.length);
+        ByteArrayInputStream inAscii = new ByteArrayInputStream(b2);
+        prep.setAsciiStream(2, inAscii, b2.length);
+        byte[] b3 = utf08.getBytes("UTF-8");
+        ByteArrayInputStream inUnicode = new ByteArrayInputStream(b3);
+        prep.setUnicodeStream(3, inUnicode, b3.length);
+
+        rs = prep.executeQuery();
+        assertTrue(rs.next());
+        assertArrayEq(b1, rs.getBytes(1));
+        assertEquals(new String(b2), rs.getString(2));
+        assertEquals(new String(b3), rs.getString(3));
         assertFalse(rs.next());
         rs.close();
     }

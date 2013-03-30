@@ -1,5 +1,10 @@
 Work in progress:
 
+* Added support for InputStreams on PreparedStatement
+    1. setBinaryStream()
+    2. setAsciiStream()
+    3. setUnicodeStream()
+* Issue 54 - Implement PreparedStatement.setBinaryStream()
 
 Release 3.7.15-SNAPSHOT-2
 * Fixed clean target to remove previous driver builds
