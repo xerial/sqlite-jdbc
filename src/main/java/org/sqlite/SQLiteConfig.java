@@ -29,6 +29,7 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -42,8 +43,17 @@ import java.util.Properties;
  */
 public class SQLiteConfig
 {
-    private final Properties pragmaTable;
+	public static final int  DEFAULT_DATE_STORAGE_CLASS = Codes.SQLITE_INTEGER;
+	public static final int  DEFAULT_DATE_INT_PRECISION = Calendar.MILLISECOND;
+	public static final long DEFAULT_DATE_INT_MULTIPLIER = 1L;
+	public static final String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+	private final Properties pragmaTable;
     private int              openModeFlag = 0x00;
+    private static int		 dateStorageClass = DEFAULT_DATE_STORAGE_CLASS;
+    private static int  	 dateIntPrecision = DEFAULT_DATE_INT_PRECISION;
+    private static long		 dateIntMultiplier = DEFAULT_DATE_INT_MULTIPLIER;
+    private static String	 dateStringFormat = DEFAULT_DATE_STRING_FORMAT;
 
     public SQLiteConfig() {
         this(new Properties());
@@ -60,6 +70,35 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
+
+        // Set the storage class for dates
+        String sDateStorageClass = pragmaTable.getProperty(Pragma.DATE_STORAGE_CLASS.pragmaName, "integer").toLowerCase();
+        if (sDateStorageClass.equals("text")) {
+        	dateStorageClass = Codes.SQLITE_TEXT;
+        } else if (sDateStorageClass.equals("real")) {
+        	dateStorageClass = Codes.SQLITE_FLOAT;
+        } else if (sDateStorageClass.equals("integer")) {
+        	dateStorageClass = Codes.SQLITE_INTEGER;
+        } else {
+	    	dateStorageClass = DEFAULT_DATE_STORAGE_CLASS;
+	    }
+
+        // Set the integer precision for dates read and stored as an integer
+        // Set as java.util.Calendar type values
+        String sDateIntPrecision = pragmaTable.getProperty(Pragma.DATE_INTEGER_PRECISION.pragmaName, "milliseconds").toLowerCase();
+        if (sDateIntPrecision.equals("seconds")) {
+        	dateIntPrecision = Calendar.SECOND;
+        	dateIntMultiplier = 1000L;
+        } else if (sDateIntPrecision.equals("milliseconds")) {
+        	dateIntPrecision = Calendar.MILLISECOND;
+        	dateIntMultiplier = 1L;
+        } else {
+        	dateIntPrecision = DEFAULT_DATE_INT_PRECISION;
+        	dateIntMultiplier = DEFAULT_DATE_INT_MULTIPLIER;
+        }
+        
+        // Set the String format for dates read and stored as text
+        dateStringFormat = pragmaTable.getProperty(Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT);
     }
 
     /**
@@ -85,6 +124,9 @@ public class SQLiteConfig
             pragmaParams.add(each.pragmaName);
         }
 
+        pragmaParams.remove(Pragma.DATE_INTEGER_PRECISION.pragmaName);
+        pragmaParams.remove(Pragma.DATE_STORAGE_CLASS.pragmaName);
+        pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
         pragmaParams.remove(Pragma.OPEN_MODE.pragmaName);
         pragmaParams.remove(Pragma.SHARED_CACHE.pragmaName);
         pragmaParams.remove(Pragma.LOAD_EXTENSION.pragmaName);
@@ -137,8 +179,24 @@ public class SQLiteConfig
     public int getOpenModeFlags() {
         return openModeFlag;
     }
+    
+    static int getDateStorageClass() {
+		return dateStorageClass;
+	}
 
-    /**
+    static int getDateIntPrecision() {
+		return dateIntPrecision;
+	}
+
+    public static long getDateIntMultiplier() {
+		return dateIntMultiplier;
+	}
+
+	static String getDateStringFormat() {
+		return dateStringFormat;
+	}
+
+	/**
      * Set a pragma value. To take effect the pragma settings,
      * 
      * @param pragma
@@ -176,12 +234,17 @@ public class SQLiteConfig
     }
 
     private static final String[] OnOff = new String[] { "true", "false" };
+    private static final String[] DatePrecisions = new String[] {"seconds","milliseconds"};
+    private static final String[] DateStorageClasses = new String[] {"integer","text","real"};
 
     private static enum Pragma {
 
         // Parameters requiring SQLite3 API invocation
+        DATE_INTEGER_PRECISION("date_integer_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", DatePrecisions),
+        DATE_STORAGE_CLASS("date_storage_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", DateStorageClasses),
+        DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss\" (SQLite standard)", null),
         OPEN_MODE("open_mode", "Database open-mode flag", null),
-        SHARED_CACHE("shared_cache", "Enablse SQLite Shared-Cache mode, native driver only", OnOff),
+        SHARED_CACHE("shared_cache", "Enable SQLite Shared-Cache mode, native driver only", OnOff),
         LOAD_EXTENSION("enable_load_extension", "Enable SQLite load_extention() function, native driver only", OnOff),
 
         // Pragmas that can be set after opening the database 

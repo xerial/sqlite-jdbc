@@ -26,15 +26,20 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Implements a JDBC ResultSet.
  */
 final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
 {
+	private final DateFormat df = new SimpleDateFormat(SQLiteConfig.getDateStringFormat());
     private final Stmt stmt;
     private final DB   db;
+    private final long DATE_INT_MULTIPLIER = (SQLiteConfig.getDateIntMultiplier());
 
     boolean            open     = false; // true means have results and can iterate them
     int                maxRows;         // max. number of rows as set by a Statement
@@ -243,18 +248,48 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     }
 
     public Date getDate(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+    	int data_type = db.column_type(stmt.pointer, markCol(col));
+        if (data_type == SQLITE_NULL)
             return null;
-        return new Date(db.column_long(stmt.pointer, markCol(col)));
+        if (data_type == SQLITE_INTEGER) {
+        	return new Date(db.column_long(stmt.pointer, markCol(col)) * DATE_INT_MULTIPLIER);
+        }
+        if (data_type == SQLITE_TEXT) {
+			try {
+				return new java.sql.Date(df.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+			} catch (Exception e) {
+				return null;
+			}
+        }
+        if (data_type == SQLITE_FLOAT) {
+        	return new Date(julianDateToCalendar(db.column_double(stmt.pointer, markCol(col))).getTimeInMillis());
+        }
+        return null;
     }
 
     public Date getDate(int col, Calendar cal) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+    	int data_type = db.column_type(stmt.pointer, markCol(col));
+        if (data_type == SQLITE_NULL)
             return null;
         if (cal == null)
             return getDate(col);
-        cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)));
-        return new Date(cal.getTime().getTime());
+        if (data_type == SQLITE_INTEGER) {
+	        cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)) * DATE_INT_MULTIPLIER);
+	        return new Date(cal.getTime().getTime());
+        }
+        if (data_type == SQLITE_TEXT) {
+			try {
+				DateFormat df2 = (DateFormat) df.clone();
+				df2.setCalendar(cal);
+				return new java.sql.Date(df2.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+			} catch (Exception e) {
+				return null;
+			}
+        }
+        if (data_type == SQLITE_FLOAT) {
+        	return new Date(julianDateToCalendar(db.column_double(stmt.pointer, markCol(col)), cal).getTimeInMillis());
+        }
+        return null;
     }
 
     public Date getDate(String col) throws SQLException {
@@ -318,18 +353,48 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     }
 
     public Time getTime(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        int data_type = db.column_type(stmt.pointer, markCol(col));
+        if (data_type == SQLITE_NULL)
             return null;
-        return new Time(db.column_long(stmt.pointer, markCol(col)));
+        if (data_type == SQLITE_INTEGER) {
+        	return new Time(db.column_long(stmt.pointer, markCol(col)) * DATE_INT_MULTIPLIER);
+        }
+        if (data_type == SQLITE_TEXT) {
+			try {
+				return new Time(df.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+			} catch (Exception e) {
+				return null;
+			}
+        }
+        if (data_type == SQLITE_FLOAT) {
+        	return new Time(julianDateToCalendar(db.column_double(stmt.pointer, markCol(col))).getTimeInMillis());
+        }
+        return null;
     }
 
     public Time getTime(int col, Calendar cal) throws SQLException {
         if (cal == null)
             return getTime(col);
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        int data_type = db.column_type(stmt.pointer, markCol(col));
+        if (data_type == SQLITE_NULL)
             return null;
-        cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)));
-        return new Time(cal.getTime().getTime());
+        if (data_type == SQLITE_INTEGER) {
+	        cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)) * DATE_INT_MULTIPLIER);
+	        return new Time(cal.getTime().getTime());
+        }
+        if (data_type == SQLITE_TEXT) {
+			try {
+				DateFormat df2 = (DateFormat) df.clone();
+				df2.setCalendar(cal);
+				return new Time(df2.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+			} catch (Exception e) {
+				return null;
+			}
+        }
+        if (data_type == SQLITE_FLOAT) {
+        	return new Time(julianDateToCalendar(db.column_double(stmt.pointer, markCol(col)), cal).getTimeInMillis());
+        }
+        return null;
     }
 
     public Time getTime(String col) throws SQLException {
@@ -341,18 +406,48 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     }
 
     public Timestamp getTimestamp(int col) throws SQLException {
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        int data_type = db.column_type(stmt.pointer, markCol(col));
+        if (data_type == SQLITE_NULL)
             return null;
-        return new Timestamp(db.column_long(stmt.pointer, markCol(col)));
+        if (data_type == SQLITE_INTEGER) {
+        	return new Timestamp(db.column_long(stmt.pointer, markCol(col)) * DATE_INT_MULTIPLIER);
+        }
+        if (data_type == SQLITE_TEXT) {
+			try {
+				return new Timestamp(df.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+			} catch (Exception e) {
+				return null;
+			}
+        }
+        if (data_type == SQLITE_FLOAT) {
+        	return new Timestamp(julianDateToCalendar(db.column_double(stmt.pointer, markCol(col))).getTimeInMillis());
+        }
+        return null;
     }
 
     public Timestamp getTimestamp(int col, Calendar cal) throws SQLException {
         if (cal == null)
             return getTimestamp(col);
-        if (db.column_type(stmt.pointer, markCol(col)) == SQLITE_NULL)
+        int data_type = db.column_type(stmt.pointer, markCol(col));
+        if (data_type == SQLITE_NULL)
             return null;
-        cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)));
-        return new Timestamp(cal.getTime().getTime());
+        if (data_type == SQLITE_INTEGER) {
+	        cal.setTimeInMillis(db.column_long(stmt.pointer, markCol(col)) * DATE_INT_MULTIPLIER);
+	        return new Timestamp(cal.getTime().getTime());
+        }
+        if (data_type == SQLITE_TEXT) {
+			try {
+				DateFormat df2 = (DateFormat) df.clone();
+				df2.setCalendar(cal);
+				return new Timestamp(df2.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+			} catch (Exception e) {
+				return null;
+			}
+        }
+        if (data_type == SQLITE_FLOAT) {
+        	return new Timestamp(julianDateToCalendar(db.column_double(stmt.pointer, markCol(col)), cal).getTimeInMillis());
+        }
+        return null;
     }
 
     public Timestamp getTimestamp(String col) throws SQLException {
@@ -537,4 +632,76 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     public boolean rowUpdated() throws SQLException {
         return false;
     }
+    /**
+     * Added julianDateToCalendar functions for transforming a Julian Date to java.util.Calendar object.
+     */
+    private Calendar julianDateToCalendar(Double jd) {
+    	if (jd == null)
+    		return null;
+    	return julianDateToCalendar(jd, Calendar.getInstance());    	
+    }
+
+    /**
+     * Added julianDateToCalendar functions for transforming a Julian Date to java.util.Calendar object.
+     * Based on Guine Christian's function found here: http://java.ittoolbox.com/groups/technical-functional/java-l/java-function-to-convert-julian-date-to-calendar-date-1947446
+     */
+	private Calendar julianDateToCalendar(Double jd, Calendar cal) {
+		if (jd == null)
+			return null;
+		int yyyy = 0;
+		int mm = 0;
+		int dd = 0;
+		int hh = 0;
+		int mn = 0;
+		int ss = 0;
+		int ms = 0;
+		int A = 0;
+		double w = jd + 0.5;
+		int Z = (int) w;
+		double F = w - Z;
+		if (Z < 2299161) {
+			A = Z;
+		} else {
+			int alpha = (int) ((Z - 1867216.25) / 36524.25);
+			A = Z + 1 + alpha - (int) (alpha / 4.0);
+		}
+		int B = A + 1524;
+		int C = (int) ((B - 122.1) / 365.25);
+		int D = (int) (365.25 * C);
+		int E = (int) ((B - D) / 30.6001);
+		// Day of month in decimals
+		double jjd = B - D - (int) (30.6001 * E) + F;
+		dd = (int) jjd;
+		// Calculate hour
+		double hhd = jjd - dd;
+		hh = (int) (24 * hhd);
+		// Calculate minutes
+		double mnd = (24 * hhd) - hh;
+		mn = (int) (60 * mnd);
+		// Calculate seconds
+		double ssd = (60 * mnd) - mn;
+		ss = (int) (60 * ssd);
+		// Calculate milliseconds
+		double msd = (60 * ssd) - ss;
+		ms = (int) (1000 * msd);
+		// Calculate month
+		if (E < 13.5) {
+			mm = E - 1;
+		} else {
+			mm = E - 13;
+		}
+		// Calculate year
+		if (mm > 2.5) {
+			yyyy = C - 4716;
+		} else {
+			yyyy = C - 4715;
+		}
+		cal.set(yyyy, mm-1, dd, hh, mn, ss);
+		cal.set(Calendar.MILLISECOND, ms);
+		if (yyyy<1) {
+			cal.set(Calendar.ERA, GregorianCalendar.BC);
+			cal.set(Calendar.YEAR, -(yyyy-1));
+		}
+		return cal;
+	}
 }

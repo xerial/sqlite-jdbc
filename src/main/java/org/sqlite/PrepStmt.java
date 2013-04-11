@@ -28,10 +28,15 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaData, Codes
 {
+    private final long DATE_INT_MULTIPLIER = SQLiteConfig.getDateIntMultiplier();
+    private final int DATE_STORAGE_CLASS = SQLiteConfig.getDateStorageClass();
+    private final DateFormat df = new SimpleDateFormat(SQLiteConfig.getDateStringFormat());
     private int columnCount;
     private int paramCount;
 
@@ -213,13 +218,13 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
         if (value == null)
             batch(pos, null);
         else if (value instanceof java.util.Date)
-            batch(pos, new Long(((java.util.Date) value).getTime()));
+        	setDateByMilliseconds(pos, ((java.util.Date) value).getTime());
         else if (value instanceof Date)
-            batch(pos, new Long(((Date) value).getTime()));
+        	setDateByMilliseconds(pos, new Long(((Date) value).getTime()));
         else if (value instanceof Time)
-            batch(pos, new Long(((Time) value).getTime()));
+        	setDateByMilliseconds(pos, new Long(((Time) value).getTime()));
         else if (value instanceof Timestamp)
-            batch(pos, new Long(((Timestamp) value).getTime()));
+        	setDateByMilliseconds(pos, new Long(((Timestamp) value).getTime()));
         else if (value instanceof Long)
             batch(pos, value);
         else if (value instanceof Integer)
@@ -236,6 +241,21 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
             batch(pos, value);
         else
             batch(pos, value.toString());
+    }
+
+    private void setDateByMilliseconds(int pos, Long value) throws SQLException {
+    	if (DATE_STORAGE_CLASS==SQLITE_INTEGER)
+            batch(pos, new Long(value / DATE_INT_MULTIPLIER));
+        else if (DATE_STORAGE_CLASS==SQLITE_TEXT) {
+        	batch(pos, df.format(new Date(value)));
+        }
+        else if (DATE_STORAGE_CLASS==SQLITE_FLOAT) {
+        	batch(pos, longToJulianDate(value));
+        }
+    }
+
+    private Double longToJulianDate(Long ms) {
+    	return new Double(( ms / 86400000.0 ) + 2440587.5);
     }
 
     public void setObject(int p, Object v, int t) throws SQLException {
