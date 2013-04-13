@@ -42,9 +42,17 @@ import java.util.Properties;
  */
 public class SQLiteConfig
 {
+    public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
     private final Properties pragmaTable;
     private int              openModeFlag = 0x00;
     private TransactionMode  transactionMode; 
+
+    /* Date storage class defaults*/
+    public final DateClass dateClass;
+    public final DatePrecision datePrecision;
+    public final long dateMultiplier;
+    public final String dateStringFormat;
 
     /**
      * Default constructor.
@@ -60,6 +68,7 @@ public class SQLiteConfig
      */
     public SQLiteConfig(Properties prop) {
         this.pragmaTable = prop;
+
         String openMode = pragmaTable.getProperty(Pragma.OPEN_MODE.pragmaName);
         if (openMode != null) {
             openModeFlag = Integer.parseInt(openMode);
@@ -73,7 +82,12 @@ public class SQLiteConfig
         setOpenMode(SQLiteOpenMode.OPEN_URI); // Enable URI filenames
 
         transactionMode = TransactionMode.getMode(
-            prop.getProperty(Pragma.TRANSACTION_MODE.pragmaName, TransactionMode.DEFFERED.name()));
+                pragmaTable.getProperty(Pragma.TRANSACTION_MODE.pragmaName, TransactionMode.DEFFERED.name()));
+
+        dateClass = DateClass.getDateClass(pragmaTable.getProperty(Pragma.DATE_CLASS.pragmaName, DateClass.INTEGER.name()));
+        datePrecision = DatePrecision.getPrecision(pragmaTable.getProperty(Pragma.DATE_PRECISION.pragmaName, DatePrecision.MILLISECONDS.name()));
+        dateMultiplier = (datePrecision == DatePrecision.MILLISECONDS) ? 1L : 1000L;
+        dateStringFormat = pragmaTable.getProperty(Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT);
     }
 
     /**
@@ -100,6 +114,9 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.OPEN_MODE.pragmaName);
         pragmaParams.remove(Pragma.SHARED_CACHE.pragmaName);
         pragmaParams.remove(Pragma.LOAD_EXTENSION.pragmaName);
+        pragmaParams.remove(Pragma.DATE_PRECISION.pragmaName);
+        pragmaParams.remove(Pragma.DATE_CLASS.pragmaName);
+        pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
@@ -191,6 +208,9 @@ public class SQLiteConfig
     public Properties toProperties() {
         pragmaTable.setProperty(Pragma.OPEN_MODE.pragmaName, Integer.toString(openModeFlag));
         pragmaTable.setProperty(Pragma.TRANSACTION_MODE.pragmaName, transactionMode.getValue());
+        pragmaTable.setProperty(Pragma.DATE_CLASS.pragmaName, dateClass.getValue());
+        pragmaTable.setProperty(Pragma.DATE_PRECISION.pragmaName, datePrecision.getValue());
+        pragmaTable.setProperty(Pragma.DATE_STRING_FORMAT.pragmaName, dateStringFormat);
 
         return pragmaTable;
     }
@@ -219,7 +239,7 @@ public class SQLiteConfig
 
         // Parameters requiring SQLite3 API invocation
         OPEN_MODE("open_mode", "Database open-mode flag", null),
-        SHARED_CACHE("shared_cache", "Enablse SQLite Shared-Cache mode, native driver only", OnOff),
+        SHARED_CACHE("shared_cache", "Enable SQLite Shared-Cache mode, native driver only", OnOff),
         LOAD_EXTENSION("enable_load_extension", "Enable SQLite load_extention() function, native driver only", OnOff),
 
         // Pragmas that can be set after opening the database
@@ -248,8 +268,11 @@ public class SQLiteConfig
         TEMP_STORE_DIRECTORY("temp_store_directory"),
         USER_VERSION("user_version"),
 
-        // transaction mode
-        TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values()));
+        // Others
+        TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
+        DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
+        DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
+        DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null);
 
         public final String   pragmaName;
         public final String[] choices;
@@ -710,5 +733,51 @@ public class SQLiteConfig
      */
     public TransactionMode getTransactionMode() {
         return transactionMode;
+    }
+
+    public static enum DatePrecision implements PragmaValue {
+        SECONDS, MILLISECONDS;
+
+        public String getValue() {
+            return name();
+        }
+
+        public static DatePrecision getPrecision(String precision) {
+            return DatePrecision.valueOf(precision.toUpperCase());
+        }
+    }
+ 
+    /**
+     * @param datePrecision One of SECONDS or MILLISECONDS
+     * @throws SQLException 
+     */
+    public void setDatePrecision(String datePrecision) throws SQLException {
+        setPragma(Pragma.DATE_PRECISION, DatePrecision.getPrecision(datePrecision).getValue());
+    }
+
+    public static enum DateClass implements PragmaValue {
+        INTEGER, TEXT, REAL;
+
+        public String getValue() {
+            return name();
+        }
+
+        public static DateClass getDateClass(String dateClass) {
+            return DateClass.valueOf(dateClass.toUpperCase());
+        }
+    }
+
+    /**
+     * @param dateClass One of INTEGER, TEXT or REAL
+     */
+    public void setDateClass(String dateClass) {
+        setPragma(Pragma.DATE_CLASS, DateClass.getDateClass(dateClass).getValue());
+    }
+
+    /**
+     * @param format Format of date string
+     */
+    public void setDateStringFormat(String dateStringFormat) {
+        setPragma(Pragma.DATE_STRING_FORMAT, dateStringFormat);
     }
 }

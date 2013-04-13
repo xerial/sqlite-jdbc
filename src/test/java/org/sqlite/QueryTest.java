@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.junit.BeforeClass;
@@ -79,13 +80,19 @@ public class QueryTest
         conn.createStatement().execute("create table sample (start_time datetime)");
 
         Date now = new Date();
-        //String date = "2000-01-01 16:45:00";
-        conn.createStatement().execute(String.format("insert into sample values(%s)", now.getTime()));
+        String date = new SimpleDateFormat(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT).format(now);
+
+        conn.createStatement().execute("insert into sample values(" + now.getTime() + ")");
+        conn.createStatement().execute("insert into sample values('" + date + "')");
 
         ResultSet rs = conn.createStatement().executeQuery("select * from sample");
         assertTrue(rs.next());
         assertEquals(now, rs.getDate(1));
+        assertTrue(rs.next());
+        assertEquals(now, rs.getDate(1));
 
+        PreparedStatement stmt = conn.prepareStatement("insert into sample values(?)");
+        stmt.setDate(1, new java.sql.Date(now.getTime()));
     }
 
     @Test

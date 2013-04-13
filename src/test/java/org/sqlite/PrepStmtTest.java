@@ -14,12 +14,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.StringTokenizer;
 
-import javax.naming.BinaryRefAddr;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /** These tests are designed to stress PreparedStatements on memory dbs. */

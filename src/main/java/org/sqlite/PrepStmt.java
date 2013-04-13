@@ -16,10 +16,8 @@
 
 package org.sqlite;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -415,16 +413,16 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
             batch(pos, null);
         }
         else if (value instanceof java.util.Date) {
-            batch(pos, new Long(((java.util.Date) value).getTime()));
+            setDateByMilliseconds(pos, ((java.util.Date) value).getTime());
         }
         else if (value instanceof Date) {
-            batch(pos, new Long(((Date) value).getTime()));
+            setDateByMilliseconds(pos, new Long(((Date) value).getTime()));
         }
         else if (value instanceof Time) {
-            batch(pos, new Long(((Time) value).getTime()));
+            setDateByMilliseconds(pos, new Long(((Time) value).getTime()));
         }
         else if (value instanceof Timestamp) {
-            batch(pos, new Long(((Timestamp) value).getTime()));
+            setDateByMilliseconds(pos, new Long(((Timestamp) value).getTime()));
         }
         else if (value instanceof Long) {
             batch(pos, value);
@@ -520,6 +518,25 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     }
 
     /**
+    * Store the date in the user's preferred format (text, int, or real)
+    */
+   private void setDateByMilliseconds(int pos, Long value) throws SQLException {
+       switch(conn.dateClass) {
+           case TEXT:
+               batch(pos, conn.dateFormat.format(new Date(value)));
+               break;
+
+           case REAL:
+               // long to Julian date
+               batch(pos, new Double((value/86400000.0) + 2440587.5));
+               break;
+
+           default: //INTEGER:
+               batch(pos, new Long(value / conn.dateMultiplier));
+       }
+   }
+
+   /**
      * @see java.sql.PreparedStatement#setTime(int, java.sql.Time)
      */
     public void setTime(int pos, Time x) throws SQLException {

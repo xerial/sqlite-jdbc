@@ -32,10 +32,14 @@ import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.sqlite.SQLiteConfig.DateClass;
+import org.sqlite.SQLiteConfig.DatePrecision;
 import org.sqlite.SQLiteConfig.TransactionMode;
 
 class Conn implements Connection
@@ -60,6 +64,12 @@ class Conn implements Connection
         beginCommandMap.put(TransactionMode.EXCLUSIVE, "begin exclusive;");
     }
 
+    /* Date storage configuration */
+    public final DateClass dateClass;
+    public final DatePrecision datePrecision; //Calendar.SECOND or Calendar.MILLISECOND
+    public final long dateMultiplier;
+    public final DateFormat dateFormat;
+
     /**
      * Constructor to create a connection to a database at the given location.
      * @param url The location of the database.
@@ -83,7 +93,13 @@ class Conn implements Connection
         this.fileName = fileName;
 
         SQLiteConfig config = new SQLiteConfig(prop);
+        this.dateClass = config.dateClass;
+        this.dateMultiplier = config.dateMultiplier;
+        this.dateFormat = new SimpleDateFormat(config.dateStringFormat);
+        this.datePrecision = config.datePrecision;
+        this.transactionMode = config.getTransactionMode();
         this.openModeFlags = config.getOpenModeFlags();
+
         open(openModeFlags);
 
         if (fileName.startsWith("file:") && !fileName.contains("cache="))
@@ -91,8 +107,6 @@ class Conn implements Connection
             db.shared_cache(config.isEnabledSharedCache());
         }
         db.enable_load_extension(config.isEnabledLoadExtension());
-
-        this.transactionMode = config.getTransactionMode();
 
         // set pragmas
         config.apply(this);
