@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
     ReadUncommittedTest.class,
     RSMetaDataTest.class,
     SQLiteDataSourceTest.class,
+    SQLiteConnectionPoolDataSourceTest.class,
     SQLiteJDBCLoaderTest.class,
     StatementTest.class,
     TransactionTest.class,

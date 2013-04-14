@@ -1,10 +1,20 @@
 Work in progress:
 
+* Issue #18 - Add support for ConnectionPool
+    * Implemented javax.sql.ConnectionPoolDataSource - javax.SQLiteConnectionPoolDataSource
 * Issue #27 - Allow user to specify busy-timeout when opening a database connection
     * Added support for sqlite3_busy_timeout
         1. Added configuration property "busy_timeout" to SQLiteConfig.
         2. Exposed setBusyTimeout and getBusyTimeout on SQLiteConnection.
         3. Default busy_timeout of 3 seconds (3000ms) remains the same.
+* Issue #60 - ExtendedCommand (e.g backup) not supported on Stmt.execute(String)
+* Issue #23 - getDate() returns wrong values
+    * Added support for specifying a date storage class. For more info <https://bitbucket.org/xerial/sqlite-jdbc/issue/23/getdate-returns-wrong-values>
+* Issue #54 - Implement PreparedStatement.setBinaryStream()
+    * Added support for InputStreams on PreparedStatement
+        1. setBinaryStream()
+        2. setAsciiStream()
+        3. setUnicodeStream()
 * Issue #60 - ExtendedCommand (e.g backup) not supported on Stmt.execute(String)
 * Issue #23 - getDate() returns wrong values
     * Added support for specifying a date storage class. For more info <https://bitbucket.org/xerial/sqlite-jdbc/issue/23/getdate-returns-wrong-values>

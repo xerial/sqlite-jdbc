@@ -279,6 +279,8 @@ public class SQLiteConnection implements Connection
      * @see <a href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
      */
     String libversion() throws SQLException {
+        checkOpen();
+
         return db.libversion();
     }
 
@@ -390,6 +392,8 @@ public class SQLiteConnection implements Connection
      * @see java.sql.Connection#setTransactionIsolation(int)
      */
     public void setTransactionIsolation(int level) throws SQLException {
+        checkOpen();
+
         switch (level) {
         case TRANSACTION_SERIALIZABLE:
             db.exec("PRAGMA read_uncommitted = false;");
@@ -447,9 +451,12 @@ public class SQLiteConnection implements Connection
     }
 
     /**
+     * @throws SQLException 
      * @see java.sql.Connection#getMetaData()
      */
-    public DatabaseMetaData getMetaData() {
+    public DatabaseMetaData getMetaData() throws SQLException {
+        checkOpen();
+
         if (meta == null)
             meta = new MetaData(this);
         return meta;
@@ -534,7 +541,9 @@ public class SQLiteConnection implements Connection
      * @see java.sql.Connection#createStatement(int, int, int)
      */
     public Statement createStatement(int rst, int rsc, int rsh) throws SQLException {
+        checkOpen();
         checkCursor(rst, rsc, rsh);
+
         return new Stmt(this);
     }
 
@@ -599,7 +608,9 @@ public class SQLiteConnection implements Connection
      * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
      */
     public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh) throws SQLException {
+        checkOpen();
         checkCursor(rst, rsc, rsh);
+
         return new PrepStmt(this, sql);
     }
 
