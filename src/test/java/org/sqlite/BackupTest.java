@@ -32,10 +32,6 @@ public class BackupTest
 
     @Test
     public void backupAndRestore() throws SQLException, IOException {
-
-        //if (!SQLiteJDBCLoader.isNativeMode())
-        //    return; // skip this test in pure-java mode
-
         // create a memory database
         File tmpFile = File.createTempFile("backup-test", ".sqlite");
         tmpFile.deleteOnExit();
@@ -53,7 +49,7 @@ public class BackupTest
         // open another memory database
         Connection conn2 = DriverManager.getConnection("jdbc:sqlite:");
         Statement stmt2 = conn2.createStatement();
-        stmt2.executeUpdate("restore from " + tmpFile.getAbsolutePath());
+        stmt2.execute("restore from " + tmpFile.getAbsolutePath());
         ResultSet rs = stmt2.executeQuery("select * from sample");
         int count = 0;
         while (rs.next()) {
@@ -61,6 +57,7 @@ public class BackupTest
         }
 
         assertEquals(2, count);
+        rs.close();
 
     }
 

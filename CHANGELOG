@@ -1,5 +1,6 @@
 Work in progress:
 
+* Issue 60 - ExtendedCommand (e.g backup) not supported on stmt.execute()
 * Added support for specifying a date storage class. For more info <https://bitbucket.org/xerial/sqlite-jdbc/issue/23/getdate-returns-wrong-values>
 * Issue 23 - getDate() returns wrong values
 * Added support for InputStreams on PreparedStatement

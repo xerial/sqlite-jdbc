@@ -147,6 +147,14 @@ class Stmt extends Unused implements Statement, Codes
      */
     public boolean execute(String sql) throws SQLException {
         internalClose();
+
+        SQLExtension ext = ExtendedCommand.parse(sql);
+        if (ext != null) { 
+            ext.execute(db);
+
+            return false;
+        }
+
         this.sql = sql;
 
         db.prepare(this);
