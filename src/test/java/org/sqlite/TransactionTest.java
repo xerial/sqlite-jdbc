@@ -274,30 +274,30 @@ public class TransactionTest
     public void transactionModes() throws Exception {
         File tmpFile = File.createTempFile("test-trans", ".db");
 
-        Field transactionMode = Conn.class.getDeclaredField("transactionMode");
+        Field transactionMode = SQLiteConnection.class.getDeclaredField("transactionMode");
         transactionMode.setAccessible(true);
-        Field beginCommandMap = Conn.class.getDeclaredField("beginCommandMap");
+        Field beginCommandMap = SQLiteConnection.class.getDeclaredField("beginCommandMap");
         beginCommandMap.setAccessible(true);
 
         SQLiteDataSource ds = new SQLiteDataSource();
         ds.setUrl("jdbc:sqlite:" + tmpFile.getAbsolutePath());
 
         // deffered
-        Conn con = (Conn)ds.getConnection();
+        SQLiteConnection con = (SQLiteConnection)ds.getConnection();
         assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
         assertEquals("begin;", 
                  ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
         runUpdates(con, "tbl1");
         
         ds.setTransactionMode(TransactionMode.DEFFERED.name());
-        con = (Conn)ds.getConnection();
+        con = (SQLiteConnection)ds.getConnection();
         assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
         assertEquals("begin;", 
                  ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
 
         // immediate
         ds.setTransactionMode(TransactionMode.IMMEDIATE.name());
-        con = (Conn)ds.getConnection();
+        con = (SQLiteConnection)ds.getConnection();
         assertEquals(TransactionMode.IMMEDIATE, transactionMode.get(con));
         assertEquals("begin immediate;", 
                  ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.IMMEDIATE));
@@ -305,7 +305,7 @@ public class TransactionTest
 
         // exclusive
         ds.setTransactionMode(TransactionMode.EXCLUSIVE.name());
-        con = (Conn)ds.getConnection();
+        con = (SQLiteConnection)ds.getConnection();
         assertEquals(TransactionMode.EXCLUSIVE, transactionMode.get(con));
         assertEquals("begin exclusive;", 
                  ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.EXCLUSIVE));

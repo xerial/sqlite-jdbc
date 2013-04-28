@@ -52,7 +52,7 @@ import java.sql.SQLException;
  */
 public abstract class Function
 {
-    private Conn conn;
+    private SQLiteConnection conn;
     private DB db;
 
     long context = 0;     // pointer sqlite3_context*
@@ -67,14 +67,14 @@ public abstract class Function
      */
     public static final void create(Connection conn, String name, Function f)
             throws SQLException {
-        if (conn == null || !(conn instanceof Conn)) {
+        if (conn == null || !(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
         if (conn.isClosed()) {
             throw new SQLException("connection closed");
         }
 
-        f.conn = (Conn)conn;
+        f.conn = (SQLiteConnection)conn;
         f.db = f.conn.db();
 
         if (name == null || name.length() > 255) {
@@ -94,10 +94,10 @@ public abstract class Function
      */
     public static final void destroy(Connection conn, String name)
             throws SQLException {
-        if (conn == null || !(conn instanceof Conn)) {
+        if (conn == null || !(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
-        ((Conn)conn).db().destroy_function(name);
+        ((SQLiteConnection)conn).db().destroy_function(name);
     }
 
 

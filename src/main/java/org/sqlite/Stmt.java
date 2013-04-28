@@ -27,7 +27,7 @@ import org.sqlite.ExtendedCommand.SQLExtension;
 
 class Stmt extends Unused implements Statement, Codes
 {
-    final Conn conn;
+    final SQLiteConnection conn;
     final DB   db;
     final RS   rs;
 
@@ -40,7 +40,7 @@ class Stmt extends Unused implements Statement, Codes
     Object[]   batch          = null;
     boolean    resultsWaiting = false;
 
-    Stmt(Conn c) {
+    Stmt(SQLiteConnection c) {
         conn = c;
         db = conn.db();
         rs = new RS(this);
@@ -338,7 +338,7 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#getQueryTimeout()
      */
     public int getQueryTimeout() throws SQLException {
-        return conn.getTimeout();
+        return conn.getBusyTimeout();
     }
 
     /**
@@ -347,7 +347,7 @@ class Stmt extends Unused implements Statement, Codes
     public void setQueryTimeout(int seconds) throws SQLException {
         if (seconds < 0)
             throw new SQLException("query timeout must be >= 0");
-        conn.setTimeout(1000 * seconds);
+        conn.setBusyTimeout(1000 * seconds);
     }
 
     // TODO: write test

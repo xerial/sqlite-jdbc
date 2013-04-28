@@ -36,7 +36,7 @@ import java.util.Map;
 abstract class DB implements Codes
 {
     /** The JDBC Connection that 'owns' this database instance. */
-    Conn                          conn   = null;
+    SQLiteConnection                          conn   = null;
 
     /** The "begin;"and "commit;" statement handles. */
     long                          begin  = 0;
@@ -152,7 +152,7 @@ abstract class DB implements Codes
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/open.html">http://www.sqlite.org/c3ref/open.html</a>
      */
-    final synchronized void open(Conn conn, String file, int openFlags) throws SQLException {
+    final synchronized void open(SQLiteConnection conn, String file, int openFlags) throws SQLException {
         this.conn = conn;
         _open(file, openFlags);
     }

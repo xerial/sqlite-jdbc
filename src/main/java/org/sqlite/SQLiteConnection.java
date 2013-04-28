@@ -42,15 +42,17 @@ import org.sqlite.SQLiteConfig.DateClass;
 import org.sqlite.SQLiteConfig.DatePrecision;
 import org.sqlite.SQLiteConfig.TransactionMode;
 
-class Conn implements Connection
+public class SQLiteConnection implements Connection
 {
+    private static final String RESOURCE_NAME_PREFIX = ":resource:";
+
     private final String url;
     private String       fileName;
     private DB           db                   = null;
     private MetaData     meta                 = null;
     private boolean      autoCommit           = true;
     private int          transactionIsolation = TRANSACTION_SERIALIZABLE;
-    private int          timeout              = 0;
+    private int          busyTimeout              = 0;
     private final int    openModeFlags;
     private TransactionMode
                          transactionMode      = TransactionMode.DEFFERED;
@@ -58,7 +60,7 @@ class Conn implements Connection
     private final static Map<TransactionMode, String> beginCommandMap =
         new HashMap<SQLiteConfig.TransactionMode, String>();
 
-    static{
+    static {
         beginCommandMap.put(TransactionMode.DEFFERED, "begin;");
         beginCommandMap.put(TransactionMode.IMMEDIATE, "begin immediate;");
         beginCommandMap.put(TransactionMode.EXCLUSIVE, "begin exclusive;");
@@ -76,7 +78,7 @@ class Conn implements Connection
      * @param fileName The database.
      * @throws SQLException
      */
-    public Conn(String url, String fileName) throws SQLException {
+    public SQLiteConnection(String url, String fileName) throws SQLException {
         this(url, fileName, new Properties());
     }
 
@@ -88,7 +90,7 @@ class Conn implements Connection
      * @param prop The configurations to apply.
      * @throws SQLException
      */
-    public Conn(String url, String fileName, Properties prop) throws SQLException {
+    public SQLiteConnection(String url, String fileName, Properties prop) throws SQLException {
         this.url = url;
         this.fileName = fileName;
 
@@ -100,7 +102,7 @@ class Conn implements Connection
         this.transactionMode = config.getTransactionMode();
         this.openModeFlags = config.getOpenModeFlags();
 
-        open(openModeFlags);
+        open(openModeFlags, config.busyTimeout);
 
         if (fileName.startsWith("file:") && !fileName.contains("cache="))
         {   // URI cache overrides flags
@@ -112,15 +114,13 @@ class Conn implements Connection
         config.apply(this);
     }
 
-    private static final String RESOURCE_NAME_PREFIX = ":resource:";
-
     /**
      * Opens a connection to the database using an SQLite library.
      * @param openModeFlags Flags for file open operations.
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
-    private void open(int openModeFlags) throws SQLException {
+    private void open(int openModeFlags, int busyTimeout) throws SQLException {
         // check the path to the file exists
         if (!":memory:".equals(fileName) && !fileName.startsWith("file:") && !fileName.contains("mode=memory")) {
             if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
@@ -182,7 +182,7 @@ class Conn implements Connection
         }
 
         db.open(this, fileName, openModeFlags);
-        setTimeout(3000);
+        setBusyTimeout(busyTimeout);
     }
 
     /**
@@ -247,20 +247,23 @@ class Conn implements Connection
     }
 
     /**
-     * @return The timeout value for the connection.
+     * @return The busy timeout value for the connection.
+     * @see <a href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
      */
-    int getTimeout() {
-        return timeout;
+    public int getBusyTimeout() {
+        return busyTimeout;
     }
 
     /**
      * Sets the timeout value for the connection.
-     * @param ms The timeout value in milliseconds.
+     * A timeout value less than or equal to zero turns off all busy handlers.
+     * @see <a href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
+     * @param milliseconds The timeout value in milliseconds.
      * @throws SQLException
      */
-    void setTimeout(int ms) throws SQLException {
-        timeout = ms;
-        db.busy_timeout(ms);
+    public void setBusyTimeout(int milliseconds) throws SQLException {
+        busyTimeout = milliseconds;
+        db.busy_timeout(busyTimeout);
     }
 
     /**

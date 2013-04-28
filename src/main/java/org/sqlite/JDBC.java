@@ -110,6 +110,6 @@ public class JDBC implements Driver
             throw new SQLException("invalid database address: " + url);
 
         url = url.trim();
-        return new Conn(url, extractAddress(url), prop);
+        return new SQLiteConnection(url, extractAddress(url), prop);
     }
 }

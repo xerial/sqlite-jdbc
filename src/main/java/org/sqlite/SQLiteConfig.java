@@ -42,17 +42,17 @@ import java.util.Properties;
  */
 public class SQLiteConfig
 {
-    public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-
     private final Properties pragmaTable;
-    private int              openModeFlag = 0x00;
-    private TransactionMode  transactionMode; 
+    private int openModeFlag = 0x00;
+    private TransactionMode transactionMode;
+    protected final int busyTimeout;
 
-    /* Date storage class defaults*/
-    public final DateClass dateClass;
-    public final DatePrecision datePrecision;
-    public final long dateMultiplier;
-    public final String dateStringFormat;
+    /* Date storage class*/
+    public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+    protected final DateClass dateClass;
+    protected final DatePrecision datePrecision;
+    protected final long dateMultiplier;
+    protected final String dateStringFormat;
 
     /**
      * Default constructor.
@@ -88,6 +88,8 @@ public class SQLiteConfig
         datePrecision = DatePrecision.getPrecision(pragmaTable.getProperty(Pragma.DATE_PRECISION.pragmaName, DatePrecision.MILLISECONDS.name()));
         dateMultiplier = (datePrecision == DatePrecision.MILLISECONDS) ? 1L : 1000L;
         dateStringFormat = pragmaTable.getProperty(Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT);
+
+        busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
     }
 
     /**
@@ -272,7 +274,8 @@ public class SQLiteConfig
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
         DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
-        DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null);
+        DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
+        BUSY_TIMEOUT("busy_timeout", null);
 
         public final String   pragmaName;
         public final String[] choices;
@@ -779,5 +782,12 @@ public class SQLiteConfig
      */
     public void setDateStringFormat(String dateStringFormat) {
         setPragma(Pragma.DATE_STRING_FORMAT, dateStringFormat);
+    }
+
+    /**
+     * @param connectTimeout Connect to DB timeout in seconds
+     */
+    public void setBusyTimeout(String milliseconds) {
+        setPragma(Pragma.BUSY_TIMEOUT, milliseconds);
     }
 }

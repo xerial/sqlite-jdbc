@@ -27,14 +27,13 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class MetaData implements DatabaseMetaData
 {
-    private Conn              conn;
+    private SQLiteConnection              conn;
     private PreparedStatement
             getTables             = null,   getTableTypes        = null,
             getTypeInfo           = null,   getCatalogs          = null,
@@ -55,7 +54,7 @@ class MetaData implements DatabaseMetaData
      * Constructor that applies the Connection object.
      * @param conn Connection object.
      */
-    MetaData(Conn conn) {
+    MetaData(SQLiteConnection conn) {
         this.conn = conn;
     }
 

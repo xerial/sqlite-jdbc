@@ -52,18 +52,18 @@ public class ReadUncommittedTest
     @Test
     public void setReadUncommitted() throws SQLException
     {
-        conn.setTransactionIsolation(Conn.TRANSACTION_READ_UNCOMMITTED);
+        conn.setTransactionIsolation(SQLiteConnection.TRANSACTION_READ_UNCOMMITTED);
     }
 
     @Test
     public void setSerializable() throws SQLException
     {
-        conn.setTransactionIsolation(Conn.TRANSACTION_SERIALIZABLE);
+        conn.setTransactionIsolation(SQLiteConnection.TRANSACTION_SERIALIZABLE);
     }
 
     @Test(expected = SQLException.class)
     public void setUnsupportedIsolationLevel() throws SQLException
     {
-        conn.setTransactionIsolation(Conn.TRANSACTION_REPEATABLE_READ);
+        conn.setTransactionIsolation(SQLiteConnection.TRANSACTION_REPEATABLE_READ);
     }
 }

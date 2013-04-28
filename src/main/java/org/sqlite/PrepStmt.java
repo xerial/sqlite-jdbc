@@ -43,7 +43,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      * @param sql The SQL script to prepare.
      * @throws SQLException
      */
-    PrepStmt(Conn conn, String sql) throws SQLException {
+    PrepStmt(SQLiteConnection conn, String sql) throws SQLException {
         super(conn);
 
         this.sql = sql;
