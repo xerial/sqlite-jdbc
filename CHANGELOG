@@ -1,5 +1,6 @@
 Work in progress:
 
+* Issue #48 - PreparedStatement.getResultSet should return null if current result is an update
 * Issue #67 - Bad ResultSet returned from DatabaseMetaData.getColumns(), if a given table doesn't exist
 * Issue #73 - DatabaseMetaData.getTables() Memory Leak
 * Issue #68 - DatabaseMetaData.getTables() erroneously returns INDEX, TRIGGER, and other non-table objects

@@ -81,7 +81,9 @@ public class PrepStmtTest
         for (int i = 0; i < 10; i++) {
             prep.setInt(1, i);
             prep.executeUpdate();
+            assertNull(prep.getResultSet());
             prep.execute();
+            assertNull(prep.getResultSet());
         }
 
         prep.close();

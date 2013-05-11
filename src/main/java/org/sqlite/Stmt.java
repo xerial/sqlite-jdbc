@@ -180,10 +180,12 @@ class Stmt extends Unused implements Statement, Codes
         this.sql = sql;
 
         db.prepare(this);
+
         if (!exec()) {
             internalClose();
             throw new SQLException("query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
         }
+
         return getResultSet();
     }
 
@@ -230,16 +232,23 @@ class Stmt extends Unused implements Statement, Codes
      */
     public ResultSet getResultSet() throws SQLException {
         checkOpen();
-        if (rs.isOpen())
-            throw new SQLException("ResultSet already requested");
-        if (db.column_count(pointer) == 0)
-            throw new SQLException("no ResultSet available");
-        if (rs.colsMeta == null)
-            rs.colsMeta = db.column_names(pointer);
-        rs.cols = rs.colsMeta;
 
+        if (rs.isOpen()) {
+            throw new SQLException("ResultSet already requested");
+        }
+
+        if (db.column_count(pointer) == 0) {
+            return null;
+        }
+
+        if (rs.colsMeta == null) {
+            rs.colsMeta = db.column_names(pointer);
+        }
+
+        rs.cols = rs.colsMeta;
         rs.open = resultsWaiting;
         resultsWaiting = false;
+
         return rs;
     }
 
