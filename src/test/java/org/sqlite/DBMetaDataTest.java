@@ -172,6 +172,7 @@ public class DBMetaDataTest
 
         rs = meta.getColumns(null, null, "doesnotexist", "%");
         assertFalse(rs.next());
+        assertEquals(22, rs.getMetaData().getColumnCount());
     }
 
     @Test

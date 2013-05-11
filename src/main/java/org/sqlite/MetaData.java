@@ -1210,10 +1210,10 @@ class MetaData implements DatabaseMetaData
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
      *      java.lang.String, java.lang.String)
      */
-    public ResultSet getColumns(String c, String s, String tbl, String colPat) throws SQLException {
+    public ResultSet getColumns(String c, String s, String tblNamePattern, String colNamePattern) throws SQLException {
         Statement stat = conn.createStatement();
         ResultSet rs;
-        String sql;
+        StringBuilder sql = new StringBuilder(700);
 
         checkOpen();
 
@@ -1222,27 +1222,26 @@ class MetaData implements DatabaseMetaData
         }
 
         // determine exact table name
-        getColumnsTblName.setString(1, tbl);
+        getColumnsTblName.setString(1, tblNamePattern);
         rs = getColumnsTblName.executeQuery();
-        if (!rs.next()) {
-            return rs;
+
+        if (rs.next()) {
+            tblNamePattern = rs.getString(1);
+            rs.close();
+            // the command "pragma table_info('tablename')" does not embed
+            // like a normal select statement so we must extract the information
+            // and then build a resultset from unioned select statements
+            rs = stat.executeQuery("pragma table_info ('" + escape(tblNamePattern) + "');");
         }
-        tbl = rs.getString(1);
-        rs.close();
 
-        sql = "select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, " + "'" + escape(tbl) + "' as TABLE_NAME, "
-                + "cn as COLUMN_NAME, " + "ct as DATA_TYPE, " + "tn as TYPE_NAME, " + "2000000000 as COLUMN_SIZE, "
-                + "2000000000 as BUFFER_LENGTH, " + "10   as DECIMAL_DIGITS, " + "10   as NUM_PREC_RADIX, "
-                + "colnullable as NULLABLE, " + "null as REMARKS, " + "colDefault as COLUMN_DEF, "
-                + "0    as SQL_DATA_TYPE, " + "0    as SQL_DATETIME_SUB, " + "2000000000 as CHAR_OCTET_LENGTH, "
-                + "ordpos as ORDINAL_POSITION, " + "(case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)"
-                + "    as IS_NULLABLE, " + "null as SCOPE_CATLOG, " + "null as SCOPE_SCHEMA, "
-                + "null as SCOPE_TABLE, " + "null as SOURCE_DATA_TYPE from (";
-
-        // the command "pragma table_info('tablename')" does not embed
-        // like a normal select statement so we must extract the information
-        // and then build a resultset from unioned select statements
-        rs = stat.executeQuery("pragma table_info ('" + escape(tbl) + "');");
+        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '").append(escape(tblNamePattern)).append("' as TABLE_NAME, ")
+        .append("cn as COLUMN_NAME, ct as DATA_TYPE, tn as TYPE_NAME, 2000000000 as COLUMN_SIZE, ")
+        .append("2000000000 as BUFFER_LENGTH, 10   as DECIMAL_DIGITS, 10   as NUM_PREC_RADIX, ")
+        .append("colnullable as NULLABLE, null as REMARKS, colDefault as COLUMN_DEF, ")
+        .append("0    as SQL_DATA_TYPE, 0    as SQL_DATETIME_SUB, 2000000000 as CHAR_OCTET_LENGTH, ")
+        .append("ordpos as ORDINAL_POSITION, (case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)")
+        .append("    as IS_NULLABLE, null as SCOPE_CATLOG, null as SCOPE_SCHEMA, ")
+        .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE from (");
 
         boolean colFound = false;
         for (int i = 0; rs.next(); i++) {
@@ -1256,7 +1255,7 @@ class MetaData implements DatabaseMetaData
                 colNullable = colNotNull.equals("0") ? 1 : 0;
             }
             if (colFound) {
-                sql += " union all ";
+                sql.append(" union all ");
             }
             colFound = true;
 
@@ -1294,21 +1293,27 @@ class MetaData implements DatabaseMetaData
                 colJavaType = Types.VARCHAR;
             }
 
-            sql += "select " + i + " as ordpos, "
-                    + colNullable + " as colnullable, '"
-                    + colJavaType + "' as ct, '"
-                    + escape(colName) + "' as cn, '"
-                    + escape(colType) + "' as tn, "
-                    + quote(colDefault == null ? null : escape(colDefault)) + " as colDefault";
+            sql.append("select ").append(i).append(" as ordpos, ")
+               .append(colNullable).append(" as colnullable, '")
+               .append(colJavaType).append("' as ct, '")
+               .append(escape(colName)).append("' as cn, '")
+               .append(escape(colType)).append("' as tn, ")
+               .append(quote(colDefault == null ? null : escape(colDefault))).append(" as colDefault");
 
-            if (colPat != null) {
-                sql += " where upper(cn) like upper('" + escape(colPat) + "')";
+            if (colNamePattern != null) {
+                sql.append(" where upper(cn) like upper('").append(escape(colNamePattern)).append("')");
             }
         }
-        sql += colFound ? ");" : "select null as ordpos, null as colnullable, null as cn, null as tn, null as colDefault) limit 0;";
+
+        if (colFound) {
+            sql.append(");");
+        }
+        else {
+            sql.append("select null as ordpos, null as colnullable, null as ct, null as cn, null as tn, null as colDefault) limit 0;");
+        }
         rs.close();
 
-        return ((Stmt)stat).executeQuery(sql, true);
+        return ((Stmt)stat).executeQuery(sql.toString(), true);
     }
 
     /**
