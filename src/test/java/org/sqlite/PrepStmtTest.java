@@ -60,6 +60,7 @@ public class PrepStmtTest
         PreparedStatement prep = conn.prepareStatement("insert into s1 values (?);");
         prep.setInt(1, 3);
         assertEquals(prep.executeUpdate(), 1);
+        assertNull(prep.getResultSet());
         prep.setInt(1, 5);
         assertEquals(prep.executeUpdate(), 1);
         prep.setInt(1, 7);
@@ -81,9 +82,7 @@ public class PrepStmtTest
         for (int i = 0; i < 10; i++) {
             prep.setInt(1, i);
             prep.executeUpdate();
-            assertNull(prep.getResultSet());
             prep.execute();
-            assertNull(prep.getResultSet());
         }
 
         prep.close();
@@ -133,6 +132,7 @@ public class PrepStmtTest
         PreparedStatement prep = conn.prepareStatement("select ?;");
         prep.setString(1, name);
         ResultSet rs = prep.executeQuery();
+        assertEquals(-1, prep.getUpdateCount());
         assertTrue(rs.next());
         assertEquals(rs.getString(1), name);
         assertFalse(rs.next());

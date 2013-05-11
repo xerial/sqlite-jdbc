@@ -153,9 +153,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     @Override
     public int getUpdateCount() throws SQLException {
-        checkOpen();
-
-        if (pointer == 0 || resultsWaiting) {
+        if (pointer == 0 || resultsWaiting || rs.isOpen()) {
             return -1;
         }
 
