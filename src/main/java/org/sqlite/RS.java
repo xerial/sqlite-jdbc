@@ -52,9 +52,12 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     private int        row      = 0;    // number of current row, starts at 1 (0 is for before loading data)
     private int        lastCol;         // last column accessed, for wasNull(). -1 if none
 
+    boolean closeStmt;
+
     /**
      * Default constructor for a given statement.
      * @param stmt The statement.
+     * @param closeStmt TODO
      */
     RS(Stmt stmt) {
         this.stmt = stmt;
@@ -136,8 +139,14 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         if (stmt == null) {
             return;
         }
+
         if (stmt != null && stmt.pointer != 0) {
             db.reset(stmt.pointer);
+
+            if (closeStmt) {
+                closeStmt = false; // break recursive call
+                stmt.close();
+            }
         }
     }
 

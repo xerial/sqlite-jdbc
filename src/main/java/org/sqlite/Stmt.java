@@ -114,11 +114,12 @@ class Stmt extends Unused implements Statement, Codes
 
         if (pointer == 0)
             return;
-        
+
         rs.close();
         batch = null;
         batchPos = 0;
         int resp = db.finalize(this);
+
         if (resp != SQLITE_OK && resp != SQLITE_MISUSE)
             db.throwex();
     }
@@ -159,6 +160,16 @@ class Stmt extends Unused implements Statement, Codes
 
         db.prepare(this);
         return exec();
+    }
+
+    /**
+     * @param autoClose Whether to close this statement when the resultset is closed.
+     * @see java.sql.Statement#executeQuery(java.lang.String)
+     */
+    ResultSet executeQuery(String sql, boolean autoClose) throws SQLException {
+        rs.closeStmt = true;
+
+        return executeQuery(sql);
     }
 
     /**

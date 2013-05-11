@@ -1308,7 +1308,7 @@ class MetaData implements DatabaseMetaData
         sql += colFound ? ");" : "select null as ordpos, null as colnullable, null as cn, null as tn, null as colDefault) limit 0;";
         rs.close();
 
-        return stat.executeQuery(sql);
+        return ((Stmt)stat).executeQuery(sql, true);
     }
 
     /**
@@ -1334,7 +1334,7 @@ class MetaData implements DatabaseMetaData
                 + "3 as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, "
                 + Integer.toString(importedKeyInitiallyDeferred)
                 + " as DEFERRABILITY limit 0;");
-        return conn.createStatement().executeQuery(query.toString());
+        return ((Stmt)conn.createStatement()).executeQuery(query.toString(), true);
     }
 
     /**
@@ -1376,7 +1376,7 @@ class MetaData implements DatabaseMetaData
 
         if (columns == null) {
             sql.append("select null as cn, null as pk, 0 as ks) order by cn limit 0;");
-            return stat.executeQuery(sql.toString());
+            return ((Stmt)stat).executeQuery(sql.toString(), true);
         }
 
         String pkName = pkFinder.getName();
@@ -1388,7 +1388,7 @@ class MetaData implements DatabaseMetaData
                .append(i).append(" as ks");
         }
 
-        return stat.executeQuery(sql.append(") order by cn;").toString());
+        return ((Stmt)stat).executeQuery(sql.append(") order by cn;").toString(), true);
     }
 
     /**
@@ -1533,7 +1533,7 @@ class MetaData implements DatabaseMetaData
        if (exist)
            sql.append(exportedKeysQuery).append(") order by fkt");
 
-        return stat.executeQuery(sql.toString()); //FIXME: close stat
+        return ((Stmt)stat).executeQuery(sql.toString(), true);
     }
 
     /**
@@ -1591,7 +1591,7 @@ class MetaData implements DatabaseMetaData
                     + importedKeyNoAction + " as dr) limit 0;";
         }
 
-        return stat.executeQuery(sql);
+        return ((Stmt)stat).executeQuery(sql, true);
     }
 
     /**
@@ -1650,7 +1650,7 @@ class MetaData implements DatabaseMetaData
             sql += "select null as un, null as n, null as op, null as cn) limit 0;";
         }
 
-        return stat.executeQuery(sql);
+        return ((Stmt)stat).executeQuery(sql, true);
     }
 
     /**
@@ -1724,31 +1724,32 @@ class MetaData implements DatabaseMetaData
      * @see java.sql.DatabaseMetaData#getTables(java.lang.String, java.lang.String,
      *      java.lang.String, java.lang.String[])
      */
-    public synchronized ResultSet getTables(String c, String s, String t, String[] types) throws SQLException {
+    public synchronized ResultSet getTables(String c, String s, String tblNamePattern, String types[]) throws SQLException {
         checkOpen();
 
-        t = (t == null || "".equals(t)) ? "%" : t.toUpperCase();
+        tblNamePattern = (tblNamePattern == null || "".equals(tblNamePattern)) ? "%" : escape(tblNamePattern);
 
-        String sql = "select" + " null as TABLE_CAT," + " null as TABLE_SCHEM," + " name as TABLE_NAME,"
-                + " upper(type) as TABLE_TYPE," + " null as REMARKS," + " null as TYPE_CAT," + " null as TYPE_SCHEM,"
-                + " null as TYPE_NAME," + " null as SELF_REFERENCING_COL_NAME," + " null as REF_GENERATION"
-                + " from (select name, type from sqlite_master union all"
-                + "       select name, type from sqlite_temp_master)" + " where TABLE_NAME like '" + escape(t) + "'";
+        StringBuilder sql = new StringBuilder();
+        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, name as TABLE_NAME,")
+           .append(" upper(type) as TABLE_TYPE, null as REMARKS, null as TYPE_CAT, null as TYPE_SCHEM,")
+           .append(" null as TYPE_NAME, null as SELF_REFERENCING_COL_NAME, null as REF_GENERATION")
+           .append(" from (select name, type from sqlite_master union all select name, type from sqlite_temp_master)")
+           .append(" where TABLE_NAME like '").append(tblNamePattern).append("' and TABLE_TYPE in (");
 
-        if (types != null) {
-            sql += " and TABLE_TYPE in (";
-            for (int i = 0; i < types.length; i++) {
-                if (i > 0) {
-                    sql += ", ";
-                }
-                sql += "'" + types[i].toUpperCase() + "'";
+        if (types == null) {
+            sql.append("'TABLE','VIEW'");
+        }
+        else {
+            sql.append("'").append(types[0].toUpperCase()).append("'");
+
+            for (int i = 1; i < types.length; i++) {
+                sql.append(",'").append(types[i].toUpperCase()).append("'");
             }
-            sql += ")";
         }
 
-        sql += ";";
+        sql.append(") order by TABLE_TYPE, TABLE_NAME;");
 
-        return conn.createStatement().executeQuery(sql);
+        return ((Stmt)conn.createStatement()).executeQuery(sql.toString(), true);
     }
 
     /**
@@ -1950,15 +1951,14 @@ class MetaData implements DatabaseMetaData
                     for (int i = 0; i < pkColumns.length; i++) {
                         pkColumns[i] = pkColumns[i].toLowerCase().trim();
                     }
-                //FIXME: close stat
             }
             finally {
                 try {
                     if (rs != null) rs.close();
-                } catch (Exception e1) {}
+                } catch (Exception e) {}
                 try {
                     if (stat != null) stat.close();
-                } catch (Exception e1) {}
+                } catch (Exception e) {}
             }
         }
 
