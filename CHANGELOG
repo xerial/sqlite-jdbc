@@ -1,5 +1,7 @@
 Work in progress:
 
+* Issue #73: DatabaseMetaData.getTables() Memory Leak
+* Issue #68 DatabaseMetaData.getTables() erroneously returns INDEX, TRIGGER, and other non-table objects
 * Issue #18 - Add support for ConnectionPool
     * Implemented javax.sql.ConnectionPoolDataSource - javax.SQLiteConnectionPoolDataSource
 * Issue #27 - Allow user to specify busy-timeout when opening a database connection
