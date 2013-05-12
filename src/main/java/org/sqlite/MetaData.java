@@ -1571,6 +1571,11 @@ class MetaData implements DatabaseMetaData
                 String PKTabName = rs.getString(3);
                 String FKColName = rs.getString(4);
                 String PKColName = rs.getString(5);
+
+                if (PKColName == null) {
+                    PKColName = new PrimaryKeyFinder(PKTabName).getColumns()[0];
+                }
+
                 String updateRule = rs.getString(6);
                 String deleteRule = rs.getString(7);
 
@@ -1746,7 +1751,7 @@ class MetaData implements DatabaseMetaData
            .append(" from (select name, type from sqlite_master union all select name, type from sqlite_temp_master)")
            .append(" where TABLE_NAME like '").append(tblNamePattern).append("' and TABLE_TYPE in (");
 
-        if (types == null) {
+        if (types == null || types.length == 0) {
             sql.append("'TABLE','VIEW'");
         }
         else {
