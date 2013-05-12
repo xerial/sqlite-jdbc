@@ -1,5 +1,6 @@
 Work in progress:
 
+* Issue #65 - Calling Statement.setMaxRows(N) has the effect of returning N+1 rows
 * Issue #64 - ArrayIndexOutOfBoundsException when calling ResultSetMetaData.getScale() for VARCHAR column types
 * Issue #56 - Implement getBinaryStream() in RS.java
 * Issue #45 - Stmt.close() should not close metadata

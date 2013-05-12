@@ -196,7 +196,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         }
 
         // check if we are row limited by the statement or the ResultSet
-        if (maxRows != 0 && row > maxRows) {
+        if (maxRows != 0 && row == maxRows) {
             return false;
         }
 

@@ -386,6 +386,23 @@ public class StatementTest
     @Test
     public void maxRows() throws SQLException {
         stat.setMaxRows(1);
+        ResultSet rs = stat.executeQuery("select 1 union select 2 union select 3");
+
+        assertTrue(rs.next());
+        assertEquals(1, rs.getInt(1));
+        assertFalse(rs.next());
+
+        rs.close();
+        stat.setMaxRows(2);
+        rs = stat.executeQuery("select 1 union select 2 union select 3");
+
+        assertTrue(rs.next());
+        assertEquals(1, rs.getInt(1));
+        assertTrue(rs.next());
+        assertEquals(2, rs.getInt(1));
+        assertFalse(rs.next());
+
+        rs.close();
     }
 
     @Test 
