@@ -120,3 +120,10 @@ ifneq ($(jni_include),)
 CFLAGS := $(CFLAGS) -I"$(jni_include)"
 endif
 
+ifeq ($(OS_NAME),Windows)
+    NATIVE32_DLL = win32
+else ifeq ($(OS_NAME),Linux)
+    NATIVE32_DLL = linux32
+else ifeq ($(OS_NAME),Mac)
+    NATIVE32_DLL = mac32
+endif

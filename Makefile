@@ -4,7 +4,7 @@ include Makefile.common
 
 RESOURCE_DIR = src/main/resources
 
-.phony: all package win mac linux native deploy
+.phony: all package win32 mac32 linux32 native deploy
 
 all: package
 
@@ -100,7 +100,7 @@ mac32:
 	$(MAKE) native OS_NAME=Mac OS_ARCH=i386
 
 
-package: native
+package: $(NATIVE32_DLL) native
 	rm -rf target/dependency-maven-plugin-markers
 	$(MVN) package
 
