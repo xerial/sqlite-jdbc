@@ -248,6 +248,14 @@ public class StatementTest
         assertTrue(rs.next());
         assertEquals(rs.getInt(1), 2);
         rs.close();
+
+        // closing one statement shouldn't close shared db metadata object.
+        stat.close();
+        Statement stat2  = conn.createStatement();
+        rs = stat2.getGeneratedKeys();
+        assertNotNull(rs);
+        rs.close();
+        stat2.close();
     }
 
     @Test

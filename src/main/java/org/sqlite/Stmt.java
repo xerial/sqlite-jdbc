@@ -130,15 +130,19 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#close()
      */
     public void close() throws SQLException {
-        if (metadata != null)
+        if (metadata != null) {
+            metadata.refCount--;
             metadata.close();
+
+            metadata = null;
+        }
 
         internalClose();
     }
+
     /**
      * @see java.lang.Object#finalize()
      */
-    @Override
     protected void finalize() throws SQLException {
         close();
     }
@@ -439,8 +443,10 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#getGeneratedKeys()
      */
     public ResultSet getGeneratedKeys() throws SQLException {
-        if (metadata == null)
-            metadata = (MetaData) conn.getMetaData();
+        if (metadata == null) {
+            metadata = (MetaData)conn.getMetaData();
+            metadata.refCount++;
+        }
 
         return metadata.getGeneratedKeys();
     }

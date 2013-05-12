@@ -457,8 +457,10 @@ public class SQLiteConnection implements Connection
     public DatabaseMetaData getMetaData() throws SQLException {
         checkOpen();
 
-        if (meta == null)
+        if (meta == null) {
             meta = new MetaData(this);
+        }
+
         return meta;
     }
 

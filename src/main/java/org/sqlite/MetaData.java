@@ -46,9 +46,14 @@ class MetaData implements DatabaseMetaData
             getColumnPrivileges   = null;
 
     /**
-     * Used by PrepStmt to save generating a new statement every call.
+     * Used to save generating a new statement every call.
      */
     private PreparedStatement getGeneratedKeys = null;
+
+    /**
+     * Reference count.
+     */
+    int refCount = 1;
 
     /**
      * Constructor that applies the Connection object.
@@ -71,7 +76,7 @@ class MetaData implements DatabaseMetaData
      * @throws SQLException
      */
     synchronized void close() throws SQLException {
-        if (conn == null) {
+        if (conn == null || refCount > 0) {
             return;
         }
 
@@ -1848,6 +1853,7 @@ class MetaData implements DatabaseMetaData
         if (getGeneratedKeys == null) {
             getGeneratedKeys = conn.prepareStatement("select last_insert_rowid();");
         }
+
         return getGeneratedKeys.executeQuery();
     }
 
@@ -1980,5 +1986,12 @@ class MetaData implements DatabaseMetaData
         public String[] getColumns() {
             return pkColumns;
         }
+    }
+
+    /**
+     * @see java.lang.Object#finalize()
+     */
+    protected void finalize() throws Throwable {
+        close();
     }
 }

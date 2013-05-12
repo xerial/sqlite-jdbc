@@ -48,6 +48,10 @@ public class DBMetaDataTest
     public void getTables() throws SQLException {
         ResultSet rs = meta.getTables(null, null, null, null);
         assertNotNull(rs);
+
+        stat.getGeneratedKeys().close();
+        stat.close();
+
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "test"); // 3
         assertEquals(rs.getString("TABLE_TYPE"), "TABLE"); // 4
