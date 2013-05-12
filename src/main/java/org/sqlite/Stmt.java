@@ -167,11 +167,11 @@ class Stmt extends Unused implements Statement, Codes
     }
 
     /**
-     * @param autoClose Whether to close this statement when the resultset is closed.
+     * @param closeStmt Whether to close this statement when the resultset is closed.
      * @see java.sql.Statement#executeQuery(java.lang.String)
      */
-    ResultSet executeQuery(String sql, boolean autoClose) throws SQLException {
-        rs.closeStmt = true;
+    ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException {
+        rs.closeStmt = closeStmt;
 
         return executeQuery(sql);
     }
