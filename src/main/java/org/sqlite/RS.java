@@ -15,6 +15,8 @@
  */
 package org.sqlite;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
@@ -345,6 +347,20 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      */
     public boolean getBoolean(String col) throws SQLException {
         return getBoolean(findColumn(col));
+    }
+
+    /**
+     * @see java.sql.ResultSet#getBinaryStream(int)
+     */
+    public InputStream getBinaryStream(int col) throws SQLException {
+        return new ByteArrayInputStream(getBytes(col));
+    }
+
+    /**
+     * @see java.sql.ResultSet#getBinaryStream(java.lang.String)
+     */
+    public InputStream getBinaryStream(String col) throws SQLException {
+        return getBinaryStream(findColumn(col));
     }
 
     /**

@@ -82,10 +82,6 @@ abstract class Unused
 //        throws SQLException { throw unused(); }
     public BigDecimal getBigDecimal(String col, int s)
         throws SQLException { throw unused(); }
-    public InputStream getBinaryStream(int col)
-        throws SQLException { throw unused(); }
-    public InputStream getBinaryStream(String col)
-        throws SQLException { throw unused(); }
     public Blob getBlob(int col)
         throws SQLException { throw unused(); }
     public Blob getBlob(String col)
