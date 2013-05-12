@@ -1,5 +1,6 @@
 package org.sqlite;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -34,7 +35,7 @@ public class RSMetaDataTest
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
         stat.executeUpdate("create table People (pid integer primary key autoincrement, "
-                + " firstname string, surname string, dob date);");
+                + " firstname string(255), surname string(25,5), dob date);");
         stat.executeUpdate("insert into people values (null, 'Mohandas', 'Gandhi', " + " '1869-10-02');");
         meta = stat.executeQuery("select pid, firstname, surname from people;").getMetaData();
     }
@@ -162,5 +163,12 @@ public class RSMetaDataTest
     public void badColumnIndex() throws SQLException
     {
         meta.getColumnName(4);
+    }
+
+    @Test
+    public void scale() throws SQLException 
+    {
+        assertEquals(0, meta.getScale(2));
+        assertEquals(5, meta.getScale(3));
     }
 }

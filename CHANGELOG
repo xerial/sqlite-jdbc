@@ -1,5 +1,6 @@
 Work in progress:
 
+* Issue #64 - ArrayIndexOutOfBoundsException when calling ResultSetMetaData.getScale() for VARCHAR column types
 * Issue #56 - Implement getBinaryStream() in RS.java
 * Issue #45 - Stmt.close() should not close metadata
 * Issue #49 - PreparedStatement.getUpdateCount should return -1 if the current result is a ResultSet or no more results exist

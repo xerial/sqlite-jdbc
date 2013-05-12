@@ -793,7 +793,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
     /**
      * Pattern used to extract the precision and scale from column meta returned by the JDBC driver.
      */
-    protected final static Pattern COLUMN_PRECISION = Pattern.compile(".*?\\(((.*?)|\2,\2)\\)");
+    protected final static Pattern COLUMN_PRECISION = Pattern.compile(".*?\\((.*?)\\)");
 
     // we do not need to check the RS is open, only that colsMeta
     // is not null, done with checkCol(int).
@@ -985,7 +985,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         if (declType != null) {
             Matcher matcher = COLUMN_PRECISION.matcher(declType);
 
-            return matcher.find() ? Integer.parseInt(matcher.group(1).split(",")[0]) : 0;
+            return matcher.find() ? Integer.parseInt(matcher.group(1).split(",")[0].trim()) : 0;
         }
 
         return 0;
@@ -1010,7 +1010,13 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
         if (declType != null) {
             Matcher matcher = COLUMN_PRECISION.matcher(declType);
 
-            return matcher.find() ? Integer.parseInt(matcher.group(1).split(",")[1]) : 0;
+            if (matcher.find()) {
+                String array[] = matcher.group(1).split(",");
+
+                if (array.length == 2) {
+                    return Integer.parseInt(array[1].trim());
+                }
+            }
         }
 
         return 0;
