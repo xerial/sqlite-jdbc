@@ -34,7 +34,8 @@ public class SQLitePooledConnection implements PooledConnection {
     protected List<ConnectionEventListener> listeners = new ArrayList<ConnectionEventListener>();
 
     /**
-     * @param physical The physical Connection
+     * Constructor.
+     * @param physicalConn The physical Connection.
      */
     protected SQLitePooledConnection(Connection physicalConn) {
         this.physicalConn = physicalConn;

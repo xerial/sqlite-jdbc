@@ -1,4 +1,3 @@
-/*--------------------------------------------------------------------------
  *  Copyright 2009 Taro L. Saito
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -778,14 +777,14 @@ public class SQLiteConfig
     }
 
     /**
-     * @param format Format of date string
+     * @param dateStringFormat Format of date string
      */
     public void setDateStringFormat(String dateStringFormat) {
         setPragma(Pragma.DATE_STRING_FORMAT, dateStringFormat);
     }
 
     /**
-     * @param connectTimeout Connect to DB timeout in seconds
+     * @param milliseconds Connect to DB timeout in milliseconds
      */
     public void setBusyTimeout(String milliseconds) {
         setPragma(Pragma.BUSY_TIMEOUT, milliseconds);
