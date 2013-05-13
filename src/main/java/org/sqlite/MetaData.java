@@ -1174,14 +1174,15 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getAttributes(String c, String s, String t, String a) throws SQLException {
         if (getAttributes == null) {
-            getAttributes = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
-                    + "null as TYPE_NAME, " + "null as ATTR_NAME, " + "null as DATA_TYPE, "
-                    + "null as ATTR_TYPE_NAME, " + "null as ATTR_SIZE, " + "null as DECIMAL_DIGITS, "
-                    + "null as NUM_PREC_RADIX, " + "null as NULLABLE, " + "null as REMARKS, " + "null as ATTR_DEF, "
-                    + "null as SQL_DATA_TYPE, " + "null as SQL_DATETIME_SUB, " + "null as CHAR_OCTET_LENGTH, "
-                    + "null as ORDINAL_POSITION, " + "null as IS_NULLABLE, " + "null as SCOPE_CATALOG, "
-                    + "null as SCOPE_SCHEMA, " + "null as SCOPE_TABLE, " + "null as SOURCE_DATA_TYPE limit 0;");
+            getAttributes = conn.prepareStatement("select null as TYPE_CAT, null as TYPE_SCHEM, " +
+                    "null as TYPE_NAME, null as ATTR_NAME, null as DATA_TYPE, " +
+                    "null as ATTR_TYPE_NAME, null as ATTR_SIZE, null as DECIMAL_DIGITS, " +
+                    "null as NUM_PREC_RADIX, null as NULLABLE, null as REMARKS, null as ATTR_DEF, " +
+                    "null as SQL_DATA_TYPE, null as SQL_DATETIME_SUB, null as CHAR_OCTET_LENGTH, " +
+                    "null as ORDINAL_POSITION, null as IS_NULLABLE, null as SCOPE_CATALOG, " +
+                    "null as SCOPE_SCHEMA, null as SCOPE_TABLE, null as SOURCE_DATA_TYPE limit 0;");
         }
+
         return getAttributes.executeQuery();
     }
 
@@ -1191,10 +1192,11 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getBestRowIdentifier(String c, String s, String t, int scope, boolean n) throws SQLException {
         if (getBestRowIdentifier == null) {
-            getBestRowIdentifier = conn.prepareStatement("select " + "null as SCOPE, " + "null as COLUMN_NAME, "
-                    + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as COLUMN_SIZE, "
-                    + "null as BUFFER_LENGTH, " + "null as DECIMAL_DIGITS, " + "null as PSEUDO_COLUMN limit 0;");
+            getBestRowIdentifier = conn.prepareStatement("select null as SCOPE, null as COLUMN_NAME, " +
+                    "null as DATA_TYPE, null as TYPE_NAME, null as COLUMN_SIZE, " +
+                    "null as BUFFER_LENGTH, null as DECIMAL_DIGITS, null as PSEUDO_COLUMN limit 0;");
         }
+
         return getBestRowIdentifier.executeQuery();
     }
 
@@ -1204,12 +1206,18 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getColumnPrivileges(String c, String s, String t, String colPat) throws SQLException {
         if (getColumnPrivileges == null) {
-            getColumnPrivileges = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
-                    + "null as TABLE_NAME, " + "null as COLUMN_NAME, " + "null as GRANTOR, " + "null as GRANTEE, "
-                    + "null as PRIVILEGE, " + "null as IS_GRANTABLE limit 0;");
+            getColumnPrivileges = conn.prepareStatement("select null as TABLE_CAT, null as TABLE_SCHEM, " +
+                    "null as TABLE_NAME, null as COLUMN_NAME, null as GRANTOR, null as GRANTEE, " +
+                    "null as PRIVILEGE, null as IS_GRANTABLE limit 0;");
         }
+
         return getColumnPrivileges.executeQuery();
     }
+
+    // Column type patterns
+    protected static final Pattern TYPE_INTEGER = Pattern.compile(".*(INT|BOOL).*");
+    protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
+    protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
 
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
@@ -1249,6 +1257,7 @@ class MetaData implements DatabaseMetaData
         .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE from (");
 
         boolean colFound = false;
+
         for (int i = 0; rs.next(); i++) {
             String colName = rs.getString(2);
             String colType = rs.getString(3);
@@ -1256,24 +1265,16 @@ class MetaData implements DatabaseMetaData
             String colDefault = rs.getString(5);
 
             int colNullable = 2;
+
             if (colNotNull != null) {
                 colNullable = colNotNull.equals("0") ? 1 : 0;
             }
+
             if (colFound) {
                 sql.append(" union all ");
             }
-            colFound = true;
 
-            //            colType = colType == null ? "TEXT" : colType.toUpperCase();
-            //            int colJavaType = -1;
-            //            if (colType.equals("INT") || colType.equals("INTEGER"))
-            //                colJavaType = Types.INTEGER;
-            //            else if (colType.equals("TEXT"))
-            //                colJavaType = Types.VARCHAR;
-            //            else if (colType.equals("FLOAT"))
-            //                colJavaType = Types.FLOAT;
-            //            else
-            //                colJavaType = Types.VARCHAR;
+            colFound = true;
 
             /*
              * improved column types
@@ -1284,13 +1285,13 @@ class MetaData implements DatabaseMetaData
             colType = colType == null ? "TEXT" : colType.toUpperCase();
             int colJavaType = -1;
             // rule #1 + boolean
-            if (colType.matches(".*(INT|BOOL).*")) {
+            if (TYPE_INTEGER.matcher(colType).find()) {
                 colJavaType = Types.INTEGER;
             }
-            else if (colType.matches(".*(CHAR|CLOB|TEXT|BLOB).*")) {
+            else if (TYPE_VARCHAR.matcher(colType).find()) {
                 colJavaType = Types.VARCHAR;
             }
-            else if (colType.matches(".*(REAL|FLOA|DOUB|DEC|NUM).*")) {
+            else if (TYPE_FLOAT.matcher(colType).find()) {
                 colJavaType = Types.FLOAT;
             }
             else {
@@ -1310,13 +1311,14 @@ class MetaData implements DatabaseMetaData
             }
         }
 
+        rs.close();
+
         if (colFound) {
-            sql.append(");");
+            sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
         }
         else {
             sql.append("select null as ordpos, null as colnullable, null as ct, null as cn, null as tn, null as colDefault) limit 0;");
         }
-        rs.close();
 
         return ((Stmt)stat).executeQuery(sql.toString(), true);
     }
@@ -1324,26 +1326,23 @@ class MetaData implements DatabaseMetaData
     /**
      * @see java.sql.DatabaseMetaData#getCrossReference(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
-    public ResultSet getCrossReference(String pc, String ps, String pt, String fc, String fs, String ft)
-            throws SQLException {
-
+    public ResultSet getCrossReference(String pc, String ps, String pt, String fc, String fs, String ft) throws SQLException {
         if (pt == null) {
             return getExportedKeys(fc, fs, ft);
         }
+
         if (ft == null) {
             return getImportedKeys(pc, ps, pt);
         }
 
         StringBuilder query = new StringBuilder();
-        query.append(String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, %s as PKTABLE_NAME, ", quote(pc),
-                quote(ps), quote(pt))
-                + "'' as PKCOLUMN_NAME, "
-                + String.format("%s as FKTABLE_CAT, %s as FKTABLE_SCHEM,  %s as FKTABLE_NAME, ", quote(fc), quote(fs),
-                        quote(ft))
-                + "'' as FKCOLUMN_NAME, -1 as KEY_SEQ, 3 as UPDATE_RULE, "
-                + "3 as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, "
-                + Integer.toString(importedKeyInitiallyDeferred)
-                + " as DEFERRABILITY limit 0;");
+        query.append("select ").append(quote(pc)).append(" as PKTABLE_CAT, ")
+            .append(quote(ps)).append(" as PKTABLE_SCHEM, ").append(quote(pt)).append(" as PKTABLE_NAME, ")
+            .append("'' as PKCOLUMN_NAME, ").append(quote(fc)).append(" as FKTABLE_CAT, ")
+            .append(quote(fs)).append(" as FKTABLE_SCHEM, ").append(quote(ft)).append(" as FKTABLE_NAME, ")
+            .append("'' as FKCOLUMN_NAME, -1 as KEY_SEQ, 3 as UPDATE_RULE, 3 as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, ")
+            .append(Integer.toString(importedKeyInitiallyDeferred)).append(" as DEFERRABILITY limit 0 ");
+
         return ((Stmt)conn.createStatement()).executeQuery(query.toString(), true);
     }
 
@@ -1352,10 +1351,9 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getSchemas() throws SQLException {
         if (getSchemas == null) {
-            getSchemas = conn.prepareStatement("select " + "null as TABLE_SCHEM, " + "null as TABLE_CATALOG "
-                    + "limit 0;");
+            getSchemas = conn.prepareStatement("select null as TABLE_SCHEM, null as TABLE_CATALOG limit 0;");
         }
-        getSchemas.clearParameters();
+
         return getSchemas.executeQuery();
     }
 
@@ -1366,7 +1364,7 @@ class MetaData implements DatabaseMetaData
         if (getCatalogs == null) {
             getCatalogs = conn.prepareStatement("select null as TABLE_CAT limit 0;");
         }
-        getCatalogs.clearParameters();
+
         return getCatalogs.executeQuery();
     }
 
@@ -1385,7 +1383,8 @@ class MetaData implements DatabaseMetaData
            .append("' as TABLE_NAME, cn as COLUMN_NAME, ks as KEY_SEQ, pk as PK_NAME from (");
 
         if (columns == null) {
-            sql.append("select null as cn, null as pk, 0 as ks) order by cn limit 0;");
+            sql.append("select null as cn, null as pk, 0 as ks) limit 0;");
+
             return ((Stmt)stat).executeQuery(sql.toString(), true);
         }
 
@@ -1450,9 +1449,11 @@ class MetaData implements DatabaseMetaData
             // retrieve table list
             ResultSet rs = stat.executeQuery("select name from sqlite_master where type = 'table'");
             ArrayList<String> tableList = new ArrayList<String>();
+
             while (rs.next()) {
                 tableList.add(rs.getString(1));
             }
+
             rs.close();
     
             ResultSet fk = null;
@@ -1471,6 +1472,7 @@ class MetaData implements DatabaseMetaData
                 Stmt stat2 = null;
                 try {
                     stat2 = (Stmt)conn.createStatement();
+
                     while(fk.next()) {
                         int keySeq = fk.getInt(2) + 1;
                         String PKTabName = fk.getString(3).toLowerCase();
@@ -1491,19 +1493,21 @@ class MetaData implements DatabaseMetaData
                             .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
                             .append(RULE_MAP.get(fk.getString(7))).append(" as dr, ");
 
-                        String fkName = "''";
                         rs = stat2.executeQuery("select sql from sqlite_master where" +
                             " lower(name) = lower('" + escape(tbl) + "')");
-                        if (rs.next())
-                        {
+
+                        if (rs.next()) {
                             Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
+
                             if (matcher.find()){
-                                fkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
+                                exportedKeysQuery.append("'").append(escape(matcher.group(1).toLowerCase())).append("' as fkn");
+                            }
+                            else {
+                                exportedKeysQuery.append("'' as fkn");
                             }
                         }
-                        rs.close();
 
-                        exportedKeysQuery.append(fkName).append(" as fkn");
+                        rs.close();
                         count++;
                     }
                 }
@@ -1521,27 +1525,31 @@ class MetaData implements DatabaseMetaData
             }
         }
 
-        boolean exist = (count > 0);
+        boolean hasImportedKey = (count > 0);
         StringBuilder sql = new StringBuilder(512);
         sql.append("select ")
             .append(catalog).append(" as PKTABLE_CAT, ")
             .append(schema).append(" as PKTABLE_SCHEM, ")
             .append(quote(table)).append(" as PKTABLE_NAME, ")
-            .append(exist ? "pcn" : "''").append(" as PKCOLUMN_NAME, ")
+            .append(hasImportedKey ? "pcn" : "''").append(" as PKCOLUMN_NAME, ")
             .append(catalog).append(" as FKTABLE_CAT, ")
             .append(schema).append(" as FKTABLE_SCHEM, ")
-            .append(exist ? "fkt" : "''").append(" as FKTABLE_NAME, ")
-            .append(exist ? "fcn" : "''").append(" as FKCOLUMN_NAME, ")
-            .append(exist ? "ks" : "-1").append(" as KEY_SEQ, ")
-            .append(exist ? "ur" : "3").append(" as UPDATE_RULE, ")
-            .append(exist ? "dr" : "3").append(" as DELETE_RULE, ")
-            .append(exist ? "fkn" : "''").append(" as FK_NAME, ")
+            .append(hasImportedKey ? "fkt" : "''").append(" as FKTABLE_NAME, ")
+            .append(hasImportedKey ? "fcn" : "''").append(" as FKCOLUMN_NAME, ")
+            .append(hasImportedKey ? "ks" : "-1").append(" as KEY_SEQ, ")
+            .append(hasImportedKey ? "ur" : "3").append(" as UPDATE_RULE, ")
+            .append(hasImportedKey ? "dr" : "3").append(" as DELETE_RULE, ")
+            .append(hasImportedKey ? "fkn" : "''").append(" as FK_NAME, ")
             .append(pkFinder.getName() != null ? pkFinder.getName() : "''").append(" as PK_NAME, ")
             .append(Integer.toString(importedKeyInitiallyDeferred)) // FIXME: Check for pragma foreign_keys = true ?
-            .append(" as DEFERRABILITY ")
-            .append(exist ? "from (" : "limit 0");
-       if (exist)
-           sql.append(exportedKeysQuery).append(") order by fkt");
+            .append(" as DEFERRABILITY ");
+
+        if (hasImportedKey) {
+            sql.append("from (").append(exportedKeysQuery).append(") order by fkt");
+        }
+        else {
+            sql.append("limit 0");
+        }
 
         return ((Stmt)stat).executeQuery(sql.toString(), true);
     }
@@ -1551,62 +1559,68 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String)
      */
     public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
-        String sql;
         ResultSet rs = null;
         Statement stat = conn.createStatement();
+        StringBuilder sql = new StringBuilder(700);
 
-        sql = String.format("select %s as PKTABLE_CAT, %s as PKTABLE_SCHEM, ", quote(catalog), quote(schema))
-                + String.format(
-                        "ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, %s as FKTABLE_CAT, %s as FKTABLE_SCHEM, %s as FKTABLE_NAME, ",
-                        quote(catalog), quote(schema), quote(table)) + "fcn as FKCOLUMN_NAME, " + "ks as KEY_SEQ, "
-                + "ur as UPDATE_RULE, " + "dr as DELETE_RULE, " + "'' as FK_NAME, " + "'' as PK_NAME, "
-                + Integer.toString(importedKeyInitiallyDeferred) + " as DEFERRABILITY from (";
+        sql.append("select ").append(quote(catalog)).append(" as PKTABLE_CAT, ")
+            .append(quote(schema)).append(" as PKTABLE_SCHEM, ")
+            .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
+            .append(quote(catalog)).append(" as FKTABLE_CAT, ")
+            .append(quote(schema)).append(" as FKTABLE_SCHEM, ")
+            .append(quote(table)).append(" as FKTABLE_NAME, ") 
+            .append("fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, ")
+            .append(Integer.toString(importedKeyInitiallyDeferred)).append(" as DEFERRABILITY from (");
 
         // Use a try catch block to avoid "query does not return ResultSet" error
         try {
             rs = stat.executeQuery("pragma foreign_key_list('" + escape(table) + "');");
-            int i;
-            for (i = 0; rs.next(); i++) {
-                int keySeq = rs.getInt(2) + 1;
-                String PKTabName = rs.getString(3);
-                String FKColName = rs.getString(4);
-                String PKColName = rs.getString(5);
-
-                if (PKColName == null) {
-                    PKColName = new PrimaryKeyFinder(PKTabName).getColumns()[0];
-                }
-
-                String updateRule = rs.getString(6);
-                String deleteRule = rs.getString(7);
-
-                if (i > 0) {
-                    sql += " union all ";
-                }
-
-                sql += String.format("select %d as ks,", keySeq)
-                        + String.format("'%s' as ptn, '%s' as fcn, '%s' as pcn,", escape(PKTabName), escape(FKColName),
-                                escape(PKColName)) + String.format("case '%s' ", escape(updateRule))
-                        + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
-                        + String.format("when 'CASCADE' then %d ", importedKeyCascade)
-                        + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
-                        + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
-                        + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as ur,"
-                        + String.format("case '%s' ", escape(deleteRule))
-                        + String.format("when 'NO ACTION' then %d ", importedKeyNoAction)
-                        + String.format("when 'CASCADE' then %d ", importedKeyCascade)
-                        + String.format("when 'RESTRICT' then %d  ", importedKeyRestrict)
-                        + String.format("when 'SET NULL' then %d  ", importedKeySetNull)
-                        + String.format("when 'SET DEFAULT' then %d  ", importedKeySetDefault) + "end as dr";
-            }
-            sql += ");";
-            rs.close();
         }
         catch (SQLException e) {
-            sql += "select -1 as ks, '' as ptn, '' as fcn, '' as pcn, " + importedKeyNoAction + " as ur, "
-                    + importedKeyNoAction + " as dr) limit 0;";
+            sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
+                .append(importedKeyNoAction).append(" as ur, ")
+                .append(importedKeyNoAction).append(" as dr) limit 0;");
+
+            return ((Stmt)stat).executeQuery(sql.toString(), true);
         }
 
-        return ((Stmt)stat).executeQuery(sql, true);
+        for (int i = 0; rs.next(); i++) {
+            int keySeq = rs.getInt(2) + 1;
+            String PKTabName = rs.getString(3);
+            String FKColName = rs.getString(4);
+            String PKColName = rs.getString(5);
+
+            if (PKColName == null) {
+                PKColName = new PrimaryKeyFinder(PKTabName).getColumns()[0];
+            }
+
+            String updateRule = rs.getString(6);
+            String deleteRule = rs.getString(7);
+
+            if (i > 0) {
+                sql.append(" union all ");
+            }
+
+            sql.append("select ").append(keySeq).append(" as ks,")
+                .append("'").append(escape(PKTabName)).append("' as ptn, '")
+                .append(escape(FKColName)).append("' as fcn, '")
+                .append(escape(PKColName)).append("' as pcn,")
+                .append("case '").append(escape(updateRule)).append("'")
+                .append(" when 'NO ACTION' then ").append(importedKeyNoAction)
+                .append(" when 'CASCADE' then ").append(importedKeyCascade)
+                .append(" when 'RESTRICT' then ").append(importedKeyRestrict)
+                .append(" when 'SET NULL' then ").append(importedKeySetNull)
+                .append(" when 'SET DEFAULT' then ").append(importedKeySetDefault).append(" end as ur, ")
+                .append("case '").append(escape(deleteRule)).append("'")
+                .append(" when 'NO ACTION' then ").append(importedKeyNoAction)
+                .append(" when 'CASCADE' then ").append(importedKeyCascade)
+                .append(" when 'RESTRICT' then ").append(importedKeyRestrict)
+                .append(" when 'SET NULL' then ").append(importedKeySetNull)
+                .append(" when 'SET DEFAULT' then ").append(importedKeySetDefault).append(" end as dr");
+        }
+        rs.close();
+
+        return ((Stmt)stat).executeQuery(sql.append(");").toString(), true);
     }
 
     /**
@@ -1614,58 +1628,57 @@ class MetaData implements DatabaseMetaData
      *      java.lang.String, boolean, boolean)
      */
     public ResultSet getIndexInfo(String c, String s, String t, boolean u, boolean approximate) throws SQLException {
-        String sql;
         ResultSet rs = null;
         Statement stat = conn.createStatement();
+        StringBuilder sql = new StringBuilder(500);
 
-        sql = "select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, " + "'" + escape(t) + "' as TABLE_NAME, "
-                + "un as NON_UNIQUE, " + "null as INDEX_QUALIFIER, " + "n as INDEX_NAME, "
-                + Integer.toString(tableIndexOther) + " as TYPE, " + "op as ORDINAL_POSITION, " + "cn as COLUMN_NAME, "
-                + "null as ASC_OR_DESC, " + "0 as CARDINALITY, " + "0 as PAGES, " + "null as FILTER_CONDITION from (";
+        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
+            .append(escape(t)).append("' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
+            .append(Integer.toString(tableIndexOther)).append(" as TYPE, op as ORDINAL_POSITION, ")
+            .append("cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
 
         // Use a try catch block to avoid "query does not return ResultSet" error
         try {
-            ArrayList<ArrayList<Object>> indexList = new ArrayList<ArrayList<Object>>();
-
             rs = stat.executeQuery("pragma index_list('" + escape(t) + "');");
-            while (rs.next()) {
-                indexList.add(new ArrayList<Object>());
-                indexList.get(indexList.size() - 1).add(rs.getString(2));
-                indexList.get(indexList.size() - 1).add(rs.getInt(3));
-            }
-            rs.close();
-
-            int i = 0;
-            Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
-            ArrayList<Object> currentIndex;
-            while (indexIterator.hasNext()) {
-                currentIndex = indexIterator.next();
-                String indexName = currentIndex.get(0).toString();
-                int unique = (Integer) currentIndex.get(1);
-
-                rs = stat.executeQuery("pragma index_info('" + escape(indexName) + "');");
-                for (; rs.next(); i++) {
-
-                    int ordinalPosition = rs.getInt(1) + 1;
-                    String colName = rs.getString(3);
-
-                    if (i > 0) {
-                        sql += " union all ";
-                    }
-
-                    sql += "select " + Integer.toString(1 - unique) + " as un," + "'" + escape(indexName) + "' as n,"
-                            + Integer.toString(ordinalPosition) + " as op," + "'" + escape(colName) + "' as cn";
-                    i++;
-                }
-                rs.close();
-            }
-            sql += ");";
         }
         catch (SQLException e) {
-            sql += "select null as un, null as n, null as op, null as cn) limit 0;";
+            sql.append("select null as un, null as n, null as op, null as cn) limit 0;");
+
+            return ((Stmt)stat).executeQuery(sql.toString(), true);
         }
 
-        return ((Stmt)stat).executeQuery(sql, true);
+        ArrayList<ArrayList<Object>> indexList = new ArrayList<ArrayList<Object>>();
+        while (rs.next()) {
+            indexList.add(new ArrayList<Object>());
+            indexList.get(indexList.size() - 1).add(rs.getString(2));
+            indexList.get(indexList.size() - 1).add(rs.getInt(3));
+        }
+        rs.close();
+
+        int i = 0;
+        Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
+        ArrayList<Object> currentIndex;
+
+        while (indexIterator.hasNext()) {
+            currentIndex = indexIterator.next();
+            String indexName = currentIndex.get(0).toString();
+            rs = stat.executeQuery("pragma index_info('" + escape(indexName) + "');");
+
+            while(rs.next()) {
+                if (i++ > 1) {
+                    sql.append(" union all ");
+                }
+
+                sql.append("select ").append(Integer.toString(1 - (Integer)currentIndex.get(1))).append(" as un,'")
+                    .append(escape(indexName)).append("' as n,")
+                    .append(Integer.toString(rs.getInt(1) + 1)).append(" as op,'")
+                    .append(escape(rs.getString(3))).append("' as cn");
+            }
+
+            rs.close();
+        }
+
+        return ((Stmt)stat).executeQuery(sql.append(");").toString(), true);
     }
 
     /**
@@ -1674,11 +1687,11 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getProcedureColumns(String c, String s, String p, String colPat) throws SQLException {
         if (getProcedures == null) {
-            getProcedureColumns = conn.prepareStatement("select " + "null as PROCEDURE_CAT, "
-                    + "null as PROCEDURE_SCHEM, " + "null as PROCEDURE_NAME, " + "null as COLUMN_NAME, "
-                    + "null as COLUMN_TYPE, " + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as PRECISION, "
-                    + "null as LENGTH, " + "null as SCALE, " + "null as RADIX, " + "null as NULLABLE, "
-                    + "null as REMARKS limit 0;");
+            getProcedureColumns = conn.prepareStatement("select null as PROCEDURE_CAT, " +
+                    "null as PROCEDURE_SCHEM, null as PROCEDURE_NAME, null as COLUMN_NAME, " +
+                    "null as COLUMN_TYPE, null as DATA_TYPE, null as TYPE_NAME, null as PRECISION, " +
+                    "null as LENGTH, null as SCALE, null as RADIX, null as NULLABLE, " +
+                    "null as REMARKS limit 0;");
         }
         return getProcedureColumns.executeQuery();
 
@@ -1690,9 +1703,9 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getProcedures(String c, String s, String p) throws SQLException {
         if (getProcedures == null) {
-            getProcedures = conn.prepareStatement("select " + "null as PROCEDURE_CAT, " + "null as PROCEDURE_SCHEM, "
-                    + "null as PROCEDURE_NAME, " + "null as UNDEF1, " + "null as UNDEF2, " + "null as UNDEF3, "
-                    + "null as REMARKS, " + "null as PROCEDURE_TYPE limit 0;");
+            getProcedures = conn.prepareStatement("select null as PROCEDURE_CAT, null as PROCEDURE_SCHEM, " +
+                    "null as PROCEDURE_NAME, null as UNDEF1, null as UNDEF2, null as UNDEF3, " +
+                    "null as REMARKS, null as PROCEDURE_TYPE limit 0;");
         }
         return getProcedures.executeQuery();
     }
@@ -1703,8 +1716,8 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getSuperTables(String c, String s, String t) throws SQLException {
         if (getSuperTables == null) {
-            getSuperTables = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
-                    + "null as TABLE_NAME, " + "null as SUPERTABLE_NAME limit 0;");
+            getSuperTables = conn.prepareStatement("select null as TABLE_CAT, null as TABLE_SCHEM, " +
+                    "null as TABLE_NAME, null as SUPERTABLE_NAME limit 0;");
         }
         return getSuperTables.executeQuery();
     }
@@ -1715,9 +1728,9 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getSuperTypes(String c, String s, String t) throws SQLException {
         if (getSuperTypes == null) {
-            getSuperTypes = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
-                    + "null as TYPE_NAME, " + "null as SUPERTYPE_CAT, " + "null as SUPERTYPE_SCHEM, "
-                    + "null as SUPERTYPE_NAME limit 0;");
+            getSuperTypes = conn.prepareStatement("select null as TYPE_CAT, null as TYPE_SCHEM, " +
+                    "null as TYPE_NAME, null as SUPERTYPE_CAT, null as SUPERTYPE_SCHEM, " +
+                    "null as SUPERTYPE_NAME limit 0;");
         }
         return getSuperTypes.executeQuery();
     }
@@ -1728,9 +1741,9 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getTablePrivileges(String c, String s, String t) throws SQLException {
         if (getTablePrivileges == null) {
-            getTablePrivileges = conn.prepareStatement("select " + "null as TABLE_CAT, " + "null as TABLE_SCHEM, "
-                    + "null as TABLE_NAME, " + "null as GRANTOR, " + "null as GRANTEE, " + "null as PRIVILEGE, "
-                    + "null as IS_GRANTABLE limit 0;");
+            getTablePrivileges = conn.prepareStatement("select  null as TABLE_CAT, "
+                    + "null as TABLE_SCHEM, null as TABLE_NAME, null as GRANTOR, null "
+                    + "GRANTEE,  null as PRIVILEGE, null as IS_GRANTABLE limit 0;");
         }
         return getTablePrivileges.executeQuery();
     }
@@ -1773,8 +1786,8 @@ class MetaData implements DatabaseMetaData
     public ResultSet getTableTypes() throws SQLException {
         checkOpen();
         if (getTableTypes == null) {
-            getTableTypes = conn.prepareStatement("select 'TABLE' as TABLE_TYPE"
-                    + " union select 'VIEW' as TABLE_TYPE;");
+            getTableTypes = conn.prepareStatement("select 'TABLE' as TABLE_TYPE "
+                    + "union select 'VIEW' as TABLE_TYPE;");
         }
         getTableTypes.clearParameters();
         return getTableTypes.executeQuery();
@@ -1828,8 +1841,8 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getUDTs(String c, String s, String t, int[] types) throws SQLException {
         if (getUDTs == null) {
-            getUDTs = conn.prepareStatement("select " + "null as TYPE_CAT, " + "null as TYPE_SCHEM, "
-                    + "null as TYPE_NAME, " + "null as CLASS_NAME, " + "null as DATA_TYPE, " + "null as REMARKS, "
+            getUDTs = conn.prepareStatement("select  null as TYPE_CAT, null as TYPE_SCHEM, "
+                    + "null as TYPE_NAME,  null as CLASS_NAME,  null as DATA_TYPE, null as REMARKS, "
                     + "null as BASE_TYPE " + "limit 0;");
         }
 
@@ -1843,9 +1856,9 @@ class MetaData implements DatabaseMetaData
      */
     public ResultSet getVersionColumns(String c, String s, String t) throws SQLException {
         if (getVersionColumns == null) {
-            getVersionColumns = conn.prepareStatement("select " + "null as SCOPE, " + "null as COLUMN_NAME, "
-                    + "null as DATA_TYPE, " + "null as TYPE_NAME, " + "null as COLUMN_SIZE, "
-                    + "null as BUFFER_LENGTH, " + "null as DECIMAL_DIGITS, " + "null as PSEUDO_COLUMN limit 0;");
+            getVersionColumns = conn.prepareStatement("select null as SCOPE, null as COLUMN_NAME, "
+                    + "null as DATA_TYPE, null as TYPE_NAME, null as COLUMN_SIZE, "
+                    + "null as BUFFER_LENGTH, null as DECIMAL_DIGITS, null as PSEUDO_COLUMN limit 0;");
         }
         return getVersionColumns.executeQuery();
     }
