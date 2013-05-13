@@ -9,6 +9,7 @@ Work in progress:
 * Issue #67 - Bad ResultSet returned from DatabaseMetaData.getColumns(), if a given table doesn't exist
 * Issue #73 - DatabaseMetaData.getTables() Memory Leak
 * Issue #68 - DatabaseMetaData.getTables() erroneously returns INDEX, TRIGGER, and other non-table objects
+* Issue #53 - getImportedKeys throws Null Exception for foreign key without explicit primary column name
 * Issue #18 - Add support for ConnectionPool
     * Implemented javax.sql.ConnectionPoolDataSource - javax.SQLiteConnectionPoolDataSource
 * Issue #27 - Allow user to specify busy-timeout when opening a database connection
