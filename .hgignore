@@ -4,7 +4,9 @@ sqlitejdbc/dl
 sqlitejdbc/nestedvm-2009-08-09
 .classpath
 .project
+.idea
 
 syntax: glob
 src/main/resources/org/ibex/nestedvm/*.o
 *~
+*.iml

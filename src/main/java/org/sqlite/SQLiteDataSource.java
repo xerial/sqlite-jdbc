@@ -24,18 +24,15 @@
 //--------------------------------------
 package org.sqlite;
 
+import org.sqlite.SQLiteConfig.*;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
-
-import javax.sql.DataSource;
-
-import org.sqlite.SQLiteConfig.Encoding;
-import org.sqlite.SQLiteConfig.JournalMode;
-import org.sqlite.SQLiteConfig.LockingMode;
-import org.sqlite.SQLiteConfig.SynchronousMode;
-import org.sqlite.SQLiteConfig.TempStore;
+import java.util.logging.Logger;
 
 /**
  * Provides {@link DataSource} API for configuring SQLite database connection
@@ -425,6 +422,10 @@ public class SQLiteDataSource implements DataSource
      */
     public int getLoginTimeout() throws SQLException {
         return loginTimeout;
+    }
+
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException("getParentLogger");
     }
 
     /**

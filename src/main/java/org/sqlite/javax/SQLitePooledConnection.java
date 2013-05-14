@@ -13,6 +13,10 @@
  *--------------------------------------------------------------------------*/
 package org.sqlite.javax;
 
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.PooledConnection;
+import javax.sql.StatementEventListener;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,10 +25,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.ConnectionEvent;
-import javax.sql.ConnectionEventListener;
-import javax.sql.PooledConnection;
 
 public class SQLitePooledConnection implements PooledConnection {
 
@@ -133,5 +133,13 @@ public class SQLitePooledConnection implements PooledConnection {
      */
     public void removeConnectionEventListener(ConnectionEventListener listener) {
         listeners.remove(listener);
+    }
+
+    public void addStatementEventListener(StatementEventListener listener) {
+      // TODO impl
+    }
+
+    public void removeStatementEventListener(StatementEventListener listener) {
+      // TODO impl
     }
 }
