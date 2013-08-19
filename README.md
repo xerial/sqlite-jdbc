@@ -140,6 +140,7 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2013 August 19th: [sqlite-jdbc-3.7.15-M1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-M1.jar)
 *   2013 March 24th : [sqlite-jdbc-3.7.15-SNAPSHOT-2](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT-2.jar)
 *   2013 January 22nd: The repositories and documentations were moved to the bitbucket.
 *   2012 December 15th: [sqlite-jdbc-3.7.15-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT.jar) 
@@ -337,7 +338,10 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
           <version>3.7.2</version>
         </dependency>
     </dependencies>
-    
+
+To use snapshot/pre-release versions, add the following repository to your Maven settings:
+* Pre-release repository: <https://oss.sonatype.org/content/repositories/releases>
+* Snapshot repository: <https://oss.sonatype.org/content/repositories/snapshots>
 
 Using SQLiteJDBC with Tomcat6 Web Server
 ========================================
