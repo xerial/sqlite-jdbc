@@ -172,6 +172,23 @@ public class StatementTest
     }
 
     @Test
+    public void nullsForGetObject() throws SQLException {
+        ResultSet rs = stat.executeQuery("select 1, null union all select null, null;");
+        assertTrue(rs.next());
+        assertNotNull(rs.getString(1));
+        assertFalse(rs.wasNull());
+        assertNull(rs.getObject(2));
+        assertTrue(rs.wasNull());
+        assertTrue(rs.next());
+        assertNull(rs.getObject(2));
+        assertTrue(rs.wasNull());
+        assertNull(rs.getObject(1));
+        assertTrue(rs.wasNull());
+        assertFalse(rs.next());
+        rs.close();
+    }
+
+    @Test
     public void tempTable() throws SQLException {
         assertEquals(stat.executeUpdate("create temp table myTemp (a);"), 0);
         assertEquals(stat.executeUpdate("insert into myTemp values (2);"), 1);

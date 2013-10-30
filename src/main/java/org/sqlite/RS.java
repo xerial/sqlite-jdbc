@@ -724,7 +724,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getObject(int)
      */
     public Object getObject(int col) throws SQLException {
-        switch (db.column_type(stmt.pointer, checkCol(col))) {
+        switch (db.column_type(stmt.pointer, markCol(col))) {
         case SQLITE_INTEGER:
             long val = getLong(col);
             if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
