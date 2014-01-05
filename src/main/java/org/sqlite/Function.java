@@ -18,6 +18,9 @@ package org.sqlite;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.sqlite.core.Codes;
+import org.sqlite.core.DB;
+
 /** Provides an interface for creating SQLite user-defined functions.
  *
  * <p>A subclass of <tt>org.sqlite.Function</tt> can be registered with

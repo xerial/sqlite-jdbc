@@ -1,28 +1,16 @@
-/*
- * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-package org.sqlite;
+package org.sqlite.jdbc3;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -32,27 +20,13 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
 
-final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaData, Codes
-{
-    private int columnCount;
-    private int paramCount;
+import org.sqlite.SQLiteConnection;
+import org.sqlite.core.CorePreparedStatement;
 
-    /**
-     * Constructs a prepared statement on a provided connection.
-     * @param conn Connection on which to create the prepared statement.
-     * @param sql The SQL script to prepare.
-     * @throws SQLException
-     */
-    PrepStmt(SQLiteConnection conn, String sql) throws SQLException {
-        super(conn);
+public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
-        this.sql = sql;
-        db.prepare(this);
-        rs.colsMeta = db.column_names(pointer);
-        columnCount = db.column_count(pointer);
-        paramCount = db.bind_parameter_count(pointer);
-        batch = null;
-        batchPos = 0;
+    protected JDBC3PreparedStatement(SQLiteConnection conn, String sql) throws SQLException {
+        super(conn, sql);
     }
 
     /**
@@ -62,23 +36,6 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
         checkOpen();
         db.clear_bindings(pointer);
         batch = null;
-    }
-
-    /**
-     * @see org.sqlite.Stmt#finalize()
-     */
-    @Override
-    protected void finalize() throws SQLException {
-        close();
-    }
-
-    /**
-     * Checks if values are bound to statement parameters.
-     * @throws SQLException
-     */
-    private void checkParameters() throws SQLException {
-        if (batch == null && paramCount > 0)
-            throw new SQLException("Values not bound to statement");
     }
 
     /**
@@ -130,37 +87,6 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     }
 
     /**
-     * @see org.sqlite.Stmt#executeBatch()
-     */
-    @Override
-    public int[] executeBatch() throws SQLException {
-        if (batchPos == 0) {
-            return new int[] {};
-        }
-
-        checkParameters();
-
-        try {
-            return db.executeBatch(pointer, batchPos / paramCount, batch);
-        }
-        finally {
-            clearBatch();
-        }
-    }
-
-    /**
-     * @see org.sqlite.Stmt#getUpdateCount()
-     */
-    @Override
-    public int getUpdateCount() throws SQLException {
-        if (pointer == 0 || resultsWaiting || rs.isOpen()) {
-            return -1;
-        }
-
-        return db.changes();
-    }
-
-    /**
      * @see java.sql.PreparedStatement#addBatch()
      */
     public void addBatch() throws SQLException {
@@ -180,7 +106,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      * @see java.sql.PreparedStatement#getParameterMetaData()
      */
     public ParameterMetaData getParameterMetaData() {
-        return this;
+        return (ParameterMetaData) this;
     }
 
     /**
@@ -217,7 +143,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      * @see java.sql.ParameterMetaData#getParameterMode(int)
      */
     public int getParameterMode(int pos) {
-        return parameterModeIn;
+        return ParameterMetaData.parameterModeIn;
     }
 
     /**
@@ -238,7 +164,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      * @see java.sql.ParameterMetaData#isNullable(int)
      */
     public int isNullable(int pos) {
-        return parameterNullable;
+        return ParameterMetaData.parameterNullable;
     }
 
     /**
@@ -253,23 +179,6 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
      */
     public Statement getStatement() {
         return this;
-    }
-
-    // PARAMETER FUNCTIONS //////////////////////////////////////////
-
-    /**
-     * Assigns the object value to the element at the specific position of array
-     * batch.
-     * @param pos
-     * @param value
-     * @throws SQLException
-     */
-    private void batch(int pos, Object value) throws SQLException {
-        checkOpen();
-        if (batch == null) {
-            batch = new Object[paramCount];
-        }
-        batch[batchPos + pos - 1] = value;
     }
 
     /**
@@ -515,65 +424,66 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
         setObject(pos, x);
     }
 
-    /**
-    * Store the date in the user's preferred format (text, int, or real)
-    */
-   private void setDateByMilliseconds(int pos, Long value) throws SQLException {
-       switch(conn.dateClass) {
-           case TEXT:
-               batch(pos, conn.dateFormat.format(new Date(value)));
-               break;
-
-           case REAL:
-               // long to Julian date
-               batch(pos, new Double((value/86400000.0) + 2440587.5));
-               break;
-
-           default: //INTEGER:
-               batch(pos, new Long(value / conn.dateMultiplier));
-       }
-   }
-
-   /**
-     * @see java.sql.PreparedStatement#setTime(int, java.sql.Time)
-     */
-    public void setTime(int pos, Time x) throws SQLException {
-        setObject(pos, x);
-    }
 
     /**
-     * @see java.sql.PreparedStatement#setTime(int, java.sql.Time, java.util.Calendar)
-     */
-    public void setTime(int pos, Time x, Calendar cal) throws SQLException {
-        setObject(pos, x);
-    }
+      * @see java.sql.PreparedStatement#setTime(int, java.sql.Time)
+      */
+     public void setTime(int pos, Time x) throws SQLException {
+         setObject(pos, x);
+     }
 
-    /**
-     * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp)
-     */
-    public void setTimestamp(int pos, Timestamp x) throws SQLException {
-        setObject(pos, x);
-    }
+     /**
+      * @see java.sql.PreparedStatement#setTime(int, java.sql.Time, java.util.Calendar)
+      */
+     public void setTime(int pos, Time x, Calendar cal) throws SQLException {
+         setObject(pos, x);
+     }
 
-    /**
-     * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp, java.util.Calendar)
-     */
-    public void setTimestamp(int pos, Timestamp x, Calendar cal) throws SQLException {
-        setObject(pos, x);
-    }
+     /**
+      * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp)
+      */
+     public void setTimestamp(int pos, Timestamp x) throws SQLException {
+         setObject(pos, x);
+     }
 
-    /**
-     * @see java.sql.PreparedStatement#getMetaData()
-     */
-    public ResultSetMetaData getMetaData() throws SQLException {
-        checkOpen();
-        return rs;
-    }
+     /**
+      * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp, java.util.Calendar)
+      */
+     public void setTimestamp(int pos, Timestamp x, Calendar cal) throws SQLException {
+         setObject(pos, x);
+     }
+
+     /**
+      * @see java.sql.PreparedStatement#getMetaData()
+      */
+     public ResultSetMetaData getMetaData() throws SQLException {
+         checkOpen();
+         return (ResultSetMetaData)rs;
+     }
 
     // UNUSED ///////////////////////////////////////////////////////
+    protected SQLException unused() {
+        return new SQLException("not implemented by SQLite JDBC driver");
+    }
+
+
+    // PreparedStatement ////////////////////////////////////////////
+
+    public void setArray(int i, Array x)
+        throws SQLException { throw unused(); }
+//    public void setBigDecimal(int parameterIndex, BigDecimal x)
+//        throws SQLException { throw unused(); }
+    public void setBlob(int i, Blob x)
+        throws SQLException { throw unused(); }
+    public void setClob(int i, Clob x)
+        throws SQLException { throw unused(); }
+    public void setRef(int i, Ref x)
+        throws SQLException { throw unused(); }
+    public void setURL(int pos, URL x)
+        throws SQLException { throw unused(); }
 
     /**
-     * @see org.sqlite.Stmt#execute(java.lang.String)
+     * @see org.sqlite.core.CoreStatement#execute(java.lang.String)
      */
     @Override
     public boolean execute(String sql) throws SQLException {
@@ -581,7 +491,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     }
 
     /**
-     * @see org.sqlite.Stmt#executeUpdate(java.lang.String)
+     * @see org.sqlite.core.CoreStatement#executeUpdate(java.lang.String)
      */
     @Override
     public int executeUpdate(String sql) throws SQLException {
@@ -589,7 +499,7 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     }
 
     /**
-     * @see org.sqlite.Stmt#executeQuery(java.lang.String)
+     * @see org.sqlite.core.CoreStatement#executeQuery(java.lang.String)
      */
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
@@ -597,10 +507,11 @@ final class PrepStmt extends Stmt implements PreparedStatement, ParameterMetaDat
     }
 
     /**
-     * @see org.sqlite.Stmt#addBatch(java.lang.String)
+     * @see org.sqlite.core.CoreStatement#addBatch(java.lang.String)
      */
     @Override
     public void addBatch(String sql) throws SQLException {
         throw unused();
     }
+
 }

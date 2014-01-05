@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteConfig.TransactionMode;
+import org.sqlite.core.CoreConnection;
 
 /**
  * These tests assume that Statements and PreparedStatements are working as per
@@ -274,9 +275,9 @@ public class TransactionTest
     public void transactionModes() throws Exception {
         File tmpFile = File.createTempFile("test-trans", ".db");
 
-        Field transactionMode = SQLiteConnection.class.getDeclaredField("transactionMode");
+        Field transactionMode = CoreConnection.class.getDeclaredField("transactionMode");
         transactionMode.setAccessible(true);
-        Field beginCommandMap = SQLiteConnection.class.getDeclaredField("beginCommandMap");
+        Field beginCommandMap = CoreConnection.class.getDeclaredField("beginCommandMap");
         beginCommandMap.setAccessible(true);
 
         SQLiteDataSource ds = new SQLiteDataSource();

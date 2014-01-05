@@ -2,8 +2,8 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
-  <artifactId>sqlite-jdbc</artifactId>
-  <version>3.7.15-SNAPSHOT</version>
+  <artifactId>sqlite-jdbc4</artifactId>
+  <version>3.8.2-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -86,11 +86,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
 	<version>3.1</version>
         <configuration>
-          <compilerArgument>
-            -Xbootclasspath/p:${basedir}/lib/jdbc-api-1.4.jar
-          </compilerArgument>
           <source>1.5</source>
-          <target>1.5</target>
+          <target>1.6</target>
         </configuration>
       </plugin>
       
@@ -140,12 +137,6 @@
   </scm>
 
   <dependencies>
-    <dependency>
-      <groupId>org.xerial.thirdparty</groupId>
-      <artifactId>jdbc-api</artifactId>
-      <version>1.4</version>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

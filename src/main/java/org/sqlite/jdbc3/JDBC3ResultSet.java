@@ -1,19 +1,4 @@
-/*
- * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-package org.sqlite;
+package org.sqlite.jdbc3;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -36,120 +21,14 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Implements a JDBC ResultSet.
- */
-final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
-{
-    private final Stmt stmt;
-    private final DB   db;
+import org.sqlite.core.CoreResultSet;
+import org.sqlite.core.CoreStatement;
 
-    boolean            open     = false; // true means have results and can iterate them
-    int                maxRows;         // max. number of rows as set by a Statement
-    String[]           cols     = null; // if null, the RS is closed()
-    String[]           colsMeta = null; // same as cols, but used by Meta interface
-    boolean[][]        meta     = null;
-
-    private int        limitRows;       // 0 means no limit, must check against maxRows
-    private int        row      = 0;    // number of current row, starts at 1 (0 is for before loading data)
-    private int        lastCol;         // last column accessed, for wasNull(). -1 if none
-
-    boolean closeStmt;
-
-    /**
-     * Default constructor for a given statement.
-     * @param stmt The statement.
-     * @param closeStmt TODO
-     */
-    RS(Stmt stmt) {
-        this.stmt = stmt;
-        this.db = stmt.db;
-    }
-
-    // INTERNAL FUNCTIONS ///////////////////////////////////////////
-
-    /**
-     * Checks the status of the result set.
-     * @return True if has results and can iterate them; false otherwise.
-     */
-    boolean isOpen() {
-        return open;
-    }
-
-    /**
-     * @throws SQLException if ResultSet is not open.
-     */
-    void checkOpen() throws SQLException {
-        if (!open) {
-            throw new SQLException("ResultSet closed");
-        }
-    }
-
-    /**
-     * Takes col in [1,x] form, returns in [0,x-1] form
-     * @param col
-     * @return
-     * @throws SQLException
-     */
-    private int checkCol(int col) throws SQLException {
-        if (colsMeta == null) {
-            throw new IllegalStateException("SQLite JDBC: inconsistent internal state");
-        }
-        if (col < 1 || col > colsMeta.length) {
-            throw new SQLException("column " + col + " out of bounds [1," + colsMeta.length + "]");
-        }
-        return --col;
-    }
-
-    /**
-     * Takes col in [1,x] form, marks it as last accessed and returns [0,x-1]
-     * @param col
-     * @return
-     * @throws SQLException
-     */
-    private int markCol(int col) throws SQLException {
-        checkOpen();
-        checkCol(col);
-        lastCol = col;
-        return --col;
-    }
-
-    /**
-     * @throws SQLException
-     */
-    private void checkMeta() throws SQLException {
-        checkCol(1);
-        if (meta == null) {
-            meta = db.column_metadata(stmt.pointer);
-        }
-    }
-
+public abstract class JDBC3ResultSet extends CoreResultSet {
     // ResultSet Functions //////////////////////////////////////////
 
-    /**
-     * @see java.sql.ResultSet#close()
-     */
-    public void close() throws SQLException {
-        cols = null;
-        colsMeta = null;
-        meta = null;
-        open = false;
-        limitRows = 0;
-        row = 0;
-        lastCol = -1;
-
-        if (stmt == null) {
-            return;
-        }
-
-        if (stmt != null && stmt.pointer != 0) {
-            db.reset(stmt.pointer);
-
-            if (closeStmt) {
-                closeStmt = false; // break recursive call
-                stmt.close();
-            }
-        }
+    protected JDBC3ResultSet(CoreStatement stmt) {
+        super(stmt);
     }
 
     /**
@@ -220,7 +99,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getType()
      */
     public int getType() throws SQLException {
-        return TYPE_FORWARD_ONLY;
+        return ResultSet.TYPE_FORWARD_ONLY;
     }
 
     /**
@@ -756,7 +635,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getStatement()
      */
     public Statement getStatement() {
-        return stmt;
+        return (Statement)stmt;
     }
 
     /**
@@ -802,7 +681,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getMetaData()
      */
     public ResultSetMetaData getMetaData() throws SQLException {
-        return this;
+        return (ResultSetMetaData)this;
     }
 
     /**
@@ -1041,7 +920,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      */
     public int isNullable(int col) throws SQLException {
         checkMeta();
-        return meta[checkCol(col)][1] ? columnNoNulls : columnNullable;
+        return meta[checkCol(col)][1] ? ResultSetMetaData.columnNoNulls : ResultSetMetaData.columnNullable;
     }
 
     /**
@@ -1105,7 +984,7 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
      * @see java.sql.ResultSet#getConcurrency()
      */
     public int getConcurrency() throws SQLException {
-        return CONCUR_READ_ONLY;
+        return ResultSet.CONCUR_READ_ONLY;
     }
 
     /**
@@ -1211,4 +1090,5 @@ final class RS extends Unused implements ResultSet, ResultSetMetaData, Codes
 
         throw e;
     }
+
 }

@@ -1,5 +1,8 @@
 Work in progress:
 
+* Issue #116: Move to Java 6
+    * Created new branch refactor/JDBC4
+    * Jar is packaged as sqlite-jdbc4*
 * Issue #65 - Calling Statement.setMaxRows(N) has the effect of returning N+1 rows
 * Issue #64 - ArrayIndexOutOfBoundsException when calling ResultSetMetaData.getScale() for VARCHAR column types
 * Issue #56 - Implement getBinaryStream() in RS.java

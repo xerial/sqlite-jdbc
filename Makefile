@@ -23,7 +23,7 @@ CFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_AMAL_DIR) $(CFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -o$@ http://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip
+	curl -o$@ http://www.sqlite.org/2013/$(SQLITE_AMAL_PREFIX).zip
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 	unzip -qo $< -d $(TARGET)
@@ -34,10 +34,10 @@ $(SQLITE_OUT)/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
 	$(JAVAC) -source 1.5 -target 1.5 -sourcepath $(SRC) -d $(SQLITE_OUT) $<
 
-jni-header: $(SRC)/org/sqlite/NativeDB.h
+jni-header: $(SRC)/org/sqlite/core/NativeDB.h
 
-$(SQLITE_OUT)/NativeDB.h: $(SQLITE_OUT)/org/sqlite/NativeDB.class
-	$(JAVAH) -classpath $(SQLITE_OUT) -jni -o $@ org.sqlite.NativeDB
+$(SQLITE_OUT)/NativeDB.h: $(SQLITE_OUT)/org/sqlite/core/NativeDB.class
+	$(JAVAH) -classpath $(SQLITE_OUT) -jni -o $@ org.sqlite.core.NativeDB
 
 test:
 	mvn test
@@ -65,9 +65,9 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3.c
 
-$(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SRC)/org/sqlite/NativeDB.c $(SQLITE_OUT)/NativeDB.h
+$(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SRC)/org/sqlite/core/NativeDB.c $(SQLITE_OUT)/NativeDB.h
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/NativeDB.c
+	$(CC) $(CFLAGS) -c -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/core/NativeDB.c
 	$(CC) $(CFLAGS) -o $@ $(SQLITE_OUT)/*.o $(LINKFLAGS)
 	$(STRIP) $@
 
