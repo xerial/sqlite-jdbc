@@ -49,10 +49,10 @@ public class SQLiteConfig
 
     /* Date storage class*/
     public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-    protected final DateClass dateClass;
-    protected final DatePrecision datePrecision;
-    protected final long dateMultiplier;
-    protected final String dateStringFormat;
+    protected DateClass dateClass;
+    protected DatePrecision datePrecision;
+    protected long dateMultiplier;
+    protected String dateStringFormat;
 
     /**
      * Default constructor.
@@ -237,7 +237,7 @@ public class SQLiteConfig
 
     private static final String[] OnOff = new String[] { "true", "false" };
 
-    private static enum Pragma {
+    public static enum Pragma {
 
         // Parameters requiring SQLite3 API invocation
         OPEN_MODE("open_mode", "Database open-mode flag", null),
@@ -293,6 +293,11 @@ public class SQLiteConfig
             this.pragmaName = pragmaName;
             this.description = description;
             this.choices = choices;
+        }
+
+        public final String getPragmaName()
+        {
+            return pragmaName;
         }
     }
 
@@ -370,6 +375,7 @@ public class SQLiteConfig
     }
 
     /**
+     * @deprecated
      * Enables or disables the count-changes flag. When enabled, INSERT, UPDATE
      * and DELETE statements return the number of rows they modified.
      * @param enable True to enable; false to disable.
@@ -391,6 +397,7 @@ public class SQLiteConfig
     }
 
     /**
+     * @deprecated
      * Enables or disables the empty_result_callbacks flag.
      * @param enable True to enable; false to disable.
      * false.
@@ -480,6 +487,7 @@ public class SQLiteConfig
     }
 
     /**
+     * @deprecated
      * Enables or disables the full_column_name flag. This flag together with
      * the short_column_names flag determine the way SQLite assigns names to
      * result columns of SELECT statements.
@@ -755,7 +763,7 @@ public class SQLiteConfig
      * @throws SQLException 
      */
     public void setDatePrecision(String datePrecision) throws SQLException {
-        setPragma(Pragma.DATE_PRECISION, DatePrecision.getPrecision(datePrecision).getValue());
+        this.datePrecision = DatePrecision.getPrecision(datePrecision);
     }
 
     public static enum DateClass implements PragmaValue {
@@ -774,14 +782,14 @@ public class SQLiteConfig
      * @param dateClass One of INTEGER, TEXT or REAL
      */
     public void setDateClass(String dateClass) {
-        setPragma(Pragma.DATE_CLASS, DateClass.getDateClass(dateClass).getValue());
+        this.dateClass = DateClass.getDateClass(dateClass);
     }
 
     /**
      * @param dateStringFormat Format of date string
      */
     public void setDateStringFormat(String dateStringFormat) {
-        setPragma(Pragma.DATE_STRING_FORMAT, dateStringFormat);
+        this.dateStringFormat = dateStringFormat;
     }
 
     /**
