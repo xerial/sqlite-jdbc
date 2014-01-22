@@ -1,6 +1,8 @@
 Work in progress:
 
-* Issue #116: Move to Java 6
+* Issue #107 - DatabaseMetaData.getPrimaryKeys does not always return all primary keys for multi-line table definitions.
+* Issue #109 - SQLiteConfig ignores calls to setDateStringFormat/setDateClass/setDatePrecision.
+* Issue #116 - Move to Java 6
     * Created new branch refactor/JDBC4
     * Jar is packaged as sqlite-jdbc4*
 * Issue #65 - Calling Statement.setMaxRows(N) has the effect of returning N+1 rows

@@ -243,7 +243,7 @@ public class DBMetaDataTest
     public void numberOfgetExportedKeysCols() throws SQLException {
 
         stat.executeUpdate("create table parent (id1 integer, id2 integer, primary key(id1, id2))");
-        stat.executeUpdate("create table child1 (id1 integer, id2 integer, foreign key(id1) references parent(id1), foreign key(id2) references parent(id2))");
+        stat.executeUpdate("create table child1 (id1 integer, id2 integer,\r\n foreign\tkey(id1) references parent(id1), foreign key(id2) references parent(id2))");
         stat.executeUpdate("create table child2 (id1 integer, id2 integer, foreign key(id2, id1) references parent(id2, id1))");
 
         ResultSet exportedKeys = meta.getExportedKeys(null, null, "parent");
@@ -503,7 +503,7 @@ public class DBMetaDataTest
         stat.executeUpdate("create table pk3 (col1, col2, col3, col4, primary key (col3, col2  ));");
         // extra spaces and mixed case are intentional, do not remove!
         stat.executeUpdate("create table pk4 (col1, col2, col3, col4, " +
-                "CONSTraint named  primary key   (col3, col2  ));");
+                "\r\nCONSTraint\r\nnamed  primary\r\n\t\t key   (col3, col2  ));");
 
         rs = meta.getPrimaryKeys(null, null, "nopk");
         assertFalse(rs.next());
@@ -608,7 +608,7 @@ public class DBMetaDataTest
 
         // With explicit primary column defined.
         stat.executeUpdate("create table REFERRED (ID integer primary key not null)");
-        stat.executeUpdate("create table REFERRING (ID integer, RID integer, constraint fk foreign key (RID) references REFERRED(id))");
+        stat.executeUpdate("create table REFERRING (ID integer, RID integer, constraint fk\r\n foreign\tkey\r\n(RID) references REFERRED(id))");
 
         exportedKeys = meta.getExportedKeys(null, null, "referred");
         assertEquals("referred", exportedKeys.getString("PKTABLE_NAME"));

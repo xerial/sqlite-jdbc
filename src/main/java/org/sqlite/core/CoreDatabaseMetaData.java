@@ -196,13 +196,15 @@ public abstract class CoreDatabaseMetaData
      * Pattern used to extract column order for an unnamed primary key.
      */
     protected final static Pattern PK_UNNAMED_PATTERN =
-            Pattern.compile(".* primary +key *\\((.*?,+.*?)\\).*", Pattern.CASE_INSENSITIVE);
+        Pattern.compile(".*\\sPRIMARY\\s+KEY\\s+\\((.*?,+.*?)\\).*",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Pattern used to extract a named primary key.
      */
      protected final static Pattern PK_NAMED_PATTERN =
-         Pattern.compile(".* constraint +(.*?) +primary +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+         Pattern.compile(".*\\sCONSTRAINT\\s+(.*?)\\s+PRIMARY\\s+KEY\\s+\\((.*?)\\).*",
+             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Parses the sqlite_master table for a table's primary key

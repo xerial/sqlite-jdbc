@@ -1278,7 +1278,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * Pattern used to extract a named primary key.
      */
      protected final static Pattern FK_NAMED_PATTERN =
-         Pattern.compile(".* constraint +(.*?) +foreign +key *\\((.*?)\\).*", Pattern.CASE_INSENSITIVE);
+        Pattern.compile(".*\\sCONSTRAINT\\s+(.*?)\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\).*",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
      /**
      * @see java.sql.DatabaseMetaData#getExportedKeys(java.lang.String, java.lang.String,
