@@ -308,6 +308,14 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         // TODO Auto-generated method stub
         
     }
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        // TODO
+        return null;
+    }
+    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+        // TODO
+        return null;
+    }
 
     protected SQLException unused() {
         return new SQLException("not implemented by SQLite JDBC driver");

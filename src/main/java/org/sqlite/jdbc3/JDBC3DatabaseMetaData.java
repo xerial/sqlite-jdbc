@@ -1735,7 +1735,6 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     public ResultSet getFunctionColumns(String a, String b, String c, String d) throws SQLException {
         throw new SQLException("Not yet implemented by SQLite JDBC driver");
     }
-<<<<<<< HEAD:src/main/java/org/sqlite/MetaData.java
 
     // inner classes
 
@@ -1846,6 +1845,4 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     protected void finalize() throws Throwable {
         close();
     }
-=======
->>>>>>> feature/jdbc4:src/main/java/org/sqlite/jdbc3/JDBC3DatabaseMetaData.java
 }

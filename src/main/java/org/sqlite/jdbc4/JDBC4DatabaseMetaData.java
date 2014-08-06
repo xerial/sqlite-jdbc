@@ -56,4 +56,12 @@ public class JDBC4DatabaseMetaData extends JDBC3DatabaseMetaData implements Data
         // TODO Auto-generated method stub
         return null;
     }
+    public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+        // TODO
+        return null;
+    }
+    public boolean generatedKeyAlwaysReturned() throws SQLException {
+        // TODO
+        return false;
+    }
 }

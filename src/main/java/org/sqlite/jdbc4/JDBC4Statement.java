@@ -36,4 +36,11 @@ public class JDBC4Statement extends JDBC3Statement implements Statement {
         // TODO Auto-generated method stub
         return false;
     }
+    public void closeOnCompletion() throws SQLException {
+        // TODO
+    }
+    public boolean isCloseOnCompletion() throws SQLException {
+        // TODO
+        return false;
+    }
 }

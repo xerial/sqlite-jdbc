@@ -4,3 +4,6 @@ sqlitejdbc/dl
 sqlitejdbc/build
 sqlitejdbc/nestedvm-*
 src/main/resources/org/ibex/nestedvm/*.o
+.idea
+*.iml
+atlassian-ide-plugin.xml

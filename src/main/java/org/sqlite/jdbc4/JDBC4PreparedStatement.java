@@ -122,4 +122,11 @@ public class JDBC4PreparedStatement extends JDBC3PreparedStatement implements Pr
         // TODO Auto-generated method stub
         
     }
+    public void closeOnCompletion() throws SQLException {
+        // TODO
+    }
+    public boolean isCloseOnCompletion() throws SQLException {
+        // TODO
+        return false;
+    }
 }
