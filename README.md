@@ -41,9 +41,9 @@ SQLite JDBC is a library for accessing SQLite databases through the JDBC API. Fo
 then append this jar file into your classpath. 
 2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
 
-** More usage examples are available at <https://bitbucket.org/xerial/sqlite-jdbc/wiki/Usage> **
+* More usage examples are available at <Usage.md> **
 
-** Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)**
+* Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)**
 
     > javac Sample.java
     > java -classpath ".;sqlite-jdbc-(VERSION).jar" Sample   # in Windows
@@ -57,7 +57,7 @@ then append this jar file into your classpath.
 
 ** Sample.java**
 	
-	:::java
+```java
     import java.sql.Connection;
     import java.sql.DriverManager;
     import java.sql.ResultSet;
@@ -112,7 +112,7 @@ then append this jar file into your classpath.
         }
       }
     }
-    
+```    
 
 
 How to Specify Database Files
