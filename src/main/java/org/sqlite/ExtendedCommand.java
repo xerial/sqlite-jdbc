@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.sqlite.core.DB;
+
 /**
  * parsing SQLite specific extension of SQL command
  * 
@@ -144,7 +146,7 @@ public class ExtendedCommand
         }
 
         /**
-         * @see org.sqlite.ExtendedCommand.SQLExtension#execute(org.sqlite.DB)
+         * @see org.sqlite.ExtendedCommand.SQLExtension#execute(org.sqlite.core.DB)
          */
         public void execute(DB db) throws SQLException {
             db.restore(targetDB, srcFile, null);

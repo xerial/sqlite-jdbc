@@ -37,6 +37,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
+import org.sqlite.util.OSInfo;
+
 /**
  * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name,
  * appropriately so that the SQLite JDBC driver can find *.dll, *.jnilib and
@@ -280,9 +282,9 @@ public class SQLiteJDBCLoader
      */
     public static String getVersion() {
 
-        URL versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
+        URL versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc4/pom.properties");
         if (versionFile == null)
-            versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
+            versionFile = SQLiteJDBCLoader.class.getResource("/META-INF/maven/org.xerial/sqlite-jdbc4/VERSION");
 
         String version = "unknown";
         try {

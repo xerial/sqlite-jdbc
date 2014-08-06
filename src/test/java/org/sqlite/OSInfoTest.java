@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.junit.Test;
+import org.sqlite.util.OSInfo;
 
 public class OSInfoTest
 {

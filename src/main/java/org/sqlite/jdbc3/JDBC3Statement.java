@@ -1,130 +1,25 @@
-/*
- * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- * 
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-package org.sqlite;
+package org.sqlite.jdbc3;
 
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.Statement;
 
-import org.sqlite.DB.ProgressObserver;
+import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
+import org.sqlite.SQLiteConnection;
+import org.sqlite.core.CoreDatabaseMetaData;
+import org.sqlite.core.CoreStatement;
+import org.sqlite.core.DB;
+import org.sqlite.core.DB.ProgressObserver;
 
-class Stmt extends Unused implements Statement, Codes
-{
-    final SQLiteConnection conn;
-    final DB   db;
-    final RS   rs;
-
-    private MetaData metadata;
-
-    long       pointer;
-    String     sql            = null;
-
-    int        batchPos;
-    Object[]   batch          = null;
-    boolean    resultsWaiting = false;
-
-    Stmt(SQLiteConnection c) {
-        conn = c;
-        db = conn.db();
-        rs = new RS(this);
-    }
-
-    /**
-     * @throws SQLException If the database is not opened.
-     */
-    protected final void checkOpen() throws SQLException {
-        if (pointer == 0)
-            throw new SQLException("statement is not executing");
-    }
-
-    /**
-     * @return True if the database is opened; false otherwise.
-     * @throws SQLException
-     */
-    boolean isOpen() throws SQLException {
-        return (pointer != 0);
-    }
-
-    /**
-     * Calls sqlite3_step() and sets up results. Expects a clean stmt.
-     * @return True if the ResultSet has at least one row; false otherwise. 
-     * @throws SQLException If the given SQL statement is null or no database is open.
-     */
-    protected boolean exec() throws SQLException {
-        if (sql == null)
-            throw new SQLException("SQLiteJDBC internal error: sql==null");
-        if (rs.isOpen())
-            throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
-
-        boolean rc = false;
-        try {
-            rc = db.execute(this, null);
-        }
-        finally {
-            resultsWaiting = rc;
-        }
-
-        return db.column_count(pointer) != 0;
-    }
-
-    /**
-     * Executes SQL statement and throws SQLExceptions if the given SQL
-     * statement is null or no database is open.
-     * @param sql SQL statement.
-     * @return True if the ResultSet has at least one row; false otherwise. 
-     * @throws SQLException If the given SQL statement is null or no database is open.
-     */
-    protected boolean exec(String sql) throws SQLException {
-        if (sql == null)
-            throw new SQLException("SQLiteJDBC internal error: sql==null");
-        if (rs.isOpen())
-            throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
-
-        boolean rc = false;
-        try {
-            rc = db.execute(sql);
-        }
-        finally {
-            resultsWaiting = rc;
-        }
-
-        return db.column_count(pointer) != 0;
-    }
-
-    protected void internalClose() throws SQLException {
-        if (db.conn.isClosed())
-            throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
-
-        if (pointer == 0)
-            return;
-
-        rs.close();
-        batch = null;
-        batchPos = 0;
-        int resp = db.finalize(this);
-
-        if (resp != SQLITE_OK && resp != SQLITE_MISUSE)
-            db.throwex();
-    }
-
+public abstract class JDBC3Statement extends CoreStatement {
     // PUBLIC INTERFACE /////////////////////////////////////////////
+
+    protected JDBC3Statement(SQLiteConnection conn) {
+        super(conn);
+    }
 
     /**
      * @see java.sql.Statement#close()
@@ -170,7 +65,7 @@ class Stmt extends Unused implements Statement, Codes
      * @param closeStmt Whether to close this statement when the resultset is closed.
      * @see java.sql.Statement#executeQuery(java.lang.String)
      */
-    ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException {
+    public ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException {
         rs.closeStmt = closeStmt;
 
         return executeQuery(sql);
@@ -253,7 +148,7 @@ class Stmt extends Unused implements Statement, Codes
         rs.open = resultsWaiting;
         resultsWaiting = false;
 
-        return rs;
+        return (ResultSet)rs;
     }
 
     /*
@@ -412,28 +307,28 @@ class Stmt extends Unused implements Statement, Codes
      * @see java.sql.Statement#getFetchSize()
      */
     public int getFetchSize() throws SQLException {
-        return rs.getFetchSize();
+        return ((ResultSet)rs).getFetchSize();
     }
 
     /**
      * @see java.sql.Statement#setFetchSize(int)
      */
     public void setFetchSize(int r) throws SQLException {
-        rs.setFetchSize(r);
+        ((ResultSet)rs).setFetchSize(r);
     }
 
     /**
      * @see java.sql.Statement#getFetchDirection()
      */
     public int getFetchDirection() throws SQLException {
-        return rs.getFetchDirection();
+        return ((ResultSet)rs).getFetchDirection();
     }
 
     /**
      * @see java.sql.Statement#setFetchDirection(int)
      */
     public void setFetchDirection(int d) throws SQLException {
-        rs.setFetchDirection(d);
+        ((ResultSet)rs).setFetchDirection(d);
     }
 
     /**
@@ -444,7 +339,7 @@ class Stmt extends Unused implements Statement, Codes
      */
     public ResultSet getGeneratedKeys() throws SQLException {
         if (metadata == null) {
-            metadata = (MetaData)conn.getMetaData();
+            metadata = (CoreDatabaseMetaData)conn.getMetaData();
             metadata.refCount++;
         }
 
@@ -498,4 +393,23 @@ class Stmt extends Unused implements Statement, Codes
         }
     }
 
+    protected SQLException unused() {
+        return new SQLException("not implemented by SQLite JDBC driver");
+    }
+
+
+    // Statement ////////////////////////////////////////////////////
+
+    public boolean execute(String sql, int[] colinds)
+        throws SQLException { throw unused(); }
+    public boolean execute(String sql, String[] colnames)
+        throws SQLException { throw unused(); }
+    public int executeUpdate(String sql, int autoKeys)
+        throws SQLException { throw unused(); }
+    public int executeUpdate(String sql, int[] colinds)
+        throws SQLException { throw unused(); }
+    public int executeUpdate(String sql, String[] cols)
+        throws SQLException { throw unused(); }
+    public boolean execute(String sql, int autokeys)
+        throws SQLException { throw unused(); }
 }

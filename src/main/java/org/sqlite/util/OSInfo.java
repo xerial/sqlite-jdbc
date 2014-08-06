@@ -22,7 +22,7 @@
 // $URL$ 
 // $Author$
 //--------------------------------------
-package org.sqlite;
+package org.sqlite.util;
 
 /**
  * Provides OS name and architecture name.

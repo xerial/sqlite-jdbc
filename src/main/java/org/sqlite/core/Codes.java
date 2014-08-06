@@ -13,9 +13,9 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-package org.sqlite;
+package org.sqlite.core;
 
-interface Codes
+public interface Codes
 {
     /** Successful result */
     public static final int SQLITE_OK         =   0;

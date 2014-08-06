@@ -45,14 +45,14 @@ public class SQLiteConfig
     private final Properties pragmaTable;
     private int openModeFlag = 0x00;
     private TransactionMode transactionMode;
-    protected final int busyTimeout;
+    public final int busyTimeout;
 
     /* Date storage class*/
     public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-    protected DateClass dateClass;
-    protected DatePrecision datePrecision;
-    protected long dateMultiplier;
-    protected String dateStringFormat;
+    public DateClass dateClass;
+    public DatePrecision datePrecision;
+    public long dateMultiplier;
+    public String dateStringFormat;
 
     /**
      * Default constructor.
