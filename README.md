@@ -7,7 +7,6 @@ our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
-
 What is different from Zentus's SQLite JDBC?
 --------------------------------------------
 The current sqlite-jdbc implementation is based on the code of [Zentus's SQLite JDBC driver (missing link)](http://www.zentus.com/sqlitejdbc/). We have improved it in two ways:
@@ -133,7 +132,6 @@ To use a memory database in your Java code, get the database connection as follo
 
     Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
     
-
 
 News
 ====
@@ -264,39 +262,6 @@ each of them is compiled for Windows, Mac OS and Linux. An appropriate native li
 file is automatically extracted into your OS's temporary folder, when your program 
 loads `org.sqlite.JDBC` driver. 
 
-
-Dependency Tests
-----------------
-*   Windows XP (32-bit) 
-*   dependency check 
-
-    > DUMPBIN /DEPENDENTS sqlitejdbc.dll
-    
-      KERNEL32.dll
-      msvcrt.dll
-    
-
-*   Mac OS X (10.4.10 Tiger ~ 10.5 Leopard) 
-*   dependency check 
-
-    > otool -L libsqlitejdbc.jnilib  
-    libsqlitejdbc.jnilib:
-            build/Darwin-i386/libsqlitejdbc.jnilib (compatibility version 0.0.0, current version 0.0.0)
-            /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 88.3.9)
-    
-
-*   Linux (glibc-2.5.12) 
-*   Dependency check 
-
-    > ldd libsqlitejdbc.so    
-            linux-gate.so.1 =>  (0x00b45000)
-            libc.so.6 => /lib/i686/nosegneg/libc.so.6 (0x002dd000)
-            /lib/ld-linux.so.2 (0x47969000)
-
-
-Source Codes
-============
-*   Mercurial Repository: <http://bitbucket.org/xerial/sqlite-jdbc> 
 
 License
 -------
