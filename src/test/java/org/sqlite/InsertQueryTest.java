@@ -24,12 +24,6 @@ import org.junit.Test;
 
 public class InsertQueryTest
 {
-    @BeforeClass
-    public static void forName() throws Exception
-    {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     String dbName;
 
     @Before

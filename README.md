@@ -66,11 +66,8 @@ id = 2
     
     public class Sample
     {
-      public static void main(String[] args) throws ClassNotFoundException
+      public static void main(String[] args) 
       {
-        // load the sqlite-JDBC driver using the current class loader
-        Class.forName("org.sqlite.JDBC");
-        
         Connection connection = null;
         try
         {
@@ -140,6 +137,7 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2014 October 8th: [sqlite-jdbc-3.8.6](https:////bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.6.jar) released.
 *   2014 August 7th: [sqlite-jdbc-3.8.5-pre1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.5-pre1.jar) released. 
 *   2014 January 5th: [sqlite-jdbc4-3.8.2-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.2-SNAPSHOT.jar) Introduced JDBC4 version of driver. (Requires at least Java 6).
     *   Source code is on branch [feature/jdbc4](https://bitbucket.org/xerial/sqlite-jdbc/branch/feature/jdbc4)
@@ -339,7 +337,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.7.2</version>
+          <version>3.8.6</version>
         </dependency>
     </dependencies>
 
@@ -365,6 +363,6 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
     <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.7.2</version>
+        <version>3.8.6</version>
         <scope>provided</scope>
     </dependency>

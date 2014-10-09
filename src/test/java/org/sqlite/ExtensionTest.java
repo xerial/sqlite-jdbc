@@ -14,12 +14,6 @@ import org.junit.Test;
 
 public class ExtensionTest
 {
-
-    @BeforeClass
-    public static void forName() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     Connection conn;
     Statement  stat;
 

@@ -24,10 +24,6 @@ import org.sqlite.SQLiteConfig.SynchronousMode;
  */
 public class ConnectionTest
 {
-    @BeforeClass
-    public static void forName() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-    }
 
     @Test
     public void executeUpdateOnClosedDB() throws SQLException {

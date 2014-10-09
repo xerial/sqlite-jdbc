@@ -25,11 +25,6 @@ import org.junit.Test;
 
 public class QueryTest
 {
-    @BeforeClass
-    public static void forName() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:sqlite::memory:");
     }

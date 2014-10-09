@@ -22,11 +22,6 @@ public class FetchSizeTest
 
     private Connection conn;
 
-    @BeforeClass
-    public static void forName() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     @Before
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");

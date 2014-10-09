@@ -34,7 +34,6 @@ public class TransactionTest
 
     @BeforeClass
     public static void forName() throws Exception {
-        Class.forName("org.sqlite.JDBC");
         System.out.println("running in " + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java") + " mode");
     }
 

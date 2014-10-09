@@ -25,12 +25,6 @@ public class ReadUncommittedTest
     private Connection conn;
     private Statement stat;
 
-    @BeforeClass
-    public static void forName() throws Exception
-    {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     @Before
     public void connect() throws Exception
     {

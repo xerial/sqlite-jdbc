@@ -19,11 +19,6 @@ import org.junit.Test;
 
 public class JDBCTest
 {
-    @BeforeClass
-    public static void forName() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     @Test
     public void enableLoadExtensionTest() throws Exception {
         Properties prop = new Properties();

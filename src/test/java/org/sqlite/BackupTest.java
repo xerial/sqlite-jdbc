@@ -25,11 +25,6 @@ import org.junit.Test;
 public class BackupTest
 {
 
-    @BeforeClass
-    public static void forName() throws Exception {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     @Test
     public void backupAndRestore() throws SQLException, IOException {
         // create a memory database

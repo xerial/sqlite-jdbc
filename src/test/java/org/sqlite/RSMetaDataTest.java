@@ -23,12 +23,6 @@ public class RSMetaDataTest
     private Statement stat;
     private ResultSetMetaData meta;
 
-    @BeforeClass
-    public static void forName() throws Exception
-    {
-        Class.forName("org.sqlite.JDBC");
-    }
-
     @Before
     public void connect() throws Exception
     {

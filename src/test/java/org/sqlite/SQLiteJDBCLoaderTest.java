@@ -47,7 +47,6 @@ public class SQLiteJDBCLoaderTest
     public void setUp() throws Exception
     {
         connection = null;
-        Class.forName("org.sqlite.JDBC");
         // create a database connection
         connection = DriverManager.getConnection("jdbc:sqlite::memory:");
     }
