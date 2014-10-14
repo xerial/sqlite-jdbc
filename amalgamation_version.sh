@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Used to generate the version for the amalgamation download zip.
 # http://www.sqlite.org/download.html#encoding
 # The version is encoded so that filenames sort in order of increasing version number when viewed using "ls".
