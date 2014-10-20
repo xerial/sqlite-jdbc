@@ -135,7 +135,9 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
-*   2014 October 8th: [sqlite-jdbc-3.8.6](https:////bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.6.jar) released.
+*   2014 October 20th: [sqlite-jdbc-3.8.7](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.7.jar) released.
+    * Fixed the native code loading mechanism to allow loading sqlite-jdbc from multiple class loaders.
+*   2014 October 8th: [sqlite-jdbc-3.8.6](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.6.jar) released.
 *   2014 August 7th: [sqlite-jdbc-3.8.5-pre1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.5-pre1.jar) released. 
 *   2014 January 5th: [sqlite-jdbc4-3.8.2-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.2-SNAPSHOT.jar) Introduced JDBC4 version of driver. (Requires at least Java 6).
     *   Source code is on branch [feature/jdbc4](https://bitbucket.org/xerial/sqlite-jdbc/branch/feature/jdbc4)
@@ -302,7 +304,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.8.6</version>
+          <version>3.8.7</version>
         </dependency>
     </dependencies>
 
@@ -312,6 +314,9 @@ To use snapshot/pre-release versions, add the following repository to your Maven
 
 Using SQLiteJDBC with Tomcat6 Web Server
 ========================================
+
+(The following note is no longer necessary since sqlite-jdbc-3.8.7)
+
 Do not include sqlite-jdbc-(version).jar in WEB-INF/lib folder of your web application 
 package, since multiple web applications hosted by the same Tomcat server cannot 
 load the sqlite-jdbc native library more than once. That is the specification of 
