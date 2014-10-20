@@ -7,7 +7,7 @@ endif
 libjdbc  := $(wildcard lib/jdbc-*.jar)
 
 JAVA  := "$$JAVA_HOME/bin/java"
-JAVAC := "$$JAVA_HOME/bin/javac" -Xbootclasspath/p:$(libjdbc)
+JAVAC := "$$JAVA_HOME/bin/javac" 
 JAVAH := "$$JAVA_HOME/bin/javah"
 
 TARGET := target
@@ -85,7 +85,7 @@ SunOS-sparcv9_SQLITE_FLAGS  :=
 Mac-i386_CC        := gcc -arch $(OS_ARCH) 
 Mac-i386_STRIP     := strip -x
 Mac-i386_CFLAGS    := -I$(JAVA_HOME)/include -O2 -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
-Mac-i386_LINKFLAGS := -dynamiclib -static-libgcc
+Mac-i386_LINKFLAGS := -dynamiclib
 Mac-i386_LIBNAME   := libsqlitejdbc.jnilib
 Mac-i386_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
 
