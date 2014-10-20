@@ -78,7 +78,7 @@ public class OSInfo
         if (osName.contains("Windows")) {
             return "Windows";
         }
-        else if (osName.contains("Mac")) {
+        else if (osName.contains("Mac") || osName.contains("Darwin")) {
             return "Mac";
         }
         else if (osName.contains("Linux")) {
