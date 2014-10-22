@@ -34,7 +34,7 @@ $(SQLITE_OUT)/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
 	$(JAVAC) -source 1.5 -target 1.5 -sourcepath $(SRC) -d $(SQLITE_OUT) $<
 
-jni-header: $(SRC)/org/sqlite/core/NativeDB.h
+jni-header: $(SQLITE_OUT)/NativeDB.h
 
 $(SQLITE_OUT)/NativeDB.h: $(SQLITE_OUT)/org/sqlite/core/NativeDB.class
 	$(JAVAH) -classpath $(SQLITE_OUT) -jni -o $@ org.sqlite.core.NativeDB
