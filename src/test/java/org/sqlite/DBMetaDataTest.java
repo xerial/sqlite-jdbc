@@ -646,6 +646,40 @@ public class DBMetaDataTest
     }
 
     @Test
+    public void getIndexInfoOnTest() throws SQLException {
+        ResultSet rs = meta.getIndexInfo(null,null,"test",false,false);
+
+        assertNotNull(rs);
+    }
+
+    @Test
+    public void getIndexInfoIndexedSingle() throws SQLException {
+        stat.executeUpdate("create table testindex (id integer primary key, fn float default 0.0, sn not null);");
+        stat.executeUpdate("create index testindex_idx on testindex (sn);");
+
+        ResultSet rs = meta.getIndexInfo(null,null,"testindex",false,false);
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        assertNotNull(rs);
+        assertNotNull(rsmd);
+    }
+
+
+    @Test
+    public void getIndexInfoIndexedMulti() throws SQLException {
+        stat.executeUpdate("create table testindex (id integer primary key, fn float default 0.0, sn not null);");
+        stat.executeUpdate("create index testindex_idx on testindex (sn);");
+        stat.executeUpdate("create index testindex_pk_idx on testindex (id);");
+
+        ResultSet rs = meta.getIndexInfo(null,null,"testindex",false,false);
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        assertNotNull(rs);
+        assertNotNull(rsmd);
+    }
+
+
+    @Test
     public void version() throws SQLException {
         assertNotNull(meta.getDatabaseProductVersion());
     }

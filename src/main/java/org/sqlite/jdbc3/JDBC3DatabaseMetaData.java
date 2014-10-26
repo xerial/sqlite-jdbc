@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.Codes;
 import org.sqlite.core.CoreStatement;
+import org.sqlite.util.StringUtils;
 
 public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabaseMetaData {
 
@@ -1478,25 +1479,20 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#getIndexInfo(java.lang.String, java.lang.String,
      *      java.lang.String, boolean, boolean)
      */
-    public ResultSet getIndexInfo(String c, String s, String t, boolean u, boolean approximate) throws SQLException {
+    public ResultSet getIndexInfo(String c, String s, String table, boolean u, boolean approximate) throws SQLException {
         ResultSet rs = null;
         Statement stat = conn.createStatement();
         StringBuilder sql = new StringBuilder(500);
 
+        // define the column header
+        // this is from the JDBC spec, it is part of the driver protocol
         sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
-            .append(escape(t)).append("' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
-            .append(Integer.toString(DatabaseMetaData.tableIndexOther)).append(" as TYPE, op as ORDINAL_POSITION, ")
-            .append("cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
+                .append(escape(table)).append("' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
+                .append(Integer.toString(DatabaseMetaData.tableIndexOther)).append(" as TYPE, op as ORDINAL_POSITION, ")
+                .append("cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
 
-        // Use a try catch block to avoid "query does not return ResultSet" error
-        try {
-            rs = stat.executeQuery("pragma index_list('" + escape(t) + "');");
-        }
-        catch (SQLException e) {
-            sql.append("select null as un, null as n, null as op, null as cn) limit 0;");
-
-            return ((CoreStatement)stat).executeQuery(sql.toString(), true);
-        }
+        // this always returns a result set now, previously threw exception
+        rs = stat.executeQuery("pragma index_list('" + escape(table) + "');");
 
         ArrayList<ArrayList<Object>> indexList = new ArrayList<ArrayList<Object>>();
         while (rs.next()) {
@@ -1505,31 +1501,43 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             indexList.get(indexList.size() - 1).add(rs.getInt(3));
         }
         rs.close();
+        if (indexList.size() == 0) {
+            // if pragma index_list() returns no information, use this null block
+            sql.append("select null as un, null as n, null as op, null as cn) limit 0;");
+            return ((CoreStatement) stat).executeQuery(sql.toString(), true);
+        } else {
+            // loop over results from pragma call, getting specific info for each index
 
-        int i = 0;
-        Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
-        ArrayList<Object> currentIndex;
+            int i = 0;
+            Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
+            ArrayList<Object> currentIndex;
 
-        while (indexIterator.hasNext()) {
-            currentIndex = indexIterator.next();
-            String indexName = currentIndex.get(0).toString();
-            rs = stat.executeQuery("pragma index_info('" + escape(indexName) + "');");
+            ArrayList<String> unionAll = new ArrayList<String>();
 
-            while(rs.next()) {
-                if (i++ > 1) {
-                    sql.append(" union all ");
+            while (indexIterator.hasNext()) {
+                currentIndex = indexIterator.next();
+                String indexName = currentIndex.get(0).toString();
+                rs = stat.executeQuery("pragma index_info('" + escape(indexName) + "');");
+
+                while (rs.next()) {
+
+                    StringBuilder sqlRow = new StringBuilder();
+
+                    sqlRow.append("select ").append(Integer.toString(1 - (Integer) currentIndex.get(1))).append(" as un,'")
+                            .append(escape(indexName)).append("' as n,")
+                            .append(Integer.toString(rs.getInt(1) + 1)).append(" as op,'")
+                            .append(escape(rs.getString(3))).append("' as cn");
+
+                    unionAll.add(sqlRow.toString());
                 }
 
-                sql.append("select ").append(Integer.toString(1 - (Integer)currentIndex.get(1))).append(" as un,'")
-                    .append(escape(indexName)).append("' as n,")
-                    .append(Integer.toString(rs.getInt(1) + 1)).append(" as op,'")
-                    .append(escape(rs.getString(3))).append("' as cn");
+                rs.close();
             }
 
-            rs.close();
-        }
+            String sqlBlock = StringUtils.join(unionAll, " union all ");
 
-        return ((CoreStatement)stat).executeQuery(sql.append(");").toString(), true);
+            return ((CoreStatement) stat).executeQuery(sql.append(sqlBlock).append(");").toString(), true);
+        }
     }
 
     /**
