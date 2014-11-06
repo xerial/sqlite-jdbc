@@ -40,7 +40,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-i386 Linux-amd64 Mac-i386 Mac-x86_64 OpenBSD-amd64 Windows-x86 Windows-amd64 SunOS-sparcv9
+known_targets := Linux-i386 Linux-amd64 Linux-arm Mac-i386 Mac-x86_64 OpenBSD-amd64 Windows-x86 Windows-amd64 SunOS-sparcv9
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -67,6 +67,13 @@ Linux-amd64_CFLAGS    := -Ilib/inc_linux -I$(JAVA_HOME)/include -O2 -fPIC -m64 -
 Linux-amd64_LINKFLAGS := -shared -static-libgcc
 Linux-amd64_LIBNAME   := libsqlitejdbc.so
 Linux-amd64_SQLITE_FLAGS  := 
+
+Linux-arm_CC := gcc
+Linux-arm_STRIP := strip
+Linux-arm_CFLAGS := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-arm_LINKFLAGS := -shared -static-libgcc
+Linux-arm_LIBNAME := libsqlitejdbc.so
+Linux-arm_SQLITE_FLAGS :=
 
 OpenBSD-amd64_CC  := gcc
 OpenBSD-amd64_STRIP  := strip
@@ -130,7 +137,11 @@ endif
 ifeq ($(OS_NAME),Windows)
     NATIVE32_DLL = win32
 else ifeq ($(OS_NAME),Linux)
-    NATIVE32_DLL = linux32
+    ifeq ($(OS_ARCH),arm)
+        NATIVE32_DLL = linuxarm
+    else
+        NATIVE32_DLL = linux32
+    endif
 else ifeq ($(OS_NAME),Mac)
     NATIVE32_DLL = mac32
 endif
