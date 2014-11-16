@@ -11,11 +11,14 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.sqlite.SQLiteOpenMode;
 import org.sqlite.core.CoreConnection;
 
 public abstract class JDBC3Connection extends CoreConnection {
+
+	private final AtomicInteger savePoint = new AtomicInteger(0);
 
     protected JDBC3Connection(String url, String fileName, Properties prop) throws SQLException {
         super(url, fileName, prop);
@@ -256,35 +259,59 @@ public abstract class JDBC3Connection extends CoreConnection {
      */
     public abstract PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh) throws SQLException;
 
-    // UNUSED FUNCTIONS /////////////////////////////////////////////
-
     /**
      * @see java.sql.Connection#setSavepoint()
      */
     public Savepoint setSavepoint() throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
+    	checkOpen();
+    	if (autoCommit)
+    		// when a SAVEPOINT is the outermost savepoint and not
+    		// with a BEGIN...COMMIT then the behavior is the same
+    		// as BEGIN DEFERRED TRANSACTION
+    		// http://www.sqlite.org/lang_savepoint.html
+    		autoCommit = false;
+    	Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
+    	db.exec(String.format("SAVEPOINT %s", sp.getSavepointName()));
+    	return sp;
     }
 
     /**
      * @see java.sql.Connection#setSavepoint(java.lang.String)
      */
     public Savepoint setSavepoint(String name) throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
+    	checkOpen();
+    	if (autoCommit)
+    		// when a SAVEPOINT is the outermost savepoint and not
+    		// with a BEGIN...COMMIT then the behavior is the same
+    		// as BEGIN DEFERRED TRANSACTION
+    		// http://www.sqlite.org/lang_savepoint.html
+    		autoCommit = false;
+    	Savepoint sp = new JDBC3Savepoint(name);
+    	db.exec(String.format("SAVEPOINT %s", sp.getSavepointName()));
+    	return sp;
     }
 
     /**
      * @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint)
      */
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
+    	checkOpen();
+    	if (autoCommit)
+    		throw new SQLException("database in auto-commit mode");
+    	db.exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()));
     }
 
     /**
      * @see java.sql.Connection#rollback(java.sql.Savepoint)
      */
     public void rollback(Savepoint savepoint) throws SQLException {
-        throw new SQLException("unsupported by SQLite: savepoints");
+    	checkOpen();
+    	if (autoCommit)
+    		throw new SQLException("database in auto-commit mode");
+    	db.exec(String.format("ROLLBACK TO SAVEPOINT %s", savepoint.getSavepointName()));
     }
+
+    // UNUSED FUNCTIONS /////////////////////////////////////////////
 
     public Struct createStruct(String t, Object[] attr) throws SQLException {
         throw new SQLException("unsupported by SQLite");
