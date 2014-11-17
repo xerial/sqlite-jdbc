@@ -286,7 +286,7 @@ public abstract class JDBC3Connection extends CoreConnection {
     		// as BEGIN DEFERRED TRANSACTION
     		// http://www.sqlite.org/lang_savepoint.html
     		autoCommit = false;
-    	Savepoint sp = new JDBC3Savepoint(name);
+    	Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);
     	db.exec(String.format("SAVEPOINT %s", sp.getSavepointName()));
     	return sp;
     }

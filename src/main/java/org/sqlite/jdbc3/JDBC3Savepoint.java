@@ -14,8 +14,8 @@ public class JDBC3Savepoint implements Savepoint {
 		this.name = null;
 	}
 
-	JDBC3Savepoint(String name) {
-		this.id = 0;
+	JDBC3Savepoint(int id, String name) {
+		this.id = id;
 		this.name = name;
 	}
 
