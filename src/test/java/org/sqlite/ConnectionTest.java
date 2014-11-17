@@ -1,6 +1,9 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,7 +17,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
@@ -72,7 +74,7 @@ public class ConnectionTest
             fail("should not change read only flag after opening connection");
         }
         catch (SQLException e) {
-           assert(e.getMessage().contains("Cannot change read-only flag after establishing a connection.")); 
+           assert(e.getMessage().contains("Cannot change read-only flag after establishing a connection."));
         }
         finally {
             conn.close();
@@ -271,5 +273,29 @@ public class ConnectionTest
         rs.close();
         stmt4.close();
         conn4.close();
+    }
+
+    @Test
+    public void URIPragmas() throws Exception {
+    	 File testDB = copyToTemp("sample.db");
+
+         assertTrue(testDB.exists());
+         Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&synchronous=OFF&journal_size_limit=500", testDB));
+         Statement stat = conn.createStatement();
+
+         ResultSet rs = stat.executeQuery("pragma journal_mode");
+         assertEquals("wal", rs.getString(1));
+         rs.close();
+
+         rs = stat.executeQuery("pragma synchronous");
+         assertEquals(false, rs.getBoolean(1));
+         rs.close();
+
+         rs = stat.executeQuery("pragma journal_size_limit");
+         assertEquals(500, rs.getInt(1));
+         rs.close();
+
+         stat.close();
+         conn.close();
     }
 }

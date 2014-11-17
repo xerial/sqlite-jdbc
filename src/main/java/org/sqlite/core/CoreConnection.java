@@ -15,10 +15,13 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConfig.DateClass;
 import org.sqlite.SQLiteConfig.DatePrecision;
+import org.sqlite.SQLiteConfig.Pragma;
 import org.sqlite.SQLiteConfig.TransactionMode;
 import org.sqlite.SQLiteConnection;
 
@@ -38,10 +41,15 @@ public abstract class CoreConnection {
     protected final static Map<TransactionMode, String> beginCommandMap =
         new HashMap<SQLiteConfig.TransactionMode, String>();
 
+    private final static Set<String> pragmaSet = new TreeSet<String>();
     static {
         beginCommandMap.put(TransactionMode.DEFFERED, "begin;");
         beginCommandMap.put(TransactionMode.IMMEDIATE, "begin immediate;");
         beginCommandMap.put(TransactionMode.EXCLUSIVE, "begin exclusive;");
+
+        for (Pragma pragma : Pragma.values()) {
+        	pragmaSet.add(pragma.pragmaName);
+        }
     }
 
     /* Date storage configuration */
@@ -53,7 +61,7 @@ public abstract class CoreConnection {
     protected CoreConnection(String url, String fileName, Properties prop) throws SQLException
     {
         this.url = url;
-        this.fileName = fileName;
+        this.fileName = extractPragmasFromFilename(fileName, prop);
 
         SQLiteConfig config = new SQLiteConfig(prop);
         this.dateClass = config.dateClass;
@@ -73,6 +81,52 @@ public abstract class CoreConnection {
 
         // set pragmas
         config.apply((Connection)this);
+
+    }
+
+    /**
+     * Extracts PRAGMA values from the filename and sets them into the Properties
+     * object which will be used to build the SQLConfig.  The sanitized filename
+     * is returned.
+     *
+     * @param filename
+     * @param prop
+     * @return a PRAGMA-sanitized filename
+     */
+    private String extractPragmasFromFilename(String filename, Properties prop) {
+    	int parameterDelimiter = filename.indexOf('?');
+    	if (parameterDelimiter == -1) {
+    		// nothing to extract
+    		return filename;
+    	}
+
+    	StringBuilder sb = new StringBuilder();
+    	sb.append(filename.substring(0, parameterDelimiter));
+
+    	String [] parameters = filename.substring(parameterDelimiter + 1).split("&");
+    	for (int i = 0 ; i < parameters.length; i++) {
+    		final String parameter = parameters[i];
+    		final String [] kvp = parameter.toLowerCase().split("=");
+    		final String key = kvp[0].trim();
+
+    		if (pragmaSet.contains(key)) {
+    			final String value = kvp[1].trim();
+    			if (!value.isEmpty()) {
+    				prop.setProperty(key,  value);
+    			}
+    		} else {
+    			// not a Pragma, retain as part of filename
+    			if (i == 0) {
+    				sb.append('?');
+    			} else {
+    				sb.append('&');
+    			}
+    			sb.append(parameter);
+    		}
+    	}
+
+    	final String newFilename = sb.toString();
+    	return newFilename;
     }
 
     /**
@@ -291,7 +345,7 @@ public abstract class CoreConnection {
         this.transactionMode = mode;
     }
 
-    /** 
+    /**
      * @return One of "native" or "unloaded".
      */
     public String getDriverVersion() {
