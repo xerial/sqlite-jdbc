@@ -1,7 +1,7 @@
 package org.sqlite;
 
-import org.junit.runners.Suite;
 import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
     QueryTest.class,
     ReadUncommittedTest.class,
     RSMetaDataTest.class,
+    SavepointTest.class,
     SQLiteDataSourceTest.class,
     SQLiteConnectionPoolDataSourceTest.class,
     SQLiteJDBCLoaderTest.class,
