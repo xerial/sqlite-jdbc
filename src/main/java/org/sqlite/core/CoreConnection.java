@@ -92,8 +92,9 @@ public abstract class CoreConnection {
      * @param filename
      * @param prop
      * @return a PRAGMA-sanitized filename
+     * @throws SQLException
      */
-    private String extractPragmasFromFilename(String filename, Properties prop) {
+    private String extractPragmasFromFilename(String filename, Properties prop) throws SQLException {
     	int parameterDelimiter = filename.indexOf('?');
     	if (parameterDelimiter == -1) {
     		// nothing to extract
@@ -104,23 +105,39 @@ public abstract class CoreConnection {
     	sb.append(filename.substring(0, parameterDelimiter));
 
     	String [] parameters = filename.substring(parameterDelimiter + 1).split("&");
-    	for (int i = 0 ; i < parameters.length; i++) {
-    		final String parameter = parameters[i];
-    		final String [] kvp = parameter.toLowerCase().split("=");
-    		final String key = kvp[0].trim();
+    	for (int i = 0; i < parameters.length; i++) {
+    		// process parameters in reverse-order, last specified pragma value wins
+    		String parameter = parameters[parameters.length - 1 - i].trim();
 
+    		if (parameter.isEmpty()) {
+    			// duplicated &&& sequence, drop
+    			continue;
+    		}
+
+    		String [] kvp = parameter.toLowerCase().split("=");
+    		String key = kvp[0].trim();
     		if (pragmaSet.contains(key)) {
-    			final String value = kvp[1].trim();
+    			if (kvp.length == 1) {
+    				throw new SQLException(String.format("Please specify a value for PRAGMA %s in URL %s", key, url));
+    			}
+    			String value = kvp[1].trim();
     			if (!value.isEmpty()) {
-    				prop.setProperty(key,  value);
+    				if (prop.containsKey(key)) {
+    					//
+    					// IGNORE
+    					//
+    					// this allows DriverManager.getConnection(String, Properties)
+    					// to override URL parameters programmatically.
+    					//
+    					// It also ignores duplicate pragma keys in the URL. The reversed
+    					// processing order ensures the last-supplied pragma value is used.
+    				} else {
+    					prop.setProperty(key,  value);
+    				}
     			}
     		} else {
     			// not a Pragma, retain as part of filename
-    			if (i == 0) {
-    				sb.append('?');
-    			} else {
-    				sb.append('&');
-    			}
+    			sb.append(i == 0 ? '?' : '&');
     			sb.append(parameter);
     		}
     	}

@@ -16,8 +16,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import org.junit.Test;
+import org.sqlite.SQLiteConfig.JournalMode;
+import org.sqlite.SQLiteConfig.Pragma;
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
 /**
@@ -276,7 +279,7 @@ public class ConnectionTest
     }
 
     @Test
-    public void URIPragmas() throws Exception {
+    public void setPragmasFromURI() throws Exception {
     	 File testDB = copyToTemp("sample.db");
 
          assertTrue(testDB.exists());
@@ -297,5 +300,79 @@ public class ConnectionTest
 
          stat.close();
          conn.close();
+    }
+
+    @Test
+    public void ignoreUnknownParametersInURI() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&debug=&invalid", testDB));
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma journal_mode");
+    	assertEquals("wal", rs.getString(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
+    }
+
+    @Test(expected = SQLException.class)
+    public void errorOnEmptyPragmaValueInURI() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+   		Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=&synchronous=", testDB));
+    }
+
+    @Test
+    public void ignoreDoubleAmpersandsInURI() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&&&debug=&invalid", testDB));
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma journal_mode");
+    	assertEquals("wal", rs.getString(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
+    }
+
+    @Test
+    public void useLastSpecifiedPragmaValueInURI() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&journal_mode=MEMORY&journal_mode=TRUNCATE", testDB));
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma journal_mode");
+    	assertEquals("truncate", rs.getString(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
+    }
+
+    @Test
+    public void overrideURIPragmaValuesWithProperties() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+    	Properties props = new Properties();
+    	props.setProperty(Pragma.JOURNAL_MODE.pragmaName, JournalMode.TRUNCATE.name());
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL", testDB), props);
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma journal_mode");
+    	assertEquals("truncate", rs.getString(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
     }
 }
