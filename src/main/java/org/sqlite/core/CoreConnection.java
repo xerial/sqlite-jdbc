@@ -104,6 +104,7 @@ public abstract class CoreConnection {
     	StringBuilder sb = new StringBuilder();
     	sb.append(filename.substring(0, parameterDelimiter));
 
+    	int nonPragmaCount = 0;
     	String [] parameters = filename.substring(parameterDelimiter + 1).split("&");
     	for (int i = 0; i < parameters.length; i++) {
     		// process parameters in reverse-order, last specified pragma value wins
@@ -137,8 +138,9 @@ public abstract class CoreConnection {
     			}
     		} else {
     			// not a Pragma, retain as part of filename
-    			sb.append(i == 0 ? '?' : '&');
+    			sb.append(nonPragmaCount == 0 ? '?' : '&');
     			sb.append(parameter);
+    			nonPragmaCount++;
     		}
     	}
 

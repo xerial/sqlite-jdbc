@@ -331,7 +331,7 @@ public class ConnectionTest
     	File testDB = copyToTemp("sample.db");
 
     	assertTrue(testDB.exists());
-    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&&&debug=&invalid", testDB));
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?debug=&&&invalid&journal_mode=WAL", testDB));
     	Statement stat = conn.createStatement();
 
     	ResultSet rs = stat.executeQuery("pragma journal_mode");
