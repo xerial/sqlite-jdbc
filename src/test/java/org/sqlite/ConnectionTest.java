@@ -304,14 +304,11 @@ public class ConnectionTest
 
     @Test
     public void ignoreUnknownParametersInURI() throws Exception {
-    	File testDB = copyToTemp("sample.db");
-
-    	assertTrue(testDB.exists());
-    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&debug=&invalid", testDB));
+    	Connection conn = DriverManager.getConnection("jdbc:sqlite:file::memory:?cache=shared&foreign_keys=ON&debug=&invalid");
     	Statement stat = conn.createStatement();
 
-    	ResultSet rs = stat.executeQuery("pragma journal_mode");
-    	assertEquals("wal", rs.getString(1));
+    	ResultSet rs = stat.executeQuery("pragma foreign_keys");
+    	assertEquals(true, rs.getBoolean(1));
     	rs.close();
 
     	stat.close();
@@ -320,10 +317,7 @@ public class ConnectionTest
 
     @Test(expected = SQLException.class)
     public void errorOnEmptyPragmaValueInURI() throws Exception {
-    	File testDB = copyToTemp("sample.db");
-
-    	assertTrue(testDB.exists());
-   		Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=&synchronous=", testDB));
+   		DriverManager.getConnection("jdbc:sqlite:file::memory:?journal_mode=&synchronous=");
     }
 
     @Test
@@ -331,11 +325,15 @@ public class ConnectionTest
     	File testDB = copyToTemp("sample.db");
 
     	assertTrue(testDB.exists());
-    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?debug=&&&invalid&journal_mode=WAL", testDB));
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?synchronous=OFF&&&&journal_mode=WAL", testDB));
     	Statement stat = conn.createStatement();
 
     	ResultSet rs = stat.executeQuery("pragma journal_mode");
     	assertEquals("wal", rs.getString(1));
+    	rs.close();
+
+    	rs = stat.executeQuery("pragma synchronous");
+    	assertEquals(false, rs.getBoolean(1));
     	rs.close();
 
     	stat.close();
