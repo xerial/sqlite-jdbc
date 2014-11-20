@@ -1,6 +1,9 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,9 +16,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sqlite.SQLiteConfig.JournalMode;
+import org.sqlite.SQLiteConfig.Pragma;
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
 /**
@@ -72,7 +77,7 @@ public class ConnectionTest
             fail("should not change read only flag after opening connection");
         }
         catch (SQLException e) {
-           assert(e.getMessage().contains("Cannot change read-only flag after establishing a connection.")); 
+           assert(e.getMessage().contains("Cannot change read-only flag after establishing a connection."));
         }
         finally {
             conn.close();
@@ -271,5 +276,101 @@ public class ConnectionTest
         rs.close();
         stmt4.close();
         conn4.close();
+    }
+
+    @Test
+    public void setPragmasFromURI() throws Exception {
+    	 File testDB = copyToTemp("sample.db");
+
+         assertTrue(testDB.exists());
+         Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&synchronous=OFF&journal_size_limit=500", testDB));
+         Statement stat = conn.createStatement();
+
+         ResultSet rs = stat.executeQuery("pragma journal_mode");
+         assertEquals("wal", rs.getString(1));
+         rs.close();
+
+         rs = stat.executeQuery("pragma synchronous");
+         assertEquals(false, rs.getBoolean(1));
+         rs.close();
+
+         rs = stat.executeQuery("pragma journal_size_limit");
+         assertEquals(500, rs.getInt(1));
+         rs.close();
+
+         stat.close();
+         conn.close();
+    }
+
+    @Test
+    public void ignoreUnknownParametersInURI() throws Exception {
+    	Connection conn = DriverManager.getConnection("jdbc:sqlite:file::memory:?cache=shared&foreign_keys=ON&debug=&invalid");
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma foreign_keys");
+    	assertEquals(true, rs.getBoolean(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
+    }
+
+    @Test(expected = SQLException.class)
+    public void errorOnEmptyPragmaValueInURI() throws Exception {
+   		DriverManager.getConnection("jdbc:sqlite:file::memory:?journal_mode=&synchronous=");
+    }
+
+    @Test
+    public void ignoreDoubleAmpersandsInURI() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?synchronous=OFF&&&&journal_mode=WAL", testDB));
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma journal_mode");
+    	assertEquals("wal", rs.getString(1));
+    	rs.close();
+
+    	rs = stat.executeQuery("pragma synchronous");
+    	assertEquals(false, rs.getBoolean(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
+    }
+
+    @Test
+    public void useLastSpecifiedPragmaValueInURI() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL&journal_mode=MEMORY&journal_mode=TRUNCATE", testDB));
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma journal_mode");
+    	assertEquals("truncate", rs.getString(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
+    }
+
+    @Test
+    public void overrideURIPragmaValuesWithProperties() throws Exception {
+    	File testDB = copyToTemp("sample.db");
+
+    	assertTrue(testDB.exists());
+    	Properties props = new Properties();
+    	props.setProperty(Pragma.JOURNAL_MODE.pragmaName, JournalMode.TRUNCATE.name());
+    	Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?journal_mode=WAL", testDB), props);
+    	Statement stat = conn.createStatement();
+
+    	ResultSet rs = stat.executeQuery("pragma journal_mode");
+    	assertEquals("truncate", rs.getString(1));
+    	rs.close();
+
+    	stat.close();
+    	conn.close();
     }
 }
