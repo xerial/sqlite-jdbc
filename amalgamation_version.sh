@@ -16,4 +16,8 @@ for num in $1; do
 	let i+=1
 done
 unset IFS
-echo "$version"00
+if [ $i -gt 3 ]; then
+  echo "$version"
+else
+  echo "$version"00
+fi
