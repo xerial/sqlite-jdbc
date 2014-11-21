@@ -22,6 +22,8 @@
 
 static jclass dbclass = 0;
 static jclass  fclass = 0;
+static jclass  tclass = 0;
+static jclass  oclass = 0;
 static jclass  aclass = 0;
 static jclass pclass = 0;
 static jclass phandleclass = 0;
@@ -372,6 +374,40 @@ void xFinal(sqlite3_context *context)
     (*env)->DeleteGlobalRef(env, *func);
 }
 
+void xTrace(void *pArg, const char *str)
+{
+    JNIEnv *env = 0;
+    struct UDFData *udf = 0;
+    jobject trace;
+    static jmethodID mth = 0;
+
+    udf = (struct UDFData*)pArg;
+    (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
+    trace = udf->func;
+    assert(trace); // disaster
+    
+    if (!mth) mth = (*env)->GetMethodID(env, tclass, "xTrace", "(Ljava/lang/String;)V");
+    
+    (*env)->CallVoidMethod(env, trace, mth, (*env)->NewStringUTF(env, str));
+}
+
+void xProfile(void *pArg, const char *str, sqlite3_uint64 duration)
+{
+    JNIEnv *env = 0;
+    struct UDFData *udf = 0;
+    jobject profile;
+    static jmethodID mth = 0;
+
+    udf = (struct UDFData*)pArg;
+    (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
+    profile = udf->func;
+    assert(profile); // disaster
+    
+    if (!mth) mth = (*env)->GetMethodID(env, oclass, "xProfile", "(Ljava/lang/String;J)V");
+    
+    (*env)->CallVoidMethod(env, profile, mth, (*env)->NewStringUTF(env, str), duration);
+}
+
 
 // INITIALISATION ///////////////////////////////////////////////////
 
@@ -393,6 +429,14 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     aclass = (*env)->FindClass(env, "org/sqlite/Function$Aggregate");
     if (!aclass) return JNI_ERR;
     aclass = (*env)->NewGlobalRef(env, aclass);
+
+    tclass = (*env)->FindClass(env, "org/sqlite/Trace");
+    if (!tclass) return JNI_ERR;
+    tclass = (*env)->NewGlobalRef(env, tclass);
+
+    oclass = (*env)->FindClass(env, "org/sqlite/Profile");
+    if (!oclass) return JNI_ERR;
+    oclass = (*env)->NewGlobalRef(env, oclass);
 
     pclass = (*env)->FindClass(env, "org/sqlite/core/DB$ProgressObserver");
     if(!pclass) return JNI_ERR;
@@ -1158,6 +1202,63 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_free_1functions(
     }
 }
 
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1trace(
+        JNIEnv *env, jobject this, jobject trace)
+{
+    sqlite3 *db;    
+    struct UDFData *prevUdf;
+
+    db = gethandle(env, this);    
+    
+    if (NULL == trace) {
+        // disable tracing
+        prevUdf = (struct UDFData*)sqlite3_trace(db, NULL, NULL);
+    } else {
+        // enable tracing, maybe replacing the func reference
+        struct UDFData *udf = malloc(sizeof(struct UDFData));
+        assert(udf); // out-of-memory
+
+        udf->func = (*env)->NewGlobalRef(env, trace);
+        (*env)->GetJavaVM(env, &udf->vm);
+   
+        prevUdf = (struct UDFData*)sqlite3_trace(db, &xTrace, udf);
+    }
+    
+    if (prevUdf != NULL) {
+        // release previous trace reference
+        (*env)->DeleteGlobalRef(env, prevUdf->func);
+        free(prevUdf);
+    }
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1profile(
+        JNIEnv *env, jobject this, jobject profile)
+{
+    sqlite3 *db;    
+    struct UDFData *prevUdf;
+
+    db = gethandle(env, this);    
+    
+    if (NULL == profile) {
+        // disable profiling
+        prevUdf = (struct UDFData*)sqlite3_profile(db, NULL, NULL);
+    } else {
+        // enable profiling, maybe replacing the profile reference
+        struct UDFData *udf = malloc(sizeof(struct UDFData));
+        assert(udf); // out-of-memory
+
+        udf->func = (*env)->NewGlobalRef(env, profile);
+        (*env)->GetJavaVM(env, &udf->vm);
+   
+        prevUdf = (struct UDFData*)sqlite3_profile(db, &xProfile, udf);
+    }
+    
+    if (prevUdf != NULL) {
+        // release previous profile reference
+        (*env)->DeleteGlobalRef(env, prevUdf->func);
+        free(prevUdf);
+    }
+}
 
 // COMPOUND FUNCTIONS ///////////////////////////////////////////////
 

@@ -22,10 +22,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.sqlite.Function;
+import org.sqlite.Profile;
 import org.sqlite.ProgressHandler;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
+import org.sqlite.Trace;
 
 /*
  * This class is the interface to SQLite. It provides some helper functions
@@ -187,6 +189,12 @@ public abstract class DB implements Codes
 
         // remove memory used by user-defined functions
         free_functions();
+
+        // clear any assigned trace
+        set_trace(null);
+
+        // clear any assigned profile
+        set_profile(null);
 
         // clean up commit object
         if (begin != 0) {
@@ -635,6 +643,20 @@ public abstract class DB implements Codes
      * @throws SQLException
      */
     abstract void free_functions() throws SQLException;
+
+    /**
+     * Enable or disable statement tracing.
+     * @throws SQLException
+     * @see <a href="http://www.sqlite.org/c3ref/profile.html">http://www.sqlite.org/c3ref/profile.html</a>
+     */
+    public abstract void set_trace(Trace trace) throws SQLException;
+
+    /**
+     * Enable or disable statement profiling.
+     * @throws SQLException
+     * @see <a href="http://www.sqlite.org/c3ref/profile.html">http://www.sqlite.org/c3ref/profile.html</a>
+     */
+    public abstract void set_profile(Profile profile) throws SQLException;
 
     /**
      * @param dbName Database name to be backed up.
