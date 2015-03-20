@@ -23,7 +23,7 @@ CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_AMAL_DIR) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -o$@ http://www.sqlite.org/2014/$(SQLITE_AMAL_PREFIX).zip
+	curl -o$@ http://www.sqlite.org/2015/$(SQLITE_AMAL_PREFIX).zip
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 	unzip -qo $< -d $(TARGET)
