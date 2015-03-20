@@ -66,6 +66,10 @@ public class OSInfo
      * @return Operation system architecture name.
      */
     public static String getArchName() {
+    	// Java 1.8 introduces a system property to determine armel or armhf
+    	if (System.getProperty("sun.arch.abi") != null && System.getProperty("sun.arch.abi").startsWith("gnueabihf")) {
+    		return translateArchNameToFolderName("armhf");
+    	}
         return translateArchNameToFolderName(System.getProperty("os.arch"));
     }
 
