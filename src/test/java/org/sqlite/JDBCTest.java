@@ -14,6 +14,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Properties;
 
+import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,6 +50,11 @@ public class JDBCTest
     public void majorVersion() throws Exception {
         int major = DriverManager.getDriver("jdbc:sqlite:").getMajorVersion();
         int minor = DriverManager.getDriver("jdbc:sqlite:").getMinorVersion();
+    }
+
+    @Test
+    public void shouldReturnNullIfProtocolUnhandled() throws Exception {
+        Assert.assertNull(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null));
     }
 
 }

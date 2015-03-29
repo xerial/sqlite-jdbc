@@ -108,7 +108,7 @@ public class JDBC implements Driver
      */
     public static Connection createConnection(String url, Properties prop) throws SQLException {
         if (!isValidURL(url))
-            throw new SQLException("invalid database address: " + url);
+            return null;
 
         url = url.trim();
         return new SQLiteConnection(url, extractAddress(url), prop);
