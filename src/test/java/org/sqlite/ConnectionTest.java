@@ -31,6 +31,14 @@ public class ConnectionTest
 {
 
     @Test
+    public void isValid() throws SQLException {
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+        assertTrue(conn.isValid(0));
+        conn.close();
+        assertFalse(conn.isValid(0));
+    }
+
+    @Test
     public void executeUpdateOnClosedDB() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         Statement stat = conn.createStatement();

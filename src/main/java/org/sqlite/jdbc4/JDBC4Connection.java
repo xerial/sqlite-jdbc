@@ -86,8 +86,15 @@ public abstract class JDBC4Connection extends JDBC3Connection implements Connect
     }
 
     public boolean isValid(int timeout) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+        if (db == null) {
+            return false;
+        }
+        Statement statement = createStatement();
+        try {
+            return statement.execute("select 1");
+        } finally {
+            statement.close();
+        }
     }
 
     public void setClientInfo(String name, String value)
