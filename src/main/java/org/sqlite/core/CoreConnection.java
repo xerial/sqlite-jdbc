@@ -115,8 +115,8 @@ public abstract class CoreConnection {
     			continue;
     		}
 
-    		String [] kvp = parameter.toLowerCase().split("=");
-    		String key = kvp[0].trim();
+    		String [] kvp = parameter.split("=");
+    		String key = kvp[0].trim().toLowerCase();
     		if (pragmaSet.contains(key)) {
     			if (kvp.length == 1) {
     				throw new SQLException(String.format("Please specify a value for PRAGMA %s in URL %s", key, url));
