@@ -64,8 +64,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     }
 
     public boolean isClosed() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+        return !isOpen();
     }
 
     public void updateNString(int columnIndex, String nString)
