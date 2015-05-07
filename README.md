@@ -135,7 +135,7 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
-*   2015 May 6th: sqlite-jdbc-3.8.9 release
+*   2015 May 7th: sqlite-jdbc-3.8.9.1 release
 *   2014 October 20th: [sqlite-jdbc-3.8.7](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.7.jar) released.
     * Fixed the native code loading mechanism to allow loading sqlite-jdbc from multiple class loaders.
 *   2014 October 8th: [sqlite-jdbc-3.8.6](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.6.jar) released.
