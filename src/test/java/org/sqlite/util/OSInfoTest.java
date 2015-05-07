@@ -7,7 +7,7 @@
 // $URL$ 
 // $Author$
 //--------------------------------------
-package org.sqlite;
+package org.sqlite.util;
 
 import static org.junit.Assert.*;
 

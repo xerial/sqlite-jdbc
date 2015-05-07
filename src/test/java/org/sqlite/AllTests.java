@@ -2,6 +2,7 @@ package org.sqlite;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.sqlite.util.OSInfoTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
