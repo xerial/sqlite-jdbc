@@ -117,7 +117,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
    protected void setDateByMilliseconds(int pos, Long value) throws SQLException {
        switch(conn.dateClass) {
            case TEXT:
-               batch(pos, conn.dateFormat.format(new Date(value)));
+               batch(pos, conn.timestampFormat.format(new Date(value)));
                break;
 
            case REAL:
