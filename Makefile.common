@@ -111,7 +111,7 @@ SunOS-sparcv9_LINKFLAGS := -shared -static-libgcc
 SunOS-sparcv9_LIBNAME   := libsqlitejdbc.so
 SunOS-sparcv9_SQLITE_FLAGS  := 
 
-Mac-x86_CC        := gcc -arch $(OS_ARCH) 
+Mac-x86_CC        := gcc -arch i386
 Mac-x86_STRIP     := strip -x
 Mac-x86_CFLAGS    := -I$(JAVA_HOME)/include -O2 -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
 Mac-x86_LINKFLAGS := -dynamiclib
