@@ -7,9 +7,9 @@ our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
-What is different from Zentus's SQLite JDBC?
+What is different from Zentus' SQLite JDBC?
 --------------------------------------------
-The current sqlite-jdbc implementation is based on the code of [Zentus's SQLite JDBC driver (missing link)](http://www.zentus.com/sqlitejdbc/). We have improved it in two ways:
+The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
 
 * Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
 * Remove manual configurations
