@@ -458,7 +458,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     
             case SQLITE_TEXT:
                 try {
-                    return new Time(stmt.conn.dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+                    return new Time(stmt.conn.timeFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }
                 catch (Exception e) {
                     SQLException error = new SQLException("Error parsing time");
@@ -487,7 +487,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat) stmt.conn.dateFormat.clone();
+                    DateFormat dateFormat = (DateFormat) stmt.conn.timeFormat.clone();
                     dateFormat.setCalendar(cal);
 
                     return new Time(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
@@ -531,8 +531,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                 return null;
     
             case SQLITE_TEXT:
-                try {
-                    return new Timestamp(stmt.conn.dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
+            	try {
+                    return new Timestamp(stmt.conn.timestampFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }
                 catch (Exception e) {
                     SQLException error = new SQLException("Error parsing time stamp");
@@ -563,7 +563,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat)stmt.conn.dateFormat.clone();
+                    DateFormat dateFormat = (DateFormat)stmt.conn.timestampFormat.clone();
                     dateFormat.setCalendar(cal);
 
                     return new Timestamp(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());

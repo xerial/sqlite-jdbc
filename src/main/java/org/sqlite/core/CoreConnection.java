@@ -57,6 +57,8 @@ public abstract class CoreConnection {
     public final DatePrecision datePrecision; //Calendar.SECOND or Calendar.MILLISECOND
     public final long dateMultiplier;
     public final DateFormat dateFormat;
+    public final DateFormat timeFormat;
+    public final DateFormat timestampFormat;
 
     protected CoreConnection(String url, String fileName, Properties prop) throws SQLException
     {
@@ -67,6 +69,8 @@ public abstract class CoreConnection {
         this.dateClass = config.dateClass;
         this.dateMultiplier = config.dateMultiplier;
         this.dateFormat = new SimpleDateFormat(config.dateStringFormat);
+        this.timeFormat = new SimpleDateFormat(config.timeStringFormat);
+        this.timestampFormat = new SimpleDateFormat(config.timestampStringFormat);
         this.datePrecision = config.datePrecision;
         this.transactionMode = config.getTransactionMode();
         this.openModeFlags = config.getOpenModeFlags();

@@ -48,11 +48,15 @@ public class SQLiteConfig
     public final int busyTimeout;
 
     /* Date storage class*/
-    public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+    public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd";
+    public final static String DEFAULT_TIME_STRING_FORMAT = "HH:mm:ss";
+    public final static String DEFAULT_TIMESTAMP_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     public DateClass dateClass;
     public DatePrecision datePrecision;
     public long dateMultiplier;
     public String dateStringFormat;
+    public String timeStringFormat;
+    public String timestampStringFormat;
 
     /**
      * Default constructor.
@@ -88,6 +92,8 @@ public class SQLiteConfig
         datePrecision = DatePrecision.getPrecision(pragmaTable.getProperty(Pragma.DATE_PRECISION.pragmaName, DatePrecision.MILLISECONDS.name()));
         dateMultiplier = (datePrecision == DatePrecision.MILLISECONDS) ? 1L : 1000L;
         dateStringFormat = pragmaTable.getProperty(Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT);
+        timeStringFormat = pragmaTable.getProperty(Pragma.TIME_STRING_FORMAT.pragmaName, DEFAULT_TIME_STRING_FORMAT);
+        timestampStringFormat = pragmaTable.getProperty(Pragma.TIMESTAMP_STRING_FORMAT.pragmaName, DEFAULT_TIMESTAMP_STRING_FORMAT);
 
         busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
     }
@@ -119,6 +125,8 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.DATE_PRECISION.pragmaName);
         pragmaParams.remove(Pragma.DATE_CLASS.pragmaName);
         pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
+        pragmaParams.remove(Pragma.TIME_STRING_FORMAT.pragmaName);
+        pragmaParams.remove(Pragma.TIMESTAMP_STRING_FORMAT.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
@@ -213,6 +221,8 @@ public class SQLiteConfig
         pragmaTable.setProperty(Pragma.DATE_CLASS.pragmaName, dateClass.getValue());
         pragmaTable.setProperty(Pragma.DATE_PRECISION.pragmaName, datePrecision.getValue());
         pragmaTable.setProperty(Pragma.DATE_STRING_FORMAT.pragmaName, dateStringFormat);
+        pragmaTable.setProperty(Pragma.TIME_STRING_FORMAT.pragmaName, timeStringFormat);
+        pragmaTable.setProperty(Pragma.TIMESTAMP_STRING_FORMAT.pragmaName, timestampStringFormat);
 
         return pragmaTable;
     }
@@ -274,7 +284,9 @@ public class SQLiteConfig
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
         DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
-        DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
+        DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd\"", null),
+        TIME_STRING_FORMAT("time_string_format", "Format to store and retrieve times stored as text. Defaults to \"HH:mm:ss\"", null),
+        TIMESTAMP_STRING_FORMAT("timestamp_string_format", "Format to store and retrieve timestamps stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
         BUSY_TIMEOUT("busy_timeout", null);
 
         public final String   pragmaName;
@@ -790,6 +802,20 @@ public class SQLiteConfig
      */
     public void setDateStringFormat(String dateStringFormat) {
         this.dateStringFormat = dateStringFormat;
+    }
+    
+    /**
+     * @param timeStringFormat Format of time string
+     */
+    public void setTimeStringFormat(String timeStringFormat) {
+        this.timeStringFormat = timeStringFormat;
+    }
+    
+    /**
+     * @param timestampStringFormat Format of timestamp string
+     */
+    public void setTimestampStringFormat(String timestampStringFormat) {
+        this.timestampStringFormat = timestampStringFormat;
     }
 
     /**
