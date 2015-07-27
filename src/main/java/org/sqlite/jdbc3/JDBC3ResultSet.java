@@ -14,12 +14,13 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.sqlite.date.FastDateFormat;
 
 import org.sqlite.core.CoreResultSet;
 import org.sqlite.core.CoreStatement;
@@ -323,8 +324,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat) stmt.conn.dateFormat.clone();
-                    dateFormat.setCalendar(cal);
+                	FastDateFormat dateFormat = FastDateFormat.getInstance(stmt.conn.dateStringFormat, cal.getTimeZone());
 
                     return new java.sql.Date(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }
@@ -487,8 +487,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat) stmt.conn.dateFormat.clone();
-                    dateFormat.setCalendar(cal);
+                	FastDateFormat dateFormat = FastDateFormat.getInstance(stmt.conn.dateStringFormat, cal.getTimeZone());
 
                     return new Time(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }
@@ -563,8 +562,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat)stmt.conn.dateFormat.clone();
-                    dateFormat.setCalendar(cal);
+                	FastDateFormat dateFormat = FastDateFormat.getInstance(stmt.conn.dateStringFormat, cal.getTimeZone());
 
                     return new Timestamp(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }
