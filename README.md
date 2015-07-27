@@ -135,6 +135,7 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2015 July 27th: sqlite-jdbc-3.8.10.2 release (Thread-safe date time)
 *   2015 May 11th: sqlite-jdbc-3.8.10.1 release
 *   2015 May 7th: sqlite-jdbc-3.8.9.1 release
 *   2014 October 20th: [sqlite-jdbc-3.8.7](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.7.jar) released.
@@ -306,7 +307,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.8.10.1</version>
+          <version>3.8.10.2</version>
         </dependency>
     </dependencies>
 
@@ -335,6 +336,6 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
     <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.8.10.1</version>
+        <version>3.8.10.2</version>
         <scope>provided</scope>
     </dependency>
