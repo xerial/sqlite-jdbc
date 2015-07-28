@@ -73,6 +73,17 @@ public class OSInfoTest
         }
 
     }
+    
+    @Test
+    public void testQNX() {
+    	String curOSName = System.getProperty("os.name");
+    	String curOSVersion = System.getProperty("os.version");
+    	System.setProperty("os.name", "QNX");
+    	System.setProperty("os.version", "6.5.0");
+    	assertEquals("QNX6.5.0", OSInfo.getOSName());
+    	System.setProperty("os.name", curOSName);
+    	System.setProperty("os.version", curOSVersion);
+    }
 
     @Test
     public void testMainForArchName() throws Exception {
