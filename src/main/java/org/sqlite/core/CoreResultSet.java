@@ -17,6 +17,8 @@ package org.sqlite.core;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implements a JDBC ResultSet.
@@ -37,6 +39,7 @@ public abstract class CoreResultSet implements Codes
     protected int        lastCol;         // last column accessed, for wasNull(). -1 if none
 
     public boolean closeStmt;
+    protected Map<String, Integer> columnNameToIndex = null;
 
     /**
      * Default constructor for a given statement.
@@ -114,6 +117,7 @@ public abstract class CoreResultSet implements Codes
         limitRows = 0;
         row = 0;
         lastCol = -1;
+        columnNameToIndex = null;
 
         if (stmt == null) {
             return;
@@ -127,5 +131,20 @@ public abstract class CoreResultSet implements Codes
                 ((Statement)stmt).close();
             }
         }
+    }
+
+    protected Integer findColumnIndexInCache(String col) {
+        if (columnNameToIndex == null) {
+            return null;
+        }
+        return columnNameToIndex.get(col);
+    }
+
+    protected int addColumnIndexInCache(String col, int index) {
+        if (columnNameToIndex == null) {
+            columnNameToIndex = new HashMap<String, Integer>(cols.length);
+        }
+        columnNameToIndex.put(col, index);
+        return index;
     }
 }
