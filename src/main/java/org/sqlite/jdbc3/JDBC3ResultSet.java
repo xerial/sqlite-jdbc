@@ -19,11 +19,9 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.sqlite.date.FastDateFormat;
-
 import org.sqlite.core.CoreResultSet;
 import org.sqlite.core.CoreStatement;
+import org.sqlite.date.FastDateFormat;
 
 public abstract class JDBC3ResultSet extends CoreResultSet {
     // ResultSet Functions //////////////////////////////////////////
@@ -38,25 +36,16 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      */
     public int findColumn(String col) throws SQLException {
         checkOpen();
-        int c = -1;
-        for (int i = 0; i < cols.length; i++) {
-            if (col.equalsIgnoreCase(cols[i])
-                    || (cols[i].toUpperCase().endsWith(col.toUpperCase()) && cols[i].charAt(cols[i].length()
-                            - col.length()) == '.')) {
-                if (c == -1) {
-                    c = i;
-                }
-                else {
-                    throw new SQLException("ambiguous column: '" + col + "'");
-                }
+        Integer index = findColumnIndexInCache(col);
+        if (index != null) {
+            return index;
+        }
+        for (int i=0; i < cols.length; i++) {
+            if (col.equalsIgnoreCase(cols[i])) {
+                return addColumnIndexInCache(col, i+1);
             }
         }
-        if (c == -1) {
-            throw new SQLException("no such column: '" + col + "'");
-        }
-        else {
-            return c + 1;
-        }
+        throw new SQLException("no such column: '"+col+"'");
     }
 
     /**
