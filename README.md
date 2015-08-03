@@ -135,6 +135,8 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2015 August 3rd: sqlite-jdbc-3.8.11.1
+    * Fix for Linux ARM native library
 *   2015 July 29th: sqlite-jdbc-3.8.11 release. 
     * General performance improvement
     * warning: No update for FreeBSD binary (need a contribution of native library!) 
