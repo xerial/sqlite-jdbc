@@ -119,12 +119,19 @@ public class OSInfo
                 String javaHome = System.getProperty("java.home");
                 try {
                     // determine if first JVM found uses ARM hard-float ABI
-                    String[] cmdarray = {"/bin/sh", "-c", "find '" + javaHome +
-                        "' -name 'libjvm.so' | head -1 | xargs readelf -A | " +
-                        "grep 'Tag_ABI_VFP_args: VFP registers'"};
-                    int exitCode = Runtime.getRuntime().exec(cmdarray).waitFor();
-                    if(exitCode == 0)
-                        return translateArchNameToFolderName("armhf");
+                    int exitCode = Runtime.getRuntime().exec("which readelf").waitFor();
+                    if(exitCode == 0) {
+                        String[] cmdarray = {"/bin/sh", "-c", "find '" + javaHome +
+                                "' -name 'libjvm.so' | head -1 | xargs readelf -A | " +
+                                "grep 'Tag_ABI_VFP_args: VFP registers'"};
+                        exitCode = Runtime.getRuntime().exec(cmdarray).waitFor();
+                        if (exitCode == 0) {
+                            return translateArchNameToFolderName("armhf");
+                        }
+                    } else {
+                        System.err.println("WARNING! readelf not found. Cannot check if running on an armhf system, " +
+                                "armel architecture will be presumed.");
+                    }
                 }
                 catch(IOException e) {
                     // ignored: fall back to "arm" arch (soft-float ABI)
