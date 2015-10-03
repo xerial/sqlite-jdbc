@@ -135,6 +135,9 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2015 Oct 3rd: sqlite-jdbc-3.8.11.2
+    * Fix for Raspberry-Pi 2
+    * Add multiple table support for DatabaseMetaData.getColumns 
 *   2015 August 3rd: sqlite-jdbc-3.8.11.1
     * Fix for Linux ARM native library
 *   2015 July 29th: sqlite-jdbc-3.8.11 release. 
@@ -312,7 +315,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.8.11</version>
+          <version>3.8.11.2</version>
         </dependency>
     </dependencies>
 
@@ -341,6 +344,6 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
     <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.8.11</version>
+        <version>3.8.11.2</version>
         <scope>provided</scope>
     </dependency>
