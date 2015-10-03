@@ -151,17 +151,40 @@ public class DBMetaDataTest
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test%", "%");
+        // TABLE "test"
         assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "test");
+        assertEquals(rs.getString("COLUMN_NAME"), "id");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "test");
+        assertEquals(rs.getString("COLUMN_NAME"), "fn");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "test");
+        assertEquals(rs.getString("COLUMN_NAME"), "sn");
+        // VIEW "testView"
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "testView");
+        assertEquals(rs.getString("COLUMN_NAME"), "id");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "testView");
+        assertEquals(rs.getString("COLUMN_NAME"), "fn");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "testView");
+        assertEquals(rs.getString("COLUMN_NAME"), "sn");
+        assertFalse(rs.next());
+
+        rs = meta.getColumns(null, null, "%", "%");
+        // TABLE "test"
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "test");
         assertEquals(rs.getString("COLUMN_NAME"), "id");
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "fn");
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "sn");
-        assertFalse(rs.next());
-
-        rs = meta.getColumns(null, null, "%", "%");
+        // VIEW "testView"
         assertTrue(rs.next());
-        assertEquals(rs.getString("TABLE_NAME"), "test");
+        assertEquals(rs.getString("TABLE_NAME"), "testView");
         assertEquals(rs.getString("COLUMN_NAME"), "id");
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "fn");
