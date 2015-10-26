@@ -9,6 +9,7 @@ import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
@@ -66,23 +67,23 @@ public abstract class JDBC4Connection extends JDBC3Connection implements Connect
     }
 
     public Clob createClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public Blob createBlob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public NClob createNClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public SQLXML createSQLXML() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public boolean isValid(int timeout) throws SQLException {
