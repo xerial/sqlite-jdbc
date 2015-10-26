@@ -3,6 +3,7 @@ package org.sqlite.jdbc3;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -202,12 +203,21 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
             throw exception;
         } 
-        
+
         byte[] bytes = new byte[length];
 
         try 
         {
-            istream.read(bytes);
+            int bytesRead;
+            int totalBytesRead = 0;
+
+            while (totalBytesRead < length) {
+                bytesRead = istream.read(bytes, totalBytesRead, length - totalBytesRead);
+                if (bytesRead == -1) {
+                    throw new IOException("End of stream has been reached");
+                }
+                totalBytesRead += bytesRead;
+            }
 
             return bytes;
         } 
@@ -216,7 +226,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             SQLException exception = new SQLException("Error reading stream");
 
             exception.initCause(cause);
-            throw(exception);
+            throw exception;
         }
     }
 
@@ -246,7 +256,14 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             setString(pos, null);
         }
 
-        setString(pos, new String(readBytes(istream, length)));
+        try {
+            setString(pos, new String(readBytes(istream, length), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            SQLException exception = new SQLException("UTF-8 is not supported");
+
+            exception.initCause(e);
+            throw exception;
+        }
     }
 
     /**
