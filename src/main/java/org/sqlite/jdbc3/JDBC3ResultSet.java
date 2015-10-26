@@ -222,7 +222,13 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSet#getBinaryStream(int)
      */
     public InputStream getBinaryStream(int col) throws SQLException {
-        return new ByteArrayInputStream(getBytes(col));
+        byte[] bytes = getBytes(col);
+        if (bytes != null) {
+            return new ByteArrayInputStream(bytes);
+        }
+        else {
+            return null;
+        }
     }
 
     /**
