@@ -23,8 +23,8 @@ import org.junit.Test;
 public class PrepStmtTest
 {
     static byte[]      b1    = new byte[] { 1, 2, 7, 4, 2, 6, 2, 8, 5, 2, 3, 1, 5, 3, 6, 3, 3, 6, 2, 5 };
-    static byte[]      b2    = "To be or not to be.".getBytes();
-    static byte[]      b3    = "Question!#$%".getBytes();
+    static byte[]      b2    = getUtf8Bytes("To be or not to be.");
+    static byte[]      b3    = getUtf8Bytes("Question!#$%");
     static String      utf01 = "\uD840\uDC40";
     static String      utf02 = "\uD840\uDC47 ";
     static String      utf03 = " \uD840\uDC43";
@@ -37,6 +37,16 @@ public class PrepStmtTest
     private Connection conn;
     private Statement  stat;
 
+    private static byte[] getUtf8Bytes(String str) {
+        try {
+            return str.getBytes("UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            fail(e.getMessage());
+            return null;
+        }
+    }
+    
     @Before
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
@@ -203,8 +213,8 @@ public class PrepStmtTest
         rs = prep.executeQuery();
         assertTrue(rs.next());
         assertArrayEq(b1, rs.getBytes(1));
-        assertEquals(new String(b2), rs.getString(2));
-        assertEquals(new String(b3), rs.getString(3));
+        assertEquals(new String(b2, "UTF-8"), rs.getString(2));
+        assertEquals(new String(b3, "UTF-8"), rs.getString(3));
         assertFalse(rs.next());
         rs.close();
     }
@@ -306,6 +316,14 @@ public class PrepStmtTest
     public void utf() throws SQLException {
         ResultSet rs = stat.executeQuery("select '" + utf01 + "','" + utf02 + "','" + utf03 + "','" + utf04 + "','"
                 + utf05 + "','" + utf06 + "','" + utf07 + "','" + utf08 + "';");
+        assertArrayEq(rs.getBytes(1), getUtf8Bytes(utf01));
+        assertArrayEq(rs.getBytes(2), getUtf8Bytes(utf02));
+        assertArrayEq(rs.getBytes(3), getUtf8Bytes(utf03));
+        assertArrayEq(rs.getBytes(4), getUtf8Bytes(utf04));
+        assertArrayEq(rs.getBytes(5), getUtf8Bytes(utf05));
+        assertArrayEq(rs.getBytes(6), getUtf8Bytes(utf06));
+        assertArrayEq(rs.getBytes(7), getUtf8Bytes(utf07));
+        assertArrayEq(rs.getBytes(8), getUtf8Bytes(utf08));
         assertEquals(rs.getString(1), utf01);
         assertEquals(rs.getString(2), utf02);
         assertEquals(rs.getString(3), utf03);
@@ -327,6 +345,14 @@ public class PrepStmtTest
         prep.setString(8, utf08);
         rs = prep.executeQuery();
         assertTrue(rs.next());
+        assertArrayEq(rs.getBytes(1), getUtf8Bytes(utf01));
+        assertArrayEq(rs.getBytes(2), getUtf8Bytes(utf02));
+        assertArrayEq(rs.getBytes(3), getUtf8Bytes(utf03));
+        assertArrayEq(rs.getBytes(4), getUtf8Bytes(utf04));
+        assertArrayEq(rs.getBytes(5), getUtf8Bytes(utf05));
+        assertArrayEq(rs.getBytes(6), getUtf8Bytes(utf06));
+        assertArrayEq(rs.getBytes(7), getUtf8Bytes(utf07));
+        assertArrayEq(rs.getBytes(8), getUtf8Bytes(utf08));
         assertEquals(rs.getString(1), utf01);
         assertEquals(rs.getString(2), utf02);
         assertEquals(rs.getString(3), utf03);
