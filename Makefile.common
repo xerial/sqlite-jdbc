@@ -130,16 +130,16 @@ Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
 
 Windows-x86_CC           := i686-w64-mingw32-gcc
-Windows-x86_STRIP        := strip
+Windows-x86_STRIP        := i686-w64-mingw32-strip
 Windows-x86_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
-Windows-x86_LINKFLAGS    := -Wl,--kill-at -shared
+Windows-x86_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
 Windows-x86_LIBNAME      := sqlitejdbc.dll
 Windows-x86_SQLITE_FLAGS := 
 
-Windows-x86_64_CC          := x86_64-w64-mingw32-gcc 
+Windows-x86_64_CC           := x86_64-w64-mingw32-gcc
 Windows-x86_64_STRIP        := x86_64-w64-mingw32-strip
-Windows-x86_64_CCFLAGS     := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
-Windows-x86_64_LINKFLAGS    := -Wl,--kill-at -shared
+Windows-x86_64_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
+Windows-x86_64_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
 Windows-x86_64_LIBNAME      := sqlitejdbc.dll
 Windows-x86_64_SQLITE_FLAGS := 
 
