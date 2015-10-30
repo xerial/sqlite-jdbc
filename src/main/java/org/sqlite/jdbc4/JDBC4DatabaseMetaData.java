@@ -15,14 +15,12 @@ public class JDBC4DatabaseMetaData extends JDBC3DatabaseMetaData implements Data
     }
 
     // JDBC 4
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T unwrap(Class<T> iface) throws ClassCastException {
+        return iface.cast(this);
     }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isWrapperFor(Class<?> iface) {
+        return iface.isInstance(this);
     }
 
     public RowIdLifetime getRowIdLifetime() throws SQLException {

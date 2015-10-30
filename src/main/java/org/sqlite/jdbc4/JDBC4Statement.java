@@ -12,14 +12,12 @@ public class JDBC4Statement extends JDBC3Statement implements Statement {
     }
 
     // JDBC 4
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T unwrap(Class<T> iface) throws ClassCastException {
+        return iface.cast(this);
     }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isWrapperFor(Class<?> iface) {
+        return iface.isInstance(this);
     }
 
     public boolean isClosed() throws SQLException {
@@ -29,7 +27,7 @@ public class JDBC4Statement extends JDBC3Statement implements Statement {
 
     public void setPoolable(boolean poolable) throws SQLException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public boolean isPoolable() throws SQLException {
