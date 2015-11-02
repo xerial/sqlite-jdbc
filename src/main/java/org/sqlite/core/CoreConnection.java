@@ -10,7 +10,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -39,7 +39,7 @@ public abstract class CoreConnection {
     protected TransactionMode transactionMode = TransactionMode.DEFFERED;
 
     protected final static Map<TransactionMode, String> beginCommandMap =
-        new HashMap<SQLiteConfig.TransactionMode, String>();
+        new EnumMap<SQLiteConfig.TransactionMode, String>(SQLiteConfig.TransactionMode.class);
 
     private final static Set<String> pragmaSet = new TreeSet<String>();
     static {
