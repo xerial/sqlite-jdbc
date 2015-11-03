@@ -20,9 +20,16 @@ public class JDBC4Statement extends JDBC3Statement implements Statement {
         return iface.isInstance(this);
     }
 
-    public boolean isClosed() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    private boolean closed = false;
+
+    @Override
+    public void close() throws SQLException {
+        super.close();
+        closed = true; // isClosed() should only return true when close() happened
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 
     public void setPoolable(boolean poolable) throws SQLException {
