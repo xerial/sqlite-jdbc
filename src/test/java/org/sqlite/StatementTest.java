@@ -2,6 +2,7 @@ package org.sqlite;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.Date;
@@ -13,7 +14,6 @@ import java.sql.Statement;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.sqlite.core.CoreConnection;
@@ -450,13 +450,17 @@ public class StatementTest
     }
 
     @Test
-    public void closeOnCompletionTest() throws SQLException {
-        if ( ! (stat instanceof JDBC4Statement) ) return;
+    public void closeOnCompletionTest() throws Exception {
+        if ( ! (stat instanceof JDBC4Statement) )
+            return;
 
-        assertFalse( stat.isCloseOnCompletion() );
+        // Run the following code only for JDK7 or higher
+        Method mIsCloseOnCompletion = JDBC4Statement.class.getDeclaredMethod("isCloseOnCompletion");
+        Method mCloseOnCompletion = JDBC4Statement.class.getDeclaredMethod("closeOnCompletion");
+        assertFalse((Boolean) mIsCloseOnCompletion.invoke(stat));
 
-        stat.closeOnCompletion();
-        assertTrue( stat.isCloseOnCompletion() );
+        mCloseOnCompletion.invoke(stat);
+        assertTrue((Boolean) mIsCloseOnCompletion.invoke(stat));
 
         ResultSet rs = stat.executeQuery("select 1");
         rs.close();
