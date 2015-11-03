@@ -16,6 +16,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.sqlite.core.CoreConnection;
+import org.sqlite.jdbc3.JDBC3Statement;
 
 /** These tests are designed to stress Statements on memory databases. */
 public class StatementTest
@@ -417,13 +419,33 @@ public class StatementTest
         rs.close();
     }
 
-    @Test 
+    @Test
     public void setEscapeProcessingToFals() throws SQLException {
         stat.setEscapeProcessing(false);
     }
 
-    @Test(expected=SQLException.class) 
+    @Test(expected=SQLException.class)
     public void setEscapeProcessingToTrue() throws SQLException {
         stat.setEscapeProcessing(true);
     }
+
+    @Test
+    public void unwrapTest() throws SQLException {
+        assertTrue( conn.isWrapperFor(Connection.class) );
+        assertFalse( conn.isWrapperFor(Statement.class) );
+        assertEquals( conn, conn.unwrap(Connection.class) );
+        assertEquals( conn, conn.unwrap(CoreConnection.class) );
+
+        assertTrue( stat.isWrapperFor(Statement.class) );
+        assertEquals( stat, stat.unwrap(Statement.class) );
+        assertEquals( stat, stat.unwrap(JDBC3Statement.class) );
+
+        ResultSet rs = stat.executeQuery("select 1");
+
+        assertTrue( rs.isWrapperFor(ResultSet.class) );
+        assertEquals( rs, rs.unwrap(ResultSet.class) );
+
+        rs.close();
+    }
+
 }
