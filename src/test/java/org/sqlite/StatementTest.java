@@ -18,6 +18,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.sqlite.core.CoreConnection;
 import org.sqlite.jdbc3.JDBC3Statement;
+import org.sqlite.jdbc4.JDBC4Statement;
 
 /** These tests are designed to stress Statements on memory databases. */
 public class StatementTest
@@ -446,6 +447,21 @@ public class StatementTest
         assertEquals( rs, rs.unwrap(ResultSet.class) );
 
         rs.close();
+    }
+
+    @Test
+    public void closeOnCompletionTest() throws SQLException {
+        if ( ! (stat instanceof JDBC4Statement) ) return;
+
+        assertFalse( stat.isCloseOnCompletion() );
+
+        stat.closeOnCompletion();
+        assertTrue( stat.isCloseOnCompletion() );
+
+        ResultSet rs = stat.executeQuery("select 1");
+        rs.close();
+
+        assertTrue( stat.isClosed() );
     }
 
 }

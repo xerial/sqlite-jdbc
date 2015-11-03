@@ -28,6 +28,20 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         super(stmt);
     }
 
+    @Override
+    public void close() throws SQLException {
+        final boolean wasOpen = isOpen(); // prevent close() recursion
+        super.close();
+        // close-on-completion regardless of closeStmt
+        if ( wasOpen && stmt instanceof JDBC4Statement ) {
+            JDBC4Statement stat = (JDBC4Statement) stmt;
+            // check if its not closed already in which case no-op
+            if (stat.closeOnCompletion && ! stat.isClosed()) {
+                stat.close();
+            }
+        }
+    }
+
     // JDBC 4
     public <T> T unwrap(Class<T> iface) throws ClassCastException {
         return iface.cast(this);
