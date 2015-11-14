@@ -57,17 +57,8 @@ public abstract class JDBC3Statement extends CoreStatement {
 
         this.sql = sql;
 
-        boolean success = false;
-        try {
-            db.prepare(this);
-            final boolean result = exec();
-            success = true;
-            return result;
-        } finally {
-            if (!success) {
-                internalClose();
-            }
-        }
+        db.prepare(this);
+        return exec();
     }
 
     /**

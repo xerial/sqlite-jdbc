@@ -48,8 +48,14 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         db.reset(pointer);
         checkParameters();
 
-        resultsWaiting = db.execute(this, batch);
-        return columnCount != 0;
+        boolean success = false;
+        try {
+            resultsWaiting = db.execute(this, batch);
+            success = true;
+            return columnCount != 0;
+        } finally {
+            if (!success) db.reset(pointer);
+        }
     }
 
     /**
@@ -66,7 +72,13 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         db.reset(pointer);
         checkParameters();
 
-        resultsWaiting = db.execute(this, batch);
+        boolean success = false;
+        try {
+            resultsWaiting = db.execute(this, batch);
+            success = true;
+        } finally {
+            if (!success) db.reset(pointer);
+        }
         return getResultSet();
     }
 
