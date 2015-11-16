@@ -10,8 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -68,6 +67,71 @@ public class TransactionTest
         conn1.close();
         conn2.close();
         conn3.close();
+    }
+
+    private void failedUpdatedPreventedFutureRollback(boolean prepared) throws SQLException {
+        stat1.execute("create table test (c1);");
+        stat1.execute("insert into test values (1);");
+
+        // First transaction starts
+        conn1.setAutoCommit(false);
+        stat1.execute("insert into test values (2);");
+
+        final PreparedStatement pstat2 = prepared ? conn2.prepareStatement("insert into test values (3);") : null;
+
+        // Second transaction starts and tries to complete but fails because first is still running
+        boolean gotException = false;
+        try {
+            conn2.setAutoCommit(false);
+            if (pstat2 != null) {
+                // The prepared case would fail regardless of whether this was "execute" or "executeUpdate"
+                pstat2.execute();
+            } else {
+                // If you changed this to "executeUpdate" instead of "execute", the test would pass
+                stat2.execute("insert into test values (3);");
+            }
+        } catch (SQLException e) {
+            if (e.getMessage().contains("is locked")) {
+                gotException = true;
+            } else {
+                throw e;
+            }
+        }
+        assertTrue(gotException);
+        conn2.rollback();
+        // The test would fail here: the trivial "transaction" created in between the rollback we just
+        // did and this point would fail to commit because "SQL statements in progress"
+        conn2.setAutoCommit(true);
+
+        // First transaction completes
+        conn1.setAutoCommit(true);
+
+        // Second transaction retries
+        conn2.setAutoCommit(false);
+        if (pstat2 != null) {
+            pstat2.execute();
+        } else {
+            stat2.execute("insert into test values (3);");
+        };
+        conn2.setAutoCommit(true);
+
+        final ResultSet rs = stat1.executeQuery("select c1 from test");
+        final Set<Integer> seen = new HashSet<Integer>();
+        while (rs.next()) {
+            assertTrue(seen.add(rs.getInt(1)));
+        }
+
+        assertEquals(new HashSet<Integer>(Arrays.asList(1, 2, 3)), seen);
+    }
+
+    @Test
+    public void failedUpdatePreventedFutureRollbackUnprepared() throws SQLException {
+        failedUpdatedPreventedFutureRollback(false);
+    }
+
+    @Test
+    public void failedUpdatePreventedFutureRollbackPrepared() throws SQLException {
+        failedUpdatedPreventedFutureRollback(true);
     }
 
     @Test
