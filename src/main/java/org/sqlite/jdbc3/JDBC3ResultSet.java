@@ -744,12 +744,17 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                 return Types.DATE;
             }
     
+            if ("DECIMAL".equals(typeName)) {
+                return Types.DECIMAL;
+            }
+            
             if (valueType == SQLITE_INTEGER ||
                 "INT".equals(typeName) ||
                 "INTEGER".equals(typeName) ||
                 "MEDIUMINT".equals(typeName)) {
                 return Types.INTEGER;
             }
+           
         }
 
         if (valueType == SQLITE_FLOAT || valueType == SQLITE_NULL) {
