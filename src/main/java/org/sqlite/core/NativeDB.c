@@ -582,7 +582,14 @@ JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1blob(
     jsize length;
     jbyteArray jBlob;
     jbyte *a;
-    const void *blob = sqlite3_column_blob(toref(stmt), col);
+    const void *blob;
+
+    // return strings in UTF-8
+    if (sqlite3_column_type(toref(stmt), col) == SQLITE_TEXT) {
+        sqlite3_column_text(toref(stmt), col);
+    }
+
+    blob = sqlite3_column_blob(toref(stmt), col);
     if (!blob) return NULL;
 
     length = sqlite3_column_bytes(toref(stmt), col);
@@ -741,6 +748,11 @@ JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_value_1blob(
     const void *blob;
     sqlite3_value *value = tovalue(env, f, arg);
     if (!value) return NULL;
+
+    // return strings in UTF-8
+    if (sqlite3_value_type(value) == SQLITE_TEXT) {
+        sqlite3_value_text(value);
+    }
 
     blob = sqlite3_value_blob(value);
     if (!blob) return NULL;
