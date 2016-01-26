@@ -25,7 +25,8 @@ import org.sqlite.util.OSInfoTest;
     SQLiteJDBCLoaderTest.class,
     StatementTest.class,
     TransactionTest.class,
-    UDFTest.class
+    UDFTest.class,
+    CollationPinyinTest.class
 })
 public class AllTests {
 // runs all Tests

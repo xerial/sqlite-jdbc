@@ -95,6 +95,7 @@ win64:
 linux32:
 	$(MAKE) native OS_NAME=Linux OS_ARCH=x86
 
+# on linux32 ,sudo apt-get install gcc-multilib
 linux64:
 	$(MAKE) native OS_NAME=Linux OS_ARCH=x86_64
 

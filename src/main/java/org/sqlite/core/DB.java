@@ -665,6 +665,11 @@ public abstract class DB implements Codes
      * @throws SQLException
      */
     abstract boolean[][] column_metadata(long stmt) throws SQLException;
+    
+    /**
+     *  install pinyin collation for order by
+     */
+    abstract int collation_pinyin();
 
     // COMPOUND FUNCTIONS ////////////////////////////////////////////
 

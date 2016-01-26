@@ -46,6 +46,7 @@ public class SQLiteConfig
     private int openModeFlag = 0x00;
     private TransactionMode transactionMode;
     public final int busyTimeout;
+    public boolean pinyin = true;
 
     /* Date storage class*/
     public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -90,6 +91,7 @@ public class SQLiteConfig
         dateStringFormat = pragmaTable.getProperty(Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT);
 
         busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
+        pinyin = getBoolean(Pragma.COLLATION_PINYIN, "true");
     }
 
     /**
@@ -269,13 +271,15 @@ public class SQLiteConfig
         TEMP_STORE("temp_store", toStringArray(TempStore.values())),
         TEMP_STORE_DIRECTORY("temp_store_directory"),
         USER_VERSION("user_version"),
+        
 
         // Others
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
         DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
         DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
-        BUSY_TIMEOUT("busy_timeout", null);
+        BUSY_TIMEOUT("busy_timeout", null),
+        COLLATION_PINYIN("pinyin", OnOff);	//can order by collation pinyin
 
         public final String   pragmaName;
         public final String[] choices;
@@ -797,5 +801,18 @@ public class SQLiteConfig
      */
     public void setBusyTimeout(String milliseconds) {
         setPragma(Pragma.BUSY_TIMEOUT, milliseconds);
+    }
+    
+    /**
+     * @param enable
+     */
+    public void enableCollationPinyin(boolean enable) {
+        set(Pragma.COLLATION_PINYIN, enable);
+    	pinyin = enable;
+    }
+    
+    public void enableCollationPinyin(String enable){
+    	setPragma(Pragma.COLLATION_PINYIN, enable);
+    	pinyin = getBoolean(Pragma.COLLATION_PINYIN, "true");
     }
 }

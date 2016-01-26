@@ -1,3 +1,21 @@
+Branch 3.8.11.2
+==================
+
+在3.8.11.2的基础上进行了相关修改。
+
+3.8.11.2.2
+--------------------------------------------
+支持按中文拼音排序，具体使用方法为：
+1. 使用jdbc的uri开启该功能，pinyin=true。例如：jdbc:sqlite://filepath?pinyin=true 。
+2. 在SQL里使用 COLLATE pinyin指定按拼音排序。例如:select * from tlocation order by name COLLATE pinyin 。
+3. 目前native库只编译了Windows和Linux的，并且在windows 32和linux 32上测试没有问题，如果在其他系统上使用，请先编译native库，然后用CollationPinyinTest测试。
+
+3.8.11.2.1
+--------------------------------------------
+修改一个bug，select cast(sum(×××) as decimal)时，getColumnType会得到INT类型。
+
+
+
 SQLite JDBC Driver
 ==================
 SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.

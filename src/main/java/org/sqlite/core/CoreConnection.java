@@ -80,7 +80,11 @@ public abstract class CoreConnection {
             db.shared_cache(config.isEnabledSharedCache());
         }
         db.enable_load_extension(config.isEnabledLoadExtension());
-
+        
+        //conllation pinyin
+        if(config.pinyin){
+        	db.collation_pinyin();
+        }
         // set pragmas
         config.apply((Connection)this);
 

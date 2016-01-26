@@ -463,4 +463,7 @@ public class SQLiteDataSource implements DataSource
         return (T) this;
     }
 
+    public void setCollationPinyin(boolean enable){
+    	config.enableCollationPinyin(enable);
+    }
 }
