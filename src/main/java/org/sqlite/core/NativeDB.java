@@ -388,6 +388,8 @@ public final class NativeDB extends DB
     @Override
     native synchronized boolean[][] column_metadata(long stmt);
 
+    
+    public native synchronized int collation_pinyin();
     /**
      * Throws an SQLException
      * @param msg Message for the SQLException.
