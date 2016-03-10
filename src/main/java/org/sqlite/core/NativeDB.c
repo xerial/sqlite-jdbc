@@ -962,6 +962,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
   jobject observer			  /* Progress function to invoke */     
 )
 {
+#if SQLITE_VERSION_NUMBER >= 3006011
   int rc;                     /* Function return code */
   sqlite3* pDb;               /* Database to back up */
   sqlite3* pFile;             /* Database connection opened on zFilename */
@@ -993,6 +994,9 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
   ** and return the result of this function. */
   (void)sqlite3_close(pFile);
   return rc;
+#else
+  return SQLITE_INTERNAL;
+#endif
 } 
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
@@ -1002,6 +1006,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   jobject observer			  /* Progress function to invoke */     
 )
 {
+#if SQLITE_VERSION_NUMBER >= 3006011
   int rc;                     /* Function return code */
   sqlite3* pDb;               /* Database to back up */
   sqlite3* pFile;             /* Database connection opened on zFilename */
@@ -1039,5 +1044,8 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   ** and return the result of this function. */
   (void)sqlite3_close(pFile);
   return rc;
+#else
+  return SQLITE_INTERNAL;
+#endif
 } 
 

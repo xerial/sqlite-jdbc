@@ -205,10 +205,12 @@ int double_cmp(const void *a, const void *b);
 #endif /* _MAP_H_ */
 
 
+#if SQLITE_VERSION_NUMBER >= 3006001
 static char *sqlite3StrDup( const char *z ) {
     char *res = sqlite3_malloc( strlen(z)+1 );
     return strcpy( res, z );
 }
+#endif
 
 /*
 ** These are copied verbatim from fun.c so as to not have the names exported
