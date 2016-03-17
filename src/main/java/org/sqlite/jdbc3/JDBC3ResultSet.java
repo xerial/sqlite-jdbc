@@ -963,7 +963,11 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSetMetaData#isSigned(int)
      */
     public boolean isSigned(int col) throws SQLException {
-        return false;
+        String typeName = getColumnTypeName(col);
+        
+        return "NUMERIC".equals(typeName) ||
+                "INTEGER".equals(typeName) ||
+                "REAL".equals(typeName);
     }
 
     /**
