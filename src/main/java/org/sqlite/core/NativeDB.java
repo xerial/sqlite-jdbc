@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import org.sqlite.Function;
+import org.sqlite.ProgressHandler;
 import org.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
@@ -415,4 +416,8 @@ public final class NativeDB extends DB
             throw new RuntimeException("UTF-8 is not supported", e);
         }
     }
+
+    public native synchronized void register_progress_handler(int vmCalls, ProgressHandler progressHandler) throws SQLException;
+
+    public native synchronized void clear_progress_handler() throws SQLException;
 }
