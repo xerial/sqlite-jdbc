@@ -436,6 +436,21 @@ public class UDFTest
         assertEquals(Integer.parseInt(func.toString()), times);
     }
 
+    @Test
+    public void progressHandler() throws Exception {
+        ProgressHandler.setHandler(conn, 1, new ProgressHandler() {
+            @Override
+            protected int progress(Object ctx) throws SQLException {
+                System.out.println("Great success!");
+                return 0;
+            }
+        }, null);
+        stat.executeUpdate("create table foo (id integer);");
+        stat.executeUpdate("insert into foo (id) values (1);");
+        stat.executeQuery("select * from foo");
+        stat.close();
+    }
+
     private void assertArrayEq(byte[] a, byte[] b) {
         assertNotNull(a);
         assertNotNull(b);
