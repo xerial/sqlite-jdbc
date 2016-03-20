@@ -658,7 +658,7 @@ public abstract class DB implements Codes
     }
 
     /** Progress handler */
-    public abstract void register_progress_handler(int vmCalls, ProgressHandler progressHandler, Object ctx) throws SQLException;
+    public abstract void register_progress_handler(int vmCalls, ProgressHandler progressHandler) throws SQLException;
 
     public abstract void clear_progress_handler() throws SQLException;
 

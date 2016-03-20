@@ -398,7 +398,7 @@ public final class NativeDB extends DB
         throw new SQLException(msg);
     }
 
-    public native synchronized void register_progress_handler(int vmCalls, ProgressHandler progressHandler, Object ctx) throws SQLException;
+    public native synchronized void register_progress_handler(int vmCalls, ProgressHandler progressHandler) throws SQLException;
 
     public native synchronized void clear_progress_handler() throws SQLException;
 }

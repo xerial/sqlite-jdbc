@@ -1076,14 +1076,13 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_register_1progress_1handler
   JNIEnv *env,
   jobject this,
   jint vmCalls,
-  jobject progressHandler,
-  jobject ctx
+  jobject progressHandler
 )
 {
-    progress_handler_context.mth = (*env)->GetMethodID(env, phandleclass, "progress", "(Ljava/lang/Object;)I");
+    progress_handler_context.mth = (*env)->GetMethodID(env, phandleclass, "progress", "()I");
     progress_handler_context.phandler = (*env)->NewGlobalRef(env, progressHandler);
     (*env)->GetJavaVM(env, &progress_handler_context.vm);
-    sqlite3_progress_handler(gethandle(env, this), vmCalls, &progress_handler_function, ctx);
+    sqlite3_progress_handler(gethandle(env, this), vmCalls, &progress_handler_function, NULL);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_clear_1progress_1handler(
