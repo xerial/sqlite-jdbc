@@ -3,9 +3,6 @@ package org.sqlite;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.sqlite.core.Codes;
-import org.sqlite.core.DB;
-
 public abstract class ProgressHandler
 {
     public static final void setHandler(Connection conn, int vmCalls, ProgressHandler progressHandler) throws SQLException {
