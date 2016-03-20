@@ -436,7 +436,6 @@ public class UDFTest
         assertEquals(Integer.parseInt(func.toString()), times);
     }
 
-
     private void assertArrayEq(byte[] a, byte[] b) {
         assertNotNull(a);
         assertNotNull(b);
