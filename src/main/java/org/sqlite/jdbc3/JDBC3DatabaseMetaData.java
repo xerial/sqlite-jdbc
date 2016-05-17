@@ -1607,7 +1607,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      *      java.lang.String, java.lang.String)
      */
     public ResultSet getProcedureColumns(String c, String s, String p, String colPat) throws SQLException {
-        if (getProcedures == null) {
+        if (getProcedureColumns == null) {
             getProcedureColumns = conn.prepareStatement("select null as PROCEDURE_CAT, " +
                     "null as PROCEDURE_SCHEM, null as PROCEDURE_NAME, null as COLUMN_NAME, " +
                     "null as COLUMN_TYPE, null as DATA_TYPE, null as TYPE_NAME, null as PRECISION, " +
