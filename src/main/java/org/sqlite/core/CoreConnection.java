@@ -67,7 +67,7 @@ public abstract class CoreConnection {
         SQLiteConfig config = new SQLiteConfig(prop);
         this.dateClass = config.dateClass;
         this.dateMultiplier = config.dateMultiplier;
-        this.dateFormat = FastDateFormat.getInstance(config.dateStringFormat);
+        this.dateFormat = FastDateFormat.getInstance(config.dateStringFormat, java.util.TimeZone.getTimeZone("UTC"));
         this.dateStringFormat = config.dateStringFormat;
         this.datePrecision = config.datePrecision;
         this.transactionMode = config.getTransactionMode();
