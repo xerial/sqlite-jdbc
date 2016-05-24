@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.sqlite.date.FastDateFormat;
 
@@ -76,7 +77,7 @@ public class QueryTest
         conn.createStatement().execute("create table sample (start_time datetime)");
 
         Date now = new Date();
-        String date = FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT).format(now);
+        String date = FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, TimeZone.getTimeZone("UTC")).format(now);
 
         conn.createStatement().execute("insert into sample values(" + now.getTime() + ")");
         conn.createStatement().execute("insert into sample values('" + date + "')");
