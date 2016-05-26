@@ -12,35 +12,46 @@ public class JDBC4Statement extends JDBC3Statement implements Statement {
     }
 
     // JDBC 4
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T unwrap(Class<T> iface) throws ClassCastException {
+        return iface.cast(this);
     }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isWrapperFor(Class<?> iface) {
+        return iface.isInstance(this);
     }
 
-    public boolean isClosed() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    private boolean closed = false;
+
+    @Override
+    public void close() throws SQLException {
+        super.close();
+        closed = true; // isClosed() should only return true when close() happened
+    }
+
+    public boolean isClosed() {
+        return closed;
+    }
+
+    boolean closeOnCompletion;
+
+    public void closeOnCompletion() throws SQLException {
+        if (closed) throw new SQLException("statement is closed");
+        closeOnCompletion = true;
+    }
+
+    public boolean isCloseOnCompletion() throws SQLException {
+        if (closed) throw new SQLException("statement is closed");
+        return closeOnCompletion;
     }
 
     public void setPoolable(boolean poolable) throws SQLException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public boolean isPoolable() throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
-    public void closeOnCompletion() throws SQLException {
-        // TODO
-    }
-    public boolean isCloseOnCompletion() throws SQLException {
-        // TODO
-        return false;
-    }
+
 }

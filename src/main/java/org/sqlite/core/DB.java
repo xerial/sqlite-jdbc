@@ -844,10 +844,13 @@ public abstract class DB implements Codes
      * @throws SQLException
      */
     public final synchronized int executeUpdate(CoreStatement stmt, Object[] vals) throws SQLException {
-        if (execute(stmt, vals)) {
-            throw new SQLException("query returns results");
+        try {
+            if (execute(stmt, vals)) {
+                throw new SQLException("query returns results");
+            }
+        } finally {
+            reset(stmt.pointer);
         }
-        reset(stmt.pointer);
         return changes();
     }
 

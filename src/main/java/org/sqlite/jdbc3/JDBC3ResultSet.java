@@ -14,15 +14,14 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.sqlite.core.CoreResultSet;
 import org.sqlite.core.CoreStatement;
+import org.sqlite.date.FastDateFormat;
 
 public abstract class JDBC3ResultSet extends CoreResultSet {
     // ResultSet Functions //////////////////////////////////////////
@@ -37,25 +36,16 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      */
     public int findColumn(String col) throws SQLException {
         checkOpen();
-        int c = -1;
-        for (int i = 0; i < cols.length; i++) {
-            if (col.equalsIgnoreCase(cols[i])
-                    || (cols[i].toUpperCase().endsWith(col.toUpperCase()) && cols[i].charAt(cols[i].length()
-                            - col.length()) == '.')) {
-                if (c == -1) {
-                    c = i;
-                }
-                else {
-                    throw new SQLException("ambiguous column: '" + col + "'");
-                }
+        Integer index = findColumnIndexInCache(col);
+        if (index != null) {
+            return index;
+        }
+        for (int i=0; i < cols.length; i++) {
+            if (col.equalsIgnoreCase(cols[i])) {
+                return addColumnIndexInCache(col, i+1);
             }
         }
-        if (c == -1) {
-            throw new SQLException("no such column: '" + col + "'");
-        }
-        else {
-            return c + 1;
-        }
+        throw new SQLException("no such column: '"+col+"'");
     }
 
     /**
@@ -232,7 +222,13 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSet#getBinaryStream(int)
      */
     public InputStream getBinaryStream(int col) throws SQLException {
-        return new ByteArrayInputStream(getBytes(col));
+        byte[] bytes = getBytes(col);
+        if (bytes != null) {
+            return new ByteArrayInputStream(bytes);
+        }
+        else {
+            return null;
+        }
     }
 
     /**
@@ -323,8 +319,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat) stmt.conn.dateFormat.clone();
-                    dateFormat.setCalendar(cal);
+                	FastDateFormat dateFormat = FastDateFormat.getInstance(stmt.conn.dateStringFormat, cal.getTimeZone());
 
                     return new java.sql.Date(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }
@@ -487,8 +482,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat) stmt.conn.dateFormat.clone();
-                    dateFormat.setCalendar(cal);
+                	FastDateFormat dateFormat = FastDateFormat.getInstance(stmt.conn.dateStringFormat, cal.getTimeZone());
 
                     return new Time(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }
@@ -563,8 +557,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     
             case SQLITE_TEXT:
                 try {
-                    DateFormat dateFormat = (DateFormat)stmt.conn.dateFormat.clone();
-                    dateFormat.setCalendar(cal);
+                	FastDateFormat dateFormat = FastDateFormat.getInstance(stmt.conn.dateStringFormat, cal.getTimeZone());
 
                     return new Timestamp(dateFormat.parse(db.column_text(stmt.pointer, markCol(col))).getTime());
                 }

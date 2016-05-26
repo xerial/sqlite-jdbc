@@ -7,9 +7,9 @@ our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
-What is different from Zentus's SQLite JDBC?
+What is different from Zentus' SQLite JDBC?
 --------------------------------------------
-The current sqlite-jdbc implementation is based on the code of [Zentus's SQLite JDBC driver (missing link)](http://www.zentus.com/sqlitejdbc/). We have improved it in two ways:
+The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
 
 * Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
 * Remove manual configurations
@@ -135,6 +135,15 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2015 Oct 3rd: sqlite-jdbc-3.8.11.2
+    * Fix for Raspberry-Pi 2
+    * Add multiple table support for DatabaseMetaData.getColumns 
+*   2015 August 3rd: sqlite-jdbc-3.8.11.1
+    * Fix for Linux ARM native library
+*   2015 July 29th: sqlite-jdbc-3.8.11 release. 
+    * General performance improvement
+    * warning: No update for FreeBSD binary (need a contribution of native library!) 
+*   2015 July 27th: sqlite-jdbc-3.8.10.2 release (Thread-safe date time)
 *   2015 May 11th: sqlite-jdbc-3.8.10.1 release
 *   2015 May 7th: sqlite-jdbc-3.8.9.1 release
 *   2014 October 20th: [sqlite-jdbc-3.8.7](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.7.jar) released.
@@ -306,7 +315,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.8.10.1</version>
+          <version>3.8.11.2</version>
         </dependency>
     </dependencies>
 
@@ -335,6 +344,6 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
     <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.8.10.1</version>
+        <version>3.8.11.2</version>
         <scope>provided</scope>
     </dependency>

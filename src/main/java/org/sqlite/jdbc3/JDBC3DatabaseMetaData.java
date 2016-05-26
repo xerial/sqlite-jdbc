@@ -1089,102 +1089,164 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      *      java.lang.String, java.lang.String)
      */
     public ResultSet getColumns(String c, String s, String tblNamePattern, String colNamePattern) throws SQLException {
-        Statement stat = conn.createStatement();
-        ResultSet rs;
-        StringBuilder sql = new StringBuilder(700);
 
+        // get the list of tables matching the pattern (getTables)
+        // create a Matrix Cursor for each of the tables
+        // create a merge cursor from all the Matrix Cursors
+        // and return the columname and type from:
+        //    "PRAGMA table_info(tablename)"
+        // which returns data like this:
+        //        sqlite> PRAGMA lastyear.table_info(gross_sales); 
+        //        cid|name|type|notnull|dflt_value|pk 
+        //        0|year|INTEGER|0|'2006'|0 
+        //        1|month|TEXT|0||0 
+        //        2|monthlygross|REAL|0||0 
+        //        3|sortcol|INTEGER|0||0 
+        //        sqlite>
+
+        // and then make the cursor have these columns
+        //        TABLE_CAT String => table catalog (may be null)
+        //        TABLE_SCHEM String => table schema (may be null)
+        //        TABLE_NAME String => table name
+        //        COLUMN_NAME String => column name
+        //        DATA_TYPE int => SQL type from java.sql.Types
+        //        TYPE_NAME String => Data source dependent type name, for a UDT the type name is fully qualified
+        //        COLUMN_SIZE int => column size.
+        //        BUFFER_LENGTH is not used.
+        //        DECIMAL_DIGITS int => the number of fractional digits. Null is returned for data types where DECIMAL_DIGITS is not applicable.
+        //        NUM_PREC_RADIX int => Radix (typically either 10 or 2)
+        //        NULLABLE int => is NULL allowed.
+        //        columnNoNulls - might not allow NULL values
+        //        columnNullable - definitely allows NULL values
+        //        columnNullableUnknown - nullability unknown
+        //        REMARKS String => comment describing column (may be null)
+        //        COLUMN_DEF String => default value for the column, which should be interpreted as a string when the value is enclosed in single quotes (may be null)
+        //        SQL_DATA_TYPE int => unused
+        //        SQL_DATETIME_SUB int => unused
+        //        CHAR_OCTET_LENGTH int => for char types the maximum number of bytes in the column
+        //        ORDINAL_POSITION int => index of column in table (starting at 1)
+        //        IS_NULLABLE String => ISO rules are used to determine the nullability for a column.
+        //        YES --- if the parameter can include NULLs
+        //        NO --- if the parameter cannot include NULLs
+        //        empty string --- if the nullability for the parameter is unknown
+        //        SCOPE_CATLOG String => catalog of table that is the scope of a reference attribute (null if DATA_TYPE isn't REF)
+        //        SCOPE_SCHEMA String => schema of table that is the scope of a reference attribute (null if the DATA_TYPE isn't REF)
+        //        SCOPE_TABLE String => table name that this the scope of a reference attribure (null if the DATA_TYPE isn't REF)
+        //        SOURCE_DATA_TYPE short => source type of a distinct type or user-generated Ref type, SQL type from java.sql.Types (null if DATA_TYPE isn't DISTINCT or user-generated REF)
+        //        IS_AUTOINCREMENT String => Indicates whether this column is auto incremented
+        //        YES --- if the column is auto incremented
+        //        NO --- if the column is not auto incremented
+        //        empty string --- if it cannot be determined whether the column is auto incremented parameter is unknown
         checkOpen();
 
-        if (getColumnsTblName == null) {
-            getColumnsTblName = conn.prepareStatement("select tbl_name from sqlite_master where tbl_name like ?;");
-        }
-
-        // determine exact table name
-        getColumnsTblName.setString(1, tblNamePattern);
-        rs = getColumnsTblName.executeQuery();
-
-        if (rs.next()) {
-            tblNamePattern = rs.getString(1);
-            rs.close();
-            // the command "pragma table_info('tablename')" does not embed
-            // like a normal select statement so we must extract the information
-            // and then build a resultset from unioned select statements
-            rs = stat.executeQuery("pragma table_info ('" + escape(tblNamePattern) + "');");
-        }
-
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '").append(escape(tblNamePattern)).append("' as TABLE_NAME, ")
-        .append("cn as COLUMN_NAME, ct as DATA_TYPE, tn as TYPE_NAME, 2000000000 as COLUMN_SIZE, ")
-        .append("2000000000 as BUFFER_LENGTH, 10   as DECIMAL_DIGITS, 10   as NUM_PREC_RADIX, ")
-        .append("colnullable as NULLABLE, null as REMARKS, colDefault as COLUMN_DEF, ")
-        .append("0    as SQL_DATA_TYPE, 0    as SQL_DATETIME_SUB, 2000000000 as CHAR_OCTET_LENGTH, ")
-        .append("ordpos as ORDINAL_POSITION, (case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)")
-        .append("    as IS_NULLABLE, null as SCOPE_CATLOG, null as SCOPE_SCHEMA, ")
-        .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE from (");
+        StringBuilder sql = new StringBuilder(700);
+        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, tblname as TABLE_NAME, ")
+           .append("cn as COLUMN_NAME, ct as DATA_TYPE, tn as TYPE_NAME, 2000000000 as COLUMN_SIZE, ")
+           .append("2000000000 as BUFFER_LENGTH, 10   as DECIMAL_DIGITS, 10   as NUM_PREC_RADIX, ")
+           .append("colnullable as NULLABLE, null as REMARKS, colDefault as COLUMN_DEF, ")
+           .append("0    as SQL_DATA_TYPE, 0    as SQL_DATETIME_SUB, 2000000000 as CHAR_OCTET_LENGTH, ")
+           .append("ordpos as ORDINAL_POSITION, (case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)")
+           .append("    as IS_NULLABLE, null as SCOPE_CATLOG, null as SCOPE_SCHEMA, ")
+           .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE from (");
 
         boolean colFound = false;
 
-        for (int i = 0; rs.next(); i++) {
-            String colName = rs.getString(2);
-            String colType = rs.getString(3);
-            String colNotNull = rs.getString(4);
-            String colDefault = rs.getString(5);
+        ResultSet rs = null;
+        try {
+            // Get all tables implied by the input
+            final String[] types = new String[] {"TABLE", "VIEW"};
+            rs = getTables(c, s, tblNamePattern, types);
+            while (rs.next()) {
+                String tableName = rs.getString(3);
 
-            int colNullable = 2;
+                Statement colstat = conn.createStatement();
+                ResultSet rscol = null;
+                try {
+                    // For each table, get the column info and build into overall SQL
+                    String pragmaStatement = "PRAGMA table_info('"+ tableName + "')";
+                    rscol = colstat.executeQuery(pragmaStatement);
 
-            if (colNotNull != null) {
-                colNullable = colNotNull.equals("0") ? 1 : 0;
+                    for (int i = 0; rscol.next(); i++) {
+                        String colName = rscol.getString(2);
+                        String colType = rscol.getString(3);
+                        String colNotNull = rscol.getString(4);
+                        String colDefault = rscol.getString(5);
+
+                        int colNullable = 2;
+                        if (colNotNull != null) {
+                            colNullable = colNotNull.equals("0") ? 1 : 0;
+                        }
+
+                        if (colFound) {
+                            sql.append(" union all ");
+                        }
+                        colFound = true;
+
+                        /*
+                         * improved column types
+                         * ref http://www.sqlite.org/datatype3.html - 2.1 Determination Of Column Affinity
+                         * plus some degree of artistic-license applied
+                         */
+                        colType = colType == null ? "TEXT" : colType.toUpperCase();
+                        int colJavaType = -1;
+                        // rule #1 + boolean
+                        if (TYPE_INTEGER.matcher(colType).find()) {
+                            colJavaType = Types.INTEGER;
+                        }
+                        else if (TYPE_VARCHAR.matcher(colType).find()) {
+                            colJavaType = Types.VARCHAR;
+                        }
+                        else if (TYPE_FLOAT.matcher(colType).find()) {
+                            colJavaType = Types.FLOAT;
+                        }
+                        else {
+                            // catch-all
+                            colJavaType = Types.VARCHAR;
+                        }
+
+                        sql.append("select ").append(i).append(" as ordpos, ")
+                           .append(colNullable).append(" as colnullable,")
+                           .append("'").append(colJavaType).append("' as ct, ")
+                           .append("'").append(tableName).append("' as tblname, ")
+                           .append("'").append(escape(colName)).append("' as cn, ")
+                           .append("'").append(escape(colType)).append("' as tn, ")
+                           .append(quote(colDefault == null ? null : escape(colDefault))).append(" as colDefault");
+
+                        if (colNamePattern != null) {
+                            sql.append(" where upper(cn) like upper('").append(escape(colNamePattern)).append("')");
+                        }
+                    }
+                } finally {
+                    if (rscol != null) {
+                        try {
+                            rscol.close();
+                        } catch (SQLException e) {}
+                    }
+                    if (colstat != null) {
+                        try {
+                            colstat.close();
+                        } catch(SQLException e) {}
+                    }
+                }
             }
-
-            if (colFound) {
-                sql.append(" union all ");
-            }
-
-            colFound = true;
-
-            /*
-             * improved column types
-             * ref http://www.sqlite.org/datatype3.html - 2.1 Determination Of Column
-            Affinity
-             * plus some degree of artistic-license applied
-             */
-            colType = colType == null ? "TEXT" : colType.toUpperCase();
-            int colJavaType = -1;
-            // rule #1 + boolean
-            if (TYPE_INTEGER.matcher(colType).find()) {
-                colJavaType = Types.INTEGER;
-            }
-            else if (TYPE_VARCHAR.matcher(colType).find()) {
-                colJavaType = Types.VARCHAR;
-            }
-            else if (TYPE_FLOAT.matcher(colType).find()) {
-                colJavaType = Types.FLOAT;
-            }
-            else {
-                // catch-all
-                colJavaType = Types.VARCHAR;
-            }
-
-            sql.append("select ").append(i).append(" as ordpos, ")
-               .append(colNullable).append(" as colnullable, '")
-               .append(colJavaType).append("' as ct, '")
-               .append(escape(colName)).append("' as cn, '")
-               .append(escape(colType)).append("' as tn, ")
-               .append(quote(colDefault == null ? null : escape(colDefault))).append(" as colDefault");
-
-            if (colNamePattern != null) {
-                sql.append(" where upper(cn) like upper('").append(escape(colNamePattern)).append("')");
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
-
-        rs.close();
 
         if (colFound) {
             sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
         }
         else {
-            sql.append("select null as ordpos, null as colnullable, null as ct, null as cn, null as tn, null as colDefault) limit 0;");
+            sql.append("select null as ordpos, null as colnullable, null as ct, null as tblname, null as cn, null as tn, null as colDefault) limit 0;");
         }
 
+        Statement stat = conn.createStatement();
         return ((CoreStatement)stat).executeQuery(sql.toString(), true);
     }
 

@@ -9,6 +9,7 @@ import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
@@ -55,34 +56,33 @@ public abstract class JDBC4Connection extends JDBC3Connection implements Connect
         return db == null;
     }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    public <T> T unwrap(Class<T> iface) throws ClassCastException {
+        // caller should invoke isWrapperFor prior to unwrap
+        return iface.cast(this);
     }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isWrapperFor(Class<?> iface) {
+        return iface.isInstance(this);
     }
 
     public Clob createClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public Blob createBlob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public NClob createNClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public SQLXML createSQLXML() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO Support this
+        throw new SQLFeatureNotSupportedException();
     }
 
     public boolean isValid(int timeout) throws SQLException {
@@ -100,13 +100,13 @@ public abstract class JDBC4Connection extends JDBC3Connection implements Connect
     public void setClientInfo(String name, String value)
             throws SQLClientInfoException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void setClientInfo(Properties properties)
             throws SQLClientInfoException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public String getClientInfo(String name) throws SQLException {

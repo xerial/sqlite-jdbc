@@ -69,12 +69,15 @@ public abstract class CoreStatement implements Codes
         if (rs.isOpen())
             throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
+        boolean success = false;
         boolean rc = false;
         try {
             rc = db.execute(this, null);
+            success = true;
         }
         finally {
             resultsWaiting = rc;
+            if (!success) db.finalize(this);
         }
 
         return db.column_count(pointer) != 0;
@@ -94,11 +97,14 @@ public abstract class CoreStatement implements Codes
             throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
         boolean rc = false;
+        boolean success = false;
         try {
             rc = db.execute(sql);
+            success = true;
         }
         finally {
             resultsWaiting = rc;
+            if (!success) db.finalize(this);
         }
 
         return db.column_count(pointer) != 0;

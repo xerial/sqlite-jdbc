@@ -10,13 +10,13 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.sqlite.date.FastDateFormat;
 
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConfig.DateClass;
@@ -39,7 +39,7 @@ public abstract class CoreConnection {
     protected TransactionMode transactionMode = TransactionMode.DEFFERED;
 
     protected final static Map<TransactionMode, String> beginCommandMap =
-        new HashMap<SQLiteConfig.TransactionMode, String>();
+        new EnumMap<SQLiteConfig.TransactionMode, String>(SQLiteConfig.TransactionMode.class);
 
     private final static Set<String> pragmaSet = new TreeSet<String>();
     static {
@@ -56,7 +56,8 @@ public abstract class CoreConnection {
     public final DateClass dateClass;
     public final DatePrecision datePrecision; //Calendar.SECOND or Calendar.MILLISECOND
     public final long dateMultiplier;
-    public final DateFormat dateFormat;
+    public final FastDateFormat dateFormat;
+    public final String dateStringFormat;
 
     protected CoreConnection(String url, String fileName, Properties prop) throws SQLException
     {
@@ -66,7 +67,8 @@ public abstract class CoreConnection {
         SQLiteConfig config = new SQLiteConfig(prop);
         this.dateClass = config.dateClass;
         this.dateMultiplier = config.dateMultiplier;
-        this.dateFormat = new SimpleDateFormat(config.dateStringFormat);
+        this.dateFormat = FastDateFormat.getInstance(config.dateStringFormat);
+        this.dateStringFormat = config.dateStringFormat;
         this.datePrecision = config.datePrecision;
         this.transactionMode = config.getTransactionMode();
         this.openModeFlags = config.getOpenModeFlags();
