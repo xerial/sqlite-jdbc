@@ -31,6 +31,18 @@ public class QueryTest
     }
 
     @Test
+    public void nullQuery() throws Exception {
+        Connection conn = getConnection();
+        Statement stmt = conn.createStatement();
+	try {
+		stmt.execute(null);
+	} catch (NullPointerException e) {
+	}
+        stmt.close();
+        conn.close();
+    }
+
+    @Test
     public void createTable() throws Exception {
         Connection conn = getConnection();
         Statement stmt = conn.createStatement();
