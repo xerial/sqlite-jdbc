@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.sqlite.Function;
+import org.sqlite.ProgressHandler;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteErrorCode;
 
@@ -653,10 +654,16 @@ public abstract class DB implements Codes
      */
     public abstract int restore(String dbName, String sourceFileName, ProgressObserver observer) throws SQLException;
 
+
     public static interface ProgressObserver
     {
         public void progress(int remaining, int pageCount);
     }
+
+    /** Progress handler */
+    public abstract void register_progress_handler(int vmCalls, ProgressHandler progressHandler) throws SQLException;
+
+    public abstract void clear_progress_handler() throws SQLException;
 
     /**
      * Returns an array describing the attributes (not null, primary key and auto increment) of columns.
@@ -967,4 +974,5 @@ public abstract class DB implements Codes
             reset(commit);
         }
     }
+
 }

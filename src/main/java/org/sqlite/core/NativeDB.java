@@ -19,6 +19,7 @@ package org.sqlite.core;
 import java.sql.SQLException;
 
 import org.sqlite.Function;
+import org.sqlite.ProgressHandler;
 import org.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
@@ -396,4 +397,8 @@ public final class NativeDB extends DB
     static void throwex(String msg) throws SQLException {
         throw new SQLException(msg);
     }
+
+    public native synchronized void register_progress_handler(int vmCalls, ProgressHandler progressHandler) throws SQLException;
+
+    public native synchronized void clear_progress_handler() throws SQLException;
 }
