@@ -1,3 +1,6 @@
+before_install:
+ - sudo apt-get install -qq libc6-dev-i386
+
 language: java
 
 jdk:
@@ -5,6 +8,8 @@ jdk:
   - openjdk7
   - oraclejdk7
   - oraclejdk8
+
+script: make
 
 branches:
   only:
