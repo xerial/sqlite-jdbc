@@ -579,13 +579,21 @@ JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1text(
 JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1blob(
         JNIEnv *env, jobject this, jlong stmt, jint col)
 {
-    jsize length;
     jbyteArray jBlob;
     jbyte *a;
+    // The value returned by sqlite3_column_type() is only meaningful if no type conversions have occurred
+    int type = sqlite3_column_type(toref(stmt), col);
     const void *blob = sqlite3_column_blob(toref(stmt), col);
-    if (!blob) return NULL;
+    jsize length = sqlite3_column_bytes(toref(stmt), col);
+    if (!blob) {
+        if (type == SQLITE_NULL) {
+            return NULL;
+        } else if (length == 0) {
+            // The return value from sqlite3_column_blob() for a zero-length BLOB is a NULL pointer.
+            return (*env)->NewByteArray(env, 0);
+        }
+    }
 
-    length = sqlite3_column_bytes(toref(stmt), col);
     jBlob = (*env)->NewByteArray(env, length);
     if (!jBlob) { throwex_outofmemory(env); return 0; }
 
