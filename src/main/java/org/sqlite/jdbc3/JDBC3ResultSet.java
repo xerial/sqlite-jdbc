@@ -749,7 +749,11 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
             if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
                 return Types.DATE;
             }
-    
+
+            if ("TIMESTAMP".equals(typeName)) {
+                return Types.TIMESTAMP;
+            }
+
             if (valueType == SQLITE_INTEGER ||
                 "INT".equals(typeName) ||
                 "INTEGER".equals(typeName) ||
