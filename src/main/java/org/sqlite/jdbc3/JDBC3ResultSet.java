@@ -787,7 +787,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
         if (valueType == SQLITE_TEXT || valueType == SQLITE_NULL) {
             if ("CHARACTER".equals(typeName) || "NCHAR".equals(typeName) ||
-                "NATIVE CHARACTER".equals(typeName)) {
+                "NATIVE CHARACTER".equals(typeName) || "CHAR".equals(typeName)) {
                 return Types.CHAR;
             }
 
