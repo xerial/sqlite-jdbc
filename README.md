@@ -38,7 +38,7 @@ SQLite JDBC is a library for accessing SQLite databases through the JDBC API. Fo
 
 1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#using-sqlitejdbc-with-maven2))
 then append this jar file into your classpath. 
-2.  Load the JDBC driver `org.sqlite.JDBC` from your code. (see the example below) 
+2.  Open a SQLite database connection from your code. (see the example below) 
 
 * More usage examples are available at [Usage](Usage.md)
 * Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)
