@@ -9,6 +9,7 @@ import org.sqlite.util.OSInfoTest;
     BackupTest.class,
     ConnectionTest.class,
     DBMetaDataTest.class,
+    ErrorMessageTest.class,
     ExtendedCommandTest.class,
     ExtensionTest.class,
     FetchSizeTest.class,

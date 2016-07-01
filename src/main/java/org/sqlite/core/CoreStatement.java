@@ -123,7 +123,7 @@ public abstract class CoreStatement implements Codes
         int resp = db.finalize(this);
 
         if (resp != SQLITE_OK && resp != SQLITE_MISUSE)
-            db.throwex();
+            db.throwex(resp);
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;

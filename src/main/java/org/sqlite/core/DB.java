@@ -24,6 +24,7 @@ import java.util.Map;
 import org.sqlite.Function;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteErrorCode;
+import org.sqlite.SQLiteException;
 
 /*
  * This class is the interface to SQLite. It provides some helper functions
@@ -132,14 +133,15 @@ public abstract class DB implements Codes
         long pointer = 0;
         try {
             pointer = prepare(sql);
-            switch (step(pointer)) {
+            int rc = step(pointer);
+            switch (rc) {
             case SQLITE_DONE:
                 ensureAutoCommit();
                 return;
             case SQLITE_ROW:
                 return;
             default:
-                throwex();
+                throwex(rc);
             }
         }
         finally {
@@ -749,8 +751,9 @@ public abstract class DB implements Codes
             for (int i = 0; i < count; i++) {
                 reset(stmt);
                 for (int j = 0; j < params; j++) {
-                    if (sqlbind(stmt, j, vals[(i * params) + j]) != SQLITE_OK) {
-                        throwex();
+                    rc = sqlbind(stmt, j, vals[(i * params) + j]);
+                    if (rc != SQLITE_OK) {
+                        throwex(rc);
                     }
                 }
 
@@ -760,7 +763,7 @@ public abstract class DB implements Codes
                     if (rc == SQLITE_ROW) {
                         throw new BatchUpdateException("batch entry " + i + ": query returns results", changes);
                     }
-                    throwex();
+                    throwex(rc);
                 }
 
                 changes[i] = changes();
@@ -790,8 +793,9 @@ public abstract class DB implements Codes
             }
 
             for (int i = 0; i < params; i++) {
-                if (sqlbind(stmt.pointer, i, vals[i]) != SQLITE_OK) {
-                    throwex();
+                int rc = sqlbind(stmt.pointer, i, vals[i]);
+                if (rc != SQLITE_OK) {
+                    throwex(rc);
                 }
             }
         }
@@ -880,7 +884,7 @@ public abstract class DB implements Codes
      * @param errorMessage Error message to be passed.
      * @throws SQLException
      */
-    final void throwex(int errorCode, String errorMessage) throws SQLException {
+    static final void throwex(int errorCode, String errorMessage) throws SQLiteException {
         throw newSQLException(errorCode, errorMessage);
     }
 
@@ -891,9 +895,11 @@ public abstract class DB implements Codes
      * @return Formated SQLException with error code and message.
      * @throws SQLException
      */
-    public static SQLException newSQLException(int errorCode, String errorMessage) throws SQLException {
+    public static SQLiteException newSQLException(int errorCode, String errorMessage) {
         SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
-        SQLException e = new SQLException(String.format("%s (%s)", code, errorMessage), null, code.code);
+        SQLiteException e = new SQLiteException(
+            String.format("%s (%s)", code, errorMessage), code
+        );
         return e;
     }
 
@@ -903,7 +909,7 @@ public abstract class DB implements Codes
      * @return SQLException with error code and message.
      * @throws SQLException
      */
-    private SQLException newSQLException(int errorCode) throws SQLException {
+    private SQLiteException newSQLException(int errorCode) throws SQLException {
         return newSQLException(errorCode, errmsg());
     }
 
@@ -956,9 +962,10 @@ public abstract class DB implements Codes
              {
                 return; // assume we are in a transaction
             }
-            if (step(commit) != SQLITE_DONE) {
+            int rc = step(commit);
+            if (rc != SQLITE_DONE) {
                 reset(commit);
-                throwex();
+                throwex(rc);
             }
             //throw new SQLException("unable to auto-commit");
         }
