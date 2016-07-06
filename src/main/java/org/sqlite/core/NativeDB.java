@@ -16,6 +16,7 @@
 
 package org.sqlite.core;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import org.sqlite.Function;
@@ -395,5 +396,23 @@ public final class NativeDB extends DB
      */
     static void throwex(String msg) throws SQLException {
         throw new SQLException(msg);
+    }
+
+    static byte[] stringToUtf8ByteArray(String str) {
+        try {
+            return str.getBytes("UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("UTF-8 is not supported", e);
+        }
+    }
+
+    static String utf8ByteArrayToString(byte[] utf8bytes) {
+        try {
+            return new String(utf8bytes, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("UTF-8 is not supported", e);
+        }
     }
 }
