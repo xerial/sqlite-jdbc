@@ -27,7 +27,8 @@ import org.sqlite.util.OSInfoTest;
     StatementTest.class,
     TransactionTest.class,
     UDFTest.class,
-    JSON1Test.class
+    JSON1Test.class,
+    ProgressHandlerTest.class
 })
 public class AllTests {
 // runs all Tests

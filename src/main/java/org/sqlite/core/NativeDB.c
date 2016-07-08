@@ -24,6 +24,7 @@ static jclass dbclass = 0;
 static jclass  fclass = 0;
 static jclass  aclass = 0;
 static jclass pclass = 0;
+static jclass phandleclass = 0;
 
 static void * toref(jlong value)
 {
@@ -396,6 +397,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     pclass = (*env)->FindClass(env, "org/sqlite/core/DB$ProgressObserver");
     if(!pclass) return JNI_ERR;
     pclass = (*env)->NewGlobalRef(env, pclass);
+
+    phandleclass = (*env)->FindClass(env, "org/sqlite/ProgressHandler");
+    if(!phandleclass) return JNI_ERR;
+    phandleclass = (*env)->NewGlobalRef(env, phandleclass);
 
     return JNI_VERSION_1_2;
 }
@@ -1391,3 +1396,43 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   return SQLITE_INTERNAL;
 #endif
 } 
+
+
+// Progress handler
+
+struct ProgressHandlerContext {
+    JavaVM *vm;
+    jmethodID mth;
+    jobject phandler;
+};
+
+static struct ProgressHandlerContext progress_handler_context;
+
+int progress_handler_function(void *ctx) {
+    JNIEnv *env = 0;
+    (*progress_handler_context.vm)->AttachCurrentThread(progress_handler_context.vm, (void **)&env, 0);
+    jint rv = (*env)->CallIntMethod(env, progress_handler_context.phandler, progress_handler_context.mth);
+    return rv;
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_register_1progress_1handler(
+  JNIEnv *env,
+  jobject this,
+  jint vmCalls,
+  jobject progressHandler
+)
+{
+    progress_handler_context.mth = (*env)->GetMethodID(env, phandleclass, "progress", "()I");
+    progress_handler_context.phandler = (*env)->NewGlobalRef(env, progressHandler);
+    (*env)->GetJavaVM(env, &progress_handler_context.vm);
+    sqlite3_progress_handler(gethandle(env, this), vmCalls, &progress_handler_function, NULL);
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_clear_1progress_1handler(
+  JNIEnv *env,
+  jobject this
+)
+{
+    sqlite3_progress_handler(gethandle(env, this), 0, NULL, NULL);
+    (*env)->DeleteGlobalRef(env, progress_handler_context.phandler);
+}
