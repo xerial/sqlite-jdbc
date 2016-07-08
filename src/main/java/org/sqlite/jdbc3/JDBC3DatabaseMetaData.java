@@ -883,7 +883,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#supportsSavepoints()
      */
     public boolean supportsSavepoints() {
-        return false;
+        return true;
     }
 
     /**
