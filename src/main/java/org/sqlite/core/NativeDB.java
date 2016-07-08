@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2007 David Crawshaw <david@zentus.com>
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -20,8 +20,10 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import org.sqlite.Function;
+import org.sqlite.Profile;
 import org.sqlite.ProgressHandler;
 import org.sqlite.SQLiteJDBCLoader;
+import org.sqlite.Trace;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 public final class NativeDB extends DB
@@ -362,6 +364,18 @@ public final class NativeDB extends DB
      */
     @Override
     native synchronized void free_functions();
+
+    /**
+     * @see org.sqlite.core.DB#set_trace(Trace)
+     */
+    @Override
+    public native synchronized void set_trace(Trace trace);
+
+    /**
+     * @see org.sqlite.core.DB#set_profile(Profile)
+     */
+    @Override
+    public native synchronized void set_profile(Profile profile);
 
     /**
      * @see org.sqlite.core.DB#backup(java.lang.String, java.lang.String, org.sqlite.core.DB.ProgressObserver)
