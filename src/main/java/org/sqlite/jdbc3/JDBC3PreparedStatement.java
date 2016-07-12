@@ -105,6 +105,10 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void addBatch() throws SQLException {
         checkOpen();
         batchPos += paramCount;
+        batchQueryCount++;
+        if (batch == null) {
+            batch = new Object[0];
+        }
         if (batchPos + paramCount > batch.length) {
             Object[] nb = new Object[batch.length * 2];
             System.arraycopy(batch, 0, nb, 0, batch.length);

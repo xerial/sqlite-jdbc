@@ -26,6 +26,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
 {
     protected int columnCount;
     protected int paramCount;
+    protected int batchQueryCount;
 
     /**
      * Constructs a prepared statement on a provided connection.
@@ -41,6 +42,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         rs.colsMeta = db.column_names(pointer);
         columnCount = db.column_count(pointer);
         paramCount = db.bind_parameter_count(pointer);
+        batchQueryCount = 0;
         batch = null;
         batchPos = 0;
     }
@@ -67,18 +69,27 @@ public abstract class CorePreparedStatement extends JDBC4Statement
      */
     @Override
     public int[] executeBatch() throws SQLException {
-        if (batchPos == 0) {
+        if (batchQueryCount == 0) {
             return new int[] {};
         }
 
         checkParameters();
 
         try {
-            return db.executeBatch(pointer, batchPos / paramCount, batch);
+            return db.executeBatch(pointer, batchQueryCount, batch);
         }
         finally {
             clearBatch();
         }
+    }
+
+    /**
+     * @see org.sqlite.jdbc3.JDBC3Statement#clearBatch() ()
+     */
+    @Override
+    public void clearBatch() throws SQLException {
+        super.clearBatch();
+        batchQueryCount = 0;
     }
 
     /**

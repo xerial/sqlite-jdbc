@@ -448,6 +448,21 @@ public class PrepStmtTest
     }
 
     @Test
+    public void batchZeroParams() throws Exception {
+        stat.executeUpdate("create table test (c1);");
+        PreparedStatement prep = conn.prepareStatement("insert into test values (5);");
+        for (int i = 0; i < 10; i++) {
+            prep.addBatch();
+        }
+        assertArrayEq(new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, prep.executeBatch());
+        prep.close();
+        ResultSet rs = stat.executeQuery("select count(*) from test;");
+        assertTrue(rs.next());
+        assertEquals(rs.getInt(1), 10);
+        rs.close();
+    }
+
+    @Test
     public void paramMetaData() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ?,?,?,?;");
         assertEquals(prep.getParameterMetaData().getParameterCount(), 4);
