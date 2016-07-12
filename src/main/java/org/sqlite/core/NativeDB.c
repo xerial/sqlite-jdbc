@@ -500,6 +500,52 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_busy_1timeout(
     sqlite3_busy_timeout(db, ms);
 }
 
+struct BusyHandlerContext {
+    JavaVM * vm;
+    jmethodID methodId;
+    jobject obj
+};
+
+static struct BusyHandlerContext busyHandlerContext;
+
+int busyHandlerCallBack(void * ctx, int nbPrevInvok) {
+    
+    JNIEnv *env = 0;
+    (*busyHandlerContext.vm)->AttachCurrentThread(busyHandlerContext.vm, (void **)&env, 0);
+
+    return (*env)->CallIntMethod(   env, 
+                                    busyHandlerContext.obj, 
+                                    busyHandlerContext.methodId, 
+                                    nbPrevInvok);
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_busy_1handler(
+    JNIEnv *env, jobject this, jobject busyHandler)
+{
+    
+    (*env)->GetJavaVM(env, &busyHandlerContext.vm);
+    
+    if (busyHandler != NULL) {
+        busyHandlerContext.obj = (*env)->NewGlobalRef(env, busyHandler);
+        busyHandlerContext.methodId = (*env)->GetMethodID(  env, 
+                                                            (*env)->GetObjectClass(env, busyHandlerContext.obj), 
+                                                            "callback", 
+                                                            "(I)I");
+    }
+
+    sqlite3 * db = gethandle(env, this);
+    if (!db){
+        throwex_db_closed(env);
+        return;
+    }
+    
+    if (busyHandler != NULL) {
+        sqlite3_busy_handler(db, &busyHandlerCallBack, NULL);
+    } else {
+        sqlite3_busy_handler(db, NULL, NULL);
+    }
+}
+
 JNIEXPORT jlong JNICALL Java_org_sqlite_core_NativeDB_prepare(
         JNIEnv *env, jobject this, jstring sql)
 {
