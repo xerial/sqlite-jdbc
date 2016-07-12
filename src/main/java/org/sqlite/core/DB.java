@@ -15,6 +15,7 @@
  */
 package org.sqlite.core;
 
+import org.sqlite.BusyHandler;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -68,6 +69,15 @@ public abstract class DB implements Codes
      * @see <a href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
      */
     public abstract void busy_timeout(int ms) throws SQLException;
+    
+    /**
+     * Sets a <a href="http://www.sqlite.org/c3ref/busy_handler.html">busy handler</a> that sleeps
+     * for a specified amount of time when a table is locked.
+     * @param busyHandler
+     * @throws SQLException
+     * @see <a href="http://www.sqlite.org/c3ref/busy_handler.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
+     */
+    public abstract void busy_handler(BusyHandler busyHandler) throws SQLException;
 
     /**
      * Return English-language text that describes the error as either UTF-8 or UTF-16.

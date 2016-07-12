@@ -16,6 +16,7 @@
 
 package org.sqlite.core;
 
+import org.sqlite.BusyHandler;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
@@ -103,6 +104,12 @@ public final class NativeDB extends DB
      */
     @Override
     public native synchronized void busy_timeout(int ms);
+    
+    /**
+     * @see org.sqlite.core.DB#busy_handler(int)
+     */
+    @Override
+    public native synchronized void busy_handler(BusyHandler busyHandler);
 
     /**
      * @see org.sqlite.core.DB#prepare(java.lang.String)
