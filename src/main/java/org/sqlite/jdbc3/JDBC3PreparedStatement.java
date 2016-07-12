@@ -107,7 +107,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         batchPos += paramCount;
         batchQueryCount++;
         if (batch == null) {
-            batch = new Object[0];
+            batch = new Object[paramCount];
         }
         if (batchPos + paramCount > batch.length) {
             Object[] nb = new Object[batch.length * 2];
