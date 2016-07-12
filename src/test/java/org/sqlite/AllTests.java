@@ -30,6 +30,7 @@ import org.sqlite.util.OSInfoTest;
     JSON1Test.class,
     ProgressHandlerTest.class,
     BusyHandlerTest.class
+    
 })
 public class AllTests {
 // runs all Tests
