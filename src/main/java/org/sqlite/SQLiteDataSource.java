@@ -163,7 +163,7 @@ public class SQLiteDataSource implements DataSource
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_count_changes">http://www.sqlite.org/pragma.html#pragma_count_changes</a>
      */
-    public void setCouncChanges(boolean enable) {
+    public void setCountChanges(boolean enable) {
         config.enableCountChanges(enable);
     }
 
@@ -194,7 +194,7 @@ public class SQLiteDataSource implements DataSource
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_foreign_keys">
      * http://www.sqlite.org/pragma.html#pragma_foreign_keys</a>
      */
-    public void setEnforceForeinKeys(boolean enforce) {
+    public void setEnforceForeignKeys(boolean enforce) {
         config.enforceForeignKeys(enforce);
     }
 
