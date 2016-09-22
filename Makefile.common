@@ -1,7 +1,7 @@
 include VERSION
 
 ifndef JAVA_HOME
-$(error Set JAVA_HOME environment variable)
+$(warning Set JAVA_HOME environment variable)
 endif
 
 libjdbc  := $(wildcard lib/jdbc-*.jar)
