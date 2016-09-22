@@ -140,8 +140,11 @@ SQLITE_EXTENSION_INIT1
 #include <stdlib.h>
 #include <assert.h>
 
+/* The defined changed from _SQLITEINT_H_ to SQLITEINT_H in SQLite 3.14.0. */
 #ifndef _SQLITEINT_H_
+#ifndef SQLITEINT_H
 #include "sqliteInt.h"
+#endif
 #endif
 
 #ifndef _MAP_H_
