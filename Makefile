@@ -110,13 +110,12 @@ linux32:
 linux64:
 	$(MAKE) native OS_NAME=Linux OS_ARCH=x86_64
 
-# for cross-compilation on Ubuntu, install the g++-arm-linux-gnueabi package
-linux-arm:
-	$(MAKE) native CROSS_PREFIX=arm-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm
+# for cross-compilation, install docker. See also https://github.com/dockcross/dockcross
+linux-arm: $(SQLITE_UNPACKED) jni-header
+	./docker/dockcross-armv5 bash -c 'make native CROSS_PREFIX=arm-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm'
 
-# for cross-compilation on Ubuntu, install the g++-arm-linux-gnueabihf package
-linux-armhf:
-	$(MAKE) native CROSS_PREFIX=arm-linux-gnueabihf- OS_NAME=Linux OS_ARCH=armhf
+linux-armhf: $(SQLITE_UNPACKED) jni-header
+	./docker/dockcross-armv6 bash -c 'make native CROSS_PREFIX=arm-linux-gnueabihf- OS_NAME=Linux OS_ARCH=armhf'
 
 sparcv9:
 	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
