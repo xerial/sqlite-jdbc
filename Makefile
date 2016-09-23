@@ -97,12 +97,12 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
 
 # for cross-compilation on Ubuntu, install the g++-mingw-w64-i686 package
-win32: 
-	$(MAKE) native CROSS_PREFIX=i686-w64-mingw32- OS_NAME=Windows OS_ARCH=x86
+win32: $(SQLITE_UNPACKED) jni-header
+	./docker/dockcross-windows-x86 bash -c 'make native CROSS_PREFIX=i686-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86'
 
 # for cross-compilation on Ubuntu, install the g++-mingw-w64-x86-64 package
-win64: 
-	$(MAKE) native CROSS_PREFIX=x86_64-w64-mingw32- OS_NAME=Windows OS_ARCH=x86_64
+win64: $(SQLITE_UNPACKED) jni-header
+	./docker/dockcross-windows-x64 bash -c 'make native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64'
 
 linux32:
 	$(MAKE) native OS_NAME=Linux OS_ARCH=x86
