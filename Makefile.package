@@ -39,13 +39,6 @@ DLL_MAC=$(DLL_DIR)/Mac/x86_64/libsqlitejdbc.jnilib
 DLL_TIGER_MAC=$(DLL_DIR)/Mac/i386/libsqlitejdbc.jnilib
 DLL_LINUX=$(DLL_DIR)/Linux/i386/libsqlitejdbc.so
 DLL_AMD64=$(DLL_DIR)/Linux/amd64/libsqlitejdbc.so
-LIB_PUREJAVA=$(LIB_DIR)/purejava/SQLite.class
-
-
-$(LIB_PUREJAVA):
-	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_TIGER_WORK) && make purejava"
-	mkdir -p $(LIB_DIR)/purejava
-	scp $(MAC_TIGER_SERVER):./$(MAC_TIGER_WORK)/sqlitejdbc/build/org/sqlite/SQLite.class $(LIB_DIR)/purejava/
 
 
 $(DLL_WIN): 
@@ -93,8 +86,7 @@ native: $(DLL_DIR) $(DLL_WIN) $(DLL_WIN64) $(DLL_MAC) $(DLL_TIGER_MAC) $(DLL_LIN
 compile-native: native
 	cp -r $(DLL_DIR)/ $(RESOURCE_DIR)/native/
 
-compile: compile-native $(LIB_PUREJAVA) 
-	cp $(LIB_PUREJAVA) $(RESOURCE_DIR)/org/sqlite
+compile: compile-native
 
 test-native:
 	ssh $(WIN_SERVER) "source .zprofile && cd $(WIN_WORK) && $(TEST_CMD)"
@@ -104,7 +96,7 @@ test-native:
 	ssh $(AMD_SERVER) "source .zprofile && cd $(AMD_WORK) && $(TEST_CMD)"
 
 test:
-	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD) -DargLine='-Dsqlite.purejava=true'"
+	ssh $(MAC_TIGER_SERVER) "source .zprofile && cd $(MAC_WORK) && $(TEST_CMD)"
 
 release:
 	mvn release:prepare
