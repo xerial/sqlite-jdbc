@@ -4,7 +4,7 @@ include Makefile.common
 
 RESOURCE_DIR = src/main/resources
 
-.phony: all package win32 mac32 linux32 native deploy
+.phony: all package win32 win64 mac32 linux32 linux64 linux-arm linux-armhf native deploy
 
 all: package
 
