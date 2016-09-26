@@ -1,5 +1,7 @@
-before_install:
- - sudo apt-get install -qq libc6-dev-i386
+sudo: required
+
+services:
+  - docker
 
 language: java
 

@@ -104,11 +104,11 @@ win32: $(SQLITE_UNPACKED) jni-header
 win64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-windows-x64 bash -c 'make native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64'
 
-linux32:
-	$(MAKE) native OS_NAME=Linux OS_ARCH=x86
+linux32: $(SQLITE_UNPACKED) jni-header
+	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make native OS_NAME=Linux OS_ARCH=x86'
 
-linux64:
-	$(MAKE) native OS_NAME=Linux OS_ARCH=x86_64
+linux64: $(SQLITE_UNPACKED) jni-header
+	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make native OS_NAME=Linux OS_ARCH=x86_64'
 
 # for cross-compilation, install docker. See also https://github.com/dockcross/dockcross
 linux-arm: $(SQLITE_UNPACKED) jni-header
