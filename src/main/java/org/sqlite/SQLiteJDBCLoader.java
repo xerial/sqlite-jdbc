@@ -227,6 +227,7 @@ public class SQLiteJDBCLoader {
                 System.load(new File(path, name).getAbsolutePath());
                 return true;
             } catch(UnsatisfiedLinkError e) {
+                System.err.println("Failed to load native library:" + name + ". osinfo: " + OSInfo.getNativeLibFolderPathForCurrentOS());
                 System.err.println(e);
                 return false;
             }
