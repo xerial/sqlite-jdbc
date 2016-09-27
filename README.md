@@ -30,7 +30,8 @@ Public Discussion Forum
 =======================
 *  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en) 
 *  Post bug reports or feqture requests to [Issue Tracker](https://bitbucket.org/xerial/sqlite-jdbc/issues)
-
+    
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
 
 Usage
 ============ 
@@ -135,6 +136,11 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2016 09-26: sqlite-jdbc-3.14.2
+    * Updated binaries (Using docker for the ease of cross compiling)
+    * Fixes native libraries for Raspberry-Pi
+    * Dropped support for Mac x86 (The last Mac OS X supporiting this archictture was Snow Leopard, 7-year ago!)
+
 *   2015 Oct 3rd: sqlite-jdbc-3.8.11.2
     * Fix for Raspberry-Pi 2
     * Add multiple table support for DatabaseMetaData.getColumns 
