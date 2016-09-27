@@ -1585,10 +1585,17 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                     StringBuilder sqlRow = new StringBuilder();
 
+                    String colName = rs.getString(3);
                     sqlRow.append("select ").append(Integer.toString(1 - (Integer) currentIndex.get(1))).append(" as un,'")
                             .append(escape(indexName)).append("' as n,")
-                            .append(Integer.toString(rs.getInt(1) + 1)).append(" as op,'")
-                            .append(escape(rs.getString(3))).append("' as cn");
+                            .append(Integer.toString(rs.getInt(1) + 1)).append(" as op,");
+                    if (colName == null) { // expression index
+                      sqlRow.append("null");
+                    }
+                    else {
+                      sqlRow.append("'").append(escape(colName)).append("'");
+                    }
+                    sqlRow.append(" as cn");
 
                     unionAll.add(sqlRow.toString());
                 }
