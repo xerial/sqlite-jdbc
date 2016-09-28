@@ -140,7 +140,9 @@ News
     * Updated binaries (Using docker for the ease of cross compiling)
     * Fixes native libraries for Raspberry-Pi
     * Dropped support for Mac x86 (The last Mac OS X supporiting this archictture was Snow Leopard, 7-year ago!)
-
+    * Default support of JSON1 extension (#76, #127)
+    * Implement query progress callback (#137)
+    * Use extended error codes (#119)
 *   2015 Oct 3rd: sqlite-jdbc-3.8.11.2
     * Fix for Raspberry-Pi 2
     * Add multiple table support for DatabaseMetaData.getColumns 
