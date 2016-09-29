@@ -373,6 +373,7 @@ public abstract class DB implements Codes
      * @see <a href="http://www.sqlite.org/c3ref/column_name.html">http://www.sqlite.org/c3ref/column_name.html</a>
      */
     public abstract String column_name(long stmt, int col) throws SQLException;
+    protected abstract byte[] column_name_utf8(long stmt, int col) throws SQLException;
 
     /**
      * @param stmt Pointer to the statement.
@@ -382,6 +383,7 @@ public abstract class DB implements Codes
      * @see <a href="http://www.sqlite.org/c3ref/column_blob.html">http://www.sqlite.org/c3ref/column_blob.html</a>
      */
     public abstract String column_text(long stmt, int col) throws SQLException;
+    protected abstract byte[] column_text_utf8(long stmt, int col) throws SQLException;
 
     /**
      * @param stmt Pointer to the statement.

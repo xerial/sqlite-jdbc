@@ -200,13 +200,36 @@ public final class NativeDB extends DB
      * @see org.sqlite.core.DB#column_name(long, int)
      */
     @Override
-    public native synchronized String column_name(long stmt, int col);
+    public synchronized String column_name(long stmt, int col)
+    {
+        try {
+            return new String(column_name_utf8(stmt, col), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Override
+    protected native synchronized byte[] column_name_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_text(long, int)
      */
     @Override
-    public native synchronized String column_text(long stmt, int col);
+    public synchronized String column_text(long stmt, int col)
+    {
+        try {
+            byte[] bytes = column_text_utf8(stmt, col);
+            if (bytes == null) {
+                return null;
+            }
+            return new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }        
+    }
+
+    @Override
+    public native synchronized byte[] column_text_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_blob(long, int)

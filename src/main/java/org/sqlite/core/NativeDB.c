@@ -772,10 +772,12 @@ JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1table_1name(
     return utf8BytesToString(env, str, strlen(str));
 }
 
-JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1name(
+JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1name_1utf8(
         JNIEnv *env, jobject this, jlong stmt, jint col)
 {
     const char *str;
+    int length;
+    jbyteArray jBlob;
 
     if (!stmt)
     {
@@ -785,15 +787,23 @@ JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1name(
 
     str = sqlite3_column_name(toref(stmt), col);
     if (!str) return NULL;
-    return utf8BytesToString(env, str, strlen(str));
+
+    length = strlen(str);
+    jBlob = (*env)->NewByteArray(env, length);
+    if (!jBlob) { throwex_outofmemory(env); return 0; }
+
+    (*env)->SetByteArrayRegion(env, jBlob, (jsize) 0, (jsize) length, (const jbyte*) str);
+
+    return jBlob;
 }
 
-JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1text(
+JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1text_1utf8(
         JNIEnv *env, jobject this, jlong stmt, jint col)
 {
     sqlite3 *db;
     const char *bytes;
     int nbytes;
+    jbyteArray jBlob;
 
     db = gethandle(env, this);
     if (!db)
@@ -816,8 +826,17 @@ JNIEXPORT jstring JNICALL Java_org_sqlite_core_NativeDB_column_1text(
         throwex_outofmemory(env);
         return NULL;
     }
+    if (!bytes) {
+        return NULL;
+    }
 
-    return utf8BytesToString(env, bytes, nbytes);
+    jBlob = (*env)->NewByteArray(env, nbytes);
+    if (!jBlob) { throwex_outofmemory(env); return 0; }
+
+    (*env)->SetByteArrayRegion(env, jBlob, (jsize) 0, (jsize) nbytes, (const jbyte*) bytes);
+
+    return jBlob;
+
 }
 
 JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1blob(
