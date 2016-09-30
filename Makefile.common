@@ -4,8 +4,6 @@ ifndef JAVA_HOME
 $(warning Set JAVA_HOME environment variable)
 endif
 
-libjdbc  := $(wildcard lib/jdbc-*.jar)
-
 JAVA  := "$$JAVA_HOME/bin/java"
 JAVAC := "$$JAVA_HOME/bin/javac" 
 JAVAH := "$$JAVA_HOME/bin/javah"
@@ -19,11 +17,14 @@ OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
 #$(shell mkdir -p lib)
 #$(shell $(JAVAC) src/main/java/org/sqlite/util/OSInfo.java -d lib)
 
+ifndef OS_NAME
 OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
+endif
+ifndef OS_ARCH
 OS_ARCH := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --arch)
-LIB_FOLDER := $(shell $(JAVA) -cp lib $(OSINFO_CLASS))
+endif
 
-# Windows uses different path separators, because they hate me
+# Windows uses different path separators
 ifeq ($(OS_NAME),Windows)
 	sep := ;
 else
@@ -32,6 +33,7 @@ endif
 
 sqlite := sqlite-$(version)
 
+ifdef JAVA_HOME
 jni_h := $(shell find -L "$(JAVA_HOME)" -name jni.h)
 ifneq ($(jni_h),)
 jni_include := $(shell dirname "$(jni_h)")
@@ -41,7 +43,7 @@ jni_md := $(shell find -L "$(JAVA_HOME)" -name jni_md.h)
 ifneq ($(jni_md),)
 jni_md_include := $(shell dirname "$(jni_md)")
 endif
-
+endif
 
 # os=Default is meant to be generic unix/linux
 
@@ -160,16 +162,3 @@ ifneq ($(jni_md_include),)
 CCFLAGS := $(CCFLAGS) -I"$(jni_md_include)"
 endif
 
-ifeq ($(OS_NAME),Windows)
-    NATIVE32_DLL = win32
-else ifeq ($(OS_NAME),Linux)
-    ifeq ($(OS_ARCH),arm)
-        NATIVE32_DLL = linux-arm
-    else ifeq ($(OS_ARCH),armhf)
-        NATIVE32_DLL = linux-armhf
-    else
-        NATIVE32_DLL = linux32
-    endif
-else ifeq ($(OS_NAME),Mac)
-    NATIVE32_DLL = mac32
-endif

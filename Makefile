@@ -1,10 +1,11 @@
+
 # use JDK1.5 to build native libraries
 
 include Makefile.common
 
 RESOURCE_DIR = src/main/resources
 
-.phony: all package win32 win64 mac32 linux32 linux64 linux-arm linux-armhf native deploy
+.phony: all package win32 win64 mac32 linux32 linux64 linux-arm linux-armhf native native-all deploy
 
 all: package
 
@@ -17,7 +18,6 @@ SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
 SQLITE_AMAL_DIR=$(TARGET)/$(SQLITE_AMAL_PREFIX)
-
 
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_AMAL_DIR) $(CCFLAGS)
 
@@ -77,7 +77,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3.c
 
-$(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SRC)/org/sqlite/core/NativeDB.c jni-header
+$(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SRC)/org/sqlite/core/NativeDB.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -I $(TARGET)/common-lib -c -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/core/NativeDB.c
 	$(CC) $(CCFLAGS) -o $@ $(SQLITE_OUT)/*.o $(LINKFLAGS)
@@ -88,6 +88,9 @@ NATIVE_DIR=src/main/resources/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
+# For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
+native-all: native win32 win64 linux32 linux64 linux-arm linux-armhf
+
 native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
 $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
@@ -96,41 +99,37 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	@mkdir -p $(NATIVE_TARGET_DIR)
 	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
 
-# for cross-compilation on Ubuntu, install the g++-mingw-w64-i686 package
 win32: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-windows-x86 bash -c 'make native CROSS_PREFIX=i686-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86'
+	./docker/dockcross-windows-x86 bash -c 'make clean-native native CROSS_PREFIX=i686-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86'
 
-# for cross-compilation on Ubuntu, install the g++-mingw-w64-x86-64 package
 win64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-windows-x64 bash -c 'make native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64'
+	./docker/dockcross-windows-x64 bash -c 'make clean-native native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64'
 
 linux32: $(SQLITE_UNPACKED) jni-header
-	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make native OS_NAME=Linux OS_ARCH=x86'
+	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86'
 
 linux64: $(SQLITE_UNPACKED) jni-header
-	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make native OS_NAME=Linux OS_ARCH=x86_64'
+	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
 
-# for cross-compilation, install docker. See also https://github.com/dockcross/dockcross
 linux-arm: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-armv5 bash -c 'make native CROSS_PREFIX=arm-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm'
+	./docker/dockcross-armv5 bash -c 'make clean-native native CROSS_PREFIX=arm-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm'
 
 linux-armhf: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-armv6 bash -c 'make native CROSS_PREFIX=arm-linux-gnueabihf- OS_NAME=Linux OS_ARCH=armhf'
+	./docker/dockcross-armv6 bash -c 'make clean-native native CROSS_PREFIX=arm-linux-gnueabihf- OS_NAME=Linux OS_ARCH=armhf'
 
 sparcv9:
 	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
 
-
+# deprecated
 mac32:
 	$(MAKE) native OS_NAME=Mac OS_ARCH=x86
 
-
-package: $(NATIVE32_DLL) native
+package: native-all
 	rm -rf target/dependency-maven-plugin-markers
 	$(MVN) package
 
 clean-native:
-	rm -rf $(TARGET)/$(sqlite)-$(OS_NAME)*
+	rm -rf $(SQLITE_OUT)
 
 clean-java:
 	rm -rf $(TARGET)/*classes
@@ -138,3 +137,9 @@ clean-java:
 
 clean-tests:
 	rm -rf $(TARGET)/{surefire*,testdb.jar*}
+
+docker-linux64:
+	docker build -f docker/Dockerfile.linux_x86_64 -t xerial/centos5-linux-x86-64 .
+
+docker-linux32:
+	docker build -f docker/Dockerfile.linux_x86 -t xerial/centos5-linux-x86 .
