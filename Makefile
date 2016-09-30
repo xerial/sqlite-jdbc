@@ -1,3 +1,4 @@
+
 include Makefile.common
 
 RESOURCE_DIR = src/main/resources
@@ -7,7 +8,7 @@ RESOURCE_DIR = src/main/resources
 all: jni-header package
 
 deploy: 
-	mvn deploy 
+	mvn package deploy -DperformRelease=true
 
 MVN:=mvn
 SRC:=src/main/java
