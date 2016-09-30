@@ -136,6 +136,9 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2016 09-30: sqlite-jdbc-3.14.2.1
+    * Improved the performance for single-threaded applications (#162)
+
 *   2016 09-26: sqlite-jdbc-3.14.2
     * Updated binaries (Using docker for the ease of cross compiling)
     * Fixes native libraries for Raspberry-Pi
