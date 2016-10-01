@@ -54,7 +54,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             success = true;
             return columnCount != 0;
         } finally {
-            if (!success) db.reset(pointer);
+            if (!success && pointer != 0) db.reset(pointer);
         }
     }
 
