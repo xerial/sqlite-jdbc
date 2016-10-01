@@ -171,13 +171,6 @@ public abstract class Function
      * Called by <tt>xFunc</tt> to access the value of an argument.
      * @param arg
      */
-    protected synchronized final int value_bytes(int arg)
-        throws SQLException {checkValue(arg); return db.value_bytes(this,arg);}
-
-    /**
-     * Called by <tt>xFunc</tt> to access the value of an argument.
-     * @param arg
-     */
     protected synchronized final String value_text(int arg)
         throws SQLException {checkValue(arg); return db.value_text(this,arg);}
 
