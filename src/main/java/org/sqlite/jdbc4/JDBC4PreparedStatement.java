@@ -123,11 +123,4 @@ public class JDBC4PreparedStatement extends JDBC3PreparedStatement implements Pr
         // TODO Support this
         throw new SQLFeatureNotSupportedException();
     }
-    public void closeOnCompletion() throws SQLException {
-        // TODO
-    }
-    public boolean isCloseOnCompletion() throws SQLException {
-        // TODO
-        return false;
-    }
 }
