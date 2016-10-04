@@ -650,6 +650,7 @@ public class PrepStmtTest
             PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
             statement.setInt(1, 1);
             statement.executeUpdate();
+            fail("expected exception");
         } catch (SQLException e) {
             assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
         }
