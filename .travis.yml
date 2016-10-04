@@ -12,9 +12,8 @@ jdk:
   - oraclejdk8
 
 script:
-  - make linux64
+  - make
+  # Deploy a snapshot version only for master branch and jdk8
   - if [ "$TRAVIS_JDK_VERSION" == "oraclejdk8" -a "$TRAVIS_BRANCH" == "master" ]; then 
-    # build all native libraries and deploy a snapshot version only for master branch and jdk8
-    make && mvn -s settings.xml deploy -DskipTests; else
-    mvn test;
+      mvn -s settings.xml deploy -DskipTests;
     fi
