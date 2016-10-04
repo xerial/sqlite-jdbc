@@ -627,7 +627,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void constraintErrorCode() throws SQLException {
+    public void constraintErrorCodeExecute() throws SQLException {
         assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
         assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
         // try to insert a row with duplicate id
@@ -635,6 +635,21 @@ public class PrepStmtTest
             PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
             statement.setInt(1, 1);
             statement.execute();
+            fail("expected exception");
+        } catch (SQLException e) {
+            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
+        }
+    }
+
+    @Test
+    public void constraintErrorCodeExecuteUpdate() throws SQLException {
+        assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
+        assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
+        // try to insert a row with duplicate id
+        try {
+            PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
+            statement.setInt(1, 1);
+            statement.executeUpdate();
             fail("expected exception");
         } catch (SQLException e) {
             assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());

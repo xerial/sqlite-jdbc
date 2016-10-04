@@ -864,7 +864,7 @@ public abstract class DB implements Codes
                 throw new SQLException("query returns results");
             }
         } finally {
-            reset(stmt.pointer);
+            if (stmt.pointer != 0) reset(stmt.pointer);
         }
         return changes();
     }
