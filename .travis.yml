@@ -11,7 +11,9 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
-script: make
+script:
+  - make
+  - mvn -s settings.xml deploy -DskipTests
 
 branches:
   only:
