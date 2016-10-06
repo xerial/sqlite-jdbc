@@ -117,6 +117,7 @@ public class DBMetaDataTest
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
         assertEquals(rs.getString("COLUMN_DEF"), null);
         assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "fn");
@@ -125,6 +126,7 @@ public class DBMetaDataTest
         assertEquals(rs.getInt("DATA_TYPE"), Types.FLOAT);
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
         assertEquals(rs.getString("COLUMN_DEF"), "0.0");
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "sn");
@@ -194,7 +196,7 @@ public class DBMetaDataTest
 
         rs = meta.getColumns(null, null, "doesnotexist", "%");
         assertFalse(rs.next());
-        assertEquals(22, rs.getMetaData().getColumnCount());
+        assertEquals(24, rs.getMetaData().getColumnCount());
     }
 
     @Test
@@ -364,7 +366,7 @@ public class DBMetaDataTest
         ResultSet rs = meta.getColumns(null, null, "test", null);
         assertTrue(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
-        assertEquals(rsmeta.getColumnCount(), 22);
+        assertEquals(rsmeta.getColumnCount(), 24);
         assertEquals(rsmeta.getColumnName(1), "TABLE_CAT");
         assertEquals(rsmeta.getColumnName(2), "TABLE_SCHEM");
         assertEquals(rsmeta.getColumnName(3), "TABLE_NAME");
@@ -388,6 +390,8 @@ public class DBMetaDataTest
         assertEquals(rsmeta.getColumnName(20), "SCOPE_SCHEMA");
         assertEquals(rsmeta.getColumnName(21), "SCOPE_TABLE");
         assertEquals(rsmeta.getColumnName(22), "SOURCE_DATA_TYPE");
+        assertEquals(rsmeta.getColumnName(23), "IS_AUTOINCREMENT");
+        assertEquals(rsmeta.getColumnName(24), "IS_GENERATEDCOLUMN");
     }
 
     // the following functions always return an empty resultset, so
