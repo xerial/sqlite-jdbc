@@ -180,7 +180,38 @@ public class SQLiteJDBCLoader {
                 // Delete the extracted lib file on JVM exit.
                 extractedLibFile.deleteOnExit();
 				extractedLckFile.deleteOnExit();
+				
+				// Add a Shutdown-Hook to remove other unused binaries (dll in temp without lck-file)
+				Runtime.getRuntime().addShutdownHook(new Thread()
+					{
+						@Override
+						public void run()
+						{
+						System.gc();
+						final String ver = org.sqlite.SQLiteJDBCLoader.getVersion();
+						
+						String tempFolder = new  	java.io.File(System.getProperty("java.io.tmpdir")).getAbsolutePath();					
+							java.io.File dir = new java.io.File(tempFolder);
+							java.io.File [] files = dir.listFiles(new java.io.FilenameFilter() {
 
+								@Override
+								public boolean accept(java.io.File dir, String name) 
+								{
+									return name.startsWith("sqlite-" + ver);
+								}
+							});
+							
+							for (java.io.File tempFile : files) 
+							{
+								if(tempFile.getName().indexOf(".lck") > 0) { continue; }
+								java.io.File lckFile = new java.io.File(tempFile.getName() + ".lck");
+								if(!lckFile.exists()){
+									tempFile.deleteOnExit();
+								}
+							}
+						   
+						}
+					}); 
                 if(writer != null) {
                     writer.close();
                 }
