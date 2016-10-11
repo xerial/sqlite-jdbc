@@ -157,7 +157,11 @@ public class SQLiteJDBCLoader {
         // when multiple JVMs with different architectures running at the same time
         String uuid = UUID.randomUUID().toString();
         String extractedLibFileName = String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
+		String extractedLckFileName = extractedLibFileName + ".lck";
+		
         File extractedLibFile = new File(targetFolder, extractedLibFileName);
+		File extractedLckFile = new File(targetFolder, extractedLckFileName);
+		
 
         try {
             // Extract a native library file into the target directory
@@ -170,8 +174,12 @@ public class SQLiteJDBCLoader {
                     writer.write(buffer, 0, bytesRead);
                 }
             } finally {
+				if (!extractedLckFile.exists()) {
+					new FileOutputStream(extractedLckFile).close();
+				}
                 // Delete the extracted lib file on JVM exit.
                 extractedLibFile.deleteOnExit();
+				extractedLckFile.deleteOnExit();
 
                 if(writer != null) {
                     writer.close();
