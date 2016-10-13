@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -55,56 +56,55 @@ import org.sqlite.util.OSInfo;
 public class SQLiteJDBCLoader {
 
     private static boolean extracted = false;
+    private static String searchPattern = "sqlite-" + getVersion();
 
     /**
      * Loads SQLite native JDBC library.
      *
-     * @return True if SQLite native library is successfully loaded; false otherwise.
+     * @return True if SQLite native library is successfully loaded; false
+     *         otherwise.
      */
     public static boolean initialize() throws Exception {
         // only cleanup before first extract
-		if(!extracted) {
-			cleanup();
-		}
-		loadSQLiteNativeLibrary();
-		return extracted;
+        if(!extracted) {
+            cleanup();
+        }
+        loadSQLiteNativeLibrary();
+        return extracted;
     }
-	
-	
-	/**
-	* Deleted old nativ libraries e.g. on Windows this are not removed on VM-Exit (bug #80)
-	*/
-	static void cleanup(){
-
-		final String ver = org.sqlite.SQLiteJDBCLoader.getVersion();
-		String tempFolder = new	java.io.File(System.getProperty("java.io.tmpdir")).getAbsolutePath();					
-		java.io.File dir = new java.io.File(tempFolder);
-		java.io.File [] files = dir.listFiles(new java.io.FilenameFilter() {
-			@Override
-			public boolean accept(java.io.File dir, String name) {
-				return name.startsWith("sqlite-" + ver);
-			}
-		});
-		
-		for (java.io.File tempFile : files) {
-			if(tempFile.getName().indexOf(".lck") > 0) { continue; }
-			java.io.File lckFile = new java.io.File(tempFile.getName() + ".lck");
-			if(!lckFile.exists()) {
-				try{
-					tempFile.delete();
-				}
-				catch(SecurityException ex){
-					
-				}
-				
-			}
-		}
-						   
-						
-	}
 
     /**
-     * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
+     * Deleted old native libraries e.g. on Windows the DLL file is not removed
+     * on VM-Exit (bug #80)
+     */
+    static void cleanup() {
+        String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
+        File dir = new File(tempFolder);
+        File[] files = dir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.startsWith(searchPattern);
+            }
+        });
+        if(files != null) {
+            for (File tempFile : files) {
+                if(tempFile.getName().indexOf(".lck") > 0) {
+                    continue;
+                }
+                File lckFile = new File(tempFile.getName() + ".lck");
+                if(!lckFile.exists()) {
+                    try {
+                        tempFile.delete();
+                    } catch (SecurityException e) {
+                        System.err.println("Fail deleting old native lib" + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @return True if the SQLite JDBC driver is set to pure Java mode; false
+     *         otherwise.
      * @deprecated Pure Java no longer supported
      */
     static boolean getPureJavaFlag() {
