@@ -1083,6 +1083,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     protected static final Pattern TYPE_INTEGER = Pattern.compile(".*(INT|BOOL).*");
     protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
     protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
+    protected static final Pattern TYPE_AUTO_INCREMENT = Pattern.compile(".*(AUTO_INCREMENT).*");
 
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
@@ -1147,7 +1148,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
            .append("0    as SQL_DATA_TYPE, 0    as SQL_DATETIME_SUB, 2000000000 as CHAR_OCTET_LENGTH, ")
            .append("ordpos as ORDINAL_POSITION, (case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)")
            .append("    as IS_NULLABLE, null as SCOPE_CATLOG, null as SCOPE_SCHEMA, ")
-           .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE from (");
+           .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE, ")
+           .append("(case colautoincrement when 0 then 'NO' when 1 then 'YES' else '' end) as IS_AUTOINCREMENT, ")
+           .append("'' as IS_GENERATEDCOLUMN from (");
 
         boolean colFound = false;
 
@@ -1188,6 +1191,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                          * plus some degree of artistic-license applied
                          */
                         colType = colType == null ? "TEXT" : colType.toUpperCase();
+
+                        int colAutoIncrement = 0;
+                        if(TYPE_AUTO_INCREMENT.matcher(colType).find())
+                        {
+                            colAutoIncrement = 1;
+                        }
                         int colJavaType = -1;
                         // rule #1 + boolean
                         if (TYPE_INTEGER.matcher(colType).find()) {
@@ -1210,7 +1219,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                            .append("'").append(tableName).append("' as tblname, ")
                            .append("'").append(escape(colName)).append("' as cn, ")
                            .append("'").append(escape(colType)).append("' as tn, ")
-                           .append(quote(colDefault == null ? null : escape(colDefault))).append(" as colDefault");
+                           .append(quote(colDefault == null ? null : escape(colDefault))).append(" as colDefault,")
+                           .append(colAutoIncrement).append(" as colautoincrement");
 
                         if (colNamePattern != null) {
                             sql.append(" where upper(cn) like upper('").append(escape(colNamePattern)).append("')");
@@ -1243,7 +1253,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
         }
         else {
-            sql.append("select null as ordpos, null as colnullable, null as ct, null as tblname, null as cn, null as tn, null as colDefault) limit 0;");
+            sql.append("select null as ordpos, null as colnullable, null as ct, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement) limit 0;");
         }
 
         Statement stat = conn.createStatement();
