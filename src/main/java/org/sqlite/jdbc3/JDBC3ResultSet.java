@@ -909,7 +909,13 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSetMetaData#getTableName(int)
      */
     public String getTableName(int col) throws SQLException {
-        return db.column_table_name(stmt.pointer, checkCol(col));
+        final String tableName = db.column_table_name(stmt.pointer, checkCol(col));
+		if(tableName == null)
+		{
+			//JDBC specifies an empty string instead of null
+			return "";
+		}
+		return tableName;
     }
 
     /**
