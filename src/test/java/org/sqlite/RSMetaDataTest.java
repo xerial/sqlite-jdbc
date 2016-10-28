@@ -1,12 +1,12 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,7 +14,6 @@ import java.sql.Types;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RSMetaDataTest
@@ -170,4 +169,13 @@ public class RSMetaDataTest
         assertEquals(0, meta.getScale(2));
         assertEquals(5, meta.getScale(3));
     }
+	
+	@Test
+	public void tableName() throws SQLException
+	{
+		final ResultSet rs = stat.executeQuery( "SELECT pid, time(dob) as some_time from people");
+		assertEquals( "People", rs.getMetaData().getTableName( 1));
+		assertEquals( "", rs.getMetaData().getTableName( 2));
+		rs.close();
+	}
 }
