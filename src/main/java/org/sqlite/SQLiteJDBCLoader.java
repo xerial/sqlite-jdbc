@@ -24,22 +24,15 @@
 //--------------------------------------
 package org.sqlite;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
+import org.sqlite.util.OSInfo;
+
+import java.io.*;
 import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 import java.util.UUID;
-
-import org.sqlite.util.OSInfo;
 
 /**
  * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name,
@@ -56,16 +49,15 @@ import org.sqlite.util.OSInfo;
 public class SQLiteJDBCLoader {
 
     private static boolean extracted = false;
-    private static String searchPattern = "sqlite-" + getVersion();
 
     /**
      * Loads SQLite native JDBC library.
      *
      * @return True if SQLite native library is successfully loaded; false
-     *         otherwise.
+     * otherwise.
      */
     public static boolean initialize() throws Exception {
-        // only cleanup before first extract
+        // only cleanup before the first extract
         if(!extracted) {
             cleanup();
         }
@@ -80,22 +72,22 @@ public class SQLiteJDBCLoader {
     static void cleanup() {
         String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
         File dir = new File(tempFolder);
-        File[] files = dir.listFiles(new FilenameFilter() {
+
+        File[] nativeLibFiles = dir.listFiles(new FilenameFilter() {
+            private final String searchPattern = "sqlite-" + getVersion();
             public boolean accept(File dir, String name) {
-                return name.startsWith(searchPattern);
+                return name.startsWith(searchPattern) && !name.endsWith(".lck");
             }
         });
-        if(files != null) {
-            for (File tempFile : files) {
-                if(tempFile.getName().indexOf(".lck") > 0) {
-                    continue;
-                }
-                File lckFile = new File(tempFile.getName() + ".lck");
+        if(nativeLibFiles != null) {
+            for(File nativeLibFile : nativeLibFiles) {
+                File lckFile = new File(nativeLibFile.getName() + ".lck");
                 if(!lckFile.exists()) {
                     try {
-                        tempFile.delete();
-                    } catch (SecurityException e) {
-                        System.err.println("Fail deleting old native lib" + e.getMessage());
+                        nativeLibFile.delete();
+                    }
+                    catch(SecurityException e) {
+                        System.err.println("Failed to delete old native lib" + e.getMessage());
                     }
                 }
             }
@@ -104,7 +96,7 @@ public class SQLiteJDBCLoader {
 
     /**
      * @return True if the SQLite JDBC driver is set to pure Java mode; false
-     *         otherwise.
+     * otherwise.
      * @deprecated Pure Java no longer supported
      */
     static boolean getPureJavaFlag() {
@@ -152,9 +144,11 @@ public class SQLiteJDBCLoader {
             ByteArrayOutputStream md5out = new ByteArrayOutputStream();
             md5out.write(digest.digest());
             return md5out.toString();
-        } catch(NoSuchAlgorithmException e) {
+        }
+        catch(NoSuchAlgorithmException e) {
             throw new IllegalStateException("MD5 algorithm is not available: " + e);
-        } finally {
+        }
+        finally {
             in.close();
         }
     }
@@ -194,11 +188,10 @@ public class SQLiteJDBCLoader {
         // when multiple JVMs with different architectures running at the same time
         String uuid = UUID.randomUUID().toString();
         String extractedLibFileName = String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
-		String extractedLckFileName = extractedLibFileName + ".lck";
-		
+        String extractedLckFileName = extractedLibFileName + ".lck";
+
         File extractedLibFile = new File(targetFolder, extractedLibFileName);
-		File extractedLckFile = new File(targetFolder, extractedLckFileName);
-		
+        File extractedLckFile = new File(targetFolder, extractedLckFileName);
 
         try {
             // Extract a native library file into the target directory
@@ -210,15 +203,16 @@ public class SQLiteJDBCLoader {
                 while((bytesRead = reader.read(buffer)) != -1) {
                     writer.write(buffer, 0, bytesRead);
                 }
-            } finally {
-				if (!extractedLckFile.exists()) {
-					new FileOutputStream(extractedLckFile).close();
-				}
+            }
+            finally {
+                if(!extractedLckFile.exists()) {
+                    new FileOutputStream(extractedLckFile).close();
+                }
                 // Delete the extracted lib file on JVM exit.
                 extractedLibFile.deleteOnExit();
-				extractedLckFile.deleteOnExit();
-				
-				
+                extractedLckFile.deleteOnExit();
+
+
                 if(writer != null) {
                     writer.close();
                 }
@@ -232,7 +226,6 @@ public class SQLiteJDBCLoader {
             extractedLibFile.setWritable(true, true);
             extractedLibFile.setExecutable(true);
 
-
             // Check whether the contents are properly copied from the resource folder
             {
                 InputStream nativeIn = SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath);
@@ -241,7 +234,8 @@ public class SQLiteJDBCLoader {
                     if(!contentsEquals(nativeIn, extractedLibIn)) {
                         throw new RuntimeException(String.format("Failed to write a native library file at %s", extractedLibFile));
                     }
-                } finally {
+                }
+                finally {
                     if(nativeIn != null) {
                         nativeIn.close();
                     }
@@ -251,7 +245,8 @@ public class SQLiteJDBCLoader {
                 }
             }
             return loadNativeLibrary(targetFolder, extractedLibFileName);
-        } catch(IOException e) {
+        }
+        catch(IOException e) {
             System.err.println(e.getMessage());
             return false;
         }
@@ -272,13 +267,15 @@ public class SQLiteJDBCLoader {
             try {
                 System.load(new File(path, name).getAbsolutePath());
                 return true;
-            } catch(UnsatisfiedLinkError e) {
+            }
+            catch(UnsatisfiedLinkError e) {
                 System.err.println("Failed to load native library:" + name + ". osinfo: " + OSInfo.getNativeLibFolderPathForCurrentOS());
                 System.err.println(e);
                 return false;
             }
 
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -388,7 +385,8 @@ public class SQLiteJDBCLoader {
                 version = versionData.getProperty("version", version);
                 version = version.trim().replaceAll("[^0-9\\.]", "");
             }
-        } catch(IOException e) {
+        }
+        catch(IOException e) {
             System.err.println(e);
         }
         return version;
