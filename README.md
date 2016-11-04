@@ -34,7 +34,7 @@ Public Discussion Forum
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
 
-* Latest snapshot (pre-releasse) versions are also available: https//oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+* Latest snapshot (pre-releasse) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
 
 Usage
 ============ 
