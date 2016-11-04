@@ -31,7 +31,10 @@ Public Discussion Forum
 *  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en) 
 *  Post bug reports or feqture requests to [Issue Tracker](https://bitbucket.org/xerial/sqlite-jdbc/issues)
     
+
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
+
+* Latest snapshot (pre-releasse) versions are also available: https//oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
 
 Usage
 ============ 
@@ -136,7 +139,12 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
-*   2016 09-30: sqlite-jdbc-3.14.2.1
+*   2016-11-04: sqlite-jdbc-3.15.0
+    * Upgrade to SQLite 3.15.0
+    * Cleanup extracted temp library files upon start
+    * Fix various metadata problems
+
+*   2016-09-30: sqlite-jdbc-3.14.2.1
     * Improved the performance for single-threaded applications (#162)
 
 *   2016 09-26: sqlite-jdbc-3.14.2
