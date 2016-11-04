@@ -34,6 +34,7 @@ Public Discussion Forum
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
 
+* Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
 * Latest snapshot (pre-releasse) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
 
 Usage
@@ -139,6 +140,8 @@ To use a memory database in your Java code, get the database connection as follo
 
 News
 ====
+*   2016-11-04: sqlite-jdbc-3.15.1
+    * Upgrade to SQLite [3.15.1](https://sqlite.org/releaselog/3_15_1.html)
 *   2016-11-04: sqlite-jdbc-3.15.0
     * Upgrade to SQLite 3.15.0
     * Cleanup extracted temp library files upon start
@@ -334,7 +337,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.8.11.2</version>
+          <version>3.15.1</version>
         </dependency>
     </dependencies>
 
@@ -363,6 +366,6 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
     <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.8.11.2</version>
+        <version>3.15.1</version>
         <scope>provided</scope>
     </dependency>
