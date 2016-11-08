@@ -33,6 +33,7 @@ Public Discussion Forum
     
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
+[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/org.xerial/sqlite-jdbc/badge.svg)](http://www.javadoc.io/doc/org.xerial/sqlite-jdbc)
 
 * Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
 * Latest snapshot (pre-releasse) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
