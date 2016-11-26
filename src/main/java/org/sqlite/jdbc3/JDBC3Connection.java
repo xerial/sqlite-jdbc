@@ -85,15 +85,22 @@ public abstract class JDBC3Connection extends CoreConnection {
      * @see java.sql.Connection#getTypeMap()
      */
     public Map<String,Class<?>> getTypeMap() throws SQLException {
-        throw new SQLException("not yet implemented");
+        synchronized (typeMap) {
+            if (this.typeMap == null) {
+                this.typeMap = new HashMap<String, Class<?>>();
+            }
+
+            return this.typeMap;
+        }
     }
 
     /**
      * @see java.sql.Connection#setTypeMap(java.util.Map)
      */
-    @SuppressWarnings("rawtypes")
     public void setTypeMap(Map map) throws SQLException {
-        throw new SQLException("not yet implemented");
+        synchronized (typeMap) {
+            this.typeMap = map;
+        }
     }
 
     /**
