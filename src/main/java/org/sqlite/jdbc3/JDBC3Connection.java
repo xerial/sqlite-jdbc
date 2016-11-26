@@ -10,6 +10,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,6 +20,7 @@ import org.sqlite.core.CoreConnection;
 public abstract class JDBC3Connection extends CoreConnection {
 
 	private final AtomicInteger savePoint = new AtomicInteger(0);
+	private Map<String, Class<?>> typeMap;
 
     protected JDBC3Connection(String url, String fileName, Properties prop) throws SQLException {
         super(url, fileName, prop);
