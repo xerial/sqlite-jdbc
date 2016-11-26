@@ -10,6 +10,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,6 +20,7 @@ import org.sqlite.core.CoreConnection;
 public abstract class JDBC3Connection extends CoreConnection {
 
 	private final AtomicInteger savePoint = new AtomicInteger(0);
+	private Map<String, Class<?>> typeMap;
 
     protected JDBC3Connection(String url, String fileName, Properties prop) throws SQLException {
         super(url, fileName, prop);
@@ -85,15 +87,22 @@ public abstract class JDBC3Connection extends CoreConnection {
      * @see java.sql.Connection#getTypeMap()
      */
     public Map<String,Class<?>> getTypeMap() throws SQLException {
-        throw new SQLException("not yet implemented");
+        synchronized (typeMap) {
+            if (this.typeMap == null) {
+                this.typeMap = new HashMap<String, Class<?>>();
+            }
+
+            return this.typeMap;
+        }
     }
 
     /**
      * @see java.sql.Connection#setTypeMap(java.util.Map)
      */
-    @SuppressWarnings("rawtypes")
     public void setTypeMap(Map map) throws SQLException {
-        throw new SQLException("not yet implemented");
+        synchronized (typeMap) {
+            this.typeMap = map;
+        }
     }
 
     /**
