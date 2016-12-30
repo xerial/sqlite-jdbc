@@ -88,7 +88,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: native win32 win64 linux32 linux64 linux-arm linux-armhf
+native-all: native win32 win64 linux32 linux64 linux-arm linux-armhf android-arm
 
 native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
@@ -97,6 +97,9 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	cp $< $@
 	@mkdir -p $(NATIVE_TARGET_DIR)
 	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
+
+android-arm: $(SQLITE_UNPACKED) jni-header
+	./docker/dockcross-android bash -c 'make clean-native native CROSS_PREFIX=/usr/arm-linux-androideabi/bin/arm-linux-androideabi- OS_NAME=Android OS_ARCH=arm'
 
 win32: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-windows-x86 bash -c 'make clean-native native CROSS_PREFIX=i686-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86'
