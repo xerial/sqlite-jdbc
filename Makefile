@@ -105,10 +105,13 @@ win64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-windows-x64 bash -c 'make clean-native native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64'
 
 linux32: $(SQLITE_UNPACKED) jni-header
-	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86'
+	docker run --rm -ti -v $$PWD:/work xerial/centos5-linux-x86 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86'
 
 linux64: $(SQLITE_UNPACKED) jni-header
-	docker run -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
+	docker run --rm -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
+
+alpine-linux64: $(SQLITE_UNPACKED) jni-header
+	docker run --rm -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
 
 linux-arm: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-armv5 bash -c 'make clean-native native CROSS_PREFIX=arm-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm'
@@ -138,7 +141,10 @@ clean-tests:
 	rm -rf $(TARGET)/{surefire*,testdb.jar*}
 
 docker-linux64:
-	docker build -f docker/Dockerfile.linux_x86_64 -t xerial/centos5-linux-x86-64 .
+	docker build -f docker/Dockerfile.linux_x86_64 -t xerial/centos5-linux-x86_64 .
 
 docker-linux32:
 	docker build -f docker/Dockerfile.linux_x86 -t xerial/centos5-linux-x86 .
+
+docker-alpine-linux64:
+	docker build -f docker/Dockerfile.alpine-linux_x86_64 -t xerial/alpine-linux-x86_64 .
