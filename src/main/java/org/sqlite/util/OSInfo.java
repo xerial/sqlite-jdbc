@@ -162,6 +162,9 @@ public class OSInfo
         else if (osName.contains("AIX")) {
             return "AIX";
         }
+        else if (osName.contains("Android")) {
+            return "Android";
+        }
 
         else {
             return osName.replaceAll("\\W", "");
