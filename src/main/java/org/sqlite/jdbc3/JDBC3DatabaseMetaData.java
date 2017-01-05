@@ -1097,12 +1097,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         // and return the columname and type from:
         //    "PRAGMA table_info(tablename)"
         // which returns data like this:
-        //        sqlite> PRAGMA lastyear.table_info(gross_sales); 
-        //        cid|name|type|notnull|dflt_value|pk 
-        //        0|year|INTEGER|0|'2006'|0 
-        //        1|month|TEXT|0||0 
-        //        2|monthlygross|REAL|0||0 
-        //        3|sortcol|INTEGER|0||0 
+        //        sqlite> PRAGMA lastyear.table_info(gross_sales);
+        //        cid|name|type|notnull|dflt_value|pk
+        //        0|year|INTEGER|0|'2006'|0
+        //        1|month|TEXT|0||0
+        //        2|monthlygross|REAL|0||0
+        //        3|sortcol|INTEGER|0||0
         //        sqlite>
 
         // and then make the cursor have these columns
@@ -1379,7 +1379,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
 
             rs.close();
-    
+
             ResultSet fk = null;
             String target = table.toLowerCase();
             // find imported keys for each table
@@ -1387,7 +1387,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 try {
                     fk = stat.executeQuery("pragma foreign_key_list('" + escape(tbl) + "')");
                 } catch (SQLException e) {
-                    if (e.getErrorCode() == Codes.SQLITE_DONE) 
+                    if (e.getErrorCode() == Codes.SQLITE_DONE)
                         continue; // expected if table has no foreign keys
 
                     throw e;
@@ -1478,6 +1478,13 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         return ((CoreStatement)stat).executeQuery(sql.toString(), true);
     }
 
+    private StringBuilder appendDummyForeignKeyList(StringBuilder sql) {
+      sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
+      .append(DatabaseMetaData.importedKeyNoAction).append(" as ur, ")
+      .append(DatabaseMetaData.importedKeyNoAction).append(" as dr) limit 0;");
+      return sql;
+    }
+
     /**
      * @see java.sql.DatabaseMetaData#getImportedKeys(java.lang.String, java.lang.String,
      *      java.lang.String)
@@ -1492,7 +1499,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
             .append(quote(catalog)).append(" as FKTABLE_CAT, ")
             .append(quote(schema)).append(" as FKTABLE_SCHEM, ")
-            .append(quote(table)).append(" as FKTABLE_NAME, ") 
+            .append(quote(table)).append(" as FKTABLE_NAME, ")
             .append("fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, ")
             .append(Integer.toString(DatabaseMetaData.importedKeyInitiallyDeferred)).append(" as DEFERRABILITY from (");
 
@@ -1501,14 +1508,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             rs = stat.executeQuery("pragma foreign_key_list('" + escape(table) + "');");
         }
         catch (SQLException e) {
-            sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
-                .append(DatabaseMetaData.importedKeyNoAction).append(" as ur, ")
-                .append(DatabaseMetaData.importedKeyNoAction).append(" as dr) limit 0;");
-
+            sql = appendDummyForeignKeyList(sql);
             return ((CoreStatement)stat).executeQuery(sql.toString(), true);
         }
 
-        for (int i = 0; rs.next(); i++) {
+        int i = 0;
+        for (; rs.next(); i++) {
             int keySeq = rs.getInt(2) + 1;
             String PKTabName = rs.getString(3);
             String FKColName = rs.getString(4);
@@ -1543,6 +1548,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 .append(" when 'SET DEFAULT' then ").append(DatabaseMetaData.importedKeySetDefault).append(" end as dr");
         }
         rs.close();
+
+        if(i == 0) {
+          sql = appendDummyForeignKeyList(sql);
+        }
 
         return ((CoreStatement)stat).executeQuery(sql.append(");").toString(), true);
     }
