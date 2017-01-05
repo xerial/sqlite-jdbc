@@ -1553,7 +1553,6 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
           sql = appendDummyForeignKeyList(sql);
         }
 
-        System.out.println("----------\n" + sql);
         return ((CoreStatement)stat).executeQuery(sql.append(");").toString(), true);
     }
 
