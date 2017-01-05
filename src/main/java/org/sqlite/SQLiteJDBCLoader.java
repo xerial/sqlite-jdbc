@@ -19,7 +19,7 @@
 // SQLite.java
 // Since: 2007/05/10
 //
-// $URL$ 
+// $URL$
 // $Author$
 //--------------------------------------
 package org.sqlite;
@@ -308,7 +308,8 @@ public class SQLiteJDBCLoader {
         }
 
         // Load the os-dependent library from the jar file
-        sqliteNativeLibraryPath = "/org/sqlite/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
+        String packagePath = SQLiteJDBCLoader.class.getPackage().getName().replaceAll("\\.", "/");
+        sqliteNativeLibraryPath = String.format("/%s/native/%s", packagePath, OSInfo.getNativeLibFolderPathForCurrentOS());
         boolean hasNativeLib = hasResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName);
 
 
@@ -325,12 +326,12 @@ public class SQLiteJDBCLoader {
 
         if(!hasNativeLib) {
             extracted = false;
-            throw new Exception(String.format("No native library is found for os.name=%s and os.arch=%s", OSInfo.getOSName(), OSInfo.getArchName()));
+            throw new Exception(String.format("No native library is found for os.name=%s and os.arch=%s. path=%s", OSInfo.getOSName(), OSInfo.getArchName(), sqliteNativeLibraryPath));
         }
 
         // temporary library folder
         String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
-        // Try extracting the library from jar 
+        // Try extracting the library from jar
         if(extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
             extracted = true;
             return;
