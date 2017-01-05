@@ -21,7 +21,7 @@ public class BusyHandlerTest {
 
     @Before
     public void connect() throws Exception {
-        conn = DriverManager.getConnection("jdbc:sqlite:test.db");
+        conn = DriverManager.getConnection("jdbc:sqlite:target/test.db");
         stat = conn.createStatement();
     }
 
@@ -34,13 +34,13 @@ public class BusyHandlerTest {
     public class BusyWork extends Thread {
         private final Connection conn;
         private final Statement stat;
-        
+
         public BusyWork() throws Exception {
-            conn = DriverManager.getConnection("jdbc:sqlite:test.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:target/test.db");
             stat = conn.createStatement();
             stat.setQueryTimeout(10);
         }
-        
+
         @Override
         public void run(){
 
@@ -64,11 +64,11 @@ public class BusyHandlerTest {
             } catch (SQLException ex) {System.out.println("BLOB"+ex.toString());}
         }
     }
-    
+
     private void workWork() throws SQLException, InterruptedException {
         // I let busyWork inject first so it can busy the db
         Thread.sleep(1000);
-        
+
         // Generate some work for the sqlite vm
         int i = 0;
         while (i<100) {
@@ -85,7 +85,7 @@ public class BusyHandlerTest {
             protected int callback(int nbPrevInvok) throws SQLException {
                 assertTrue(calls[0] == nbPrevInvok);
                 calls[0]++;
-                
+
                 if (nbPrevInvok <= 1) {
                     return 1;
                 } else {
@@ -93,21 +93,21 @@ public class BusyHandlerTest {
                 }
             }
         });
-        
+
         BusyWork busyWork = new BusyWork();
         busyWork.start();
-        
+
         // I let busyWork prepare a huge insert
         Thread.sleep(1000);
-        
-        synchronized(busyWork){ 
+
+        synchronized(busyWork){
             try{
                 workWork();
             } catch(SQLException ex) {
                 assertTrue(ex.getErrorCode() == SQLiteErrorCode.SQLITE_BUSY.code);
             }
         }
-        
+
         busyWork.interrupt();
         assertTrue(calls[0] == 3);
     }
@@ -120,7 +120,7 @@ public class BusyHandlerTest {
             protected int callback(int nbPrevInvok) throws SQLException {
                 assertTrue(calls[0] == nbPrevInvok);
                 calls[0]++;
-                
+
                 if (nbPrevInvok <= 1) {
                     return 1;
                 } else {
@@ -128,12 +128,12 @@ public class BusyHandlerTest {
                 }
             }
         });
-        
+
         BusyWork busyWork = new BusyWork();
         busyWork.start();
         // I let busyWork prepare a huge insert
         Thread.sleep(1000);
-        synchronized(busyWork){ 
+        synchronized(busyWork){
             try{
                 workWork();
             } catch(SQLException ex) {
@@ -141,21 +141,21 @@ public class BusyHandlerTest {
             }
         }
         assertTrue(calls[0] == 3);
-        
+
         int totalCalls = calls[0];
         BusyHandler.clearHandler(conn);
         busyWork = new BusyWork();
         busyWork.start();
         // I let busyWork prepare a huge insert
         Thread.sleep(1000);
-        synchronized(busyWork){ 
+        synchronized(busyWork){
             try{
                 workWork();
             } catch(SQLException ex) {
                 assertTrue(ex.getErrorCode() == SQLiteErrorCode.SQLITE_BUSY.code);
             }
         }
-    
+
         busyWork.interrupt();
         assertEquals(totalCalls, calls[0]);
     }
