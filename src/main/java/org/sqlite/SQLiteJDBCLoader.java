@@ -65,12 +65,16 @@ public class SQLiteJDBCLoader {
         return extracted;
     }
 
+    private static File getTempDir() {
+        return new File(System.getProperty("org.sqlite.tmpdir", System.getProperty("java.io.tmpdir")));
+    }
+
     /**
      * Deleted old native libraries e.g. on Windows the DLL file is not removed
      * on VM-Exit (bug #80)
      */
     static void cleanup() {
-        String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
+        String tempFolder = getTempDir().getAbsolutePath();
         File dir = new File(tempFolder);
 
         File[] nativeLibFiles = dir.listFiles(new FilenameFilter() {
@@ -330,7 +334,7 @@ public class SQLiteJDBCLoader {
         }
 
         // temporary library folder
-        String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
+        String tempFolder = getTempDir().getAbsolutePath();
         // Try extracting the library from jar
         if(extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
             extracted = true;
