@@ -24,7 +24,9 @@
 //--------------------------------------
 package org.sqlite.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -107,39 +109,95 @@ public class OSInfo
         return translateOSNameToFolderName(System.getProperty("os.name"));
     }
 
+    public static boolean isAndroid() {
+        return System.getProperty("java.runtime.name", "").toLowerCase().contains("android");
+    }
+
+    static String getHardwareName() {
+        try {
+            Process p = Runtime.getRuntime().exec("uname -m");
+            p.waitFor();
+
+            InputStream in = p.getInputStream();
+            try {
+                int readLen = 0;
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                byte[] buf = new byte[32];
+                while((readLen = in.read(buf, 0, buf.length)) >= 0) {
+                    b.write(buf, 0, readLen);
+                }
+                return b.toString();
+            }
+            finally {
+                if(in != null) {
+                    in.close();
+                }
+            }
+        }
+        catch (Throwable e) {
+            System.err.println("Error while running uname -m: " + e.getMessage());
+            return "unknown";
+        }
+    }
+
+    static String resolveArmArchType() {
+        // For Android
+        if(isAndroid()) {
+            return "android-arm";
+        }
+
+        if(System.getProperty("os.name").contains("Linux")) {
+            String armType = getHardwareName();
+            // armType (uname -m) can be armv5t, armv5te, armv5tej, armv5tejl, armv6, armv7, armv7l, i686
+            if(armType.startsWith("armv6")) {
+                // Raspberry PI
+                return "armv6";
+            }
+            else if(armType.startsWith("armv7")) {
+                // Generic
+                return "armv7";
+            }
+
+            // Java 1.8 introduces a system property to determine armel or armhf
+            // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=8005545
+            String abi = System.getProperty("sun.arch.abi");
+            if(abi != null && abi.startsWith("gnueabihf")) {
+                return "armv7";
+            }
+
+            // For java7, we stil need to if run some shell commands to determine ABI of JVM
+            String javaHome = System.getProperty("java.home");
+            try {
+                // determine if first JVM found uses ARM hard-float ABI
+                int exitCode = Runtime.getRuntime().exec("which readelf").waitFor();
+                if(exitCode == 0) {
+                    String[] cmdarray = {"/bin/sh", "-c", "find '" + javaHome +
+                        "' -name 'libjvm.so' | head -1 | xargs readelf -A | " +
+                        "grep 'Tag_ABI_VFP_args: VFP registers'"};
+                    exitCode = Runtime.getRuntime().exec(cmdarray).waitFor();
+                    if (exitCode == 0) {
+                        return "armv7";
+                    }
+                } else {
+                    System.err.println("WARNING! readelf not found. Cannot check if running on an armhf system, " +
+                        "armel architecture will be presumed.");
+                }
+            }
+            catch(IOException e) {
+                // ignored: fall back to "arm" arch (soft-float ABI)
+            }
+            catch(InterruptedException e) {
+                // ignored: fall back to "arm" arch (soft-float ABI)
+            }
+        }
+        // Use armv5, soft-float ABI
+        return "arm";
+    }
+
     public static String getArchName() {
         String osArch = System.getProperty("os.arch");
         if(osArch.startsWith("arm")) {
-            // Java 1.8 introduces a system property to determine armel or armhf
-            if(System.getProperty("sun.arch.abi") != null && System.getProperty("sun.arch.abi").startsWith("gnueabihf")) {
-                return translateArchNameToFolderName("armhf");
-            }
-            // For java7, we stil need to if run some shell commands to determine ABI of JVM
-            if(System.getProperty("os.name").contains("Linux")) {
-                String javaHome = System.getProperty("java.home");
-                try {
-                    // determine if first JVM found uses ARM hard-float ABI
-                    int exitCode = Runtime.getRuntime().exec("which readelf").waitFor();
-                    if(exitCode == 0) {
-                        String[] cmdarray = {"/bin/sh", "-c", "find '" + javaHome +
-                                "' -name 'libjvm.so' | head -1 | xargs readelf -A | " +
-                                "grep 'Tag_ABI_VFP_args: VFP registers'"};
-                        exitCode = Runtime.getRuntime().exec(cmdarray).waitFor();
-                        if (exitCode == 0) {
-                            return translateArchNameToFolderName("armhf");
-                        }
-                    } else {
-                        System.err.println("WARNING! readelf not found. Cannot check if running on an armhf system, " +
-                                "armel architecture will be presumed.");
-                    }
-                }
-                catch(IOException e) {
-                    // ignored: fall back to "arm" arch (soft-float ABI)
-                }
-                catch(InterruptedException e) {
-                    // ignored: fall back to "arm" arch (soft-float ABI)
-                }
-            }
+            osArch = resolveArmArchType();
         }
         else {
             String lc = osArch.toLowerCase(Locale.US);

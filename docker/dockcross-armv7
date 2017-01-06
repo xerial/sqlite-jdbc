@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEFAULT_DOCKCROSS_IMAGE=dockcross/linux-armv6
+DEFAULT_DOCKCROSS_IMAGE=dockcross/linux-armv7
 
 #------------------------------------------------------------------------------
 # Helpers
