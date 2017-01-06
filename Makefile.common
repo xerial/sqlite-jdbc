@@ -113,9 +113,9 @@ SunOS-sparcv9_LINKFLAGS := -shared -static-libgcc
 SunOS-sparcv9_LIBNAME   := libsqlitejdbc.so
 SunOS-sparcv9_SQLITE_FLAGS  := 
 
-Mac-x86_CC        := gcc -arch i386
+Mac-x86_CC        := gcc
 Mac-x86_STRIP     := strip -x
-Mac-x86_CFLAGS    := -I$(JAVA_HOME)/include -O2 -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
+Mac-x86_CCFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
 Mac-x86_LINKFLAGS := -dynamiclib
 Mac-x86_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
@@ -124,9 +124,9 @@ Mac-x86_64_CC        := gcc -arch $(OS_ARCH)
 Mac-x86_64_STRIP     := strip -x
 MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
 ifeq ($(wildcard MAC_SDK),)
-	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk
+	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk
 endif
-Mac-x86_64_CFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -O2 -fPIC -mmacosx-version-min=10.5 -fvisibility=hidden
+Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.5 -fvisibility=hidden
 Mac-x86_64_LINKFLAGS := -dynamiclib 
 Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
