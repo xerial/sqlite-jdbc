@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armhf Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -85,12 +85,26 @@ Linux-arm_LINKFLAGS   := -shared -static-libgcc
 Linux-arm_LIBNAME     := libsqlitejdbc.so
 Linux-arm_SQLITE_FLAGS  :=
 
-Linux-armhf_CC        := $(CROSS_PREFIX)gcc
-Linux-armhf_STRIP     := $(CROSS_PREFIX)strip
-Linux-armhf_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
-Linux-armhf_LINKFLAGS := -shared -static-libgcc
-Linux-armhf_LIBNAME   := libsqlitejdbc.so
-Linux-armhf_SQLITE_FLAGS  := 
+Linux-armv6_CC        := $(CROSS_PREFIX)gcc
+Linux-armv6_STRIP     := $(CROSS_PREFIX)strip
+Linux-armv6_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-armv6_LINKFLAGS := -shared -static-libgcc
+Linux-armv6_LIBNAME   := libsqlitejdbc.so
+Linux-armv6_SQLITE_FLAGS  :=
+
+Linux-armv7_CC        := $(CROSS_PREFIX)gcc
+Linux-armv7_STRIP     := $(CROSS_PREFIX)strip
+Linux-armv7_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-armv7_LINKFLAGS := -shared -static-libgcc
+Linux-armv7_LIBNAME   := libsqlitejdbc.so
+Linux-armv7_SQLITE_FLAGS  :=
+
+Linux-android-arm_CC        := $(CROSS_PREFIX)gcc
+Linux-android-arm_STRIP     := $(CROSS_PREFIX)strip
+Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -O2 -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
+Linux-android-arm_LINKFLAGS := -shared -static-libgcc
+Linux-android-arm_LIBNAME   := libsqlitejdbc.so
+Linux-android-arm_SQLITE_FLAGS  :=
 
 FreeBSD-x86_64_CC        := $(CROSS_PREFIX)cc
 FreeBSD-x86_64_STRIP     := $(CROSS_PREFIX)strip
