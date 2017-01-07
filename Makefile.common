@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -105,6 +105,13 @@ Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm
 Linux-android-arm_LINKFLAGS := -shared -static-libgcc
 Linux-android-arm_LIBNAME   := libsqlitejdbc.so
 Linux-android-arm_SQLITE_FLAGS  :=
+
+Linux-ppc64_CC        := $(CROSS_PREFIX)gcc
+Linux-ppc64_STRIP     := $(CROSS_PREFIX)strip
+Linux-ppc64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -fvisibility=hidden
+Linux-ppc64_LINKFLAGS := -shared -static-libgcc
+Linux-ppc64_LIBNAME   := libsqlitejdbc.so
+Linux-ppc64_SQLITE_FLAGS  :=
 
 FreeBSD-x86_64_CC        := $(CROSS_PREFIX)cc
 FreeBSD-x86_64_STRIP     := $(CROSS_PREFIX)strip
