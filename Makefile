@@ -3,7 +3,7 @@ include Makefile.common
 
 RESOURCE_DIR = src/main/resources
 
-.phony: all package win32 win64 mac64 mac32 linux32 linux64 linux-arm linux-armhf native native-all deploy
+.phony: all package native native-all deploy
 
 all: jni-header package
 
@@ -91,7 +91,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv6 linux-armv7 linux-android-arm
+native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv6 linux-armv7 linux-android-arm linux-ppc64
 
 native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
 
@@ -129,6 +129,9 @@ linux-armv7: $(SQLITE_UNPACKED) jni-header
 
 linux-android-arm: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-android-arm -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/arm-linux-androideabi/bin/arm-linux-androideabi- OS_NAME=Linux OS_ARCH=android-arm'
+
+linux-ppc64: $(SQLITE_UNPACKED) jni-header
+	./docker/dockcross-ppc64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=powerpc64le-linux-gnu- OS_NAME=Linux OS_ARCH=ppc64'
 
 mac64: $(SQLITE_UNPACKED) jni-header
 	docker run -it $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=x86_64-apple-darwin multiarch/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=x86_64
