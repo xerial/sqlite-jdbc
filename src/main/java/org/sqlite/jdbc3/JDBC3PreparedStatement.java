@@ -77,7 +77,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             resultsWaiting = db.execute(this, batch);
             success = true;
         } finally {
-            if (!success) db.reset(pointer);
+            if (!success && pointer != 0) db.reset(pointer);
         }
         return getResultSet();
     }
