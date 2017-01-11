@@ -147,7 +147,7 @@ News
 ====
 *   2017-01-10: sqlite-jdbc-3.16.1
     * Upgrade to SQLite [3.16.1](https://sqlite.org/releaselog/3_16_1.html)
-    * Add experimental support for armv5, v6 (Raspberry PI), v7 and android-arm.
+    * Add experimental support for ppc64, armv5, v6 (Raspberry PI), v7 and android-arm.
     * Fix a bug in prepared statements #74
     * Building all native libraries using cross compilers in docker images
 *   2016-11-04: sqlite-jdbc-3.15.1
@@ -290,9 +290,9 @@ Supported Operating Systems
 Since sqlite-jdbc-3.6.19, the natively compiled SQLite engines will be used for
 the following operating systems:
 
-*   Windows XP, Vista (Windows, x86 architecture, x86_64)
-*   Mac OS X 10.4 (Tiger), 10.5(Leopard), 10.6 SnowLeopard (for i386, x86_64, Intel CPU machines)
-*   Linux i386 (Intel), amd64 (64-bit X86 Intel processor)
+*   Windows (Windows, x86 architecture, x86_64)
+*   Mac OS X x86_64 (Support for SnowLeopard (i386) has been deprecated)
+*   Linux x86, x86_64, amd (v5, v6, v7 and for android), ppc64
 
 In the other OSs not listed above, the pure-java SQLite is used. (Applies to versions before 3.7.15)
 
