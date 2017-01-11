@@ -145,6 +145,11 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2017-01-10: sqlite-jdbc-3.16.1
+    * Upgrade to SQLite [3.16.1](https://sqlite.org/releaselog/3_16_1.html)
+    * Add experimental support for armv5, v6 (Raspberry PI), v7 and android-arm.
+    * Fix a bug in prepared statements #74
+    * Building all native libraries using cross compilers in docker images
 *   2016-11-04: sqlite-jdbc-3.15.1
     * Upgrade to SQLite [3.15.1](https://sqlite.org/releaselog/3_15_1.html)
 *   2016-11-04: sqlite-jdbc-3.15.0
