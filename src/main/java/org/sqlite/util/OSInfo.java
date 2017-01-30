@@ -157,6 +157,10 @@ public class OSInfo
                 // Generic
                 return "armv7";
             }
+            else if (armType.startsWith("armv5")) {
+                // Use armv5, soft-float ABI
+                return "arm";
+            }
 
             // Java 1.8 introduces a system property to determine armel or armhf
             // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=8005545
