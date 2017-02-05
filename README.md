@@ -292,7 +292,7 @@ the following operating systems:
 
 *   Windows (Windows, x86 architecture, x86_64)
 *   Mac OS X x86_64 (Support for SnowLeopard (i386) has been deprecated)
-*   Linux x86, x86_64, amd (v5, v6, v7 and for android), ppc64
+*   Linux x86, x86_64, arm (v5, v6, v7 and for android), ppc64
 
 In the other OSs not listed above, the pure-java SQLite is used. (Applies to versions before 3.7.15)
 
