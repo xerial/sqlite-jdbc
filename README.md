@@ -1,4 +1,4 @@
-SQLite JDBC Driver [![Build Status](https://travis-ci.org/xerial/sqlite-jdbc.svg?branch=master)](https://travis-ci.org/xerial/sqlite-jdbc)
+SQLite JDBC Driver [![Build Status](https://travis-ci.org/xerial/sqlite-jdbc.svg?branch=master)](https://travis-ci.org/xerial/sqlite-jdbc) [![Reference Status](https://www.versioneye.com/java/org.xerial:sqlite-jdbc/reference_badge.svg?style=flat-square)](https://www.versioneye.com/java/org.xerial:sqlite-jdbc/references)
 ==================
 SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
