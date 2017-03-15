@@ -847,6 +847,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         case SQLITE_NULL:
             return "NULL";
         case SQLITE_TEXT:
+        	return "TEXT";
         default:
             return "NULL";
         }
