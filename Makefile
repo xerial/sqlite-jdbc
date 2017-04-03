@@ -16,8 +16,8 @@ SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
 SQLITE_SOURCE?=$(TARGET)/$(SQLITE_AMAL_PREFIX)
-ifneq($(SQLITE_SOURCE),$(TARGET)/$(SQLITE_AMAL_PREFIX))
-	created = $(shell touch $(SQLITE_UNPACKED))
+ifneq ($(SQLITE_SOURCE),$(TARGET)/$(SQLITE_AMAL_PREFIX))
+	created := $(shell touch $(SQLITE_UNPACKED))
 endif
 
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_SOURCE) $(CCFLAGS)
