@@ -1213,7 +1213,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                             colJavaType = Types.VARCHAR;
                         }
 
-                        sql.append("select ").append(i).append(" as ordpos, ")
+                        sql.append("select ").append(i + 1).append(" as ordpos, ")
                            .append(colNullable).append(" as colnullable,")
                            .append("'").append(colJavaType).append("' as ct, ")
                            .append("'").append(tableName).append("' as tblname, ")
