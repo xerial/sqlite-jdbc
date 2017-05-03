@@ -8,11 +8,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.junit.Assert.assertEquals;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class BusyHandlerTest {
@@ -83,7 +80,7 @@ public class BusyHandlerTest {
         BusyHandler.setHandler(conn, new BusyHandler() {
             @Override
             protected int callback(int nbPrevInvok) throws SQLException {
-                assertTrue(calls[0] == nbPrevInvok);
+                assertEquals(nbPrevInvok, calls[0]);
                 calls[0]++;
 
                 if (nbPrevInvok <= 1) {
@@ -104,12 +101,12 @@ public class BusyHandlerTest {
             try{
                 workWork();
             } catch(SQLException ex) {
-                assertTrue(ex.getErrorCode() == SQLiteErrorCode.SQLITE_BUSY.code);
+                assertEquals(SQLiteErrorCode.SQLITE_BUSY.code, ex.getErrorCode());
             }
         }
 
         busyWork.interrupt();
-        assertTrue(calls[0] == 3);
+        assertEquals(3, calls[0]);
     }
 
     @Test
@@ -118,7 +115,7 @@ public class BusyHandlerTest {
         BusyHandler.setHandler(conn, new BusyHandler() {
             @Override
             protected int callback(int nbPrevInvok) throws SQLException {
-                assertTrue(calls[0] == nbPrevInvok);
+                assertEquals(nbPrevInvok, calls[0]);
                 calls[0]++;
 
                 if (nbPrevInvok <= 1) {
@@ -137,10 +134,10 @@ public class BusyHandlerTest {
             try{
                 workWork();
             } catch(SQLException ex) {
-                assertTrue(ex.getErrorCode() == SQLiteErrorCode.SQLITE_BUSY.code);
+                assertEquals(SQLiteErrorCode.SQLITE_BUSY.code, ex.getErrorCode());
             }
         }
-        assertTrue(calls[0] == 3);
+        assertEquals(3, calls[0]);
 
         int totalCalls = calls[0];
         BusyHandler.clearHandler(conn);
@@ -152,7 +149,7 @@ public class BusyHandlerTest {
             try{
                 workWork();
             } catch(SQLException ex) {
-                assertTrue(ex.getErrorCode() == SQLiteErrorCode.SQLITE_BUSY.code);
+                assertEquals(SQLiteErrorCode.SQLITE_BUSY.code, ex.getErrorCode());
             }
         }
 
