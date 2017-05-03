@@ -24,13 +24,13 @@ CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_SOURCE) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
-	curl -L --max-redirs 0 -f -o$@ http://www.sqlite.org/2017/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ http://www.sqlite.org/2016/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ http://www.sqlite.org/2015/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ http://www.sqlite.org/2014/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ http://www.sqlite.org/2013/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ http://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip || \
-	curl -L --max-redirs 0 -f -o$@ http://www.sqlite.org/$(SQLITE_OLD_AMAL_PREFIX).zip
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2017/$(SQLITE_AMAL_PREFIX).zip || \
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2016/$(SQLITE_AMAL_PREFIX).zip || \
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2015/$(SQLITE_AMAL_PREFIX).zip || \
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2014/$(SQLITE_AMAL_PREFIX).zip || \
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2013/$(SQLITE_AMAL_PREFIX).zip || \
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/$(SQLITE_AMAL_PREFIX).zip || \
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/$(SQLITE_OLD_AMAL_PREFIX).zip
 
 $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 	unzip -qo $< -d $(TARGET)/tmp.$(version)
