@@ -392,6 +392,8 @@ public class DBMetaDataTest
         assertEquals(rsmeta.getColumnName(22), "SOURCE_DATA_TYPE");
         assertEquals(rsmeta.getColumnName(23), "IS_AUTOINCREMENT");
         assertEquals(rsmeta.getColumnName(24), "IS_GENERATEDCOLUMN");
+        assertEquals(rs.getString("COLUMN_NAME").toUpperCase(), "ID");
+        assertEquals(rs.getInt("ORDINAL_POSITION"), 1);
     }
 
     // the following functions always return an empty resultset, so
