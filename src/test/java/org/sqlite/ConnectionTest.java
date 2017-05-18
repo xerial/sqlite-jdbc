@@ -16,7 +16,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 import org.sqlite.SQLiteConfig.JournalMode;
@@ -228,6 +235,29 @@ public class ConnectionTest
         assertTrue(testDB.exists());
         Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB));
         conn.close();
+    }
+
+    @Test
+    public void concurrentClose() throws SQLException, InterruptedException, ExecutionException {
+        final Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+        ResultSet[] rss = new ResultSet[512];
+        for (int i = 0; i < rss.length; i++)
+            rss[i] = conn.prepareStatement("select null;").executeQuery();
+        ExecutorService finalizer = Executors.newSingleThreadExecutor();
+        try {
+            ArrayList<Future<Void>> futures = new ArrayList<Future<Void>>(rss.length);
+            for (final ResultSet rs: rss)
+                futures.add(finalizer.submit(new Callable<Void>() {
+                    public Void call() throws Exception {
+                        rs.close();
+                        return null;
+                    }
+                }));
+            conn.close();
+            for (Future<Void> f: futures) f.get();
+        } finally {
+            finalizer.shutdown();
+        }
     }
 
     public static File copyToTemp(String fileName) throws IOException {

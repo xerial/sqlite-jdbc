@@ -119,16 +119,18 @@ public abstract class CoreResultSet implements Codes
         lastCol = -1;
         columnNameToIndex = null;
 
-        if (stmt == null) {
-            return;
-        }
+        synchronized (db) {
+            if (stmt == null) {
+                return;
+            }
 
-        if (stmt != null && stmt.pointer != 0) {
-            db.reset(stmt.pointer);
+            if (stmt != null && stmt.pointer != 0) {
+                db.reset(stmt.pointer);
 
-            if (closeStmt) {
-                closeStmt = false; // break recursive call
-                ((Statement)stmt).close();
+                if (closeStmt) {
+                    closeStmt = false; // break recursive call
+                    ((Statement)stmt).close();
+                }
             }
         }
     }
