@@ -369,7 +369,7 @@ JNI (Java Native Interface). You will observe `UnsatisfiedLinkError` exception w
 the message "no SQLite library found".
 
 Work-around of this problem is to put `sqlite-jdbc-(version).jar` file into `(TOMCAT_HOME)/lib`
-direcotry, in which multiple web applications can share the same native library
+directory, in which multiple web applications can share the same native library
 file (.dll, .jnilib, .so) extracted from this sqlite-jdbc jar file.
 
 If you are using Maven for your web application, set the dependency scope as 'provided',
