@@ -224,7 +224,9 @@ public class OSInfo
         else if (osName.contains("AIX")) {
             return "AIX";
         }
-
+        else if (osName.contains("QNX")) {
+            return "QNX" + System.getProperty("os.version");
+        }
         else {
             return osName.replaceAll("\\W", "");
         }
