@@ -9,3 +9,4 @@ src/main/resources/org/ibex/nestedvm/*.o
 atlassian-ide-plugin.xml
 .classpath
 .project
+.DS_Store
