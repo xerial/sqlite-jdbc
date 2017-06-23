@@ -8,17 +8,13 @@ language: java
 jdk:
   - openjdk6
   - openjdk7
-  - oraclejdk7
   - oraclejdk8
 
 script:
-  # Deploy a snapshot version only for master branch and jdk8
-  - if [ "$TRAVIS_JDK_VERSION" == "oraclejdk8" ]; then 
-      if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-        make && mvn -s settings.xml deploy -DskipTests;
-      else
-        make;
-      fi;
-    else
-      make linux64 && mvn test;
-    fi
+  - ./scripts/travis-deploy.sh
+
+before_install:
+  - wget https://archive.apache.org/dist/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.zip
+  - unzip -qq apache-maven-3.1.1-bin.zip
+  - export M2_HOME=$PWD/apache-maven-3.1.1
+  - export PATH=$M2_HOME/bin:$PATH

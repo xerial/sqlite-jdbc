@@ -145,6 +145,8 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2017-06-22: sqlite-jdbc-3.19.3
+    * Upgrade to SQLite [3.19.0](https://www.sqlite.org/releaselog/3_19_3.html)
 *   2017-05-18: sqlite-jdbc-3.18.0
     * Upgrade to SQLite [3.18.0](http://sqlite.org/releaselog/3_18_0.html)
 *   2017-01-10: sqlite-jdbc-3.16.1
@@ -349,7 +351,7 @@ fragments into your pom.xml file. With those settings, your Maven will automatic
         <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
-          <version>3.15.1</version>
+          <version>(version)</version>
         </dependency>
     </dependencies>
 
@@ -378,6 +380,6 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
     <dependency>
         <groupId>org.xerial</groupId>
         <artifactId>sqlite-jdbc</artifactId>
-        <version>3.15.1</version>
+        <version>(version)</version>
         <scope>provided</scope>
     </dependency>
