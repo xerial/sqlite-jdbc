@@ -85,7 +85,7 @@ public class SQLiteJDBCLoader {
         });
         if(nativeLibFiles != null) {
             for(File nativeLibFile : nativeLibFiles) {
-                File lckFile = new File(nativeLibFile.getName() + ".lck");
+                File lckFile = new File(nativeLibFile.getAbsolutePath() + ".lck");
                 if(!lckFile.exists()) {
                     try {
                         nativeLibFile.delete();
@@ -201,6 +201,9 @@ public class SQLiteJDBCLoader {
             // Extract a native library file into the target directory
             InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath);
             FileOutputStream writer = new FileOutputStream(extractedLibFile);
+            if(!extractedLckFile.exists()) {
+                new FileOutputStream(extractedLckFile).close();
+            }
             try {
                 byte[] buffer = new byte[8192];
                 int bytesRead = 0;
@@ -209,9 +212,6 @@ public class SQLiteJDBCLoader {
                 }
             }
             finally {
-                if(!extractedLckFile.exists()) {
-                    new FileOutputStream(extractedLckFile).close();
-                }
                 // Delete the extracted lib file on JVM exit.
                 extractedLibFile.deleteOnExit();
                 extractedLckFile.deleteOnExit();
