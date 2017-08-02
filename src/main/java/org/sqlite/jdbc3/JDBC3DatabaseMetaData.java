@@ -1880,7 +1880,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 stat = conn.createStatement();
                 // read create SQL script for table
                 rs = stat.executeQuery("select sql from sqlite_master where" +
-                    " lower(name) = lower('" + escape(table) + "') and type = 'table'");
+                    " lower(name) = lower('" + escape(table) + "') and type in ('table', 'view')");
 
                 if (!rs.next())
                     throw new SQLException("Table not found: '" + table + "'");
