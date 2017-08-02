@@ -148,7 +148,7 @@ public class OSInfo
 
         if(System.getProperty("os.name").contains("Linux")) {
             String armType = getHardwareName();
-            // armType (uname -m) can be armv5t, armv5te, armv5tej, armv5tejl, armv6, armv7, armv7l, i686
+            // armType (uname -m) can be armv5t, armv5te, armv5tej, armv5tejl, armv6, armv7, armv7l, aarch64, i686
             if(armType.startsWith("armv6")) {
                 // Raspberry PI
                 return "armv6";
@@ -160,6 +160,10 @@ public class OSInfo
             else if (armType.startsWith("armv5")) {
                 // Use armv5, soft-float ABI
                 return "arm";
+            }
+            else if (armType.equals("aarch64")) {
+                // Use arm64
+                return "arm64";
             }
 
             // Java 1.8 introduces a system property to determine armel or armhf
