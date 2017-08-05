@@ -2,6 +2,7 @@ package org.sqlite;
 
 import static org.junit.Assert.*;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
@@ -384,6 +385,30 @@ public class StatementTest
         stat.executeUpdate("CREATE TABLE Foo (KeyId INTEGER, Stuff BLOB)");
     }
 
+    @Test
+    public void bytesTest() throws SQLException, UnsupportedEncodingException {
+        stat.executeUpdate("CREATE TABLE blobs (Blob BLOB)");
+        PreparedStatement prep = conn.prepareStatement("insert into blobs values(?)");
+        
+        String str = "This is a test";
+        byte[] strBytes = str.getBytes("UTF-8");
+        
+        prep.setBytes(1, strBytes);
+        prep.executeUpdate();
+        
+        ResultSet rs = stat.executeQuery("select * from blobs");
+        assertTrue(rs.next());
+
+        byte[] resultBytes = rs.getBytes(1);
+        assertArrayEquals(strBytes, resultBytes);
+        
+        String resultStr = rs.getString(1);
+        assertEquals(str, resultStr);
+
+        byte[] resultBytesAfterConversionToString = rs.getBytes(1);
+        assertArrayEquals(strBytes, resultBytesAfterConversionToString);
+    }
+    
     @Test
     public void dateTimeTest() throws SQLException {
         Date day = new Date(new java.util.Date().getTime());

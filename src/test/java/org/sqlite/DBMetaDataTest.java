@@ -117,6 +117,7 @@ public class DBMetaDataTest
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
         assertEquals(rs.getString("COLUMN_DEF"), null);
         assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "fn");
@@ -125,6 +126,7 @@ public class DBMetaDataTest
         assertEquals(rs.getInt("DATA_TYPE"), Types.FLOAT);
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
         assertEquals(rs.getString("COLUMN_DEF"), "0.0");
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "sn");
@@ -194,7 +196,7 @@ public class DBMetaDataTest
 
         rs = meta.getColumns(null, null, "doesnotexist", "%");
         assertFalse(rs.next());
-        assertEquals(22, rs.getMetaData().getColumnCount());
+        assertEquals(24, rs.getMetaData().getColumnCount());
     }
 
     @Test
@@ -364,7 +366,7 @@ public class DBMetaDataTest
         ResultSet rs = meta.getColumns(null, null, "test", null);
         assertTrue(rs.next());
         ResultSetMetaData rsmeta = rs.getMetaData();
-        assertEquals(rsmeta.getColumnCount(), 22);
+        assertEquals(rsmeta.getColumnCount(), 24);
         assertEquals(rsmeta.getColumnName(1), "TABLE_CAT");
         assertEquals(rsmeta.getColumnName(2), "TABLE_SCHEM");
         assertEquals(rsmeta.getColumnName(3), "TABLE_NAME");
@@ -388,6 +390,10 @@ public class DBMetaDataTest
         assertEquals(rsmeta.getColumnName(20), "SCOPE_SCHEMA");
         assertEquals(rsmeta.getColumnName(21), "SCOPE_TABLE");
         assertEquals(rsmeta.getColumnName(22), "SOURCE_DATA_TYPE");
+        assertEquals(rsmeta.getColumnName(23), "IS_AUTOINCREMENT");
+        assertEquals(rsmeta.getColumnName(24), "IS_GENERATEDCOLUMN");
+        assertEquals(rs.getString("COLUMN_NAME").toUpperCase(), "ID");
+        assertEquals(rs.getInt("ORDINAL_POSITION"), 1);
     }
 
     // the following functions always return an empty resultset, so
@@ -508,6 +514,17 @@ public class DBMetaDataTest
         assertEquals(rsmeta.getColumnName(6), "BUFFER_LENGTH");
         assertEquals(rsmeta.getColumnName(7), "DECIMAL_DIGITS");
         assertEquals(rsmeta.getColumnName(8), "PSEUDO_COLUMN");
+    }
+
+    @Test
+    public void viewIngetPrimaryKeys() throws SQLException {
+        ResultSet rs;
+
+        stat.executeUpdate("create table t1 (c1, c2, c3);");
+        stat.executeUpdate("create view view_nopk (v1, v2) as select c1, c3 from t1;");
+
+        rs = meta.getPrimaryKeys(null, null, "view_nopk");
+        assertFalse(rs.next());
     }
 
     @Test
@@ -679,6 +696,19 @@ public class DBMetaDataTest
     public void getIndexInfoIndexedSingle() throws SQLException {
         stat.executeUpdate("create table testindex (id integer primary key, fn float default 0.0, sn not null);");
         stat.executeUpdate("create index testindex_idx on testindex (sn);");
+
+        ResultSet rs = meta.getIndexInfo(null,null,"testindex",false,false);
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        assertNotNull(rs);
+        assertNotNull(rsmd);
+    }
+
+
+    @Test
+    public void getIndexInfoIndexedSingleExpr() throws SQLException {
+        stat.executeUpdate("create table testindex (id integer primary key, fn float default 0.0, sn not null);");
+        stat.executeUpdate("create index testindex_idx on testindex (sn, fn/2);");
 
         ResultSet rs = meta.getIndexInfo(null,null,"testindex",false,false);
         ResultSetMetaData rsmd = rs.getMetaData();

@@ -448,6 +448,21 @@ public class PrepStmtTest
     }
 
     @Test
+    public void batchZeroParams() throws Exception {
+        stat.executeUpdate("create table test (c1);");
+        PreparedStatement prep = conn.prepareStatement("insert into test values (5);");
+        for (int i = 0; i < 10; i++) {
+            prep.addBatch();
+        }
+        assertArrayEq(new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, prep.executeBatch());
+        prep.close();
+        ResultSet rs = stat.executeQuery("select count(*) from test;");
+        assertTrue(rs.next());
+        assertEquals(rs.getInt(1), 10);
+        rs.close();
+    }
+
+    @Test
     public void paramMetaData() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ?,?,?,?;");
         assertEquals(prep.getParameterMetaData().getParameterCount(), 4);
@@ -609,6 +624,36 @@ public class PrepStmtTest
         ResultSet rs = conn.prepareStatement("select 1;").executeQuery();
         assertTrue(rs.next());
         rs.getInt("noSuchColName");
+    }
+
+    @Test
+    public void constraintErrorCodeExecute() throws SQLException {
+        assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
+        assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
+        // try to insert a row with duplicate id
+        try {
+            PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
+            statement.setInt(1, 1);
+            statement.execute();
+            fail("expected exception");
+        } catch (SQLException e) {
+            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
+        }
+    }
+
+    @Test
+    public void constraintErrorCodeExecuteUpdate() throws SQLException {
+        assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
+        assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
+        // try to insert a row with duplicate id
+        try {
+            PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
+            statement.setInt(1, 1);
+            statement.executeUpdate();
+            fail("expected exception");
+        } catch (SQLException e) {
+            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
+        }
     }
 
     private void assertArrayEq(byte[] a, byte[] b) {

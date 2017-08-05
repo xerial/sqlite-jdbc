@@ -883,7 +883,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#supportsSavepoints()
      */
     public boolean supportsSavepoints() {
-        return false;
+        return true;
     }
 
     /**
@@ -1083,6 +1083,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     protected static final Pattern TYPE_INTEGER = Pattern.compile(".*(INT|BOOL).*");
     protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
     protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
+    protected static final Pattern TYPE_AUTO_INCREMENT = Pattern.compile(".*(AUTO_INCREMENT).*");
 
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
@@ -1096,12 +1097,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         // and return the columname and type from:
         //    "PRAGMA table_info(tablename)"
         // which returns data like this:
-        //        sqlite> PRAGMA lastyear.table_info(gross_sales); 
-        //        cid|name|type|notnull|dflt_value|pk 
-        //        0|year|INTEGER|0|'2006'|0 
-        //        1|month|TEXT|0||0 
-        //        2|monthlygross|REAL|0||0 
-        //        3|sortcol|INTEGER|0||0 
+        //        sqlite> PRAGMA lastyear.table_info(gross_sales);
+        //        cid|name|type|notnull|dflt_value|pk
+        //        0|year|INTEGER|0|'2006'|0
+        //        1|month|TEXT|0||0
+        //        2|monthlygross|REAL|0||0
+        //        3|sortcol|INTEGER|0||0
         //        sqlite>
 
         // and then make the cursor have these columns
@@ -1147,7 +1148,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
            .append("0    as SQL_DATA_TYPE, 0    as SQL_DATETIME_SUB, 2000000000 as CHAR_OCTET_LENGTH, ")
            .append("ordpos as ORDINAL_POSITION, (case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)")
            .append("    as IS_NULLABLE, null as SCOPE_CATLOG, null as SCOPE_SCHEMA, ")
-           .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE from (");
+           .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE, ")
+           .append("(case colautoincrement when 0 then 'NO' when 1 then 'YES' else '' end) as IS_AUTOINCREMENT, ")
+           .append("'' as IS_GENERATEDCOLUMN from (");
 
         boolean colFound = false;
 
@@ -1188,6 +1191,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                          * plus some degree of artistic-license applied
                          */
                         colType = colType == null ? "TEXT" : colType.toUpperCase();
+
+                        int colAutoIncrement = 0;
+                        if(TYPE_AUTO_INCREMENT.matcher(colType).find())
+                        {
+                            colAutoIncrement = 1;
+                        }
                         int colJavaType = -1;
                         // rule #1 + boolean
                         if (TYPE_INTEGER.matcher(colType).find()) {
@@ -1204,13 +1213,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                             colJavaType = Types.VARCHAR;
                         }
 
-                        sql.append("select ").append(i).append(" as ordpos, ")
+                        sql.append("select ").append(i + 1).append(" as ordpos, ")
                            .append(colNullable).append(" as colnullable,")
                            .append("'").append(colJavaType).append("' as ct, ")
                            .append("'").append(tableName).append("' as tblname, ")
                            .append("'").append(escape(colName)).append("' as cn, ")
                            .append("'").append(escape(colType)).append("' as tn, ")
-                           .append(quote(colDefault == null ? null : escape(colDefault))).append(" as colDefault");
+                           .append(quote(colDefault == null ? null : escape(colDefault))).append(" as colDefault,")
+                           .append(colAutoIncrement).append(" as colautoincrement");
 
                         if (colNamePattern != null) {
                             sql.append(" where upper(cn) like upper('").append(escape(colNamePattern)).append("')");
@@ -1243,7 +1253,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
         }
         else {
-            sql.append("select null as ordpos, null as colnullable, null as ct, null as tblname, null as cn, null as tn, null as colDefault) limit 0;");
+            sql.append("select null as ordpos, null as colnullable, null as ct, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement) limit 0;");
         }
 
         Statement stat = conn.createStatement();
@@ -1369,7 +1379,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
 
             rs.close();
-    
+
             ResultSet fk = null;
             String target = table.toLowerCase();
             // find imported keys for each table
@@ -1377,7 +1387,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 try {
                     fk = stat.executeQuery("pragma foreign_key_list('" + escape(tbl) + "')");
                 } catch (SQLException e) {
-                    if (e.getErrorCode() == Codes.SQLITE_DONE) 
+                    if (e.getErrorCode() == Codes.SQLITE_DONE)
                         continue; // expected if table has no foreign keys
 
                     throw e;
@@ -1468,6 +1478,13 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         return ((CoreStatement)stat).executeQuery(sql.toString(), true);
     }
 
+    private StringBuilder appendDummyForeignKeyList(StringBuilder sql) {
+      sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
+      .append(DatabaseMetaData.importedKeyNoAction).append(" as ur, ")
+      .append(DatabaseMetaData.importedKeyNoAction).append(" as dr) limit 0;");
+      return sql;
+    }
+
     /**
      * @see java.sql.DatabaseMetaData#getImportedKeys(java.lang.String, java.lang.String,
      *      java.lang.String)
@@ -1482,7 +1499,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
             .append(quote(catalog)).append(" as FKTABLE_CAT, ")
             .append(quote(schema)).append(" as FKTABLE_SCHEM, ")
-            .append(quote(table)).append(" as FKTABLE_NAME, ") 
+            .append(quote(table)).append(" as FKTABLE_NAME, ")
             .append("fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, ")
             .append(Integer.toString(DatabaseMetaData.importedKeyInitiallyDeferred)).append(" as DEFERRABILITY from (");
 
@@ -1491,14 +1508,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             rs = stat.executeQuery("pragma foreign_key_list('" + escape(table) + "');");
         }
         catch (SQLException e) {
-            sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
-                .append(DatabaseMetaData.importedKeyNoAction).append(" as ur, ")
-                .append(DatabaseMetaData.importedKeyNoAction).append(" as dr) limit 0;");
-
+            sql = appendDummyForeignKeyList(sql);
             return ((CoreStatement)stat).executeQuery(sql.toString(), true);
         }
 
-        for (int i = 0; rs.next(); i++) {
+        int i = 0;
+        for (; rs.next(); i++) {
             int keySeq = rs.getInt(2) + 1;
             String PKTabName = rs.getString(3);
             String FKColName = rs.getString(4);
@@ -1533,6 +1548,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 .append(" when 'SET DEFAULT' then ").append(DatabaseMetaData.importedKeySetDefault).append(" end as dr");
         }
         rs.close();
+
+        if(i == 0) {
+          sql = appendDummyForeignKeyList(sql);
+        }
 
         return ((CoreStatement)stat).executeQuery(sql.append(");").toString(), true);
     }
@@ -1585,10 +1604,17 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                     StringBuilder sqlRow = new StringBuilder();
 
+                    String colName = rs.getString(3);
                     sqlRow.append("select ").append(Integer.toString(1 - (Integer) currentIndex.get(1))).append(" as un,'")
                             .append(escape(indexName)).append("' as n,")
-                            .append(Integer.toString(rs.getInt(1) + 1)).append(" as op,'")
-                            .append(escape(rs.getString(3))).append("' as cn");
+                            .append(Integer.toString(rs.getInt(1) + 1)).append(" as op,");
+                    if (colName == null) { // expression index
+                      sqlRow.append("null");
+                    }
+                    else {
+                      sqlRow.append("'").append(escape(colName)).append("'");
+                    }
+                    sqlRow.append(" as cn");
 
                     unionAll.add(sqlRow.toString());
                 }
@@ -1607,7 +1633,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      *      java.lang.String, java.lang.String)
      */
     public ResultSet getProcedureColumns(String c, String s, String p, String colPat) throws SQLException {
-        if (getProcedures == null) {
+        if (getProcedureColumns == null) {
             getProcedureColumns = conn.prepareStatement("select null as PROCEDURE_CAT, " +
                     "null as PROCEDURE_SCHEM, null as PROCEDURE_NAME, null as COLUMN_NAME, " +
                     "null as COLUMN_TYPE, null as DATA_TYPE, null as TYPE_NAME, null as PRECISION, " +
@@ -1854,7 +1880,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 stat = conn.createStatement();
                 // read create SQL script for table
                 rs = stat.executeQuery("select sql from sqlite_master where" +
-                    " lower(name) = lower('" + escape(table) + "') and type = 'table'");
+                    " lower(name) = lower('" + escape(table) + "') and type in ('table', 'view')");
 
                 if (!rs.next())
                     throw new SQLException("Table not found: '" + table + "'");

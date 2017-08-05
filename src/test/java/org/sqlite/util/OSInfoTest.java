@@ -9,16 +9,17 @@
 //--------------------------------------
 package org.sqlite.util;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.logging.Logger;
 
-import org.junit.Test;
-import org.sqlite.util.OSInfo;
+import static org.junit.Assert.assertEquals;
 
-public class OSInfoTest
-{
+public class OSInfoTest {
+    private static Logger logger = Logger.getLogger(OSInfoTest.class.getName());
+
     @Test
     public void osName() {
         assertEquals("Windows", OSInfo.translateOSNameToFolderName("Windows XP"));
@@ -64,7 +65,7 @@ public class OSInfoTest
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             PrintStream tmpOut = new PrintStream(buf);
             System.setOut(tmpOut);
-            OSInfo.main(new String[] { "--os" });
+            OSInfo.main(new String[]{"--os"});
             assertEquals(OSInfo.getOSName(), buf.toString());
         }
         finally {
@@ -84,13 +85,19 @@ public class OSInfoTest
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             PrintStream tmpOut = new PrintStream(buf);
             System.setOut(tmpOut);
-            OSInfo.main(new String[] { "--arch" });
+            OSInfo.main(new String[]{"--arch"});
             assertEquals(OSInfo.getArchName(), buf.toString());
         }
         finally {
             // reset STDOUT
             System.setOut(out);
         }
+    }
+
+    @Test
+    public void testGetHardwareName() throws Exception {
+        String hardware = OSInfo.getHardwareName();
+        logger.info("Hardware name: " + hardware);
     }
 
 }

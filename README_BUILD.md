@@ -59,6 +59,12 @@ Here is the excerpt from <http://mingw-w64.sourceforge.net/>
 * Then, do 
         $ make native
 
+How to build arm binary for Rapsberry Pi
+==============================
+* Install docker 
+* Run
+      $ make linux-arm
+      $ make linux-armhf
 
 How to build pure-java library
 ==============================
@@ -82,7 +88,6 @@ archive I downloaded:
 (for deployer only) How to build pure-java and native libraries
 ===============================================================
         make -fMakefile.package 
-
 
 How to deploy to the maven repository
 =====================================

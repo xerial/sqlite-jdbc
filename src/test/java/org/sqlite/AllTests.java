@@ -10,6 +10,7 @@ import org.sqlite.util.OSInfoTest;
     ConnectionTest.class,
     DateTimeTest.class,
     DBMetaDataTest.class,
+    ErrorMessageTest.class,
     ExtendedCommandTest.class,
     ExtensionTest.class,
     FetchSizeTest.class,
@@ -26,7 +27,11 @@ import org.sqlite.util.OSInfoTest;
     SQLiteJDBCLoaderTest.class,
     StatementTest.class,
     TransactionTest.class,
-    UDFTest.class
+    UDFTest.class,
+    JSON1Test.class,
+    ProgressHandlerTest.class,
+    BusyHandlerTest.class
+    
 })
 public class AllTests {
 // runs all Tests

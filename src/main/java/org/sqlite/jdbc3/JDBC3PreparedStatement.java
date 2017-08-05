@@ -54,7 +54,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             success = true;
             return columnCount != 0;
         } finally {
-            if (!success) db.reset(pointer);
+            if (!success && pointer != 0) db.reset(pointer);
         }
     }
 
@@ -77,7 +77,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             resultsWaiting = db.execute(this, batch);
             success = true;
         } finally {
-            if (!success) db.reset(pointer);
+            if (!success && pointer != 0) db.reset(pointer);
         }
         return getResultSet();
     }
@@ -105,6 +105,10 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void addBatch() throws SQLException {
         checkOpen();
         batchPos += paramCount;
+        batchQueryCount++;
+        if (batch == null) {
+            batch = new Object[paramCount];
+        }
         if (batchPos + paramCount > batch.length) {
             Object[] nb = new Object[batch.length * 2];
             System.arraycopy(batch, 0, nb, 0, batch.length);

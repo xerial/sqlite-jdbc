@@ -672,7 +672,11 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
             if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
                 return Types.DATE;
             }
-    
+
+            if ("TIMESTAMP".equals(typeName)) {
+                return Types.TIMESTAMP;
+            }
+
             if (valueType == SQLITE_INTEGER ||
                 "INT".equals(typeName) ||
                 "INTEGER".equals(typeName) ||
@@ -706,7 +710,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
         if (valueType == SQLITE_TEXT || valueType == SQLITE_NULL) {
             if ("CHARACTER".equals(typeName) || "NCHAR".equals(typeName) ||
-                "NATIVE CHARACTER".equals(typeName)) {
+                "NATIVE CHARACTER".equals(typeName) || "CHAR".equals(typeName)) {
                 return Types.CHAR;
             }
 
@@ -766,6 +770,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         case SQLITE_NULL:
             return "NULL";
         case SQLITE_TEXT:
+        	return "TEXT";
         default:
             return "NULL";
         }
@@ -828,7 +833,13 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSetMetaData#getTableName(int)
      */
     public String getTableName(int col) throws SQLException {
-        return db.column_table_name(stmt.pointer, checkCol(col));
+        final String tableName = db.column_table_name(stmt.pointer, checkCol(col));
+		if(tableName == null)
+		{
+			//JDBC specifies an empty string instead of null
+			return "";
+		}
+		return tableName;
     }
 
     /**
@@ -886,7 +897,11 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSetMetaData#isSigned(int)
      */
     public boolean isSigned(int col) throws SQLException {
-        return false;
+        String typeName = getColumnTypeName(col);
+        
+        return "NUMERIC".equals(typeName) ||
+                "INTEGER".equals(typeName) ||
+                "REAL".equals(typeName);
     }
 
     /**

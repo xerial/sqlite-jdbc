@@ -1,10 +1,8 @@
 include VERSION
 
 ifndef JAVA_HOME
-$(error Set JAVA_HOME environment variable)
+$(warning Set JAVA_HOME environment variable)
 endif
-
-libjdbc  := $(wildcard lib/jdbc-*.jar)
 
 JAVA  := "$$JAVA_HOME/bin/java"
 JAVAC := "$$JAVA_HOME/bin/javac" 
@@ -19,11 +17,14 @@ OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
 #$(shell mkdir -p lib)
 #$(shell $(JAVAC) src/main/java/org/sqlite/util/OSInfo.java -d lib)
 
+ifndef OS_NAME
 OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
+endif
+ifndef OS_ARCH
 OS_ARCH := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --arch)
-LIB_FOLDER := $(shell $(JAVA) -cp lib $(OSINFO_CLASS))
+endif
 
-# Windows uses different path separators, because they hate me
+# Windows uses different path separators
 ifeq ($(OS_NAME),Windows)
 	sep := ;
 else
@@ -32,6 +33,7 @@ endif
 
 sqlite := sqlite-$(version)
 
+ifdef JAVA_HOME
 jni_h := $(shell find -L "$(JAVA_HOME)" -name jni.h)
 ifneq ($(jni_h),)
 jni_include := $(shell dirname "$(jni_h)")
@@ -41,11 +43,11 @@ jni_md := $(shell find -L "$(JAVA_HOME)" -name jni_md.h)
 ifneq ($(jni_md),)
 jni_md_include := $(shell dirname "$(jni_md)")
 endif
-
+endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armhf Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -78,17 +80,38 @@ Linux-x86_64_SQLITE_FLAGS  :=
 
 Linux-arm_CC          := $(CROSS_PREFIX)gcc
 Linux-arm_STRIP       := $(CROSS_PREFIX)strip
-Linux-arm_CCFLAGS     := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=softfp -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-arm_CCFLAGS     := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -mfloat-abi=softfp -mfpu=vfp -fvisibility=hidden
 Linux-arm_LINKFLAGS   := -shared -static-libgcc
 Linux-arm_LIBNAME     := libsqlitejdbc.so
 Linux-arm_SQLITE_FLAGS  :=
 
-Linux-armhf_CC        := $(CROSS_PREFIX)gcc
-Linux-armhf_STRIP     := $(CROSS_PREFIX)strip
-Linux-armhf_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
-Linux-armhf_LINKFLAGS := -shared -static-libgcc
-Linux-armhf_LIBNAME   := libsqlitejdbc.so
-Linux-armhf_SQLITE_FLAGS  := 
+Linux-armv6_CC        := $(CROSS_PREFIX)gcc
+Linux-armv6_STRIP     := $(CROSS_PREFIX)strip
+Linux-armv6_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-armv6_LINKFLAGS := -shared -static-libgcc
+Linux-armv6_LIBNAME   := libsqlitejdbc.so
+Linux-armv6_SQLITE_FLAGS  :=
+
+Linux-armv7_CC        := $(CROSS_PREFIX)gcc
+Linux-armv7_STRIP     := $(CROSS_PREFIX)strip
+Linux-armv7_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-armv7_LINKFLAGS := -shared -static-libgcc
+Linux-armv7_LIBNAME   := libsqlitejdbc.so
+Linux-armv7_SQLITE_FLAGS  :=
+
+Linux-android-arm_CC        := $(CROSS_PREFIX)gcc
+Linux-android-arm_STRIP     := $(CROSS_PREFIX)strip
+Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -O2 -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
+Linux-android-arm_LINKFLAGS := -shared -static-libgcc
+Linux-android-arm_LIBNAME   := libsqlitejdbc.so
+Linux-android-arm_SQLITE_FLAGS  :=
+
+Linux-ppc64_CC        := $(CROSS_PREFIX)gcc
+Linux-ppc64_STRIP     := $(CROSS_PREFIX)strip
+Linux-ppc64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -fvisibility=hidden
+Linux-ppc64_LINKFLAGS := -shared -static-libgcc
+Linux-ppc64_LIBNAME   := libsqlitejdbc.so
+Linux-ppc64_SQLITE_FLAGS  :=
 
 FreeBSD-x86_64_CC        := $(CROSS_PREFIX)cc
 FreeBSD-x86_64_STRIP     := $(CROSS_PREFIX)strip
@@ -111,9 +134,9 @@ SunOS-sparcv9_LINKFLAGS := -shared -static-libgcc
 SunOS-sparcv9_LIBNAME   := libsqlitejdbc.so
 SunOS-sparcv9_SQLITE_FLAGS  := 
 
-Mac-x86_CC        := gcc -arch i386
+Mac-x86_CC        := gcc
 Mac-x86_STRIP     := strip -x
-Mac-x86_CFLAGS    := -I$(JAVA_HOME)/include -O2 -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
+Mac-x86_CCFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
 Mac-x86_LINKFLAGS := -dynamiclib
 Mac-x86_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
@@ -122,22 +145,22 @@ Mac-x86_64_CC        := gcc -arch $(OS_ARCH)
 Mac-x86_64_STRIP     := strip -x
 MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
 ifeq ($(wildcard MAC_SDK),)
-	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk
+	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk
 endif
-Mac-x86_64_CFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -O2 -fPIC -mmacosx-version-min=10.5 -fvisibility=hidden
+Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.5 -fvisibility=hidden
 Mac-x86_64_LINKFLAGS := -dynamiclib 
 Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
 
-Windows-x86_CC           := i686-w64-mingw32-gcc
-Windows-x86_STRIP        := i686-w64-mingw32-strip
+Windows-x86_CC           := $(CROSS_PREFIX)gcc
+Windows-x86_STRIP        := $(CROSS_PREFIX)strip
 Windows-x86_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
 Windows-x86_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
 Windows-x86_LIBNAME      := sqlitejdbc.dll
 Windows-x86_SQLITE_FLAGS := 
 
-Windows-x86_64_CC           := x86_64-w64-mingw32-gcc
-Windows-x86_64_STRIP        := x86_64-w64-mingw32-strip
+Windows-x86_64_CC           := $(CROSS_PREFIX)gcc
+Windows-x86_64_STRIP        := $(CROSS_PREFIX)strip
 Windows-x86_64_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
 Windows-x86_64_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
 Windows-x86_64_LIBNAME      := sqlitejdbc.dll
@@ -160,16 +183,3 @@ ifneq ($(jni_md_include),)
 CCFLAGS := $(CCFLAGS) -I"$(jni_md_include)"
 endif
 
-ifeq ($(OS_NAME),Windows)
-    NATIVE32_DLL = win32
-else ifeq ($(OS_NAME),Linux)
-    ifeq ($(OS_ARCH),arm)
-        NATIVE32_DLL = linux-arm
-    else ifeq ($(OS_ARCH),armhf)
-        NATIVE32_DLL = linux-armhf
-    else
-        NATIVE32_DLL = linux32
-    endif
-else ifeq ($(OS_NAME),Mac)
-    NATIVE32_DLL = mac32
-endif

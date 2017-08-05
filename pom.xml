@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.9.1-SNAPSHOT</version>
+  <version>3.20.1-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -43,9 +43,6 @@
 
   <build>
     <resources>
-      <resource>
-        <directory>src/main/java</directory>
-      </resource>
       <resource>
         <directory>src/main/resources</directory>
         <includes>
@@ -188,7 +185,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

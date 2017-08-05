@@ -9,7 +9,10 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,15 +23,25 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.sqlite.date.FastDateFormat;
-
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sqlite.date.FastDateFormat;
 
 public class QueryTest
 {
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:sqlite::memory:");
+    }
+
+    @Test
+    public void nullQuery() throws Exception {
+        Connection conn = getConnection();
+        Statement stmt = conn.createStatement();
+	try {
+		stmt.execute(null);
+	} catch (NullPointerException e) {
+	}
+        stmt.close();
+        conn.close();
     }
 
     @Test
@@ -91,6 +104,49 @@ public class QueryTest
         PreparedStatement stmt = conn.prepareStatement("insert into sample values(?)");
         stmt.setDate(1, new java.sql.Date(now.getTime()));
     }
+
+    @Test
+    public void notEmptyBlob() throws Exception {
+        Connection conn = getConnection();
+
+        conn.createStatement().execute("create table sample (b blob not null)");
+
+        conn.createStatement().execute("insert into sample values(zeroblob(5))");
+
+        ResultSet rs = conn.createStatement().executeQuery("select * from sample");
+        assertTrue(rs.next());
+        assertEquals(5, rs.getBytes(1).length);
+        assertFalse(rs.wasNull());
+    }
+
+    @Test
+    public void emptyBlob() throws Exception {
+        Connection conn = getConnection();
+
+        conn.createStatement().execute("create table sample (b blob null)");
+
+        conn.createStatement().execute("insert into sample values(zeroblob(0))");
+
+        ResultSet rs = conn.createStatement().executeQuery("select * from sample");
+        assertTrue(rs.next());
+        assertEquals(0, rs.getBytes(1).length);
+        assertFalse(rs.wasNull());
+    }
+
+    @Test
+    public void nullBlob() throws Exception {
+        Connection conn = getConnection();
+
+        conn.createStatement().execute("create table sample (b blob null)");
+
+        conn.createStatement().execute("insert into sample values(null)");
+
+        ResultSet rs = conn.createStatement().executeQuery("select * from sample");
+        assertTrue(rs.next());
+        assertNull(rs.getBytes(1));
+        assertTrue(rs.wasNull());
+    }
+
 
     @Test
     public void viewTest() throws Exception {
