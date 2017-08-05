@@ -145,6 +145,10 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2017-08-04: sqlite-jdbc-3.20.0
+    * Upgrade to SQLite [3.20.0](https://www.sqlite.org/releaselog/3_20_0.html))
+    * Support Linux aarch64
+    * Fix #239
 *   2017-06-22: sqlite-jdbc-3.19.3
     * Upgrade to SQLite [3.19.0](https://www.sqlite.org/releaselog/3_19_3.html)
 *   2017-05-18: sqlite-jdbc-3.18.0
