@@ -526,6 +526,60 @@ public class DBMetaDataTest
         rs = meta.getPrimaryKeys(null, null, "view_nopk");
         assertFalse(rs.next());
     }
+    
+    @Test
+    public void moreOfgetColumns() throws SQLException {
+        ResultSet rs;
+
+        stat.executeUpdate("create table tabcols1 (col1, col2);");
+        // mixed-case table, column and primary key names
+        stat.executeUpdate("CREATE TABLE TabCols2 (Col1, Col2);");
+        // quoted table, column and primary key names
+        stat.executeUpdate("CREATE TABLE `TabCols3` (`Col1`, `Col2`);");
+        
+        rs = meta.getColumns(null, null, "tabcols1", "%");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "tabcols1");
+        assertEquals(rs.getString("COLUMN_NAME"), "col1");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertEquals(rs.getString("IS_NULLABLE"), "YES");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "tabcols1");
+        assertEquals(rs.getString("COLUMN_NAME"), "col2");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertFalse(rs.next());
+        
+        rs = meta.getColumns(null, null, "TabCols2", "%");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TabCols2");
+        assertEquals(rs.getString("COLUMN_NAME"), "Col1");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertEquals(rs.getString("IS_NULLABLE"), "YES");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TabCols2");
+        assertEquals(rs.getString("COLUMN_NAME"), "Col2");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertFalse(rs.next());
+        
+        rs = meta.getColumns(null, null, "TabCols3", "%");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TabCols3");
+        assertEquals(rs.getString("COLUMN_NAME"), "Col1");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertEquals(rs.getString("IS_NULLABLE"), "YES");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TabCols3");
+        assertEquals(rs.getString("COLUMN_NAME"), "Col2");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertFalse(rs.next());
+        
+    }
 
     @Test
     public void columnOrderOfgetPrimaryKeys() throws SQLException {
@@ -541,6 +595,8 @@ public class DBMetaDataTest
                 "\r\nCONSTraint\r\nnamed  primary\r\n\t\t key   (col3, col2  ));");
         // mixed-case table, column and primary key names
         stat.executeUpdate("CREATE TABLE Pk5 (Col1, Col2, Col3, Col4, CONSTRAINT NamedPk PRIMARY KEY (Col3, Col2));");
+        // quoted table, column and primary key names
+        stat.executeUpdate("CREATE TABLE `Pk6` (`Col1`, `Col2`, `Col3`, `Col4`, CONSTRAINT `NamedPk` PRIMARY KEY (`Col3`, `Col2`));");
         
         rs = meta.getPrimaryKeys(null, null, "nopk");
         assertFalse(rs.next());
@@ -596,10 +652,26 @@ public class DBMetaDataTest
         
         rs = meta.getPrimaryKeys(null, null, "Pk5");
         assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "Pk5");
         assertEquals(rs.getString("COLUMN_NAME"), "Col2");
         assertEquals(rs.getString("PK_NAME"), "NamedPk");
         assertEquals(rs.getInt("KEY_SEQ"), 1);
         assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "Pk5");
+        assertEquals(rs.getString("COLUMN_NAME"), "Col3");
+        assertEquals(rs.getString("PK_NAME"), "NamedPk");
+        assertEquals(rs.getInt("KEY_SEQ"), 0);
+        assertFalse(rs.next());
+        rs.close();
+        
+        rs = meta.getPrimaryKeys(null, null, "Pk6");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "Pk6");
+        assertEquals(rs.getString("COLUMN_NAME"), "Col2");
+        assertEquals(rs.getString("PK_NAME"), "NamedPk");
+        assertEquals(rs.getInt("KEY_SEQ"), 1);
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "Pk6");
         assertEquals(rs.getString("COLUMN_NAME"), "Col3");
         assertEquals(rs.getString("PK_NAME"), "NamedPk");
         assertEquals(rs.getInt("KEY_SEQ"), 0);
