@@ -539,7 +539,9 @@ public class DBMetaDataTest
         // extra spaces and mixed case are intentional, do not remove!
         stat.executeUpdate("create table pk4 (col1, col2, col3, col4, " +
                 "\r\nCONSTraint\r\nnamed  primary\r\n\t\t key   (col3, col2  ));");
-
+        // mixed-case table, column and primary key names
+        stat.executeUpdate("CREATE TABLE Pk5 (Col1, Col2, Col3, Col4, CONSTRAINT NamedPk PRIMARY KEY (Col3, Col2));");
+        
         rs = meta.getPrimaryKeys(null, null, "nopk");
         assertFalse(rs.next());
         rsmeta = rs.getMetaData();
@@ -556,6 +558,7 @@ public class DBMetaDataTest
         assertTrue(rs.next());
         assertEquals(rs.getString("PK_NAME"), null);
         assertEquals(rs.getString("COLUMN_NAME"), "col1");
+        assertEquals(rs.getInt("KEY_SEQ"), 0);
         assertFalse(rs.next());
         rs.close();
 
@@ -563,6 +566,7 @@ public class DBMetaDataTest
         assertTrue(rs.next());
         assertEquals(rs.getString("PK_NAME"), null);
         assertEquals(rs.getString("COLUMN_NAME"), "col2");
+        assertEquals(rs.getInt("KEY_SEQ"), 0);
         assertFalse(rs.next());
         rs.close();
 
@@ -586,6 +590,18 @@ public class DBMetaDataTest
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "col3");
         assertEquals(rs.getString("PK_NAME"), "named");
+        assertEquals(rs.getInt("KEY_SEQ"), 0);
+        assertFalse(rs.next());
+        rs.close();
+        
+        rs = meta.getPrimaryKeys(null, null, "Pk5");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("COLUMN_NAME"), "Col2");
+        assertEquals(rs.getString("PK_NAME"), "NamedPk");
+        assertEquals(rs.getInt("KEY_SEQ"), 1);
+        assertTrue(rs.next());
+        assertEquals(rs.getString("COLUMN_NAME"), "Col3");
+        assertEquals(rs.getString("PK_NAME"), "NamedPk");
         assertEquals(rs.getInt("KEY_SEQ"), 0);
         assertFalse(rs.next());
         rs.close();

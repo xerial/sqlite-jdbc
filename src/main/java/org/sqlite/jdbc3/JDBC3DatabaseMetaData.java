@@ -1887,7 +1887,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                 Matcher matcher = PK_NAMED_PATTERN.matcher(rs.getString(1));
                 if (matcher.find()){
-                    pkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
+                    pkName = '\'' + escape(matcher.group(1)) + '\'';
                     pkColumns = matcher.group(2).split(",");
                 }
                 else {
@@ -1907,7 +1907,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                 if (pkColumns != null)
                     for (int i = 0; i < pkColumns.length; i++) {
-                        pkColumns[i] = pkColumns[i].toLowerCase().trim();
+                        pkColumns[i] = pkColumns[i].trim();
                     }
             }
             finally {
