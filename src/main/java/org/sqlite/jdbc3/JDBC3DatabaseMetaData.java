@@ -1326,6 +1326,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         }
 
         String pkName = pkFinder.getName();
+        if (pkName != null) {
+        	pkName = "'" + pkName + "'";
+        }
 
         for (int i = 0; i < columns.length; i++) {
             if (i > 0) sql.append(" union ");
@@ -1887,7 +1890,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                 Matcher matcher = PK_NAMED_PATTERN.matcher(rs.getString(1));
                 if (matcher.find()){
-                    pkName = '\'' + escape(matcher.group(1).toLowerCase()) + '\'';
+                    pkName = escape(matcher.group(1));
+                    if (pkName.length() > 2 && pkName.startsWith("`") && pkName.endsWith("`")) {
+                    	pkName = pkName.substring(1, pkName.length() - 1);
+                    }
                     pkColumns = matcher.group(2).split(",");
                 }
                 else {
@@ -1905,10 +1911,15 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     }
                 }
 
-                if (pkColumns != null)
+                if (pkColumns != null) {
                     for (int i = 0; i < pkColumns.length; i++) {
-                        pkColumns[i] = pkColumns[i].toLowerCase().trim();
+                        pkColumns[i] = pkColumns[i].trim();
+                        if (pkColumns[i].length() > 2 && pkColumns[i].startsWith("`") && pkColumns[i].endsWith("`")) {
+                        	// unquote to be consistent with column names returned by getColumns()
+                        	pkColumns[i] = pkColumns[i].substring(1, pkColumns[i].length() - 1);
+                        }
                     }
+                }
             }
             finally {
                 try {
