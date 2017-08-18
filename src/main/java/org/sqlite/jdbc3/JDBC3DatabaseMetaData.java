@@ -43,21 +43,21 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#getDatabaseMinorVersion()
      */
     public int getDatabaseMinorVersion() {
-        return 0;
+        return 20;
     }
 
     /**
      * @see java.sql.DatabaseMetaData#getDriverMajorVersion()
      */
     public int getDriverMajorVersion() {
-        return 1;
+        return 3;
     }
 
     /**
      * @see java.sql.DatabaseMetaData#getDriverMinorVersion()
      */
     public int getDriverMinorVersion() {
-        return 1;
+        return 20;
     }
 
     /**
