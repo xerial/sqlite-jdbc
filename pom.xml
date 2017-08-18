@@ -103,7 +103,7 @@
           <goals>deploy</goals>
           <pushChanges>false</pushChanges>
           <localCheckout>true</localCheckout>
-          <connectionUrl>scm:hg:ssh://hg@bitbucket.org/xerial/sqlite-jdbc</connectionUrl>
+          <connectionUrl>cm:git:git://github.com/xerial/sqlite-jdbc.git</connectionUrl>
         </configuration>
       </plugin>
 
