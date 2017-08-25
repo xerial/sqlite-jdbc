@@ -678,9 +678,9 @@ public class SQLiteConfig
      * @param storeType One of {@link TempStore}:<ul>
      * <li> DEFAULT - the compile-time C preprocessor macro SQLITE_TEMP_STORE
      * is used to determine where temporary tables and indices are stored</li>
-     * <li>FILE - temporary tables and indices are kept in as if they were pure
+     * <li>FILE - temporary tables and indices are stored in a file.</li></ul>
+     * <li>MEMORY - temporary tables and indices are kept in as if they were pure
      * in-memory databases memory</li>
-     * <li>MEMORY - temporary tables and indices are stored in a file.</li></ul>
      * @see <a
      *      href="http://www.sqlite.org/pragma.html#pragma_temp_store">www.sqlite.org/pragma.html#pragma_temp_store</a>
      */
