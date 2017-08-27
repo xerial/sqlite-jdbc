@@ -1334,7 +1334,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             if (i > 0) sql.append(" union ");
             sql.append("select ").append(pkName).append(" as pk, '")
                .append(escape(columns[i].trim())).append("' as cn, ")
-               .append(i).append(" as ks");
+               .append(i+1).append(" as ks");
         }
 
         return ((CoreStatement)stat).executeQuery(sql.append(") order by cn;").toString(), true);
@@ -1841,14 +1841,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * Pattern used to extract column order for an unnamed primary key.
      */
     protected final static Pattern PK_UNNAMED_PATTERN =
-        Pattern.compile(".*\\sPRIMARY\\s+KEY\\s+\\((.*?,+.*?)\\).*",
+        Pattern.compile(".*PRIMARY\\s+KEY\\s*\\((.*?,+.*?)\\).*",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Pattern used to extract a named primary key.
      */
      protected final static Pattern PK_NAMED_PATTERN =
-         Pattern.compile(".*\\sCONSTRAINT\\s+(.*?)\\s+PRIMARY\\s+KEY\\s+\\((.*?)\\).*",
+         Pattern.compile(".*CONSTRAINT\\s*(.*?)\\s*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
              Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
