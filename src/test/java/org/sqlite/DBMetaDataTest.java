@@ -1,7 +1,12 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -10,10 +15,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /** These tests are designed to stress Statements on memory databases. */
@@ -821,7 +826,23 @@ public class DBMetaDataTest
 
 
     @Test
-    public void version() throws SQLException {
-        assertNotNull(meta.getDatabaseProductVersion());
+    public void version() throws Exception {
+    	File versionFile = new File("./VERSION");
+    	Properties version = new Properties();
+    	version.load(new FileReader(versionFile));
+    	String versionString = version.getProperty("version");
+    	int majorVersion = Integer.valueOf(versionString.split("\\.")[0]);
+    	int minorVersion = Integer.valueOf(versionString.split("\\.")[1]);
+    	
+    	assertEquals("driver name           ", "SQLiteJDBC", meta.getDriverName());
+    	assertEquals("driver version        ", "native", meta.getDriverVersion());
+    	assertEquals("driver major version  ", majorVersion, meta.getDriverMajorVersion());
+    	assertEquals("driver minor version  ", minorVersion, meta.getDriverMinorVersion());
+    	assertEquals("db name               ", "SQLite", meta.getDatabaseProductName());
+    	assertEquals("db version            ", versionString, meta.getDatabaseProductVersion());
+    	assertEquals("db major version      ", majorVersion, meta.getDatabaseMajorVersion());
+    	assertEquals("db minor version      ", minorVersion, meta.getDatabaseMinorVersion());
+    	assertEquals("user name             ", null, meta.getUserName());
     }
+    
 }
