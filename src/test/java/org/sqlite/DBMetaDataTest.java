@@ -1,6 +1,9 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -10,10 +13,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /** These tests are designed to stress Statements on memory databases. */
@@ -582,7 +587,7 @@ public class DBMetaDataTest
     }
 
     @Test
-    public void columnOrderOfgetPrimaryKeys() throws SQLException {
+    public void columnOrderOfgetPrimaryKeys() throws Exception {
         ResultSet rs;
         ResultSetMetaData rsmeta;
 
@@ -593,10 +598,17 @@ public class DBMetaDataTest
         // extra spaces and mixed case are intentional, do not remove!
         stat.executeUpdate("create table pk4 (col1, col2, col3, col4, " +
                 "\r\nCONSTraint\r\nnamed  primary\r\n\t\t key   (col3, col2  ));");
-        // mixed-case table, column and primary key names
+        // mixed-case table, column and primary key names - GitHub issue #219
         stat.executeUpdate("CREATE TABLE Pk5 (Col1, Col2, Col3, Col4, CONSTRAINT NamedPk PRIMARY KEY (Col3, Col2));");
-        // quoted table, column and primary key names
+        // quoted table, column and primary key names - GitHub issue #219
         stat.executeUpdate("CREATE TABLE `Pk6` (`Col1`, `Col2`, `Col3`, `Col4`, CONSTRAINT `NamedPk` PRIMARY KEY (`Col3`, `Col2`));");
+        // spaces before and after "primary key" - GitHub issue #236
+        stat.executeUpdate("CREATE TABLE pk7 (col1, col2, col3, col4 VARCHAR(10),PRIMARY KEY (col1, col2, col3));");
+        stat.executeUpdate("CREATE TABLE pk8 (col1, col2, col3, col4 VARCHAR(10), PRIMARY KEY(col1, col2, col3));");
+        stat.executeUpdate("CREATE TABLE pk9 (col1, col2, col3, col4 VARCHAR(10),PRIMARY KEY(col1, col2, col3));");
+        stat.executeUpdate("CREATE TABLE `Pk10` (`Col1`, `Col2`, `Col3`, `Col4`, CONSTRAINT `NamedPk`PRIMARY KEY (`Col3`, `Col2`));");
+        stat.executeUpdate("CREATE TABLE `Pk11` (`Col1`, `Col2`, `Col3`, `Col4`, CONSTRAINT `NamedPk` PRIMARY KEY(`Col3`, `Col2`));");
+        stat.executeUpdate("CREATE TABLE `Pk12` (`Col1`, `Col2`, `Col3`, `Col4`, CONSTRAINT`NamedPk`PRIMARY KEY(`Col3`,`Col2`));");
         
         rs = meta.getPrimaryKeys(null, null, "nopk");
         assertFalse(rs.next());
@@ -609,74 +621,40 @@ public class DBMetaDataTest
         assertEquals(rsmeta.getColumnName(5), "KEY_SEQ");
         assertEquals(rsmeta.getColumnName(6), "PK_NAME");
         rs.close();
-
-        rs = meta.getPrimaryKeys(null, null, "pk1");
-        assertTrue(rs.next());
-        assertEquals(rs.getString("PK_NAME"), null);
-        assertEquals(rs.getString("COLUMN_NAME"), "col1");
-        assertEquals(rs.getInt("KEY_SEQ"), 0);
-        assertFalse(rs.next());
-        rs.close();
-
-        rs = meta.getPrimaryKeys(null, null, "pk2");
-        assertTrue(rs.next());
-        assertEquals(rs.getString("PK_NAME"), null);
-        assertEquals(rs.getString("COLUMN_NAME"), "col2");
-        assertEquals(rs.getInt("KEY_SEQ"), 0);
-        assertFalse(rs.next());
-        rs.close();
-
-        rs = meta.getPrimaryKeys(null, null, "pk3");
-        assertTrue(rs.next());
-        assertEquals(rs.getString("COLUMN_NAME"), "col2");
-        assertEquals(rs.getString("PK_NAME"), null);
-        assertEquals(rs.getInt("KEY_SEQ"), 1);
-        assertTrue(rs.next());
-        assertEquals(rs.getString("COLUMN_NAME"), "col3");
-        assertEquals(rs.getString("PK_NAME"), null);
-        assertEquals(rs.getInt("KEY_SEQ"), 0);
-        assertFalse(rs.next());
-        rs.close();
-
-        rs = meta.getPrimaryKeys(null, null, "pk4");
-        assertTrue(rs.next());
-        assertEquals(rs.getString("COLUMN_NAME"), "col2");
-        assertEquals(rs.getString("PK_NAME"), "named");
-        assertEquals(rs.getInt("KEY_SEQ"), 1);
-        assertTrue(rs.next());
-        assertEquals(rs.getString("COLUMN_NAME"), "col3");
-        assertEquals(rs.getString("PK_NAME"), "named");
-        assertEquals(rs.getInt("KEY_SEQ"), 0);
-        assertFalse(rs.next());
-        rs.close();
         
-        rs = meta.getPrimaryKeys(null, null, "Pk5");
-        assertTrue(rs.next());
-        assertEquals(rs.getString("TABLE_NAME"), "Pk5");
-        assertEquals(rs.getString("COLUMN_NAME"), "Col2");
-        assertEquals(rs.getString("PK_NAME"), "NamedPk");
-        assertEquals(rs.getInt("KEY_SEQ"), 1);
-        assertTrue(rs.next());
-        assertEquals(rs.getString("TABLE_NAME"), "Pk5");
-        assertEquals(rs.getString("COLUMN_NAME"), "Col3");
-        assertEquals(rs.getString("PK_NAME"), "NamedPk");
-        assertEquals(rs.getInt("KEY_SEQ"), 0);
-        assertFalse(rs.next());
-        rs.close();
-        
-        rs = meta.getPrimaryKeys(null, null, "Pk6");
-        assertTrue(rs.next());
-        assertEquals(rs.getString("TABLE_NAME"), "Pk6");
-        assertEquals(rs.getString("COLUMN_NAME"), "Col2");
-        assertEquals(rs.getString("PK_NAME"), "NamedPk");
-        assertEquals(rs.getInt("KEY_SEQ"), 1);
-        assertTrue(rs.next());
-        assertEquals(rs.getString("TABLE_NAME"), "Pk6");
-        assertEquals(rs.getString("COLUMN_NAME"), "Col3");
-        assertEquals(rs.getString("PK_NAME"), "NamedPk");
-        assertEquals(rs.getInt("KEY_SEQ"), 0);
-        assertFalse(rs.next());
-        rs.close();
+        assertPrimaryKey(meta, "pk1", null, "col1");
+        assertPrimaryKey(meta, "pk2", null, "col2");
+        assertPrimaryKey(meta, "pk3", null, "col3", "col2");
+        assertPrimaryKey(meta, "pk4", "named", "col3", "col2");
+        assertPrimaryKey(meta, "Pk5", "NamedPk", "Col3", "Col2");
+        assertPrimaryKey(meta, "Pk6", "NamedPk", "Col3", "Col2");
+        assertPrimaryKey(meta, "pk7", null, "col1", "col2", "col3");
+        assertPrimaryKey(meta, "pk8", null, "col1", "col2", "col3");
+        assertPrimaryKey(meta, "pk9", null, "col1", "col2", "col3");
+        assertPrimaryKey(meta, "Pk10", "NamedPk", "Col3", "Col2");
+        assertPrimaryKey(meta, "Pk11", "NamedPk", "Col3", "Col2");
+        assertPrimaryKey(meta, "Pk12", "NamedPk", "Col3", "Col2");
+    }
+    
+    private void assertPrimaryKey(DatabaseMetaData meta, String tableName, String pkName, String... pkColumns) throws Exception {  
+    	final Map<String, Integer> colSeq = new HashMap<String, Integer>();
+    	for (int i = 0; i < pkColumns.length; i++) {
+    		colSeq.put(pkColumns[i], i+1);
+    	}
+    	Arrays.sort(pkColumns);
+    	
+	    final ResultSet rs = meta.getPrimaryKeys(null, null, tableName);
+	    assertTrue(rs.next());
+	    for (int i = 0; i < pkColumns.length; i++) {
+	    	assertEquals("DatabaseMetaData.getPrimaryKeys: TABLE_CAT", null, rs.getString("TABLE_CAT"));
+	    	assertEquals("DatabaseMetaData.getPrimaryKeys: TABLE_SCHEM", null, rs.getString("TABLE_SCHEM"));
+		    assertEquals("DatabaseMetaData.getPrimaryKeys: TABLE_NAME", tableName, rs.getString("TABLE_NAME"));
+		    assertEquals("DatabaseMetaData.getPrimaryKeys: COLUMN_NAME", pkColumns[i], rs.getString("COLUMN_NAME"));
+		    assertEquals("DatabaseMetaData.getPrimaryKeys: PK_NAME", pkName, rs.getString("PK_NAME"));
+		    assertEquals("DatabaseMetaData.getPrimaryKeys: KEY_SEQ", colSeq.get(pkColumns[i]).intValue(), rs.getInt("KEY_SEQ"));
+		    if (i < pkColumns.length - 1) assertTrue(rs.next());
+	    }
+	    rs.close();
     }
 
     @Test

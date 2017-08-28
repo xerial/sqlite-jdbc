@@ -4,6 +4,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 
 import org.sqlite.SQLiteConnection;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData;
@@ -24,42 +25,34 @@ public class JDBC4DatabaseMetaData extends JDBC3DatabaseMetaData implements Data
     }
 
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SQLFeatureNotSupportedException();
     }
 
     public ResultSet getSchemas(String catalog, String schemaPattern)
             throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new SQLFeatureNotSupportedException();
     }
 
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    	throw new SQLFeatureNotSupportedException();
     }
 
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+    	throw new SQLFeatureNotSupportedException();
     }
 
     public ResultSet getClientInfoProperties() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new SQLFeatureNotSupportedException();
     }
 
     public ResultSet getFunctions(String catalog, String schemaPattern,
             String functionNamePattern) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new SQLFeatureNotSupportedException();
     }
     public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
-        // TODO
-        return null;
+    	throw new SQLFeatureNotSupportedException();
     }
     public boolean generatedKeyAlwaysReturned() throws SQLException {
-        // TODO
-        return false;
+    	throw new SQLFeatureNotSupportedException();
     }
 }
