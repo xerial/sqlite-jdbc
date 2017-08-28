@@ -29,7 +29,7 @@ is our utility to create personalized genome browsers.
 Public Discussion Forum
 =======================
 *  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en)
-*  Post bug reports or feqture requests to [Issue Tracker](https://bitbucket.org/xerial/sqlite-jdbc/issues)
+*  Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
 
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
@@ -42,7 +42,7 @@ Usage
 ============
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#using-sqlitejdbc-with-maven2))
+1.  Download sqlite-jdbc-(VERSION).jar from the [download page](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22sqlite-jdbc%22%20g%3Aorg.xerial) (or by using [Maven](#using-sqlitejdbc-with-maven2))
 then append this jar file into your classpath.
 2.  Open a SQLite database connection from your code. (see the example below)
 
