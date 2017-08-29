@@ -21,17 +21,17 @@ Build
 
 How to submit a patch
 =====================
-Bitbucket Pull Request
+GitHub Pull Request
 ----------------------
-1. Fork this project on bitbucket
+1. Fork this project on GitHub
 2. (make some change)
-3. `hg commit -m 'what changes are made to the source'`
-4. `hg push`
+3. `git commit -m 'what changes are made to the source'`
+4. `git push`
 5. Create a pull request
 
 Patch file
 ----------
-1. Create a new issue on <https://bitbucket.org/xerial/sqlite-jdbc/issues>
+1. Create a new issue on <https://github.com/xerial/sqlite-jdbc/issues>
 2. Attach a patch file to issue
 
 
