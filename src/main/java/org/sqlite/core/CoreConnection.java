@@ -332,7 +332,7 @@ public abstract class CoreConnection {
      * @throws SQLException.
      */
     protected void checkOpen() throws SQLException {
-        if (db == null)
+        if (isClosed())
             throw new SQLException("database connection closed");
     }
 
@@ -366,12 +366,8 @@ public abstract class CoreConnection {
         this.transactionMode = mode;
     }
 
-    /**
-     * @return One of "native" or "unloaded".
-     */
-    public String getDriverVersion() {
-        // Used to supply DatabaseMetaData.getDriverVersion()
-        return  db != null ? "native" : "unloaded";
+    protected boolean isClosed() throws SQLException {
+        return db == null;
     }
 
     /**
@@ -386,7 +382,7 @@ public abstract class CoreConnection {
      * @see java.sql.Connection#close()
      */
     public void close() throws SQLException {
-        if (db == null)
+        if (isClosed())
             return;
         if (meta != null)
             meta.close();

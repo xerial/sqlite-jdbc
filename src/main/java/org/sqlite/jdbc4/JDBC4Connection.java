@@ -53,7 +53,7 @@ public abstract class JDBC4Connection extends JDBC3Connection implements Connect
      * @see java.sql.Connection#isClosed()
      */
     public boolean isClosed() throws SQLException {
-        return db == null;
+        return super.isClosed();
     }
 
     public <T> T unwrap(Class<T> iface) throws ClassCastException {
