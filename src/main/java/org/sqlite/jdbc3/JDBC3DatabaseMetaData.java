@@ -1083,7 +1083,6 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     protected static final Pattern TYPE_INTEGER = Pattern.compile(".*(INT|BOOL).*");
     protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
     protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
-    protected static final Pattern TYPE_AUTO_INCREMENT = Pattern.compile(".*(AUTO_INCREMENT).*");
 
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
@@ -1153,7 +1152,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
            .append("'' as IS_GENERATEDCOLUMN from (");
 
         boolean colFound = false;
-
+                      
         ResultSet rs = null;
         try {
             // Get all tables implied by the input
@@ -1162,6 +1161,33 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             while (rs.next()) {
                 String tableName = rs.getString(3);
 
+                boolean isAutoIncrement = false;  
+                
+                Statement statColAutoinc = conn.createStatement();
+                ResultSet rsColAutoinc = null;
+                try {
+                	statColAutoinc = conn.createStatement();
+                	rsColAutoinc = statColAutoinc.executeQuery("SELECT LIKE('%autoincrement%', LOWER(sql)) FROM sqlite_master "
+                			+ "WHERE LOWER(name) = LOWER('" + escape(tableName) + "') AND TYPE IN ('table', 'view')");
+                	rsColAutoinc.next();
+                	isAutoIncrement = rsColAutoinc.getInt(1) == 1;
+                }  finally {
+                	if (rsColAutoinc != null) {
+                			try {
+                					rsColAutoinc.close();
+                			} catch (Exception e) {
+                					e.printStackTrace();
+                			}
+                	}
+                	if (statColAutoinc != null) {
+                			try {
+                					statColAutoinc.close();
+                			} catch (Exception e) {
+                					e.printStackTrace();
+                			}
+                	}	
+                }
+                
                 Statement colstat = conn.createStatement();
                 ResultSet rscol = null;
                 try {
@@ -1174,6 +1200,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         String colType = rscol.getString(3);
                         String colNotNull = rscol.getString(4);
                         String colDefault = rscol.getString(5);
+                        boolean isPk = "1".equals(rscol.getString(6));
 
                         int colNullable = 2;
                         if (colNotNull != null) {
@@ -1193,7 +1220,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         colType = colType == null ? "TEXT" : colType.toUpperCase();
 
                         int colAutoIncrement = 0;
-                        if(TYPE_AUTO_INCREMENT.matcher(colType).find())
+                        if(isPk && isAutoIncrement)
                         {
                             colAutoIncrement = 1;
                         }

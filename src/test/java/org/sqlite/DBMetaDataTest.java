@@ -587,6 +587,61 @@ public class DBMetaDataTest
     }
 
     @Test
+    public void autoincrement() throws SQLException {
+        ResultSet rs;
+
+        // no autoincrement no rowid
+        stat.executeUpdate("CREATE TABLE TAB1 (COL1 INTEGER NOT NULL PRIMARY KEY, COL2) WITHOUT ROWID;");
+        // no autoincrement
+        stat.executeUpdate("CREATE TABLE TAB2 (COL1 INTEGER NOT NULL PRIMARY KEY, COL2);");
+        // autoincrement
+        stat.executeUpdate("CREATE TABLE TAB3 (COL1 INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, COL2);");
+        
+        rs = meta.getColumns(null, null, "TAB1", "%");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TAB1");
+        assertEquals(rs.getString("COLUMN_NAME"), "COL1");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
+        assertEquals(rs.getString("IS_NULLABLE"), "NO");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TAB1");
+        assertEquals(rs.getString("COLUMN_NAME"), "COL2");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertFalse(rs.next());
+        
+        rs = meta.getColumns(null, null, "TAB2", "%");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TAB2");
+        assertEquals(rs.getString("COLUMN_NAME"), "COL1");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
+        assertEquals(rs.getString("IS_NULLABLE"), "NO");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TAB2");
+        assertEquals(rs.getString("COLUMN_NAME"), "COL2");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertFalse(rs.next());
+        
+        rs = meta.getColumns(null, null, "TAB3", "%");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TAB3");
+        assertEquals(rs.getString("COLUMN_NAME"), "COL1");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
+        assertEquals(rs.getString("IS_NULLABLE"), "NO");
+        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertEquals(rs.getString("IS_AUTOINCREMENT"), "YES");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_NAME"), "TAB3");
+        assertEquals(rs.getString("COLUMN_NAME"), "COL2");
+        assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
+        assertFalse(rs.next());
+        
+    }
+
+    @Test
     public void columnOrderOfgetPrimaryKeys() throws Exception {
         ResultSet rs;
         ResultSetMetaData rsmeta;
