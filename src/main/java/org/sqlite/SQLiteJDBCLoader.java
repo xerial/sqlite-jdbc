@@ -194,8 +194,8 @@ public class SQLiteJDBCLoader {
         String extractedLibFileName = String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
         String extractedLckFileName = extractedLibFileName + ".lck";
 
-        File extractedLibFile = new File(targetFolder, extractedLibFileName);
         File extractedLckFile = new File(targetFolder, extractedLckFileName);
+        File extractedLibFile = new File(targetFolder, extractedLibFileName);
 
         try {
             // Extract a native library file into the target directory
@@ -213,8 +213,6 @@ public class SQLiteJDBCLoader {
             }
             finally {
                 // Delete the extracted lib file on JVM exit.
-                extractedLibFile.deleteOnExit();
-                extractedLckFile.deleteOnExit();
 
 
                 if(writer != null) {
@@ -253,8 +251,10 @@ public class SQLiteJDBCLoader {
         catch(IOException e) {
             System.err.println(e.getMessage());
             return false;
+        } finally {
+            extractedLibFile.delete();
+            extractedLckFile.delete();
         }
-
     }
 
     /**
