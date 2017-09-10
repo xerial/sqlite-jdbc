@@ -200,10 +200,10 @@ public class SQLiteJDBCLoader {
         try {
             // Extract a native library file into the target directory
             InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath);
-            FileOutputStream writer = new FileOutputStream(extractedLibFile);
             if(!extractedLckFile.exists()) {
                 new FileOutputStream(extractedLckFile).close();
             }
+            FileOutputStream writer = new FileOutputStream(extractedLibFile);
             try {
                 byte[] buffer = new byte[8192];
                 int bytesRead = 0;
