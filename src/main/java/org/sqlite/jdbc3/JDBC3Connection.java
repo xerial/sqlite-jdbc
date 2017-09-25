@@ -9,11 +9,10 @@ import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.sqlite.SQLiteOpenMode;
 import org.sqlite.core.CoreConnection;
 
@@ -83,11 +82,12 @@ public abstract class JDBC3Connection extends CoreConnection {
         }
         transactionIsolation = level;
     }
+    
     /**
      * @see java.sql.Connection#getTypeMap()
      */
     public Map<String,Class<?>> getTypeMap() throws SQLException {
-        synchronized (typeMap) {
+        synchronized (this) {
             if (this.typeMap == null) {
                 this.typeMap = new HashMap<String, Class<?>>();
             }
@@ -100,7 +100,7 @@ public abstract class JDBC3Connection extends CoreConnection {
      * @see java.sql.Connection#setTypeMap(java.util.Map)
      */
     public void setTypeMap(Map map) throws SQLException {
-        synchronized (typeMap) {
+        synchronized (this) {
             this.typeMap = map;
         }
     }
