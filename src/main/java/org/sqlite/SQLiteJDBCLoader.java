@@ -56,7 +56,7 @@ public class SQLiteJDBCLoader {
      * @return True if SQLite native library is successfully loaded; false
      * otherwise.
      */
-    public static boolean initialize() throws Exception {
+    public static synchronized boolean initialize() throws Exception {
         // only cleanup before the first extract
         if(!extracted) {
             cleanup();
@@ -264,7 +264,7 @@ public class SQLiteJDBCLoader {
      * @param name Name  of the native library.
      * @return True for successfully loading; false otherwise.
      */
-    private static synchronized boolean loadNativeLibrary(String path, String name) {
+    private static boolean loadNativeLibrary(String path, String name) {
         File libPath = new File(path, name);
         if(libPath.exists()) {
 
