@@ -364,6 +364,16 @@ To use snapshot/pre-release versions, add the following repository to your Maven
 * Pre-release repository: <https://oss.sonatype.org/content/repositories/releases>
 * Snapshot repository: <https://oss.sonatype.org/content/repositories/snapshots>
 
+### Hint for maven-shade-plugin
+
+You may need to add shade plugin transformer to solve `No suitable driver found for jdbc:sqlite:` issue.
+```xml
+<transformer
+	implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+	<resource>META-INF/services/java.sql.Driver</resource>
+</transformer>
+```
+
 Using SQLiteJDBC with Tomcat6 Web Server
 ========================================
 
