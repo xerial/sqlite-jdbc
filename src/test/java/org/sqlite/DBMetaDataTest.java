@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -16,6 +18,7 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -799,7 +802,24 @@ public class DBMetaDataTest
 
 
     @Test
-    public void version() throws SQLException {
-        assertNotNull(meta.getDatabaseProductVersion());
+    public void version() throws Exception {
+      File versionFile = new File("./VERSION");
+      Properties version = new Properties();
+      version.load(new FileReader(versionFile));
+      String versionString = version.getProperty("version");
+      int majorVersion = Integer.valueOf(versionString.split("\\.")[0]);
+      int minorVersion = Integer.valueOf(versionString.split("\\.")[1]);
+      
+      assertTrue("major version check", majorVersion > 0);
+      assertEquals("driver name","SQLite JDBC", meta.getDriverName());
+      assertTrue("driver version", meta.getDriverVersion().startsWith(String.format("%d.%d", majorVersion, minorVersion)));
+      assertEquals("driver major version", majorVersion, meta.getDriverMajorVersion());
+      assertEquals("driver minor version", minorVersion, meta.getDriverMinorVersion());
+      assertEquals("db name","SQLite", meta.getDatabaseProductName());
+      assertEquals("db version", versionString, meta.getDatabaseProductVersion());
+      assertEquals("db major version", majorVersion, meta.getDatabaseMajorVersion());
+      assertEquals("db minor version", minorVersion, meta.getDatabaseMinorVersion());
+      assertEquals("user name", null, meta.getUserName());
     }
+    
 }

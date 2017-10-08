@@ -1,5 +1,7 @@
 package org.sqlite.jdbc3;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +24,39 @@ import org.sqlite.util.StringUtils;
 
 public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabaseMetaData {
 
+	private static String driverName;
+	private static String driverVersion;
+	
+	static {
+		InputStream sqliteJdbcPropStream = null;
+	    try {
+	    	sqliteJdbcPropStream = JDBC3DatabaseMetaData.class.getClassLoader().getResourceAsStream("sqlite-jdbc.properties");
+	    	if (sqliteJdbcPropStream == null) {
+	    		throw new IOException("Cannot load sqlite-jdbc.properties from jar");
+	    	}
+			final Properties sqliteJdbcProp = new Properties();
+			sqliteJdbcProp.load(sqliteJdbcPropStream);
+			driverName = sqliteJdbcProp.getProperty("name");
+			driverVersion = sqliteJdbcProp.getProperty("version");
+		} catch (Exception e) {
+			// Default values
+			driverName = "SQLite JDBC";
+			driverVersion = "3.0.0-UNKNOWN";
+		} finally {
+		    if (null != sqliteJdbcPropStream)
+		    {
+		        try
+		        {
+		        	sqliteJdbcPropStream.close();
+		        }
+		        catch (Exception e)
+		        {
+		            // Ignore
+		        }
+		    }
+		}
+	}
+	
     protected JDBC3DatabaseMetaData(SQLiteConnection conn) {
         super(conn);
     }
@@ -35,29 +71,29 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     /**
      * @see java.sql.DatabaseMetaData#getDatabaseMajorVersion()
      */
-    public int getDatabaseMajorVersion() {
-        return 3;
+    public int getDatabaseMajorVersion() throws SQLException {
+        return Integer.valueOf(conn.libversion().split("\\.")[0]);
     }
 
     /**
      * @see java.sql.DatabaseMetaData#getDatabaseMinorVersion()
      */
-    public int getDatabaseMinorVersion() {
-        return 0;
+    public int getDatabaseMinorVersion() throws SQLException {
+        return Integer.valueOf(conn.libversion().split("\\.")[1]);
     }
 
     /**
      * @see java.sql.DatabaseMetaData#getDriverMajorVersion()
      */
     public int getDriverMajorVersion() {
-        return 1;
+        return Integer.valueOf(driverVersion.split("\\.")[0]);
     }
 
     /**
      * @see java.sql.DatabaseMetaData#getDriverMinorVersion()
      */
     public int getDriverMinorVersion() {
-        return 1;
+        return Integer.valueOf(driverVersion.split("\\.")[1]);
     }
 
     /**
@@ -253,14 +289,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#getDriverName()
      */
     public String getDriverName() {
-        return "SQLiteJDBC";
+        return driverName;
     }
 
     /**
      * @see java.sql.DatabaseMetaData#getDriverVersion()
      */
     public String getDriverVersion() {
-        return conn.getDriverVersion();
+        return driverVersion;
     }
 
     /**
