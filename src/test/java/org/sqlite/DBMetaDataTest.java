@@ -352,6 +352,50 @@ public class DBMetaDataTest
 
         exportedKeys.close();
     }
+
+    @Test
+    public void getImportedKeysColsForNamedKeys() throws SQLException {
+
+    	ResultSet importedKeys;
+
+    	// 1. Check for named primary keys
+    	// SQL is deliberately in uppercase, to make sure case-sensitivity is maintained
+        stat.executeUpdate("CREATE TABLE PARENT1 (ID1 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT PRIMARY KEY (ID1))");
+        stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, DATA2 INTEGER, FOREIGN KEY(ID1) REFERENCES PARENT1(ID1))");
+
+		importedKeys = meta.getImportedKeys(null, null, "CHILD1");
+
+        assertTrue(importedKeys.next());
+        assertEquals("PARENT1", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID1", importedKeys.getString("PKCOLUMN_NAME"));
+        // assertEquals("PK_PARENT", importedKeys.getString("PK_NAME"));
+        assertEquals("", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID1", importedKeys.getString("FKCOLUMN_NAME"));
+
+        assertFalse(importedKeys.next());
+
+        importedKeys.close();
+        
+    	// 2. Check for named foreign keys
+    	// SQL is deliberately in mixed case, to make sure case-sensitivity is maintained
+        stat.executeUpdate("CREATE TABLE Parent2 (Id1 INTEGER, DATA1 INTEGER, PRIMARY KEY (Id1))");
+        stat.executeUpdate("CREATE TABLE Child2 (Id1 INTEGER, DATA2 INTEGER, CONSTRAINT FK_Child2 FOREIGN KEY(Id1) REFERENCES Parent2(Id1))");
+
+		importedKeys = meta.getImportedKeys(null, null, "Child2");
+
+        assertTrue(importedKeys.next());
+        assertEquals("Parent2", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("Id1", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("", importedKeys.getString("PK_NAME"));
+        assertEquals("FK_Child2", importedKeys.getString("FK_NAME"));
+        assertEquals("Child2", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("Id1", importedKeys.getString("FKCOLUMN_NAME"));
+
+        assertFalse(importedKeys.next());
+
+        importedKeys.close();
+    }
     
     @Test
     public void columnOrderOfgetTables() throws SQLException {
