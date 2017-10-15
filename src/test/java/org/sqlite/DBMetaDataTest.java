@@ -368,7 +368,7 @@ public class DBMetaDataTest
         assertTrue(importedKeys.next());
         assertEquals("PARENT1", importedKeys.getString("PKTABLE_NAME"));
         assertEquals("ID1", importedKeys.getString("PKCOLUMN_NAME"));
-        // assertEquals("PK_PARENT", importedKeys.getString("PK_NAME"));
+        assertEquals("PK_PARENT", importedKeys.getString("PK_NAME"));
         assertEquals("", importedKeys.getString("FK_NAME"));
         assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
         assertEquals("ID1", importedKeys.getString("FKCOLUMN_NAME"));

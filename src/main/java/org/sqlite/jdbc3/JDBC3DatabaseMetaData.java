@@ -1575,7 +1575,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
       sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
       .append(DatabaseMetaData.importedKeyNoAction).append(" as ur, ")
       .append(DatabaseMetaData.importedKeyNoAction).append(" as dr, ")
-      .append(" '' as fkn) limit 0;");
+      .append(" '' as fkn, ")
+      .append(" '' as pkn ")
+      .append(") limit 0;");
       return sql;
     }
 
@@ -1594,7 +1596,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             .append(quote(catalog)).append(" as FKTABLE_CAT, ")
             .append(quote(schema)).append(" as FKTABLE_SCHEM, ")
             .append(quote(table)).append(" as FKTABLE_NAME, ")
-            .append("fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, '' as PK_NAME, ")
+            .append("fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, pkn as PK_NAME, ")
             .append(Integer.toString(DatabaseMetaData.importedKeyInitiallyDeferred)).append(" as DEFERRABILITY from (");
 
         // Use a try catch block to avoid "query does not return ResultSet" error
@@ -1615,8 +1617,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             String FKColName = rs.getString(4);
             String PKColName = rs.getString(5);
 
+            PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(PKTabName);
+            String pkName = pkFinder.getName();
             if (PKColName == null) {
-                PKColName = new PrimaryKeyFinder(PKTabName).getColumns()[0];
+				PKColName = pkFinder.getColumns()[0];
             }
 
             String updateRule = rs.getString(6);
@@ -1642,7 +1646,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 .append(" when 'RESTRICT' then ").append(DatabaseMetaData.importedKeyRestrict)
                 .append(" when 'SET NULL' then ").append(DatabaseMetaData.importedKeySetNull)
                 .append(" when 'SET DEFAULT' then ").append(DatabaseMetaData.importedKeySetDefault).append(" end as dr, ")
-                .append(fkName == null? "''": quote(fkName)).append(" as fkn");
+                .append(fkName == null? "''": quote(fkName)).append(" as fkn, ")
+                .append(pkName == null? "''": quote(pkName)).append(" as pkn");
         }
         rs.close();
 
