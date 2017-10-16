@@ -10,8 +10,10 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -1417,7 +1419,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * Pattern used to extract a named primary key.
      */
      protected final static Pattern FK_NAMED_PATTERN =
-        Pattern.compile(".*\\sCONSTRAINT\\s+(.*?)\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\).*",
+        Pattern.compile("\\sCONSTRAINT\\s+(.*?)\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\)",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
      /**
@@ -1466,6 +1468,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 }
 
                 try {
+                	List<String> fkNames = getForeignKeyNames(tbl);  
+                	
+                	int i = 0;
                     while(fk.next()) {
                         int keySeq = fk.getInt(2) + 1;
                         String PKTabName = fk.getString(3);
@@ -1486,7 +1491,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                             .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
                             .append(RULE_MAP.get(fk.getString(7))).append(" as dr, ");
 
-                        String fkName = getForeignKeyName(tbl);                        
+                        String fkName = null;
+                        if (fkNames.size() > i) fkName = fkNames.get(i);
+                        
                         if (fkName != null){
                             exportedKeysQuery.append("'").append(escape(fkName)).append("' as fkn");
                         }
@@ -1494,6 +1501,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                             exportedKeysQuery.append("'' as fkn");
                         }
                         
+                        i++;
                         count++;
                     }
                 }
@@ -1537,10 +1545,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         return ((CoreStatement)stat).executeQuery(sql.toString(), true);
     }
 
-	private String getForeignKeyName(String tbl) throws SQLException {		
-		String fkName = null;
+	private List<String> getForeignKeyNames(String tbl) throws SQLException {		
+		List<String> fkNames = new ArrayList<String>();
 		if (tbl==null) {
-			return fkName;
+			return fkNames;
 		}
 		Statement stat2 = null;
 		ResultSet rs = null;
@@ -1552,8 +1560,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 			if (rs.next()) {
 				Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
 
-				if (matcher.find()) {
-					fkName = matcher.group(1);
+				while (matcher.find()) {
+					fkNames.add(matcher.group(1));
 				}
 			}
 		} finally {
@@ -1568,7 +1576,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 			} catch (SQLException e) {
 			}
 		}
-		return fkName;
+		Collections.reverse(fkNames);
+		return fkNames;
 	}
     
     private StringBuilder appendDummyForeignKeyList(StringBuilder sql) {
@@ -1608,7 +1617,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             return ((CoreStatement)stat).executeQuery(sql.toString(), true);
         }
         
-        String fkName = getForeignKeyName(table);
+        List<String> fkNames = getForeignKeyNames(table);
 
         int i = 0;
         for (; rs.next(); i++) {
@@ -1630,6 +1639,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 sql.append(" union all ");
             }
 
+            String fkName = null;
+            if (fkNames.size() > i) fkName = fkNames.get(i);
+            
             sql.append("select ").append(keySeq).append(" as ks,")
                 .append("'").append(escape(PKTabName)).append("' as ptn, '")
                 .append(escape(FKColName)).append("' as fcn, '")

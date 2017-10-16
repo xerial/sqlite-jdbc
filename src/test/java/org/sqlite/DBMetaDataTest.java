@@ -422,6 +422,40 @@ public class DBMetaDataTest
     }
     
     @Test
+    public void getImportedKeysColsForMultipleImports() throws SQLException {
+
+    	ResultSet importedKeys;
+
+    	// SQL is deliberately in mixed-case, to make sure case-sensitivity is maintained
+    	stat.executeUpdate("CREATE TABLE PARENT1 (ID1 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT1 PRIMARY KEY (ID1))");
+    	stat.executeUpdate("CREATE TABLE PARENT2 (ID2 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT2 PRIMARY KEY (ID2))");
+    	stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, ID2 INTEGER, CONSTRAINT FK_PARENT1 FOREIGN KEY(ID1) REFERENCES PARENT1(ID1), CONSTRAINT FK_PARENT2 FOREIGN KEY(ID2) REFERENCES PARENT2(ID2))");
+
+		importedKeys = meta.getImportedKeys(null, null, "CHILD1");
+
+        assertTrue(importedKeys.next());
+        assertEquals("PARENT2", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID2", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_PARENT2", importedKeys.getString("PK_NAME"));
+        assertEquals("FK_PARENT2", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID2", importedKeys.getString("FKCOLUMN_NAME"));
+
+
+        assertTrue(importedKeys.next());
+        assertEquals("PARENT1", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID1", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_PARENT1", importedKeys.getString("PK_NAME"));
+        // assertEquals("FK_PARENT1", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID1", importedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertFalse(importedKeys.next());
+
+        importedKeys.close();    
+    }
+    
+    @Test
     public void columnOrderOfgetTables() throws SQLException {
         ResultSet rs = meta.getTables(null, null, null, null);
         assertTrue(rs.next());
