@@ -398,6 +398,30 @@ public class DBMetaDataTest
     }
     
     @Test
+    public void getImportedKeysColsForMixedCaseDefinition() throws SQLException {
+
+    	ResultSet importedKeys;
+
+    	// SQL is deliberately in mixed-case, to make sure case-sensitivity is maintained
+        stat.executeUpdate("CREATE TABLE PARENT1 (ID1 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT PRIMARY KEY (ID1))");
+        stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, DATA2 INTEGER, CONSTRAINT FK_Parent1 FOREIGN KEY(ID1) REFERENCES Parent1(Id1))");
+
+		importedKeys = meta.getImportedKeys(null, null, "CHILD1");
+
+        assertTrue(importedKeys.next());
+        assertEquals("Parent1", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("Id1", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_PARENT", importedKeys.getString("PK_NAME"));
+        assertEquals("FK_Parent1", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID1", importedKeys.getString("FKCOLUMN_NAME"));
+
+        assertFalse(importedKeys.next());
+
+        importedKeys.close();    
+    }
+    
+    @Test
     public void columnOrderOfgetTables() throws SQLException {
         ResultSet rs = meta.getTables(null, null, null, null);
         assertTrue(rs.next());
