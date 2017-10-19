@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.Codes;
 import org.sqlite.core.CoreStatement;
+import org.sqlite.jdbc3.JDBC3DatabaseMetaData.ImportedKeyFinder.ForeignKey;
 import org.sqlite.util.StringUtils;
 
 public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabaseMetaData {
@@ -1468,7 +1469,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 }
 
                 try {
-                	List<String> fkNames = getForeignKeyNames(tbl);  
+                	final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(tbl);
+                	List<ForeignKey> fkNames = impFkFinder.getFkList();  
                 	
                 	int i = 0;
                     while(fk.next()) {
@@ -1480,19 +1482,29 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         }
 
                         String PKColName = fk.getString(5);
-                        PKColName = (PKColName == null) ? pkColumns[0] : PKColName;
+                        PKColName = (PKColName == null) ? "" : PKColName;
 
+                        boolean usePkName = false;
+                        for (int j = 0; j < pkColumns.length; j++) {
+							if (pkColumns[j] != null && pkColumns[j].equalsIgnoreCase(PKColName)) {
+								usePkName = true;
+								break;
+							}
+						}
+                        String pkName = (usePkName && pkFinder.getName() != null)? pkFinder.getName(): "";
+                        	
                         exportedKeysQuery
                             .append(count > 0 ? " union all select " : "select ")
                             .append(Integer.toString(keySeq)).append(" as ks, '")
                             .append(escape(tbl)).append("' as fkt, '")
                             .append(escape(fk.getString(4))).append("' as fcn, '")
-                            .append(escape(PKColName)).append("' as pcn, ")
+                            .append(escape(PKColName)).append("' as pcn, '")
+                            .append(escape(pkName)).append("' as pkn, ")
                             .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
                             .append(RULE_MAP.get(fk.getString(7))).append(" as dr, ");
 
                         String fkName = null;
-                        if (fkNames.size() > i) fkName = fkNames.get(i);
+                        if (fkNames.size() > i) fkName = fkNames.get(i).getFkName();
                         
                         if (fkName != null){
                             exportedKeysQuery.append("'").append(escape(fkName)).append("' as fkn");
@@ -1518,7 +1530,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
         boolean hasImportedKey = (count > 0);
         StringBuilder sql = new StringBuilder(512);
-        sql.append("select ")
+		sql.append("select ")
             .append(catalog).append(" as PKTABLE_CAT, ")
             .append(schema).append(" as PKTABLE_SCHEM, ")
             .append(quote(target)).append(" as PKTABLE_NAME, ")
@@ -1531,12 +1543,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             .append(hasImportedKey ? "ur" : "3").append(" as UPDATE_RULE, ")
             .append(hasImportedKey ? "dr" : "3").append(" as DELETE_RULE, ")
             .append(hasImportedKey ? "fkn" : "''").append(" as FK_NAME, ")
-            .append(pkFinder.getName() != null ? quote(pkFinder.getName()) : "''").append(" as PK_NAME, ")
+            .append(hasImportedKey ? "pkn" : "''").append(" as PK_NAME, ")
             .append(Integer.toString(DatabaseMetaData.importedKeyInitiallyDeferred)) // FIXME: Check for pragma foreign_keys = true ?
             .append(" as DEFERRABILITY ");
 
         if (hasImportedKey) {
-            sql.append("from (").append(exportedKeysQuery).append(") order by fkt");
+            sql.append("from (").append(exportedKeysQuery).append(") ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
         }
         else {
             sql.append("limit 0");
@@ -1545,41 +1557,6 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         return ((CoreStatement)stat).executeQuery(sql.toString(), true);
     }
 
-	private List<String> getForeignKeyNames(String tbl) throws SQLException {		
-		List<String> fkNames = new ArrayList<String>();
-		if (tbl==null) {
-			return fkNames;
-		}
-		Statement stat2 = null;
-		ResultSet rs = null;
-		try {
-			stat2 = conn.createStatement();
-
-			rs = stat2.executeQuery(
-					"select sql from sqlite_master where" + " lower(name) = lower('" + escape(tbl) + "')");
-			if (rs.next()) {
-				Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
-
-				while (matcher.find()) {
-					fkNames.add(matcher.group(1));
-				}
-			}
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-			} catch (SQLException e) {
-			}
-			try {
-				if (stat2 != null)
-					stat2.close();
-			} catch (SQLException e) {
-			}
-		}
-		Collections.reverse(fkNames);
-		return fkNames;
-	}
-    
     private StringBuilder appendDummyForeignKeyList(StringBuilder sql) {
       sql.append("select -1 as ks, '' as ptn, '' as fcn, '' as pcn, ")
       .append(DatabaseMetaData.importedKeyNoAction).append(" as ur, ")
@@ -1617,7 +1594,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             return ((CoreStatement)stat).executeQuery(sql.toString(), true);
         }
         
-        List<String> fkNames = getForeignKeyNames(table);
+    	final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(table);
+    	List<ForeignKey> fkNames = impFkFinder.getFkList();  
 
         int i = 0;
         for (; rs.next(); i++) {
@@ -1640,7 +1618,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
 
             String fkName = null;
-            if (fkNames.size() > i) fkName = fkNames.get(i);
+            if (fkNames.size() > i) fkName = fkNames.get(i).getFkName();
             
             sql.append("select ").append(keySeq).append(" as ks,")
                 .append("'").append(escape(PKTabName)).append("' as ptn, '")
@@ -1666,8 +1644,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         if(i == 0) {
           sql = appendDummyForeignKeyList(sql);
         }
-
-        return ((CoreStatement)stat).executeQuery(sql.append(");").toString(), true);
+        sql.append(") ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ;");
+        
+        return ((CoreStatement)stat).executeQuery(sql.toString(), true);
     }
 
     /**
@@ -2055,6 +2034,164 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         public String[] getColumns() {
             return pkColumns;
         }
+    }
+    
+    class ImportedKeyFinder {
+    	
+    	private String fkTableName;
+    	private List<ForeignKey> fkList = new ArrayList<ForeignKey>();
+    	
+    	public ImportedKeyFinder(String table) throws SQLException {
+
+            if (table == null || table.trim().length() == 0) {
+                throw new SQLException("Invalid table name: '" + table + "'");
+            }
+
+            this.fkTableName = table;
+            
+            List<String> fkNames = getForeignKeyNames(this.fkTableName);
+
+            Statement stat = null;
+            ResultSet rs = null;
+
+            try {
+                stat = conn.createStatement();
+                rs = stat.executeQuery("pragma foreign_key_list("+ this.fkTableName.toLowerCase()
+                		+ ")");
+
+                int prevFkId = -1;
+                int count = 0;
+                ForeignKey fk = null;
+                while(rs.next()) {
+                	int fkId = rs.getInt(1);
+                	int colSeq = rs.getInt(2);
+                	String pkTableName = rs.getString(3);
+                	String fkColName = rs.getString(4);
+                	String pkColName = rs.getString(5);
+                	String onUpdate = rs.getString(6);
+                	String onDelete = rs.getString(7);
+                	String match = rs.getString(8);
+                	
+                	String fkName = null;
+                    if (fkNames.size() > count) fkName = fkNames.get(count);
+                    
+                	if (fkId != prevFkId) {
+                		fk = new ForeignKey(fkName, pkTableName, pkTableName, onUpdate, onDelete, match);
+                		fkList.add(fk);
+                		prevFkId = fkId;
+                		count++;
+                	}
+                	fk.addColumnMapping(fkColName, pkColName);
+                }
+            }
+            finally {
+                try {
+                    if (rs != null) rs.close();
+                } catch (Exception e) {}
+                try {
+                    if (stat != null) stat.close();
+                } catch (Exception e) {}
+            }
+        }
+    	
+    	private List<String> getForeignKeyNames(String tbl) throws SQLException {		
+    		List<String> fkNames = new ArrayList<String>();
+    		if (tbl==null) {
+    			return fkNames;
+    		}
+    		Statement stat2 = null;
+    		ResultSet rs = null;
+    		try {
+    			stat2 = conn.createStatement();
+
+    			rs = stat2.executeQuery(
+    					"select sql from sqlite_master where" + " lower(name) = lower('" + escape(tbl) + "')");
+    			if (rs.next()) {
+    				Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
+
+    				while (matcher.find()) {
+    					fkNames.add(matcher.group(1));
+    				}
+    			}
+    		} finally {
+    			try {
+    				if (rs != null)
+    					rs.close();
+    			} catch (SQLException e) {
+    			}
+    			try {
+    				if (stat2 != null)
+    					stat2.close();
+    			} catch (SQLException e) {
+    			}
+    		}
+    		Collections.reverse(fkNames);
+    		return fkNames;
+    	}
+    	
+    	public String getFkTableName() {
+			return fkTableName;
+		}
+
+		public List<ForeignKey> getFkList() {
+			return fkList;
+		}
+
+		class ForeignKey {
+			
+			private String fkName;
+			private String pkTableName;
+    		private String fkTableName;
+    		private List<String> fkColNames = new ArrayList<String>();
+    		private List<String> pkColNames = new ArrayList<String>();
+    		private String onUpdate;
+    		private String onDelete;
+    		private String match;
+    		
+    		ForeignKey(String fkName, String pkTableName, String fkTableName, String onUpdate, String onDelete, String match) {
+				this.fkName = fkName;
+				this.pkTableName = pkTableName;
+				this.fkTableName = fkTableName;
+				this.onUpdate = onUpdate;
+				this.onDelete = onDelete;
+				this.match = match;
+			}
+    		
+
+    		public String getFkName() {
+				return fkName;
+			}
+
+			void addColumnMapping(String fkColName, String pkColName) {
+    			fkColNames.add(fkColName);
+    			pkColNames.add(pkColName);
+    		}
+    		
+    		public String[] getColumnMapping(int colSeq) {
+    			return new String[] {fkColNames.get(colSeq), pkColNames.get(colSeq)};
+    		}
+
+			public String getPkTableName() {
+				return pkTableName;
+			}
+
+			public String getFkTableName() {
+				return fkTableName;
+			}
+
+			public String getOnUpdate() {
+				return onUpdate;
+			}
+
+			public String getOnDelete() {
+				return onDelete;
+			}
+
+			public String getMatch() {
+				return match;
+			}
+    	}
+    	
     }
 
     /**

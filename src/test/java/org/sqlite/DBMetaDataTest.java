@@ -380,7 +380,8 @@ public class DBMetaDataTest
     	// 2. Check for named foreign keys
     	// SQL is deliberately in mixed case, to make sure case-sensitivity is maintained
         stat.executeUpdate("CREATE TABLE Parent2 (Id1 INTEGER, DATA1 INTEGER, PRIMARY KEY (Id1))");
-        stat.executeUpdate("CREATE TABLE Child2 (Id1 INTEGER, DATA2 INTEGER, CONSTRAINT FK_Child2 FOREIGN KEY(Id1) REFERENCES Parent2(Id1))");
+        stat.executeUpdate("CREATE TABLE Child2 (Id1 INTEGER, DATA2 INTEGER, "
+        		+ "CONSTRAINT FK_Child2 FOREIGN KEY(Id1) REFERENCES Parent2(Id1))");
 
 		importedKeys = meta.getImportedKeys(null, null, "Child2");
 
@@ -404,7 +405,8 @@ public class DBMetaDataTest
 
     	// SQL is deliberately in mixed-case, to make sure case-sensitivity is maintained
         stat.executeUpdate("CREATE TABLE PARENT1 (ID1 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT PRIMARY KEY (ID1))");
-        stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, DATA2 INTEGER, CONSTRAINT FK_Parent1 FOREIGN KEY(ID1) REFERENCES Parent1(Id1))");
+        stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, DATA2 INTEGER, "
+        		+ "CONSTRAINT FK_Parent1 FOREIGN KEY(ID1) REFERENCES Parent1(Id1))");
 
 		importedKeys = meta.getImportedKeys(null, null, "CHILD1");
 
@@ -426,13 +428,22 @@ public class DBMetaDataTest
 
     	ResultSet importedKeys;
 
-    	// SQL is deliberately in mixed-case, to make sure case-sensitivity is maintained
     	stat.executeUpdate("CREATE TABLE PARENT1 (ID1 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT1 PRIMARY KEY (ID1))");
-    	stat.executeUpdate("CREATE TABLE PARENT2 (ID2 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT2 PRIMARY KEY (ID2))");
-    	stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, ID2 INTEGER, CONSTRAINT FK_PARENT1 FOREIGN KEY(ID1) REFERENCES PARENT1(ID1), CONSTRAINT FK_PARENT2 FOREIGN KEY(ID2) REFERENCES PARENT2(ID2))");
+    	stat.executeUpdate("CREATE TABLE PARENT2 (ID2 INTEGER, DATA2 INTEGER, CONSTRAINT PK_PARENT2 PRIMARY KEY (ID2))");
+    	stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, ID2 INTEGER, "
+    			+ "CONSTRAINT FK_PARENT1 FOREIGN KEY(ID1) REFERENCES PARENT1(ID1), "
+    			+ "CONSTRAINT FK_PARENT2 FOREIGN KEY(ID2) REFERENCES PARENT2(ID2))");
 
 		importedKeys = meta.getImportedKeys(null, null, "CHILD1");
 
+        assertTrue(importedKeys.next());
+        assertEquals("PARENT1", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID1", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_PARENT1", importedKeys.getString("PK_NAME"));
+        assertEquals("FK_PARENT1", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID1", importedKeys.getString("FKCOLUMN_NAME"));
+        
         assertTrue(importedKeys.next());
         assertEquals("PARENT2", importedKeys.getString("PKTABLE_NAME"));
         assertEquals("ID2", importedKeys.getString("PKCOLUMN_NAME"));
@@ -440,19 +451,71 @@ public class DBMetaDataTest
         assertEquals("FK_PARENT2", importedKeys.getString("FK_NAME"));
         assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
         assertEquals("ID2", importedKeys.getString("FKCOLUMN_NAME"));
-
-
-        assertTrue(importedKeys.next());
-        assertEquals("PARENT1", importedKeys.getString("PKTABLE_NAME"));
-        assertEquals("ID1", importedKeys.getString("PKCOLUMN_NAME"));
-        assertEquals("PK_PARENT1", importedKeys.getString("PK_NAME"));
-        // assertEquals("FK_PARENT1", importedKeys.getString("FK_NAME"));
-        assertEquals("CHILD1", importedKeys.getString("FKTABLE_NAME"));
-        assertEquals("ID1", importedKeys.getString("FKCOLUMN_NAME"));
         
         assertFalse(importedKeys.next());
 
         importedKeys.close();    
+        
+        // Unnamed foreign keys and unnamed primary keys
+    	stat.executeUpdate("CREATE TABLE PARENT3 (ID3 INTEGER, DATA3 INTEGER, PRIMARY KEY (ID3))");
+    	stat.executeUpdate("CREATE TABLE PARENT4 (ID4 INTEGER, DATA4 INTEGER, CONSTRAINT PK_PARENT4 PRIMARY KEY (ID4))");
+    	stat.executeUpdate("CREATE TABLE CHILD2 (ID3 INTEGER, ID4 INTEGER, "
+    			+ "FOREIGN KEY(ID3) REFERENCES PARENT3(ID3), "
+    			+ "CONSTRAINT FK_PARENT4 FOREIGN KEY(ID4) REFERENCES PARENT4(ID4))");
+
+		importedKeys = meta.getImportedKeys(null, null, "CHILD2");
+
+        assertTrue(importedKeys.next());
+        assertEquals("PARENT3", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID3", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("", importedKeys.getString("PK_NAME"));
+        assertEquals("", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD2", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID3", importedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertTrue(importedKeys.next());
+        assertEquals("PARENT4", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID4", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_PARENT4", importedKeys.getString("PK_NAME"));
+        assertEquals("FK_PARENT4", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD2", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID4", importedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertFalse(importedKeys.next());
+
+        importedKeys.close();   
+    }
+    
+    @Test
+    public void getExportedKeysColsForMultipleImports() throws SQLException {
+
+    	ResultSet exportedKeys;
+
+    	stat.executeUpdate("CREATE TABLE PARENT1 (ID1 INTEGER, ID2 INTEGER, CONSTRAINT PK_PARENT1 PRIMARY KEY (ID1))");
+    	stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, CONSTRAINT FK_PARENT1 FOREIGN KEY(ID1) REFERENCES PARENT1(ID1))");
+    	stat.executeUpdate("CREATE TABLE CHILD2 (ID2 INTEGER, CONSTRAINT FK_PARENT2 FOREIGN KEY(ID2) REFERENCES PARENT1(ID2))");
+
+		exportedKeys = meta.getExportedKeys(null, null, "PARENT1");
+
+        assertTrue(exportedKeys.next());
+        assertEquals("PARENT1", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID1", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_PARENT1", exportedKeys.getString("PK_NAME"));
+        assertEquals("FK_PARENT1", exportedKeys.getString("FK_NAME"));
+        assertEquals("CHILD1", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID1", exportedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertTrue(exportedKeys.next());
+        assertEquals("PARENT1", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID2", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("", exportedKeys.getString("PK_NAME"));
+        assertEquals("FK_PARENT2", exportedKeys.getString("FK_NAME"));
+        assertEquals("CHILD2", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID2", exportedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertFalse(exportedKeys.next());
+
+        exportedKeys.close();    
     }
     
     @Test
