@@ -493,8 +493,8 @@ public class DBMetaDataTest
     			+ "CONSTRAINT PK_Authors PRIMARY KEY (Id)," + 
     			"  CONSTRAINT CHECK_UPPERCASE_Name CHECK (Name=UPPER(Name)))");
     	stat.executeUpdate("CREATE TABLE Books (Id INTEGER NOT NULL, Title VARCHAR(255) NOT NULL, PreviousEditionId INTEGER,"
-    			+ "CONSTRAINT PK_Books PRIMARY KEY (Id),"
-    			+ "CONSTRAINT FK_PreviousEdition FOREIGN KEY (PreviousEditionId) REFERENCES Books (Id))");
+    			+ "CONSTRAINT PK_Books PRIMARY KEY (Id), "
+    			+ "CONSTRAINT FK_PreviousEdition FOREIGN KEY(PreviousEditionId) REFERENCES Books (Id))");
     	stat.executeUpdate("CREATE TABLE BookAuthors (BookId INTEGER NOT NULL, AuthorId INTEGER NOT NULL, "
     			+ "CONSTRAINT FK_Y_Book FOREIGN KEY (BookId) REFERENCES Books (Id), "
     			+ "CONSTRAINT FK_Z_Author FOREIGN KEY (AuthorId) REFERENCES Authors (Id)) ");
@@ -554,7 +554,7 @@ public class DBMetaDataTest
 		assertEquals("Books", exportedKeys.getString("PKTABLE_NAME"));
 		assertEquals("Id", exportedKeys.getString("PKCOLUMN_NAME"));
 		assertEquals("PK_Books", exportedKeys.getString("PK_NAME"));
-		assertEquals("", exportedKeys.getString("FK_NAME")); // ???
+		assertEquals("FK_PreviousEdition", exportedKeys.getString("FK_NAME")); // ???
 		assertEquals("Books", exportedKeys.getString("FKTABLE_NAME"));
 		assertEquals("PreviousEditionId", exportedKeys.getString("FKCOLUMN_NAME"));
 		
