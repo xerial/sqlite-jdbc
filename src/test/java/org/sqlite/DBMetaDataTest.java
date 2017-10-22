@@ -522,7 +522,45 @@ public class DBMetaDataTest
         assertFalse(importedKeys.next());
 
         importedKeys.close();  
+	
+
+        ResultSet exportedKeys;
+
+		exportedKeys = meta.getExportedKeys(null, null, "Authors");
+
+		assertTrue(exportedKeys.next());
+		assertEquals("Authors", exportedKeys.getString("PKTABLE_NAME"));
+		assertEquals("Id", exportedKeys.getString("PKCOLUMN_NAME"));
+		assertEquals("PK_Authors", exportedKeys.getString("PK_NAME"));
+		assertEquals("FK_Z_Author", exportedKeys.getString("FK_NAME"));
+		assertEquals("BookAuthors", exportedKeys.getString("FKTABLE_NAME"));
+		assertEquals("AuthorId", exportedKeys.getString("FKCOLUMN_NAME"));
+
+		assertFalse(exportedKeys.next());
+
+		exportedKeys.close(); 
+
+		exportedKeys = meta.getExportedKeys(null, null, "Books");
+
+		assertTrue(exportedKeys.next());
+		assertEquals("Books", exportedKeys.getString("PKTABLE_NAME"));
+		assertEquals("Id", exportedKeys.getString("PKCOLUMN_NAME"));
+		assertEquals("PK_Books", exportedKeys.getString("PK_NAME"));
+		assertEquals("FK_Y_Book", exportedKeys.getString("FK_NAME"));
+		assertEquals("BookAuthors", exportedKeys.getString("FKTABLE_NAME"));
+		assertEquals("BookId", exportedKeys.getString("FKCOLUMN_NAME"));
 		
+		assertTrue(exportedKeys.next());
+		assertEquals("Books", exportedKeys.getString("PKTABLE_NAME"));
+		assertEquals("Id", exportedKeys.getString("PKCOLUMN_NAME"));
+		assertEquals("PK_Books", exportedKeys.getString("PK_NAME"));
+		assertEquals("", exportedKeys.getString("FK_NAME")); // ???
+		assertEquals("Books", exportedKeys.getString("FKTABLE_NAME"));
+		assertEquals("PreviousEditionId", exportedKeys.getString("FKCOLUMN_NAME"));
+		
+		assertFalse(exportedKeys.next());
+
+		exportedKeys.close();  
     }
     
     @Test

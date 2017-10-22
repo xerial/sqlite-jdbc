@@ -1449,73 +1449,64 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
             rs.close();
 
-            ResultSet fk = null;
             // find imported keys for each table
             for (String tbl : tableList) {
-                try {
-                    fk = stat.executeQuery("pragma foreign_key_list('" + escape(tbl) + "')");
-                } catch (SQLException e) {
-                    if (e.getErrorCode() == Codes.SQLITE_DONE)
-                        continue; // expected if table has no foreign keys
-
-                    throw e;
-                }
-
                 try {
                 	final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(tbl);
                 	List<ForeignKey> fkNames = impFkFinder.getFkList();  
                 	
-                	int i = 0;
-                    while(fk.next()) {
-                        int keySeq = fk.getInt(2) + 1;
-                        String PKTabName = fk.getString(3);
+                	for (Iterator iterator = fkNames.iterator(); iterator.hasNext();) {
+						ForeignKey foreignKey = (ForeignKey) iterator.next();
+						
+                        String PKTabName = foreignKey.getPkTableName();
 
                         if (PKTabName == null || !PKTabName.equalsIgnoreCase(target)) {
                             continue;
                         }
-
-                        String PKColName = fk.getString(5);
-                        PKColName = (PKColName == null) ? "" : PKColName;
-
-                        boolean usePkName = false;
-                        for (int j = 0; j < pkColumns.length; j++) {
-							if (pkColumns[j] != null && pkColumns[j].equalsIgnoreCase(PKColName)) {
-								usePkName = true;
-								break;
+                        
+                        for (int j = 0; j < foreignKey.getColumnMappingCount(); j++) {
+	                        int keySeq = j + 1;
+	                        String[] columnMapping = foreignKey.getColumnMapping(j);
+	                        String PKColName = columnMapping[1];
+	                        PKColName = (PKColName == null) ? "" : PKColName;
+	                        String FKColName = columnMapping[0];
+	                        FKColName = (FKColName == null) ? "" : FKColName;
+	                        
+	                        boolean usePkName = false;
+	                        for (int k = 0; k < pkColumns.length; k++) {
+								if (pkColumns[k] != null && pkColumns[k].equalsIgnoreCase(PKColName)) {
+									usePkName = true;
+									break;
+								}
 							}
-						}
-                        String pkName = (usePkName && pkFinder.getName() != null)? pkFinder.getName(): "";
-                        	
-                        exportedKeysQuery
-                            .append(count > 0 ? " union all select " : "select ")
-                            .append(Integer.toString(keySeq)).append(" as ks, '")
-                            .append(escape(tbl)).append("' as fkt, '")
-                            .append(escape(fk.getString(4))).append("' as fcn, '")
-                            .append(escape(PKColName)).append("' as pcn, '")
-                            .append(escape(pkName)).append("' as pkn, ")
-                            .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
-                            .append(RULE_MAP.get(fk.getString(7))).append(" as dr, ");
-
-                        String fkName = null;
-                        if (fkNames.size() > i) fkName = fkNames.get(i).getFkName();
-                        
-                        if (fkName != null){
-                            exportedKeysQuery.append("'").append(escape(fkName)).append("' as fkn");
-                        }
-                        else {
-                            exportedKeysQuery.append("'' as fkn");
-                        }
-                        
-                        i++;
-                        count++;
-                    }
+	                        String pkName = (usePkName && pkFinder.getName() != null)? pkFinder.getName(): "";
+	                        	
+	                        exportedKeysQuery
+	                            .append(count > 0 ? " union all select " : "select ")
+	                            .append(Integer.toString(keySeq)).append(" as ks, '")
+	                            .append(escape(tbl)).append("' as fkt, '")
+	                            .append(escape(FKColName)).append("' as fcn, '")
+	                            .append(escape(PKColName)).append("' as pcn, '")
+	                            .append(escape(pkName)).append("' as pkn, ")
+	                            .append(RULE_MAP.get(foreignKey.getOnUpdate())).append(" as ur, ")
+	                            .append(RULE_MAP.get(foreignKey.getOnDelete())).append(" as dr, ");
+	
+	                        String fkName = foreignKey.getFkName();
+	                        
+	                        if (fkName != null){
+	                            exportedKeysQuery.append("'").append(escape(fkName)).append("' as fkn");
+	                        }
+	                        else {
+	                            exportedKeysQuery.append("'' as fkn");
+	                        }
+	                        
+	                        count++;
+	                    }
+                	}
                 }
                 finally {
                     try{
                         if (rs != null) rs.close();
-                    }catch(SQLException e) {}
-                    try{
-                        if (fk != null) fk.close();
                     }catch(SQLException e) {}
                 }
             }
@@ -2169,6 +2160,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     		
     		public String[] getColumnMapping(int colSeq) {
     			return new String[] {fkColNames.get(colSeq), pkColNames.get(colSeq)};
+    		}
+    		
+    		public int getColumnMappingCount() {
+    			return fkColNames.size();
     		}
 
 			public String getPkTableName() {
