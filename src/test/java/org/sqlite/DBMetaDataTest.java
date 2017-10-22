@@ -487,6 +487,45 @@ public class DBMetaDataTest
     }
     
     @Test
+    public void getImportedKeysCols2() throws SQLException {
+
+    	stat.executeUpdate("CREATE TABLE Authors (Id INTEGER NOT NULL, Name VARCHAR(20) NOT NULL, "
+    			+ "CONSTRAINT PK_Authors PRIMARY KEY (Id)," + 
+    			"  CONSTRAINT CHECK_UPPERCASE_Name CHECK (Name=UPPER(Name)))");
+    	stat.executeUpdate("CREATE TABLE Books (Id INTEGER NOT NULL, Title VARCHAR(255) NOT NULL, PreviousEditionId INTEGER,"
+    			+ "CONSTRAINT PK_Books PRIMARY KEY (Id),"
+    			+ "CONSTRAINT FK_PreviousEdition FOREIGN KEY (PreviousEditionId) REFERENCES Books (Id))");
+    	stat.executeUpdate("CREATE TABLE BookAuthors (BookId INTEGER NOT NULL, AuthorId INTEGER NOT NULL, "
+    			+ "CONSTRAINT FK_Y_Book FOREIGN KEY (BookId) REFERENCES Books (Id), "
+    			+ "CONSTRAINT FK_Z_Author FOREIGN KEY (AuthorId) REFERENCES Authors (Id)) ");
+
+    	ResultSet importedKeys;
+    	
+		importedKeys = meta.getImportedKeys(null, null, "BookAuthors");
+
+        assertTrue(importedKeys.next());
+        assertEquals("Authors", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("Id", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_Authors", importedKeys.getString("PK_NAME"));
+        assertEquals("FK_Z_Author", importedKeys.getString("FK_NAME"));
+        assertEquals("BookAuthors", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("AuthorId", importedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertTrue(importedKeys.next());
+        assertEquals("Books", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("Id", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_Books", importedKeys.getString("PK_NAME"));
+        assertEquals("FK_Y_Book", importedKeys.getString("FK_NAME"));
+        assertEquals("BookAuthors", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("BookId", importedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertFalse(importedKeys.next());
+
+        importedKeys.close();  
+		
+    }
+    
+    @Test
     public void getExportedKeysColsForMultipleImports() throws SQLException {
 
     	ResultSet exportedKeys;

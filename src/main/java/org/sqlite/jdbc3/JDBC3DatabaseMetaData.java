@@ -1416,13 +1416,6 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         RULE_MAP.put("SET DEFAULT", DatabaseMetaData.importedKeySetDefault);
     }
 
-    /**
-     * Pattern used to extract a named primary key.
-     */
-     protected final static Pattern FK_NAMED_PATTERN =
-        Pattern.compile("\\sCONSTRAINT\\s+(.*?)\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\)",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
      /**
      * @see java.sql.DatabaseMetaData#getExportedKeys(java.lang.String, java.lang.String,
      *      java.lang.String)
@@ -2038,6 +2031,13 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     
     class ImportedKeyFinder {
     	
+        /**
+         * Pattern used to extract a named primary key.
+         */
+         private final Pattern FK_NAMED_PATTERN =
+            Pattern.compile("\\sCONSTRAINT\\s+(.*?)\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\)",
+                Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+         
     	private String fkTableName;
     	private List<ForeignKey> fkList = new ArrayList<ForeignKey>();
     	
@@ -2056,8 +2056,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
             try {
                 stat = conn.createStatement();
-                rs = stat.executeQuery("pragma foreign_key_list("+ this.fkTableName.toLowerCase()
-                		+ ")");
+                rs = stat.executeQuery("pragma foreign_key_list('" + this.fkTableName.toLowerCase()
+                		+ "')");
 
                 int prevFkId = -1;
                 int count = 0;
@@ -2076,7 +2076,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     if (fkNames.size() > count) fkName = fkNames.get(count);
                     
                 	if (fkId != prevFkId) {
-                		fk = new ForeignKey(fkName, pkTableName, pkTableName, onUpdate, onDelete, match);
+                		fk = new ForeignKey(fkName, pkTableName, fkTableName, onUpdate, onDelete, match);
                 		fkList.add(fk);
                 		prevFkId = fkId;
                 		count++;
@@ -2189,6 +2189,13 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
 			public String getMatch() {
 				return match;
+			}
+
+
+			@Override
+			public String toString() {
+				return "ForeignKey [fkName=" + fkName + ", pkTableName=" + pkTableName + ", fkTableName=" + fkTableName
+						+ ", pkColNames=" + pkColNames + ", fkColNames=" + fkColNames + "]";
 			}
     	}
     	
