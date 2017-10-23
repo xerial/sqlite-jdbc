@@ -1777,16 +1777,49 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      *      java.lang.String, java.lang.String[])
      */
     public synchronized ResultSet getTables(String c, String s, String tblNamePattern, String types[]) throws SQLException {
+    	
         checkOpen();
 
         tblNamePattern = (tblNamePattern == null || "".equals(tblNamePattern)) ? "%" : escape(tblNamePattern);
 
         StringBuilder sql = new StringBuilder();
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, name as TABLE_NAME,")
-           .append(" upper(type) as TABLE_TYPE, null as REMARKS, null as TYPE_CAT, null as TYPE_SCHEM,")
-           .append(" null as TYPE_NAME, null as SELF_REFERENCING_COL_NAME, null as REF_GENERATION")
-           .append(" from (select name, type from sqlite_master union all select name, type from sqlite_temp_master)")
-           .append(" where TABLE_NAME like '").append(tblNamePattern).append("' and TABLE_TYPE in (");
+        sql.append("SELECT").append("\n");
+        sql.append("  NULL AS TABLE_CAT,").append("\n");
+        sql.append("  NULL AS TABLE_SCHEM,").append("\n");
+        sql.append("  NAME AS TABLE_NAME,").append("\n");
+        sql.append("  TYPE AS TABLE_TYPE,").append("\n");
+        sql.append("  NULL AS REMARKS,").append("\n");
+        sql.append("  NULL AS TYPE_CAT,").append("\n");
+        sql.append("  NULL AS TYPE_SCHEM,").append("\n");
+        sql.append("  NULL AS TYPE_NAME,").append("\n");
+        sql.append("  NULL AS SELF_REFERENCING_COL_NAME,").append("\n");
+        sql.append("  NULL AS REF_GENERATION").append("\n");
+        sql.append("FROM").append("\n");
+        sql.append("  (").append("\n");
+        sql.append("    SELECT").append("\n");
+        sql.append("      NAME,").append("\n");
+        sql.append("      UPPER(TYPE) AS TYPE").append("\n");
+        sql.append("    FROM").append("\n");
+        sql.append("      sqlite_master").append("\n");
+        sql.append("    WHERE").append("\n");
+        sql.append("      NAME NOT LIKE 'sqlite_%'").append("\n");
+        sql.append("      AND UPPER(TYPE) IN ('TABLE', 'VIEW')").append("\n");
+        sql.append("    UNION ALL").append("\n");
+        sql.append("    SELECT").append("\n");
+        sql.append("      NAME,").append("\n");
+        sql.append("      'GLOBAL TEMPORARY' AS TYPE").append("\n");
+        sql.append("    FROM").append("\n");
+        sql.append("      sqlite_temp_master").append("\n");
+        sql.append("    UNION ALL").append("\n");
+        sql.append("    SELECT").append("\n");
+        sql.append("      NAME,").append("\n");
+        sql.append("      'SYSTEM TABLE' AS TYPE").append("\n");
+        sql.append("    FROM").append("\n");
+        sql.append("      sqlite_master").append("\n");
+        sql.append("    WHERE").append("\n");
+        sql.append("      NAME LIKE 'sqlite_%'").append("\n");
+        sql.append("  )").append("\n");
+        sql.append(" WHERE TABLE_NAME LIKE '").append(tblNamePattern).append("' AND TABLE_TYPE IN (");
 
         if (types == null || types.length == 0) {
             sql.append("'TABLE','VIEW'");
@@ -1799,7 +1832,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
         }
 
-        sql.append(") order by TABLE_TYPE, TABLE_NAME;");
+        sql.append(") ORDER BY TABLE_TYPE, TABLE_NAME;");
 
         return ((CoreStatement)conn.createStatement()).executeQuery(sql.toString(), true);
     }
@@ -1809,9 +1842,17 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      */
     public ResultSet getTableTypes() throws SQLException {
         checkOpen();
+        
+        String sql = "SELECT 'TABLE' AS TABLE_TYPE " +
+        		"UNION " +
+        		"SELECT 'VIEW' AS TABLE_TYPE " +
+        		"UNION " +
+        		"SELECT 'SYSTEM TABLE' AS TABLE_TYPE " +
+        		"UNION " +
+        		"SELECT 'GLOBAL TEMPORARY' AS TABLE_TYPE;";
+        
         if (getTableTypes == null) {
-            getTableTypes = conn.prepareStatement("select 'TABLE' as TABLE_TYPE "
-                    + "union select 'VIEW' as TABLE_TYPE;");
+            getTableTypes = conn.prepareStatement(sql);
         }
         getTableTypes.clearParameters();
         return getTableTypes.executeQuery();
