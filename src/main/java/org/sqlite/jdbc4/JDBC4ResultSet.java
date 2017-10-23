@@ -1,7 +1,12 @@
 package org.sqlite.jdbc4;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -24,6 +29,7 @@ import org.sqlite.core.CoreStatement;
 import org.sqlite.jdbc3.JDBC3ResultSet;
 
 public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultSetMetaData {
+	
     public JDBC4ResultSet(CoreStatement stmt) {
         super(stmt);
     }
@@ -145,14 +151,22 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         throw new SQLFeatureNotSupportedException();
     }
 
-    public Reader getNCharacterStream(int columnIndex) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+    public Reader getNCharacterStream(int col) throws SQLException { 
+    	String data = getString(col);
+    	return getNCharacterStreamInternal(data); 
     }
+    
+	private Reader getNCharacterStreamInternal(String data) {
+		if (data == null) {
+    		return null;
+    	}
+		Reader reader = new StringReader(data);
+		return reader;
+	}
 
-    public Reader getNCharacterStream(String columnLabel) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+    public Reader getNCharacterStream(String col) throws SQLException { 
+    	String data = getString(col);
+    	return getNCharacterStreamInternal(data); 
     }
 
     public void updateNCharacterStream(int columnIndex, Reader x, long length)
@@ -330,7 +344,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     }
 
     protected SQLException unused() {
-        return new SQLException("not implemented by SQLite JDBC driver");
+        return new SQLFeatureNotSupportedException();
     }
 
 
@@ -340,26 +354,49 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         throws SQLException { throw unused(); }
     public Array getArray(String col)
         throws SQLException { throw unused(); }
-    public InputStream getAsciiStream(int col)
-        throws SQLException { throw unused(); }
-    public InputStream getAsciiStream(String col)
-        throws SQLException { throw unused(); }
-//    public BigDecimal getBigDecimal(int col)
-//        throws SQLException { throw unused(); }
+    
+    public InputStream getAsciiStream(int col) throws SQLException { 
+    	String data = getString(col);
+    	return getAsciiStreamInternal(data); 
+    }
+
+    public InputStream getAsciiStream(String col) throws SQLException { 
+    	String data = getString(col);
+    	return getAsciiStreamInternal(data); 
+    }
+    
+	private InputStream getAsciiStreamInternal(String data) {
+		if (data == null) {
+    		return null;
+    	}
+		InputStream inputStream;
+		try {
+			inputStream = new ByteArrayInputStream(data.getBytes("ASCII"));
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
+		return inputStream;
+	}
+    
+	@Deprecated
     public BigDecimal getBigDecimal(int col, int s)
         throws SQLException { throw unused(); }
-//    public BigDecimal getBigDecimal(String col)
-//        throws SQLException { throw unused(); }
+	@Deprecated
     public BigDecimal getBigDecimal(String col, int s)
         throws SQLException { throw unused(); }
     public Blob getBlob(int col)
         throws SQLException { throw unused(); }
     public Blob getBlob(String col)
         throws SQLException { throw unused(); }
-    public Clob getClob(int col)
-        throws SQLException { throw unused(); }
-    public Clob getClob(String col)
-        throws SQLException { throw unused(); }
+    
+    public Clob getClob(int col) throws SQLException { 
+    	return new SqliteClob(getString(col)); 
+    }
+    
+    public Clob getClob(String col) throws SQLException { 
+    	return new SqliteClob(getString(col)); 
+    }
+    
     @SuppressWarnings("rawtypes")
     public Object getObject(int col, Map map)
         throws SQLException { throw unused(); }
@@ -371,10 +408,14 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     public Ref getRef(String col)
         throws SQLException { throw unused(); }
 
-    public InputStream getUnicodeStream(int col)
-        throws SQLException { throw unused(); }
-    public InputStream getUnicodeStream(String col)
-        throws SQLException { throw unused(); }
+    public InputStream getUnicodeStream(int col) throws SQLException { 
+    	return getAsciiStream(col); 
+    }
+    
+    public InputStream getUnicodeStream(String col) throws SQLException { 
+    	return getAsciiStream(col); 
+    }
+    
     public URL getURL(int col)
         throws SQLException { throw unused(); }
     public URL getURL(String col)
@@ -503,4 +544,80 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
 
     public void refreshRow()
         throws SQLException { throw unused(); }
+    
+    
+    class SqliteClob implements NClob {
+    	
+    	private String data;
+
+		protected SqliteClob(String data) {
+			this.data = data;
+		}
+
+		public void free() throws SQLException {
+			data = null;
+		}
+
+		public InputStream getAsciiStream() throws SQLException {
+			return getAsciiStreamInternal(data);
+		}
+
+		public Reader getCharacterStream() throws SQLException {
+			return getNCharacterStreamInternal(data);
+		}
+
+		public Reader getCharacterStream(long arg0, long arg1) throws SQLException {
+			return getNCharacterStreamInternal(data);
+		}
+
+		public String getSubString(long beginIndex, int endIndex) throws SQLException {
+			if (data == null) {
+				throw new SQLException("no data");
+			}
+			return data.substring((int) beginIndex, endIndex);
+		}
+
+		public long length() throws SQLException {
+			if (data == null) {
+				throw new SQLException("no data");
+			}
+			return data.length();
+		}
+
+		public long position(String arg0, long arg1) throws SQLException {
+			unused();
+			return -1;
+		}
+
+		public long position(Clob arg0, long arg1) throws SQLException {
+			unused();
+			return -1;
+		}
+
+		public OutputStream setAsciiStream(long arg0) throws SQLException {
+			unused();
+			return null;
+		}
+
+		public Writer setCharacterStream(long arg0) throws SQLException {
+			unused();
+			return null;
+		}
+
+		public int setString(long arg0, String arg1) throws SQLException {
+			unused();
+			return -1;
+		}
+
+		public int setString(long arg0, String arg1, int arg2, int arg3) throws SQLException {
+			unused();
+			return -1;
+		}
+
+		public void truncate(long arg0) throws SQLException {
+			unused();
+		}
+    	
+    }
+    
 }
