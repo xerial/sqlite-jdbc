@@ -260,13 +260,6 @@ public class DBMetaDataTest
         importedKeys.close();
     }
 
-/*    @Test
-    public void columnOrderOfgetExportedKeys() throws SQLException {
-
-    exportedKeys.close();
-
-    }*/
-
     @Test
     public void numberOfgetExportedKeysCols() throws SQLException {
 
@@ -316,6 +309,50 @@ public class DBMetaDataTest
         exportedKeys.close();
     }
 
+    @Test
+    public void getExportedKeysColsForNamedKeys() throws SQLException {
+
+    	ResultSet exportedKeys;
+
+    	// 1. Check for named primary keys
+    	// SQL is deliberately in uppercase, to make sure case-sensitivity is maintained
+        stat.executeUpdate("CREATE TABLE PARENT1 (ID1 INTEGER, DATA1 INTEGER, CONSTRAINT PK_PARENT PRIMARY KEY (ID1))");
+        stat.executeUpdate("CREATE TABLE CHILD1 (ID1 INTEGER, DATA2 INTEGER, FOREIGN KEY(ID1) REFERENCES PARENT1(ID1))");
+
+		exportedKeys = meta.getExportedKeys(null, null, "PARENT1");
+
+        assertTrue(exportedKeys.next());
+        assertEquals("PARENT1", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID1", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PK_PARENT", exportedKeys.getString("PK_NAME"));
+        assertEquals("", exportedKeys.getString("FK_NAME"));
+        assertEquals("CHILD1", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID1", exportedKeys.getString("FKCOLUMN_NAME"));
+
+        assertFalse(exportedKeys.next());
+
+        exportedKeys.close();
+        
+    	// 2. Check for named foreign keys
+    	// SQL is deliberately in mixed case, to make sure case-sensitivity is maintained
+        stat.executeUpdate("CREATE TABLE Parent2 (Id1 INTEGER, DATA1 INTEGER, PRIMARY KEY (Id1))");
+        stat.executeUpdate("CREATE TABLE Child2 (Id1 INTEGER, DATA2 INTEGER, CONSTRAINT FK_Child2 FOREIGN KEY(Id1) REFERENCES Parent2(Id1))");
+
+		exportedKeys = meta.getExportedKeys(null, null, "Parent2");
+
+        assertTrue(exportedKeys.next());
+        assertEquals("Parent2", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("Id1", exportedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("", exportedKeys.getString("PK_NAME"));
+        assertEquals("FK_Child2", exportedKeys.getString("FK_NAME"));
+        assertEquals("Child2", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("Id1", exportedKeys.getString("FKCOLUMN_NAME"));
+
+        assertFalse(exportedKeys.next());
+
+        exportedKeys.close();
+    }
+    
     @Test
     public void columnOrderOfgetTables() throws SQLException {
         ResultSet rs = meta.getTables(null, null, null, null);
@@ -770,8 +807,8 @@ public class DBMetaDataTest
         stat.executeUpdate("create table REFERRING (ID integer, RID integer, constraint fk\r\n foreign\tkey\r\n(RID) references REFERRED(id))");
 
         exportedKeys = meta.getExportedKeys(null, null, "referred");
-        assertEquals("referred", exportedKeys.getString("PKTABLE_NAME"));
-        assertEquals("referring", exportedKeys.getString("FKTABLE_NAME"));
+        assertEquals("REFERRED", exportedKeys.getString("PKTABLE_NAME"));
+        assertEquals("REFERRING", exportedKeys.getString("FKTABLE_NAME"));
         assertEquals("fk", exportedKeys.getString("FK_NAME"));
         exportedKeys.close();
     }

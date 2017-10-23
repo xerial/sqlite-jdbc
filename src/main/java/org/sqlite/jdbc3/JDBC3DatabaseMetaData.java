@@ -1434,6 +1434,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
         StringBuilder exportedKeysQuery = new StringBuilder(512);
 
+        String target = null;
         int count = 0;
         if (pkColumns != null) {
             // retrieve table list
@@ -1441,13 +1442,18 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             ArrayList<String> tableList = new ArrayList<String>();
 
             while (rs.next()) {
-                tableList.add(rs.getString(1));
+            	String tblname = rs.getString(1);
+                tableList.add(tblname);
+                if (tblname.equalsIgnoreCase(table)) {
+                	// get the correct case as in the database
+                	// (not uppercase nor lowercase)
+                	target = tblname;
+                }
             }
 
             rs.close();
 
             ResultSet fk = null;
-            String target = table.toLowerCase();
             // find imported keys for each table
             for (String tbl : tableList) {
                 try {
@@ -1465,20 +1471,20 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                     while(fk.next()) {
                         int keySeq = fk.getInt(2) + 1;
-                        String PKTabName = fk.getString(3).toLowerCase();
+                        String PKTabName = fk.getString(3);
 
-                        if (PKTabName == null || !PKTabName.equals(target)) {
+                        if (PKTabName == null || !PKTabName.equalsIgnoreCase(target)) {
                             continue;
                         }
 
                         String PKColName = fk.getString(5);
-                        PKColName = (PKColName == null) ? pkColumns[0] : PKColName.toLowerCase();
+                        PKColName = (PKColName == null) ? pkColumns[0] : PKColName;
 
                         exportedKeysQuery
                             .append(count > 0 ? " union all select " : "select ")
-                            .append(Integer.toString(keySeq)).append(" as ks, lower('")
-                            .append(escape(tbl)).append("') as fkt, lower('")
-                            .append(escape(fk.getString(4))).append("') as fcn, '")
+                            .append(Integer.toString(keySeq)).append(" as ks, '")
+                            .append(escape(tbl)).append("' as fkt, '")
+                            .append(escape(fk.getString(4))).append("' as fcn, '")
                             .append(escape(PKColName)).append("' as pcn, ")
                             .append(RULE_MAP.get(fk.getString(6))).append(" as ur, ")
                             .append(RULE_MAP.get(fk.getString(7))).append(" as dr, ");
@@ -1490,7 +1496,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                             Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
 
                             if (matcher.find()){
-                                exportedKeysQuery.append("'").append(escape(matcher.group(1).toLowerCase())).append("' as fkn");
+                                exportedKeysQuery.append("'").append(escape(matcher.group(1))).append("' as fkn");
                             }
                             else {
                                 exportedKeysQuery.append("'' as fkn");
@@ -1520,7 +1526,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("select ")
             .append(catalog).append(" as PKTABLE_CAT, ")
             .append(schema).append(" as PKTABLE_SCHEM, ")
-            .append(quote(table)).append(" as PKTABLE_NAME, ")
+            .append(quote(target)).append(" as PKTABLE_NAME, ")
             .append(hasImportedKey ? "pcn" : "''").append(" as PKCOLUMN_NAME, ")
             .append(catalog).append(" as FKTABLE_CAT, ")
             .append(schema).append(" as FKTABLE_SCHEM, ")
@@ -1530,7 +1536,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             .append(hasImportedKey ? "ur" : "3").append(" as UPDATE_RULE, ")
             .append(hasImportedKey ? "dr" : "3").append(" as DELETE_RULE, ")
             .append(hasImportedKey ? "fkn" : "''").append(" as FK_NAME, ")
-            .append(pkFinder.getName() != null ? pkFinder.getName() : "''").append(" as PK_NAME, ")
+            .append(pkFinder.getName() != null ? quote(pkFinder.getName()) : "''").append(" as PK_NAME, ")
             .append(Integer.toString(DatabaseMetaData.importedKeyInitiallyDeferred)) // FIXME: Check for pragma foreign_keys = true ?
             .append(" as DEFERRABILITY ");
 
