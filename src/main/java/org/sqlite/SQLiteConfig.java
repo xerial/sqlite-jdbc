@@ -264,6 +264,7 @@ public class SQLiteConfig
         READ_UNCOMMITED("read_uncommited", OnOff),
         RECURSIVE_TRIGGERS("recursive_triggers", OnOff),
         REVERSE_UNORDERED_SELECTS("reverse_unordered_selects", OnOff),
+        SECURE_DELETE("secure_delete", new String[] { "true", "false", "fast" }),
         SHORT_COLUMN_NAMES("short_column_names", OnOff),
         SYNCHRONOUS("synchronous", toStringArray(SynchronousMode.values())),
         TEMP_STORE("temp_store", toStringArray(TempStore.values())),
