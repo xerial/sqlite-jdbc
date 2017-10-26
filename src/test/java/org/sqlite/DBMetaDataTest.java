@@ -93,6 +93,10 @@ public class DBMetaDataTest
         ResultSet rs = meta.getTableTypes();
         assertNotNull(rs);
         assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_TYPE"), "GLOBAL TEMPORARY");
+        assertTrue(rs.next());
+        assertEquals(rs.getString("TABLE_TYPE"), "SYSTEM TABLE");        
+        assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_TYPE"), "TABLE");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_TYPE"), "VIEW");
@@ -597,9 +601,18 @@ public class DBMetaDataTest
     
     @Test
     public void columnOrderOfgetTables() throws SQLException {
-        ResultSet rs = meta.getTables(null, null, null, null);
-        assertTrue(rs.next());
-        ResultSetMetaData rsmeta = rs.getMetaData();
+    	
+    	stat.executeUpdate("CREATE TABLE TABLE1 (ID1 INTEGER PRIMARY KEY AUTOINCREMENT, ID2 INTEGER)");
+    	stat.executeUpdate("CREATE TABLE TABLE2 (ID2 INTEGER, DATA2 VARCHAR(20))");
+    	stat.executeUpdate("CREATE TEMP TABLE TABLE3 (ID3 INTEGER, DATA3 VARCHAR(20))");
+    	stat.executeUpdate("CREATE VIEW VIEW1 (V1, V2) AS SELECT ID1, ID2 FROM TABLE1");
+    	
+        ResultSet rsTables = meta.getTables(null, null, null, new String[] {"TABLE", "VIEW", "GLOBAL TEMPORARY", "SYSTEM TABLE"});
+        
+        assertTrue(rsTables.next());
+        
+        // Check order of columns
+        ResultSetMetaData rsmeta = rsTables.getMetaData();
         assertEquals(rsmeta.getColumnCount(), 10);
         assertEquals(rsmeta.getColumnName(1), "TABLE_CAT");
         assertEquals(rsmeta.getColumnName(2), "TABLE_SCHEM");
@@ -611,6 +624,28 @@ public class DBMetaDataTest
         assertEquals(rsmeta.getColumnName(8), "TYPE_NAME");
         assertEquals(rsmeta.getColumnName(9), "SELF_REFERENCING_COL_NAME");
         assertEquals(rsmeta.getColumnName(10), "REF_GENERATION");
+        
+        assertEquals("TABLE3", rsTables.getString("TABLE_NAME"));
+        assertEquals("GLOBAL TEMPORARY", rsTables.getString("TABLE_TYPE"));
+        
+        assertTrue(rsTables.next());
+        assertEquals("sqlite_sequence", rsTables.getString("TABLE_NAME"));
+        assertEquals("SYSTEM TABLE", rsTables.getString("TABLE_TYPE"));
+        
+        assertTrue(rsTables.next());
+        assertEquals("TABLE1", rsTables.getString("TABLE_NAME"));
+        assertEquals("TABLE", rsTables.getString("TABLE_TYPE"));
+
+        assertTrue(rsTables.next());
+        assertEquals("TABLE2", rsTables.getString("TABLE_NAME"));
+        assertEquals("TABLE", rsTables.getString("TABLE_TYPE"));
+
+        assertTrue(rsTables.next());
+        assertTrue(rsTables.next());
+        assertEquals("VIEW1", rsTables.getString("TABLE_NAME"));
+        assertEquals("VIEW", rsTables.getString("TABLE_TYPE"));
+                
+        rsTables.close();    
     }
 
     @Test
