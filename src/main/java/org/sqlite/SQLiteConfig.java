@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Properties;
+import java.math.BigInteger;
 
 /**
  * SQLite Configuration
@@ -122,6 +123,15 @@ public class SQLiteConfig
 
         Statement stat = conn.createStatement();
         try {
+            if(pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
+                String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
+                if(password != null && !password.isEmpty()) {
+                    stat.execute(String.format("pragma hexkey = '%x'", new BigInteger(1, password.getBytes())));
+                    stat.execute("select 1 from sqlite_master");
+                }
+                pragmaParams.remove(Pragma.PASSWORD.pragmaName);
+            }
+            
             for (Object each : pragmaTable.keySet()) {
                 String key = each.toString();
                 if (!pragmaParams.contains(key)) {
@@ -275,7 +285,8 @@ public class SQLiteConfig
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
         DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
         DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
-        BUSY_TIMEOUT("busy_timeout", null);
+        BUSY_TIMEOUT("busy_timeout", null),
+        PASSWORD("password", null);
 
         public final String   pragmaName;
         public final String[] choices;
