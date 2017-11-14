@@ -31,7 +31,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Properties;
-import java.math.BigInteger;
 
 /**
  * SQLite Configuration
@@ -126,7 +125,7 @@ public class SQLiteConfig
             if(pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
                 String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
                 if(password != null && !password.isEmpty()) {
-                    stat.execute(String.format("pragma hexkey = '%x'", new BigInteger(1, password.getBytes())));
+                    stat.execute(String.format("pragma key = '%s'", password.replace("'", "''")));
                     stat.execute("select 1 from sqlite_master");
                 }
                 pragmaParams.remove(Pragma.PASSWORD.pragmaName);
