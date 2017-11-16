@@ -269,7 +269,8 @@ public class SQLiteConfig
         TEMP_STORE("temp_store", toStringArray(TempStore.values())),
         TEMP_STORE_DIRECTORY("temp_store_directory"),
         USER_VERSION("user_version"),
-
+        APPLICATION_ID("application_id"),
+        
         // Others
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),
@@ -707,6 +708,19 @@ public class SQLiteConfig
      */
     public void setUserVersion(int version) {
         set(Pragma.USER_VERSION, version);
+    }
+    
+     /**
+     * Set the value of the application-id. The application-id is not used
+     * internally by SQLite. Applications that use SQLite as their application file-format 
+     * should set the Application ID integer to a unique integer so that utilities such as file(1) 
+     * can determine the specific file type. The
+     * value is stored in the database header at offset 68.
+     * @param id A big-endian 32-bit unsigned integer.
+     * @see <a href="http://sqlite.org/pragma.html#pragma_application_id">www.sqlite.org/pragma.html#pragma_application_id</a>
+     */
+    public void setApplicationId(int id){
+        set(Pragma.APPLICATION_ID, id);
     }
 
     public static enum TransactionMode implements PragmaValue {
