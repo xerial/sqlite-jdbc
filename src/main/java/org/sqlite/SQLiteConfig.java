@@ -119,16 +119,26 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.DATE_PRECISION.pragmaName);
         pragmaParams.remove(Pragma.DATE_CLASS.pragmaName);
         pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
+        pragmaParams.remove(Pragma.PASSWORD.pragmaName);
+        pragmaParams.remove(Pragma.HEXKEY_MODE.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
             if(pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
                 String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
                 if(password != null && !password.isEmpty()) {
-                    stat.execute(String.format("pragma key = '%s'", password.replace("'", "''")));
+                    String hexkeyMode = pragmaTable.getProperty(Pragma.HEXKEY_MODE.pragmaName);
+                    String passwordPragma; 
+                    if(HexKeyMode.SSE.name().equalsIgnoreCase(hexkeyMode)) {
+                        passwordPragma = "pragma hexkey = '%s'";
+                    }else if(HexKeyMode.SQLCIPHER.name().equalsIgnoreCase(hexkeyMode)) {
+                        passwordPragma = "pragma key = \"x'%s'\"";
+                    } else {
+                        passwordPragma = "pragma key = '%s'";
+                    }
+                    stat.execute(String.format(passwordPragma, password.replace("'", "''")));
                     stat.execute("select 1 from sqlite_master");
                 }
-                pragmaParams.remove(Pragma.PASSWORD.pragmaName);
             }
             
             for (Object each : pragmaTable.keySet()) {
@@ -285,6 +295,7 @@ public class SQLiteConfig
         DATE_CLASS("date_class", "\"integer\": (Default) store dates as number of seconds or milliseconds from the Unix Epoch\n\"text\": store dates as a string of text\n\"real\": store dates as Julian Dates", toStringArray(DateClass.values())),
         DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
         BUSY_TIMEOUT("busy_timeout", null),
+        HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
         PASSWORD("password", null);
 
         public final String   pragmaName;
@@ -676,6 +687,26 @@ public class SQLiteConfig
 
     public static enum TempStore implements PragmaValue {
         DEFAULT, FILE, MEMORY;
+
+        public String getValue() {
+            return name();
+        }
+
+    }
+
+    /**
+     * Changes the setting of the "hexkey" flag.
+     * @param mode One of {@link HexKeyMode}:<ul>
+     * <li> NONE - SQLite uses a string based password</li>
+     * <li> SSE - the SQLite database engine will use pragma hexkey = '' to set the password</li>
+     * <li> SQLCIPHER - the SQLite database engine calls pragma key = "x''" to set the password</li></ul>
+     */
+    public void setHexKeyMode(HexKeyMode mode) {
+        setPragma(Pragma.HEXKEY_MODE, mode.name());
+    }
+
+    public static enum HexKeyMode implements PragmaValue {
+        NONE, SSE, SQLCIPHER;
 
         public String getValue() {
             return name();
