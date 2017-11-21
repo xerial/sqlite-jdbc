@@ -383,7 +383,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#getTimeDateFunctions()
      */
     public String getTimeDateFunctions() {
-        return "";
+        return "DATE,TIME,DATETIME,JULIANDAY,STRFTIME";
     }
 
     /**
