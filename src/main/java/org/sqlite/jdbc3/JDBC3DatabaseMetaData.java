@@ -353,9 +353,16 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /**
      * @see java.sql.DatabaseMetaData#getSQLKeywords()
+     * 
+     * @see <a href="https://sqlite.org/lang_keywords.html">SQLite Keywords</a>
      */
     public String getSQLKeywords() {
-        return "";
+        return "ABORT,ACTION,AFTER,ANALYZE,ATTACH,AUTOINCREMENT,BEFORE,"
+        		+ "CASCADE,CONFLICT,DATABASE,DEFERRABLE,DEFERRED,DESC,DETACH,"
+        		+ "EXCLUSIVE,EXPLAIN,FAIL,GLOB,IGNORE,INDEX,INDEXED,INITIALLY,INSTEAD,ISNULL,"
+        		+ "KEY,LIMIT,NOTNULL,OFFSET,PLAN,PRAGMA,QUERY,"
+        		+ "RAISE,REGEXP,REINDEX,RENAME,REPLACE,RESTRICT,"
+        		+ "TEMP,TEMPORARY,TRANSACTION,VACUUM,VIEW,VIRTUAL";
     }
 
     /**
