@@ -348,7 +348,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#getIdentifierQuoteString()
      */
     public String getIdentifierQuoteString() {
-        return " ";
+        return "\"";
     }
 
     /**
