@@ -1406,7 +1406,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         for (int i = 0; i < columns.length; i++) {
             if (i > 0) sql.append(" union ");
             sql.append("select ").append(pkName).append(" as pk, '")
-               .append(escape(columns[i].trim())).append("' as cn, ")
+               .append(escape(unquoteIdentifier(columns[i]))).append("' as cn, ")
                .append(i+1).append(" as ks");
         }
 
@@ -2012,10 +2012,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                 Matcher matcher = PK_NAMED_PATTERN.matcher(rs.getString(1));
                 if (matcher.find()){
-                    pkName = escape(matcher.group(1));
-                    if (pkName.length() > 2 && pkName.startsWith("`") && pkName.endsWith("`")) {
-                    	pkName = pkName.substring(1, pkName.length() - 1);
-                    }
+                    pkName = unquoteIdentifier(escape(matcher.group(1)));
                     pkColumns = matcher.group(2).split(",");
                 }
                 else {
@@ -2035,11 +2032,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                 if (pkColumns != null) {
                     for (int i = 0; i < pkColumns.length; i++) {
-                        pkColumns[i] = pkColumns[i].trim();
-                        if (pkColumns[i].length() > 2 && pkColumns[i].startsWith("`") && pkColumns[i].endsWith("`")) {
-                        	// unquote to be consistent with column names returned by getColumns()
-                        	pkColumns[i] = pkColumns[i].substring(1, pkColumns[i].length() - 1);
-                        }
+                        pkColumns[i] = unquoteIdentifier(pkColumns[i]);
                     }
                 }
             }
@@ -2250,4 +2243,24 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     protected void finalize() throws Throwable {
         close();
     }
+    
+    /**
+     * Follow rules in <a href="https://sqlite.org/lang_keywords.html">SQLite Keywords</a>
+     * @param name Identifier name
+     * @return Unquoted identifier
+     */
+    private String unquoteIdentifier(String name) {	
+    	if (name == null) return name;
+    	name = name.trim();
+        if (name.length() > 2 && (
+        		(name.startsWith("`") && name.endsWith("`"))
+        	||	(name.startsWith("\"") && name.endsWith("\""))
+        	||	(name.startsWith("[") && name.endsWith("]"))
+        	)) {
+        	// unquote to be consistent with column names returned by getColumns()
+        	name = name.substring(1, name.length() - 1);
+        }
+		return name;
+    }
+    
 }
