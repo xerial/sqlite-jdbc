@@ -119,7 +119,7 @@ SQLite support encryption of the database via special drivers and a key. To use 
 -Dorg.sqlite.lib.name=sqlite_cryption_support.dll
 ```
 
-Now the only need to specify the passwort is via:
+Now the only need to specify the password is via:
 ```java
 Connection connection = DriverManager.getConnection("jdbc:sqlite:db.sqlite", "", "S3cr3T");
 ```
