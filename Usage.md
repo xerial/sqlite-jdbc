@@ -124,7 +124,7 @@ Now the only need to specify the password is via:
 Connection connection = DriverManager.getConnection("jdbc:sqlite:db.sqlite", "", "password");
 ```
 ### Binary Passphrase
-If you need to prove the password in binary form, you need to specify how the provided .dll/.so needs it. There are two different modes available:
+If you need to provide the password in binary form, you have to specify how the provided .dll/.so needs it. There are two different modes available:
 
 #### SSE:
 The binary password is provided via `pragma hexkey='AE...'`
