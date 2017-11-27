@@ -121,7 +121,7 @@ SQLite support encryption of the database via special drivers and a key. To use 
 
 Now the only need to specify the password is via:
 ```java
-Connection connection = DriverManager.getConnection("jdbc:sqlite:db.sqlite", "", "S3cr3T");
+Connection connection = DriverManager.getConnection("jdbc:sqlite:db.sqlite", "", "password");
 ```
 ### Binary Passphrase
 If you need to prove the password in binary form, you need to specify how the provided .dll/.so needs it. There are two different modes available:
