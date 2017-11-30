@@ -107,3 +107,32 @@ config.recursiveTriggers(true);
 // ... other configuration can be set via SQLiteConfig object
 Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.toProperties());
 ```
+
+## How to Use Encrypted Databases ##
+
+*__Important: xerial/sqlite-jdbc does not support encryption out of the box, you need a special .dll/.so__*
+
+SQLite support encryption of the database via special drivers and a key. To use an encrypted database you need a driver which supports encrypted database via `pragma key` or `pragma hexkey`, e.g. SQLite SSE or SQLCipher. You need to specify those drivers via directly referencing the .dll/.so through:
+
+```
+-Dorg.sqlite.lib.path=.
+-Dorg.sqlite.lib.name=sqlite_cryption_support.dll
+```
+
+Now the only need to specify the password is via:
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite:db.sqlite", "", "password");
+```
+### Binary Passphrase
+If you need to provide the password in binary form, you have to specify how the provided .dll/.so needs it. There are two different modes available:
+
+#### SSE:
+The binary password is provided via `pragma hexkey='AE...'`
+
+#### SQLCipher:
+The binary password is provided via `pragma key="x'AE...'"`
+
+You set the mode at the connectionstring level:
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite:db.sqlite?hexkey_mode=sse", "", "AE...");
+```
