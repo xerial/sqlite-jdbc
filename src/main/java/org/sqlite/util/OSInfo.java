@@ -141,11 +141,6 @@ public class OSInfo
     }
 
     static String resolveArmArchType() {
-        // For Android
-        if(isAndroid()) {
-            return "android-arm";
-        }
-
         if(System.getProperty("os.name").contains("Linux")) {
             String armType = getHardwareName();
             // armType (uname -m) can be armv5t, armv5te, armv5tej, armv5tejl, armv6, armv7, armv7l, aarch64, i686
@@ -204,6 +199,11 @@ public class OSInfo
 
     public static String getArchName() {
         String osArch = System.getProperty("os.arch");
+        // For Android
+        if(isAndroid()) {
+            return "android-arm";
+        }
+
         if(osArch.startsWith("arm")) {
             osArch = resolveArmArchType();
         }
