@@ -146,6 +146,9 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2017-12-07: sqlite-jdbc-3.21.0.1
+    * Metadata query fixes
+    * Fix for Android
 *   2017-11-14: sqlite-jdbc-3.21.0
     * Upgrade to SQLite 3.21.0
     * Various fixes for metadata queries
@@ -153,7 +156,7 @@ News
     * Upgrade to SQLite 3.20.1
     * Various bug fixes
 *   2017-08-04: sqlite-jdbc-3.20.0
-    * Upgrade to SQLite [3.20.0](https://www.sqlite.org/releaselog/3_20_0.html))
+    * Upgrade to SQLite [3.20.0](https://www.sqlite.org/releaselog/3_20_0.html)
     * Support Linux aarch64
     * Fix #239
 *   2017-06-22: sqlite-jdbc-3.19.3
