@@ -20,7 +20,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
+import java.util.TimeZone;
 
 import org.junit.Test;
 import org.sqlite.date.FastDateFormat;
@@ -102,6 +105,59 @@ public class QueryTest
 
         PreparedStatement stmt = conn.prepareStatement("insert into sample values(?)");
         stmt.setDate(1, new java.sql.Date(now.getTime()));
+    }
+
+    @Test
+    public void dateTimeWithTimeZoneTest() throws Exception {
+        Properties properties = new Properties();
+        properties.setProperty(SQLiteConfig.Pragma.DATE_CLASS.pragmaName, "text");
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:", properties);
+
+        Statement statement = null;
+        try {
+            statement = conn.createStatement();
+            statement.execute("create table sample (date_time datetime)");
+        }
+        finally {
+            if (statement != null) statement.close();
+        }
+
+        TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
+        TimeZone customTimeZone = TimeZone.getTimeZone("+3");
+        Calendar utcCalendar = Calendar.getInstance(utcTimeZone);
+        Calendar customCalendar = Calendar.getInstance(customTimeZone);
+
+        java.sql.Date now = new java.sql.Date(new Date().getTime());
+        FastDateFormat customFormat = FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, customTimeZone);
+        FastDateFormat utcFormat = FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, utcTimeZone);
+        java.sql.Date nowLikeCustomZoneIsUtc = new java.sql.Date(utcFormat.parse(customFormat.format(now)).getTime());
+
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = conn.prepareStatement("insert into sample (date_time) values(?)");
+            preparedStatement.setDate(1, now, customCalendar);
+            preparedStatement.executeUpdate();
+            preparedStatement.setDate(1, nowLikeCustomZoneIsUtc, utcCalendar);
+            preparedStatement.executeUpdate();
+        }
+        finally {
+            if (preparedStatement != null) preparedStatement.close();
+        }
+
+        ResultSet resultSet = null;
+        try {
+            resultSet = conn.createStatement().executeQuery("select * from sample");
+            assertTrue(resultSet.next());
+            assertEquals(now, resultSet.getDate(1, customCalendar));
+            assertEquals(nowLikeCustomZoneIsUtc, resultSet.getDate(1, utcCalendar));
+
+            assertTrue(resultSet.next());
+            assertEquals(now, resultSet.getDate(1, customCalendar));
+            assertEquals(nowLikeCustomZoneIsUtc, resultSet.getDate(1, utcCalendar));
+        }
+        finally {
+            if (resultSet != null) resultSet.close();
+        }
     }
 
     @Test

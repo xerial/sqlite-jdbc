@@ -353,16 +353,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             batch(pos, null);
         }
         else if (value instanceof java.util.Date) {
-            setDateByMilliseconds(pos, ((java.util.Date) value).getTime());
-        }
-        else if (value instanceof Date) {
-            setDateByMilliseconds(pos, new Long(((Date) value).getTime()));
-        }
-        else if (value instanceof Time) {
-            setDateByMilliseconds(pos, new Long(((Time) value).getTime()));
-        }
-        else if (value instanceof Timestamp) {
-            setDateByMilliseconds(pos, new Long(((Timestamp) value).getTime()));
+            setDateByMilliseconds(pos, ((java.util.Date)value).getTime(), Calendar.getInstance());
         }
         else if (value instanceof Long) {
             batch(pos, value);
@@ -447,14 +438,14 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
      * @see java.sql.PreparedStatement#setDate(int, java.sql.Date)
      */
     public void setDate(int pos, Date x) throws SQLException {
-        setObject(pos, x);
+        setDate(pos, x, Calendar.getInstance());
     }
 
     /**
      * @see java.sql.PreparedStatement#setDate(int, java.sql.Date, java.util.Calendar)
      */
     public void setDate(int pos, Date x, Calendar cal) throws SQLException {
-        setObject(pos, x);
+        setDateByMilliseconds(pos, x.getTime(), cal);
     }
 
 
@@ -462,28 +453,28 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
       * @see java.sql.PreparedStatement#setTime(int, java.sql.Time)
       */
      public void setTime(int pos, Time x) throws SQLException {
-         setObject(pos, x);
+         setTime(pos, x, Calendar.getInstance());
      }
 
      /**
       * @see java.sql.PreparedStatement#setTime(int, java.sql.Time, java.util.Calendar)
       */
      public void setTime(int pos, Time x, Calendar cal) throws SQLException {
-         setObject(pos, x);
+         setDateByMilliseconds(pos, x.getTime(), cal);
      }
 
      /**
       * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp)
       */
      public void setTimestamp(int pos, Timestamp x) throws SQLException {
-         setObject(pos, x);
+         setTimestamp(pos, x, Calendar.getInstance());
      }
 
      /**
       * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp, java.util.Calendar)
       */
      public void setTimestamp(int pos, Timestamp x, Calendar cal) throws SQLException {
-         setObject(pos, x);
+         setDateByMilliseconds(pos, x.getTime(), cal);
      }
 
      /**

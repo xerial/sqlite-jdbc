@@ -18,8 +18,10 @@ package org.sqlite.core;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.Calendar;
 
 import org.sqlite.SQLiteConnection;
+import org.sqlite.date.FastDateFormat;
 import org.sqlite.jdbc4.JDBC4Statement;
 
 public abstract class CorePreparedStatement extends JDBC4Statement
@@ -125,10 +127,10 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     /**
     * Store the date in the user's preferred format (text, int, or real)
     */
-   protected void setDateByMilliseconds(int pos, Long value) throws SQLException {
+   protected void setDateByMilliseconds(int pos, Long value, Calendar calendar) throws SQLException {
        switch(conn.dateClass) {
            case TEXT:
-               batch(pos, conn.dateFormat.format(new Date(value)));
+               batch(pos, FastDateFormat.getInstance(conn.dateStringFormat, calendar.getTimeZone()).format(new Date(value)));
                break;
 
            case REAL:
