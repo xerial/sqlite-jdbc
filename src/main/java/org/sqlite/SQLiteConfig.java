@@ -265,6 +265,7 @@ public class SQLiteConfig
 
         // Pragmas that can be set after opening the database
         CACHE_SIZE("cache_size"),
+        MMAP_SIZE("mmap_size"),
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
         COUNT_CHANGES("count_changes", OnOff),
         DEFAULT_CACHE_SIZE("default_cache_size"),
