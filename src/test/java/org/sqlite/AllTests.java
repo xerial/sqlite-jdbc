@@ -8,6 +8,7 @@ import org.sqlite.util.OSInfoTest;
 @Suite.SuiteClasses({
     BackupTest.class,
     ConnectionTest.class,
+    DateTimeTest.class,
     DBMetaDataTest.class,
     ErrorMessageTest.class,
     ExtendedCommandTest.class,
