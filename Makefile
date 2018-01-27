@@ -49,6 +49,9 @@ $(TARGET)/common-lib/NativeDB.h: $(TARGET)/common-lib/org/sqlite/core/NativeDB.c
 	$(JAVAH) -classpath $(TARGET)/common-lib -jni -o $@ org.sqlite.core.NativeDB
 
 test:
+	mkdir -p target/test-classes/
+	$(CC) -I$(SQLITE_SOURCE) -fPIC -shared -o target/test-classes/libtest.so src/test/c/test.c
+	$(CC) -I$(SQLITE_SOURCE) -fPIC -shared -o target/test-classes/libtest2.so src/test/c/test2.c
 	mvn test
 
 clean: clean-native clean-java clean-tests

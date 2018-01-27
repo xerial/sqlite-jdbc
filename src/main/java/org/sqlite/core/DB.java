@@ -147,6 +147,10 @@ public abstract class DB implements Codes
      */
     public abstract int shared_cache(boolean enable) throws SQLException;
 
+    public abstract int dbconfig_enable_load_extension(boolean enable);
+
+    public abstract void load_extension(String file, String entry) throws SQLException;
+
     /**
      * Enables or disables loading of SQLite extensions.
      * @param enable True to enable; false otherwise.

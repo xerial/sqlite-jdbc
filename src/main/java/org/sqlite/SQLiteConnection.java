@@ -17,6 +17,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -241,6 +242,17 @@ public abstract class SQLiteConnection
             throw err;
         }
         db.open(fileName, config.getOpenModeFlags());
+
+        Set<ExtensionInfo> loadExtensions = config.getLoadExtensions();
+        if (!loadExtensions.isEmpty()) {
+            db.dbconfig_enable_load_extension(true);
+            for (ExtensionInfo ei : loadExtensions) {
+                db.load_extension(ei.getFile(), ei.getEntry());
+            }
+            db.dbconfig_enable_load_extension(false);
+        }
+        db.enable_load_extension(config.isEnabledLoadExtension());
+
         return db;
     }
 

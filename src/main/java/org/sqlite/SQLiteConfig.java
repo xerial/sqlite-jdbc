@@ -34,7 +34,6 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * SQLite Configuration
@@ -53,6 +52,8 @@ public class SQLiteConfig
     private int openModeFlag = 0x00;
 
     private final int busyTimeout;
+
+    private final Set<ExtensionInfo> loadExtensions = new HashSet<ExtensionInfo>();
 
     private final SQLiteConnectionConfig defaultConnectionConfig;
 
@@ -92,6 +93,23 @@ public class SQLiteConfig
     public SQLiteConnectionConfig newConnectionConfig()
     {
          return defaultConnectionConfig.copyConfig();
+
+        String loadExtsString = pragmaTable.getProperty(Pragma.LOAD_EXTENSIONS.pragmaName);
+        if (loadExtsString != null) {
+            loadExtensions.addAll(ExtensionInfo.deserialize(loadExtsString));
+        }
+    }
+
+    public void loadExtension(String file, String entry) {
+        loadExtensions.add(new ExtensionInfo(file, entry));
+    }
+
+    public void loadExtension(String file) {
+        this.loadExtension(file, null);
+    }
+
+    public Set<ExtensionInfo> getLoadExtensions() {
+        return loadExtensions;
     }
 
     /**
@@ -123,6 +141,7 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
         pragmaParams.remove(Pragma.PASSWORD.pragmaName);
         pragmaParams.remove(Pragma.HEXKEY_MODE.pragmaName);
+        pragmaParams.remove(Pragma.LOAD_EXTENSIONS.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
@@ -235,6 +254,14 @@ public class SQLiteConfig
         pragmaTable.setProperty(Pragma.DATE_PRECISION.pragmaName, defaultConnectionConfig.getDatePrecision().getValue());
         pragmaTable.setProperty(Pragma.DATE_STRING_FORMAT.pragmaName, defaultConnectionConfig.getDateStringFormat());
 
+        if (loadExtensions.isEmpty()) {
+            pragmaTable.remove(Pragma.LOAD_EXTENSIONS.pragmaName);
+        } else {
+            pragmaTable.setProperty(
+                    Pragma.LOAD_EXTENSIONS.pragmaName,
+                    ExtensionInfo.serialize(loadExtensions));
+        }
+
         return pragmaTable;
     }
 
@@ -309,7 +336,10 @@ public class SQLiteConfig
         DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
         BUSY_TIMEOUT("busy_timeout", null),
         HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
-        PASSWORD("password", null);
+        PASSWORD("password", null),
+
+        LOAD_EXTENSIONS("load_extensions"),
+        ;
 
         public final String   pragmaName;
         public final String[] choices;
