@@ -29,7 +29,8 @@ import org.sqlite.util.OSInfoTest;
     UDFTest.class,
     JSON1Test.class,
     ProgressHandlerTest.class,
-    BusyHandlerTest.class
+    BusyHandlerTest.class,
+    LoadExtensionTest.class,
     
 })
 public class AllTests {
