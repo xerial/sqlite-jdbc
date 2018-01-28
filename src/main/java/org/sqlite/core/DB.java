@@ -157,7 +157,7 @@ public abstract class DB implements Codes
      * @see <a href="https://sqlite.org/c3ref/db_config.html">https://sqlite.org/c3ref/db_config.html</a>
      * @see <a href="https://sqlite.org/c3ref/c_dbconfig_enable_fkey.html">https://sqlite.org/c3ref/c_dbconfig_enable_fkey.html</a> SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION
      */
-    public abstract int dbconfig_enable_load_extension(boolean enable);
+    public abstract int dbconfig_enable_load_extension(boolean enable) throws SQLException;
 
     /**
      * Loads the specified extension via the SQLite C-API.

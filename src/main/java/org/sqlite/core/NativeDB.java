@@ -106,7 +106,7 @@ public final class NativeDB extends DB
      * @see org.sqlite.core.B#dbconfig_enable_load_extension(boolean)
      */
     @Override
-    public native synchronized int dbconfig_enable_load_extension(boolean enable);
+    public native synchronized int dbconfig_enable_load_extension(boolean enable) throws SQLException;
 
     /**
      * @see org.sqlite.core.DB#load_extension(String, String)

@@ -46,7 +46,7 @@ public class StringUtils {
             if ((ch == esc) || (StringUtils.inArray(ch, specials))) {
                 sb.append(esc);
             }
-            sb.append(s.charAt(i));
+            sb.append(ch);
         }
         if (s.length() == sb.length()) {
             return s;
