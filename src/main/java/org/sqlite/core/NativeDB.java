@@ -102,8 +102,16 @@ public final class NativeDB extends DB
     @Override
     public native synchronized int shared_cache(boolean enable);
 
+    /**
+     * @see org.sqlite.core.B#dbconfig_enable_load_extension(boolean)
+     */
+    @Override
     public native synchronized int dbconfig_enable_load_extension(boolean enable);
 
+    /**
+     * @see org.sqlite.core.DB#load_extension(String, String)
+     */
+    @Override
     public void load_extension(String file, String entry) throws SQLException {
         this.load_extension_utf8(NativeDB.stringToUtf8ByteArray(file),
                 NativeDB.stringToUtf8ByteArray(entry));

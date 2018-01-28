@@ -17,6 +17,12 @@ public class StringUtils {
         return sb.toString();
     }
 
+    /**
+     * @param needle
+     * @param haystack must NOT be <code>null</code>.
+     * @return
+     * @author Andy-2639
+     */
     public static boolean inArray(char needle, char... haystack) {
         for (int i = 0; i < haystack.length; i++) {
             if (needle == haystack[i]) {
@@ -26,6 +32,13 @@ public class StringUtils {
         return false;
     }
 
+    /**
+     * @param s must NOT be <code>null<code>.
+     * @param esc
+     * @param specials must NOT be <code>null</code>.
+     * @return never <code>null</code>.
+     * @author Andy-2639
+     */
     public static String escape(String s, char esc, char... specials) {
         StringBuilder sb = new StringBuilder(2 * s.length());
         for (int i = 0; i < s.length(); i++) {
@@ -35,7 +48,7 @@ public class StringUtils {
             }
             sb.append(s.charAt(i));
         }
-        if (sb.length() == sb.length()) {
+        if (s.length() == sb.length()) {
             return s;
         } else {
             return sb.toString();

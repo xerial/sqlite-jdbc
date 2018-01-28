@@ -2,20 +2,39 @@ package org.sqlite;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
+
 import org.sqlite.util.StringUtils;
 
+/**
+ * File and entry point needed to load a SQLite extension.
+ * 
+ * Also provides static methods to serialize and deserialize a
+ * collection of <code>ExtensionInfo</code>s into a <code>String</code>.
+ * 
+ * @see <a href="https://sqlite.org/loadext.html#loading_an_extension">https://sqlite.org/loadext.html#loading_an_extension</a>
+ * @see <a href="https://sqlite.org/lang_corefunc.html#load_extension">https://sqlite.org/lang_corefunc.html#load_extension</a>
+ * @see <a href="https://sqlite.org/c3ref/load_extension.html">https://sqlite.org/c3ref/load_extension.html</a>
+ * @author Andy-2639
+ */
 public class ExtensionInfo {
 
     private static final char SERIALIZE_ESCAPE_CHAR = '|';
     private static final char SERIALIZE_EXTENSION_INFO_SEPARATOR = '*';
     private static final char SERIALIZE_FILE_ENTRY_SEPARATOR = '"';
 
+    /** Must not be <code>null</code>. */
     private final String file;
+    /** May be <code>null</null>. */
     private final String entry;
 
     /*
      * <serialized> ::= ( <file_entry> SERIALIZE_EXTENSION_INFO_SEPARATOR )*
      * <file_entry> ::= <file> [ SERIALIZE_FILE_ENTRY_SEPARATOR <entry> ]
+     */
+    /**
+     * @param extensionInfos must not be <code>null</code>.
+     * @return Serialized {@link ExtensionInfo}s. Never <code>null</code>.
      */
     static String serialize(Collection<ExtensionInfo> extensionInfos) {
         final char[] serializeSpecialChars = new char[] {
@@ -34,8 +53,12 @@ public class ExtensionInfo {
         return builder.toString();
     }
 
-    static Collection<ExtensionInfo> deserialize(String extensionInfosSerialized) {
-        Collection<ExtensionInfo> eis = new HashSet<ExtensionInfo>();
+    /**
+     * @param extensionInfosSerialized must not be null.
+     * @return Deserialized {@link EntensionInfo}s. Never <code>null</code>.
+     */
+    static Set<ExtensionInfo> deserialize(String extensionInfosSerialized) {
+        Set<ExtensionInfo> eis = new HashSet<ExtensionInfo>();
         StringBuilder file = new StringBuilder();
         StringBuilder entry = new StringBuilder();
         boolean parseFile = true;
@@ -94,6 +117,13 @@ public class ExtensionInfo {
         return eis;
     }
 
+    /**
+     * @param file native library containing the SQLite extension. Must not be null.
+     * @param entry if <code>null</code>, SQLite determines the entry point.
+     * 
+     * @see <a href="https://sqlite.org/lang_corefunc.html#load_extension">https://sqlite.org/lang_corefunc.html#load_extension</a>
+     * @see <a href="https://sqlite.org/c3ref/load_extension.html">https://sqlite.org/c3ref/load_extension.html</a>
+     */
     ExtensionInfo(String file, String entry) {
         if (file == null) {
             throw new NullPointerException("file must not be null");
@@ -102,10 +132,18 @@ public class ExtensionInfo {
         this.entry = entry;
     }
 
+    /**
+     * @return file native library containing the SQLite extension. Never <code>null</code>.
+     */
     public String getFile() {
         return file;
     }
 
+    /**
+     * Entry point of the extension.
+     * 
+     * @return may be <code>null</code>.
+     */
     public String getEntry() {
         return entry;
     }

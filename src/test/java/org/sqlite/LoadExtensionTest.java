@@ -8,6 +8,9 @@ import java.sql.Statement;
 
 import org.junit.Test;
 
+/**
+ * @author Andy-2639
+ */
 public class LoadExtensionTest {
 
     public SQLException execute(Connection conn, String sql) throws SQLException {

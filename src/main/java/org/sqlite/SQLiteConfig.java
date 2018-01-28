@@ -34,6 +34,7 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * SQLite Configuration
@@ -53,6 +54,7 @@ public class SQLiteConfig
 
     private final int busyTimeout;
 
+    /** @author Andy-2639 */
     private final Set<ExtensionInfo> loadExtensions = new HashSet<ExtensionInfo>();
 
     private final SQLiteConnectionConfig defaultConnectionConfig;
@@ -88,16 +90,16 @@ public class SQLiteConfig
 
         this.busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
-    }
-
-    public SQLiteConnectionConfig newConnectionConfig()
-    {
-         return defaultConnectionConfig.copyConfig();
 
         String loadExtsString = pragmaTable.getProperty(Pragma.LOAD_EXTENSIONS.pragmaName);
         if (loadExtsString != null) {
             loadExtensions.addAll(ExtensionInfo.deserialize(loadExtsString));
         }
+    }
+
+    public SQLiteConnectionConfig newConnectionConfig()
+    {
+         return defaultConnectionConfig.copyConfig();
     }
 
     public void loadExtension(String file, String entry) {

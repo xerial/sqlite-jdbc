@@ -147,16 +147,43 @@ public abstract class DB implements Codes
      */
     public abstract int shared_cache(boolean enable) throws SQLException;
 
+    /**
+     * Enables (SQLite C-API only) / Disables (C-API and SQL load_extension function)
+     * the loading of SQLite extensions.
+     * 
+     * @param enable
+     * @return success code.
+     * @see <a href="https://sqlite.org/c3ref/load_extension.html">https://sqlite.org/c3ref/load_extension.html</a>
+     * @see <a href="https://sqlite.org/c3ref/db_config.html">https://sqlite.org/c3ref/db_config.html</a>
+     * @see <a href="https://sqlite.org/c3ref/c_dbconfig_enable_fkey.html">https://sqlite.org/c3ref/c_dbconfig_enable_fkey.html</a> SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION
+     */
     public abstract int dbconfig_enable_load_extension(boolean enable);
 
+    /**
+     * Loads the specified extension via the SQLite C-API.
+     * 
+     * <p>
+     * Loading of extensions has to be enabled:
+     * <ol>
+     *  <li>{@link #dbconfig_enable_load_extension(boolean)} (preferred)</li>
+     *  <li>{@link #enable_load_extension(boolean)}</li>
+     * </ol>
+     * </p>
+     * 
+     * @param file native library containing the SQLite extension. Must not be null.
+     * @param entry if <code>null</code>, SQLite determines the entry point.
+     * @throws SQLException
+     * @see <a href="https://sqlite.org/c3ref/load_extension.html">https://sqlite.org/c3ref/load_extension.html</a>
+     */
     public abstract void load_extension(String file, String entry) throws SQLException;
 
     /**
-     * Enables or disables loading of SQLite extensions.
+     * Enables or disables loading of SQLite extensions (SQLite C-API and SQL function load_extension).
      * @param enable True to enable; false otherwise.
      * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/load_extension.html">http://www.sqlite.org/c3ref/load_extension.html</a>
+     * @see <a href="https://sqlite.org/c3ref/enable_load_extension.html">https://sqlite.org/c3ref/enable_load_extension.html</a>
      */
     public abstract int enable_load_extension(boolean enable) throws SQLException;
 
