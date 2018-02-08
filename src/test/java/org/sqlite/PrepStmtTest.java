@@ -480,7 +480,7 @@ public class PrepStmtTest
         assertEquals(meta.getColumnType(2), Types.INTEGER);
         assertEquals(meta.getColumnType(3), Types.INTEGER);*/
 
-        prep.setInt(1, 2);prep.setInt(2, 3);prep.setInt(1, -1);
+        prep.setInt(1, 2);prep.setInt(2, 3);prep.setInt(3, -1);
         meta = prep.executeQuery().getMetaData();
         assertEquals(meta.getColumnCount(), 3);
         prep.close();
