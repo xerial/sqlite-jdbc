@@ -36,7 +36,10 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void clearParameters() throws SQLException {
         checkOpen();
         db.clear_bindings(pointer);
-        batch = null;
+        paramValid.clear();
+        if (batch != null)
+            for (int i = batchPos; i < batchPos + paramCount; i++)
+                batch[i] = null;
     }
 
     /**
@@ -108,6 +111,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         batchQueryCount++;
         if (batch == null) {
             batch = new Object[paramCount];
+            paramValid.clear();
         }
         if (batchPos + paramCount > batch.length) {
             Object[] nb = new Object[batch.length * 2];

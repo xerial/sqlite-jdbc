@@ -620,6 +620,28 @@ public class PrepStmtTest
     }
 
     @Test(expected = SQLException.class)
+    public void preparedStatementShouldThrowIfNotAllParamsSetBatch() throws SQLException {
+        ResultSet rs;
+
+        stat.executeUpdate("create table test (c1, c2);");
+        PreparedStatement prep = conn.prepareStatement("insert into test values (?,?);");
+        prep.setInt(1, 1);
+        prep.addBatch(); // <-- TODO: this should throw since we have a command with invalid params set
+
+        // we clear the params for the current statement which will reset validation
+        // the old statement becomes immutable once it's added via addBatch()
+        // and TODO: currently there is no validation when you add a statement to a batch
+
+        // if you delay the throw till the batch is executed you will need to keep increasing the BitSet
+        // which will blow it up for big batches and it's really unnecessary since you should fail as early as possible
+        prep.clearParameters();
+        prep.setInt(1, 3);
+        prep.setInt(2, 4);
+        prep.addBatch();
+        assertArrayEq(prep.executeBatch(), new int[] { 1, 1 });
+    }
+
+    @Test(expected = SQLException.class)
     public void noSuchTable() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select * from doesnotexist;");
         prep.executeQuery();
