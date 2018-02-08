@@ -608,6 +608,18 @@ public class PrepStmtTest
     }
 
     @Test(expected = SQLException.class)
+    public void preparedStatementShouldThrowIfNotAllParamsSet() throws SQLException {
+        PreparedStatement prep = conn.prepareStatement("select ? as col1, ? as col2, ? as col3;");
+        ResultSetMetaData meta = prep.getMetaData();
+        assertEquals(meta.getColumnCount(), 3);
+
+        // we only set one 1 param of the expected 3 params
+        prep.setInt(1, 2);
+        prep.executeQuery();
+        prep.close();
+    }
+
+    @Test(expected = SQLException.class)
     public void noSuchTable() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select * from doesnotexist;");
         prep.executeQuery();
