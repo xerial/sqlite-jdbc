@@ -107,6 +107,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
      */
     public void addBatch() throws SQLException {
         checkOpen();
+        checkParameters();
         batchPos += paramCount;
         batchQueryCount++;
         if (batch == null) {

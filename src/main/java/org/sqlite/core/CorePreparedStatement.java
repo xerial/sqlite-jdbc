@@ -63,7 +63,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
      * @throws SQLException
      */
     protected void checkParameters() throws SQLException {
-        if ((batch == null && paramCount > 0) || (paramValid.cardinality() != paramCount))
+        if (paramValid.cardinality() != paramCount)
             throw new SQLException("Values not bound to statement");
     }
 
