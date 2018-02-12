@@ -116,7 +116,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     protected void batch(int pos, Object value) throws SQLException {
         checkOpen();
         if (batch == null) {
-            batch = new Object[paramCount];
+            batch = new Object[paramCount * batchQueryCount];
         }
         batch[batchPos + pos - 1] = value;
     }
