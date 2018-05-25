@@ -480,7 +480,7 @@ public class PrepStmtTest
         assertEquals(meta.getColumnType(2), Types.INTEGER);
         assertEquals(meta.getColumnType(3), Types.INTEGER);*/
 
-        prep.setInt(1, 2);prep.setInt(2, 3);prep.setInt(1, -1);
+        prep.setInt(1, 2);prep.setInt(2, 3);prep.setInt(3, -1);
         meta = prep.executeQuery().getMetaData();
         assertEquals(meta.getColumnCount(), 3);
         prep.close();
@@ -605,6 +605,32 @@ public class PrepStmtTest
         } catch (Exception e) {
             assertEquals("Values not bound to statement", e.getMessage());
         }
+    }
+
+    @Test(expected = SQLException.class)
+    public void preparedStatementShouldThrowIfNotAllParamsSet() throws SQLException {
+        PreparedStatement prep = conn.prepareStatement("select ? as col1, ? as col2, ? as col3;");
+        ResultSetMetaData meta = prep.getMetaData();
+        assertEquals(meta.getColumnCount(), 3);
+
+        // we only set one 1 param of the expected 3 params
+        prep.setInt(1, 2);
+        prep.executeQuery();
+        prep.close();
+    }
+
+    @Test(expected = SQLException.class)
+    public void preparedStatementShouldThrowIfNotAllParamsSetBatch() throws SQLException {
+        ResultSet rs;
+
+        stat.executeUpdate("create table test (c1, c2);");
+        PreparedStatement prep = conn.prepareStatement("insert into test values (?,?);");
+        prep.setInt(1, 1);
+
+        // addBatch should throw since we added a command with invalid params set
+        // which becomes immutable once added to the batch so it makes sense to verify
+        // at the point when you add a command instead of delaying till batch execution
+        prep.addBatch();
     }
 
     @Test(expected = SQLException.class)

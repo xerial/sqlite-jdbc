@@ -18,6 +18,7 @@ package org.sqlite.core;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.BitSet;
 import java.util.Calendar;
 
 import org.sqlite.SQLiteConnection;
@@ -29,6 +30,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     protected int columnCount;
     protected int paramCount;
     protected int batchQueryCount;
+    protected BitSet paramValid;
 
     /**
      * Constructs a prepared statement on a provided connection.
@@ -44,6 +46,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         rs.colsMeta = db.column_names(pointer);
         columnCount = db.column_count(pointer);
         paramCount = db.bind_parameter_count(pointer);
+        paramValid = new BitSet(paramCount);
         batchQueryCount = 0;
         batch = null;
         batchPos = 0;
@@ -62,7 +65,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
      * @throws SQLException
      */
     protected void checkParameters() throws SQLException {
-        if (batch == null && paramCount > 0)
+        if (paramValid.cardinality() != paramCount)
             throw new SQLException("Values not bound to statement");
     }
 
@@ -91,6 +94,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     @Override
     public void clearBatch() throws SQLException {
         super.clearBatch();
+        paramValid.clear();
         batchQueryCount = 0;
     }
 
@@ -119,8 +123,10 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         checkOpen();
         if (batch == null) {
             batch = new Object[paramCount];
+            paramValid.clear();
         }
         batch[batchPos + pos - 1] = value;
+        paramValid.set(pos - 1);
     }
 
 
