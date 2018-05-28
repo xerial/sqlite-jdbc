@@ -16,11 +16,21 @@ package org.sqlite;
 import static org.junit.Assert.*;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.junit.Test;
 import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
@@ -54,5 +64,18 @@ public class SQLiteConnectionPoolDataSourceTest {
 
         pooledConn.close();
         assertTrue(handle.isClosed());
+    }
+
+    @Test
+    public void proxyConnectionCloseTest()
+            throws SQLException
+    {
+        ConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
+        PooledConnection pooledConn = ds.getPooledConnection();
+
+        Connection handle = pooledConn.getConnection();
+        handle.createStatement().getConnection().close(); // This closes the physical connection, not the proxy
+
+        Connection handle2 = pooledConn.getConnection();
     }
 }
