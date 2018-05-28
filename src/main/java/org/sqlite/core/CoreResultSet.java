@@ -15,6 +15,8 @@
  */
 package org.sqlite.core;
 
+import org.sqlite.SQLiteConnectionConfig;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -26,7 +28,6 @@ import java.util.Map;
 public abstract class CoreResultSet implements Codes
 {
     protected final CoreStatement stmt;
-    protected final DB   db;
 
     public boolean            open     = false; // true means have results and can iterate them
     public int                maxRows;         // max. number of rows as set by a Statement
@@ -44,14 +45,20 @@ public abstract class CoreResultSet implements Codes
     /**
      * Default constructor for a given statement.
      * @param stmt The statement.
-     * @param closeStmt TODO
      */
     protected CoreResultSet(CoreStatement stmt) {
         this.stmt = stmt;
-        this.db = stmt.db;
     }
 
     // INTERNAL FUNCTIONS ///////////////////////////////////////////
+
+    protected DB getDatabase() {
+        return stmt.getDatbase();
+    }
+
+    protected SQLiteConnectionConfig getConnectionConfig() {
+        return stmt.getConnectionConfig();
+    }
 
     /**
      * Checks the status of the result set.
@@ -105,7 +112,7 @@ public abstract class CoreResultSet implements Codes
     public void checkMeta() throws SQLException {
         checkCol(1);
         if (meta == null) {
-            meta = db.column_metadata(stmt.pointer);
+            meta = stmt.getDatbase().column_metadata(stmt.pointer);
         }
     }
 
@@ -119,6 +126,7 @@ public abstract class CoreResultSet implements Codes
         lastCol = -1;
         columnNameToIndex = null;
 
+        DB db = stmt.getDatbase();
         synchronized (db) {
             if (stmt == null) {
                 return;

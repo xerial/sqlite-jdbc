@@ -35,7 +35,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
      */
     public void clearParameters() throws SQLException {
         checkOpen();
-        db.clear_bindings(pointer);
+        conn.getDatabase().clear_bindings(pointer);
         paramValid.clear();
         if (batch != null)
             for (int i = batchPos; i < batchPos + paramCount; i++)
@@ -48,16 +48,16 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public boolean execute() throws SQLException {
         checkOpen();
         rs.close();
-        db.reset(pointer);
+        conn.getDatabase().reset(pointer);
         checkParameters();
 
         boolean success = false;
         try {
-            resultsWaiting = db.execute(this, batch);
+            resultsWaiting = conn.getDatabase().execute(this, batch);
             success = true;
             return columnCount != 0;
         } finally {
-            if (!success && pointer != 0) db.reset(pointer);
+            if (!success && pointer != 0) conn.getDatabase().reset(pointer);
         }
     }
 
@@ -72,15 +72,15 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
 
         rs.close();
-        db.reset(pointer);
+        conn.getDatabase().reset(pointer);
         checkParameters();
 
         boolean success = false;
         try {
-            resultsWaiting = db.execute(this, batch);
+            resultsWaiting = conn.getDatabase().execute(this, batch);
             success = true;
         } finally {
-            if (!success && pointer != 0) db.reset(pointer);
+            if (!success && pointer != 0) conn.getDatabase().reset(pointer);
         }
         return getResultSet();
     }
@@ -96,10 +96,10 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
 
         rs.close();
-        db.reset(pointer);
+        conn.getDatabase().reset(pointer);
         checkParameters();
 
-        return db.executeUpdate(this, batch);
+        return conn.getDatabase().executeUpdate(this, batch);
     }
 
     /**
@@ -512,7 +512,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         throws SQLException { throw unused(); }
 
     /**
-     * @see org.sqlite.core.CoreStatement#execute(java.lang.String)
+     * @see org.sqlite.core.CoreStatement#exec(java.lang.String)
      */
     @Override
     public boolean execute(String sql) throws SQLException {
@@ -520,7 +520,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /**
-     * @see org.sqlite.core.CoreStatement#executeUpdate(java.lang.String)
+     * @see org.sqlite.core.CoreStatement#exec(java.lang.String)
      */
     @Override
     public int executeUpdate(String sql) throws SQLException {
@@ -528,7 +528,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /**
-     * @see org.sqlite.core.CoreStatement#executeQuery(java.lang.String)
+     * @see org.sqlite.core.CoreStatement#exec(String)
      */
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
@@ -536,7 +536,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /**
-     * @see org.sqlite.core.CoreStatement#addBatch(java.lang.String)
      */
     @Override
     public void addBatch(String sql) throws SQLException {

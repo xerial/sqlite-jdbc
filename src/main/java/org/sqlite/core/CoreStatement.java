@@ -15,19 +15,18 @@
  */
 package org.sqlite.core;
 
+import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteConnectionConfig;
+import org.sqlite.jdbc4.JDBC4ResultSet;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.sqlite.SQLiteConnection;
-import org.sqlite.jdbc4.JDBC4ResultSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class CoreStatement implements Codes
 {
     public final SQLiteConnection conn;
-    protected final DB   db;
     protected final CoreResultSet   rs;
-
-    protected CoreDatabaseMetaData metadata;
 
     public long       pointer;
     protected String     sql            = null;
@@ -38,8 +37,15 @@ public abstract class CoreStatement implements Codes
 
     protected CoreStatement(SQLiteConnection c) {
         conn = c;
-        db = conn.db();
         rs = new JDBC4ResultSet(this);
+    }
+
+    public DB getDatbase() {
+        return conn.getDatabase();
+    }
+
+    public SQLiteConnectionConfig getConnectionConfig() {
+        return conn.getConnectionConfig();
     }
 
     /**
@@ -72,15 +78,15 @@ public abstract class CoreStatement implements Codes
         boolean success = false;
         boolean rc = false;
         try {
-            rc = db.execute(this, null);
+            rc = conn.getDatabase().execute(this, null);
             success = true;
         }
         finally {
             resultsWaiting = rc;
-            if (!success) db.finalize(this);
+            if (!success) conn.getDatabase().finalize(this);
         }
 
-        return db.column_count(pointer) != 0;
+        return conn.getDatabase().column_count(pointer) != 0;
     }
 
     /**
@@ -99,19 +105,21 @@ public abstract class CoreStatement implements Codes
         boolean rc = false;
         boolean success = false;
         try {
-            rc = db.execute(sql);
+            rc = conn.getDatabase().execute(sql);
             success = true;
         }
         finally {
             resultsWaiting = rc;
-            if (!success) db.finalize(this);
+            if (!success) conn.getDatabase().finalize(this);
         }
 
-        return db.column_count(pointer) != 0;
+        return conn.getDatabase().column_count(pointer) != 0;
     }
 
+    private AtomicBoolean isClosed = new AtomicBoolean(false);
+
     protected void internalClose() throws SQLException {
-        if (db.conn.isClosed())
+        if (isClosed.get())
             throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
 
         if (pointer == 0)
@@ -120,10 +128,10 @@ public abstract class CoreStatement implements Codes
         rs.close();
         batch = null;
         batchPos = 0;
-        int resp = db.finalize(this);
+        int resp = conn.getDatabase().finalize(this);
 
         if (resp != SQLITE_OK && resp != SQLITE_MISUSE)
-            db.throwex(resp);
+            conn.getDatabase().throwex(resp);
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;

@@ -78,7 +78,7 @@ public abstract class Function
         }
 
         f.conn = (SQLiteConnection)conn;
-        f.db = f.conn.db();
+        f.db = f.conn.getDatabase();
 
         if (name == null || name.length() > 255) {
             throw new SQLException("invalid function name: '"+name+"'");
@@ -100,7 +100,7 @@ public abstract class Function
         if (conn == null || !(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
-        ((SQLiteConnection)conn).db().destroy_function(name);
+        ((SQLiteConnection)conn).getDatabase().destroy_function(name);
     }
 
 
@@ -214,7 +214,7 @@ public abstract class Function
      * @throws SQLException
      */
     private void checkContext() throws SQLException {
-        if (conn == null || conn.db() == null || context == 0) {
+        if (conn == null || conn.getDatabase() == null || context == 0) {
             throw new SQLException("no context, not allowed to read value");
         }
     }
@@ -224,7 +224,7 @@ public abstract class Function
      * @throws SQLException
      */
     private void checkValue(int arg) throws SQLException {
-        if (conn == null || conn.db() == null || value == 0) {
+        if (conn == null || conn.getDatabase() == null || value == 0) {
             throw new SQLException("not in value access state");
         }
         if (arg >= args) {

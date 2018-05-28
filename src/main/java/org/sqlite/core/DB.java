@@ -21,10 +21,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.sqlite.Function;
 import org.sqlite.ProgressHandler;
-import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
 
@@ -42,8 +43,9 @@ import org.sqlite.SQLiteException;
  */
 public abstract class DB implements Codes
 {
-    /** The JDBC Connection that 'owns' this database instance. */
-    SQLiteConnection                          conn   = null;
+    private final String url;
+    private final SQLiteConfig config;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     /** The "begin;"and "commit;" statement handles. */
     long                          begin  = 0;
@@ -51,6 +53,33 @@ public abstract class DB implements Codes
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
     private final Map<Long, CoreStatement> stmts  = new HashMap<Long, CoreStatement>();
+
+    public DB(String url, String fileName, SQLiteConfig config)
+            throws SQLException
+    {
+        this.url = url;
+        this.config = config;
+        open(fileName, config.getOpenModeFlags());
+
+        if (fileName.startsWith("file:") && !fileName.contains("cache="))
+        {   // URI cache overrides flags
+            shared_cache(config.isEnabledSharedCache());
+        }
+        enable_load_extension(config.isEnabledLoadExtension());
+        busy_timeout(config.getBusyTimeout());
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public boolean isClosed() {
+        return closed.get();
+    }
+
+    public SQLiteConfig getConfig() {
+        return config;
+    }
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
@@ -162,15 +191,13 @@ public abstract class DB implements Codes
 
     /**
      * Creates an SQLite interface to a database for the given connection.
-     * @param conn The connection.
      * @param file The database.
      * @param openFlags File opening configurations
      * (<a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>)
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/open.html">http://www.sqlite.org/c3ref/open.html</a>
      */
-    public final synchronized void open(SQLiteConnection conn, String file, int openFlags) throws SQLException {
-        this.conn = conn;
+    public final synchronized void open(String file, int openFlags) throws SQLException {
         _open(file, openFlags);
     }
 
@@ -208,6 +235,7 @@ public abstract class DB implements Codes
             commit = 0;
         }
 
+        closed.set(true);
         _close();
     }
 
@@ -921,6 +949,15 @@ public abstract class DB implements Codes
         return newSQLException(errorCode, errmsg());
     }
 
+    private final AtomicBoolean autoCommit = new AtomicBoolean(true);
+
+    public void enableAutoCommit() {
+        autoCommit.set(true);
+    }
+    public void disableAutoCommit() {
+        autoCommit.set(false);
+    }
+
     /**
      * SQLite and the JDBC API have very different ideas about the meaning
      * of auto-commit. Under JDBC, when executeUpdate() returns in
@@ -954,7 +991,7 @@ public abstract class DB implements Codes
      * @throws SQLException
      */
     final void ensureAutoCommit() throws SQLException {
-        if (!conn.getAutoCommit()) {
+        if (!autoCommit.get()) {
             return;
         }
 

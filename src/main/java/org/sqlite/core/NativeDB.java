@@ -22,6 +22,7 @@ import java.sql.SQLException;
 
 import org.sqlite.Function;
 import org.sqlite.ProgressHandler;
+import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
@@ -43,6 +44,12 @@ public final class NativeDB extends DB
             isLoaded = false;
             loadSucceeded = false;
         }
+    }
+
+    public NativeDB(String url, String fileName, SQLiteConfig config)
+            throws SQLException
+    {
+        super(url, fileName, config);
     }
 
     /**
