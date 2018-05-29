@@ -17,6 +17,7 @@ package org.sqlite.core;
 
 import org.sqlite.BusyHandler;
 import java.sql.BatchUpdateException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -169,14 +170,14 @@ public abstract class DB implements Codes
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/exec.html">http://www.sqlite.org/c3ref/exec.html</a>
      */
-    public final synchronized void exec(String sql) throws SQLException {
+    public final synchronized void exec(String sql, boolean autoCommit) throws SQLException {
         long pointer = 0;
         try {
             pointer = prepare(sql);
             int rc = step(pointer);
             switch (rc) {
             case SQLITE_DONE:
-                ensureAutoCommit();
+                ensureAutoCommit(autoCommit);
                 return;
             case SQLITE_ROW:
                 return;
@@ -773,7 +774,7 @@ public abstract class DB implements Codes
      *         commands execute successfully;
      * @throws SQLException
      */
-    final synchronized int[] executeBatch(long stmt, int count, Object[] vals) throws SQLException {
+    final synchronized int[] executeBatch(long stmt, int count, Object[] vals, boolean autoCommit) throws SQLException {
         if (count < 1) {
             throw new SQLException("count (" + count + ") < 1");
         }
@@ -806,7 +807,7 @@ public abstract class DB implements Codes
             }
         }
         finally {
-            ensureAutoCommit();
+            ensureAutoCommit(autoCommit);
         }
 
         reset(stmt);
@@ -840,7 +841,7 @@ public abstract class DB implements Codes
         switch (statusCode) {
         case SQLITE_DONE:
             reset(stmt.pointer);
-            ensureAutoCommit();
+            ensureAutoCommit(stmt.conn.getAutoCommit());
             return false;
         case SQLITE_ROW:
             return true;
@@ -862,13 +863,13 @@ public abstract class DB implements Codes
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/exec.html">http://www.sqlite.org/c3ref/exec.html</a>
      */
-    final synchronized boolean execute(String sql) throws SQLException {
+    final synchronized boolean execute(String sql, boolean autoCommit) throws SQLException {
         int statusCode = _exec(sql);
         switch (statusCode) {
         case SQLITE_OK:
             return false;
         case SQLITE_DONE:
-            ensureAutoCommit();
+            ensureAutoCommit(autoCommit);
             return false;
         case SQLITE_ROW:
             return true;
@@ -949,15 +950,6 @@ public abstract class DB implements Codes
         return newSQLException(errorCode, errmsg());
     }
 
-    private final AtomicBoolean autoCommit = new AtomicBoolean(true);
-
-    public void enableAutoCommit() {
-        autoCommit.set(true);
-    }
-    public void disableAutoCommit() {
-        autoCommit.set(false);
-    }
-
     /**
      * SQLite and the JDBC API have very different ideas about the meaning
      * of auto-commit. Under JDBC, when executeUpdate() returns in
@@ -990,8 +982,8 @@ public abstract class DB implements Codes
      * mode.
      * @throws SQLException
      */
-    final void ensureAutoCommit() throws SQLException {
-        if (!autoCommit.get()) {
+    final void ensureAutoCommit(boolean autoCommit) throws SQLException {
+        if (!autoCommit) {
             return;
         }
 

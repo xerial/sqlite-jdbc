@@ -1,13 +1,10 @@
 package org.sqlite.jdbc4;
 
-import org.sqlite.SQLiteConnection;
 import org.sqlite.jdbc3.JDBC3Connection;
 
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.SQLClientInfoException;

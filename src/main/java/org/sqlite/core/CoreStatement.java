@@ -105,7 +105,7 @@ public abstract class CoreStatement implements Codes
         boolean rc = false;
         boolean success = false;
         try {
-            rc = conn.getDatabase().execute(sql);
+            rc = conn.getDatabase().execute(sql, conn.getAutoCommit());
             success = true;
         }
         finally {
@@ -116,22 +116,22 @@ public abstract class CoreStatement implements Codes
         return conn.getDatabase().column_count(pointer) != 0;
     }
 
-    private AtomicBoolean isClosed = new AtomicBoolean(false);
-
     protected void internalClose() throws SQLException {
-        if (isClosed.get())
+        if (conn.isClosed())
             throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
 
         if (pointer == 0)
             return;
 
         rs.close();
+
         batch = null;
         batchPos = 0;
         int resp = conn.getDatabase().finalize(this);
 
         if (resp != SQLITE_OK && resp != SQLITE_MISUSE)
             conn.getDatabase().throwex(resp);
+
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;

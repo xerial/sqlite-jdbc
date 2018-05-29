@@ -56,11 +56,11 @@ public abstract class SQLiteConnection
     public SQLiteConnection(String url, String fileName, Properties prop) throws SQLException {
         this.db = open(url, fileName, new SQLiteConfig(prop));
         SQLiteConfig config = db.getConfig();
+        this.connectionConfig = config.newConnectionConfig();
 
         // set pragmas
         String pragmas = extractPragmasFromFilename(url, fileName, prop);
         config.apply(this);
-        this.connectionConfig = config.newConnectionConfig();
     }
 
     public SQLiteConnectionConfig getConnectionConfig() {
@@ -153,10 +153,10 @@ public abstract class SQLiteConnection
 
         switch (level) {
             case java.sql.Connection.TRANSACTION_SERIALIZABLE:
-                getDatabase().exec("PRAGMA read_uncommitted = false;");
+                getDatabase().exec("PRAGMA read_uncommitted = false;", getAutoCommit());
                 break;
             case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
-                getDatabase().exec("PRAGMA read_uncommitted = true;");
+                getDatabase().exec("PRAGMA read_uncommitted = true;", getAutoCommit());
                 break;
             default:
                 throw new SQLException("SQLite supports only TRANSACTION_SERIALIZABLE and TRANSACTION_READ_UNCOMMITTED.");
@@ -318,12 +318,9 @@ public abstract class SQLiteConnection
         checkOpen();
         if (connectionConfig.isAutoCommit() == ac)
             return;
+
         connectionConfig.setAutoCommit(ac);
-        if(ac)
-            db.enableAutoCommit();
-        else
-            db.disableAutoCommit();
-        db.exec(connectionConfig.isAutoCommit() ? "commit;" : connectionConfig.transactionPrefix());
+        db.exec(connectionConfig.isAutoCommit() ? "commit;" : connectionConfig.transactionPrefix(), ac);
     }
 
     /**
@@ -395,8 +392,8 @@ public abstract class SQLiteConnection
         checkOpen();
         if (connectionConfig.isAutoCommit())
             throw new SQLException("database in auto-commit mode");
-        db.exec("commit;");
-        db.exec(connectionConfig.transactionPrefix());
+        db.exec("commit;", getAutoCommit());
+        db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
     }
 
     /**
@@ -407,8 +404,8 @@ public abstract class SQLiteConnection
         checkOpen();
         if (connectionConfig.isAutoCommit())
             throw new SQLException("database in auto-commit mode");
-        db.exec("rollback;");
-        db.exec(connectionConfig.transactionPrefix());
+        db.exec("rollback;", getAutoCommit());
+        db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
     }
 
 

@@ -264,7 +264,7 @@ public abstract class JDBC3Connection
             setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()));
+        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), getAutoCommit());
         return sp;
     }
 
@@ -283,7 +283,7 @@ public abstract class JDBC3Connection
             setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()));
+        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), getAutoCommit());
         return sp;
     }
 
@@ -297,7 +297,7 @@ public abstract class JDBC3Connection
         if (getAutoCommit()) {
             throw new SQLException("database in auto-commit mode");
         }
-        getDatabase().exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()));
+        getDatabase().exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()), getAutoCommit());
     }
 
     /**
@@ -310,7 +310,7 @@ public abstract class JDBC3Connection
         if (getAutoCommit()) {
             throw new SQLException("database in auto-commit mode");
         }
-        getDatabase().exec(String.format("ROLLBACK TO SAVEPOINT %s", savepoint.getSavepointName()));
+        getDatabase().exec(String.format("ROLLBACK TO SAVEPOINT %s", savepoint.getSavepointName()), getAutoCommit());
     }
 
     // UNUSED FUNCTIONS /////////////////////////////////////////////

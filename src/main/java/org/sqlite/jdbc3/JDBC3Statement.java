@@ -106,7 +106,7 @@ public abstract class JDBC3Statement extends CoreStatement {
             try {
                 changes = db.total_changes();
 
-                // directly invokes the exec API to support multiple SQL statements 
+                // directly invokes the exec API to support multiple SQL statements
                 int statusCode = db._exec(sql);
                 if (statusCode != SQLITE_OK)
                     throw DB.newSQLException(statusCode, "");
@@ -403,4 +403,5 @@ public abstract class JDBC3Statement extends CoreStatement {
         throws SQLException { throw unused(); }
     public boolean execute(String sql, int autokeys)
         throws SQLException { throw unused(); }
+
 }

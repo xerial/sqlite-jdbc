@@ -121,7 +121,7 @@ public final class NativeDB extends DB
     public native synchronized void busy_timeout(int ms);
     
     /**
-     * @see org.sqlite.core.DB#busy_handler(int)
+     * @see org.sqlite.core.DB#busy_handler(BusyHandler)
      */
     @Override
     public native synchronized void busy_handler(BusyHandler busyHandler);
