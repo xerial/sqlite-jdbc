@@ -3,16 +3,17 @@ package org.sqlite;
 import org.sqlite.date.FastDateFormat;
 
 import java.sql.Connection;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Properties;
+
+import static org.sqlite.SQLiteConfig.DEFAULT_DATE_STRING_FORMAT;
 
 /**
  * Connection local cofigurations
  */
 public class SQLiteConnectionConfig implements Cloneable
 {
-    /* Date storage class*/
-    public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-
     private SQLiteConfig.DateClass dateClass = SQLiteConfig.DateClass.INTEGER;
     private SQLiteConfig.DatePrecision datePrecision = SQLiteConfig.DatePrecision.MILLISECONDS; //Calendar.SECOND or Calendar.MILLISECOND
     private String dateStringFormat = DEFAULT_DATE_STRING_FORMAT;
@@ -130,5 +131,20 @@ public class SQLiteConnectionConfig implements Cloneable
     public void setTransactionMode(SQLiteConfig.TransactionMode transactionMode)
     {
         this.transactionMode = transactionMode;
+    }
+
+
+    private final static Map<SQLiteConfig.TransactionMode, String> beginCommandMap =
+            new EnumMap<SQLiteConfig.TransactionMode, String>(SQLiteConfig.TransactionMode.class);
+
+
+    static {
+        beginCommandMap.put(SQLiteConfig.TransactionMode.DEFFERED, "begin;");
+        beginCommandMap.put(SQLiteConfig.TransactionMode.IMMEDIATE, "begin immediate;");
+        beginCommandMap.put(SQLiteConfig.TransactionMode.EXCLUSIVE, "begin exclusive;");
+    }
+
+    String transactionPrefix() {
+        return beginCommandMap.get(transactionMode);
     }
 }

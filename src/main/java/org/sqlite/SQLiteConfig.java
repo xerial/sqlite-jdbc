@@ -33,6 +33,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * SQLite Configuration
@@ -44,6 +46,9 @@ import java.util.Properties;
  */
 public class SQLiteConfig
 {
+    /* Date storage class*/
+    public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
     private final Properties pragmaTable;
     private int openModeFlag = 0x00;
 
@@ -249,6 +254,14 @@ public class SQLiteConfig
     }
 
     private static final String[] OnOff = new String[] { "true", "false" };
+
+    final static Set<String> pragmaSet = new TreeSet<String>();
+
+    static {
+        for (SQLiteConfig.Pragma pragma : SQLiteConfig.Pragma.values()) {
+            pragmaSet.add(pragma.pragmaName);
+        }
+    }
 
     public static enum Pragma {
 

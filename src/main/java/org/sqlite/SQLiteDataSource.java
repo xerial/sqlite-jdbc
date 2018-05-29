@@ -401,7 +401,7 @@ public class SQLiteDataSource implements DataSource
     /**
      * @see javax.sql.DataSource#getConnection(java.lang.String, java.lang.String)
      */
-    public Connection getConnection(String username, String password) throws SQLException {
+    public SQLiteConnection getConnection(String username, String password) throws SQLException {
         Properties p = config.toProperties();
         if (username != null)
             p.put("user", username);

@@ -16,6 +16,8 @@
 
 package org.sqlite;
 
+import org.sqlite.jdbc4.JDBC4Connection;
+
 import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -106,11 +108,11 @@ public class JDBC implements Driver
      * @throws SQLException
      * @see java.sql.Driver#connect(java.lang.String, java.util.Properties)
      */
-    public static Connection createConnection(String url, Properties prop) throws SQLException {
+    public static SQLiteConnection createConnection(String url, Properties prop) throws SQLException {
         if (!isValidURL(url))
             return null;
 
         url = url.trim();
-        return new SQLiteConnection(url, extractAddress(url), prop);
+        return new JDBC4Connection(url, extractAddress(url), prop);
     }
 }

@@ -16,11 +16,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Executor;
 
 /**
@@ -30,21 +26,6 @@ public abstract class SQLiteConnection
         implements Connection
 {
     private static final String RESOURCE_NAME_PREFIX = ":resource:";
-
-    private final static Map<SQLiteConfig.TransactionMode, String> beginCommandMap =
-            new EnumMap<SQLiteConfig.TransactionMode, String>(SQLiteConfig.TransactionMode.class);
-
-    private final static Set<String> pragmaSet = new TreeSet<String>();
-    static {
-        beginCommandMap.put(SQLiteConfig.TransactionMode.DEFFERED, "begin;");
-        beginCommandMap.put(SQLiteConfig.TransactionMode.IMMEDIATE, "begin immediate;");
-        beginCommandMap.put(SQLiteConfig.TransactionMode.EXCLUSIVE, "begin exclusive;");
-
-        for (SQLiteConfig.Pragma pragma : SQLiteConfig.Pragma.values()) {
-            pragmaSet.add(pragma.pragmaName);
-        }
-    }
-
     private final DB db;
     private CoreDatabaseMetaData meta = null;
     private final SQLiteConnectionConfig connectionConfig;
@@ -86,14 +67,21 @@ public abstract class SQLiteConnection
         return connectionConfig;
     }
 
-    public DatabaseMetaData getMetaData() throws SQLException {
+    public CoreDatabaseMetaData getSQLiteDatabaseMetaData() throws SQLException {
         checkOpen();
 
         if (meta == null) {
             meta = new JDBC4DatabaseMetaData(this);
         }
 
-        return (DatabaseMetaData)meta;
+        return meta;
+    }
+
+    @Override
+    public DatabaseMetaData getMetaData()
+            throws SQLException
+    {
+        return (DatabaseMetaData) getSQLiteDatabaseMetaData();
     }
 
     public String getUrl() {
@@ -335,7 +323,7 @@ public abstract class SQLiteConnection
             db.enableAutoCommit();
         else
             db.disableAutoCommit();
-        db.exec(connectionConfig.isAutoCommit() ? "commit;" : beginCommandMap.get(db.getConfig().getTransactionMode()));
+        db.exec(connectionConfig.isAutoCommit() ? "commit;" : connectionConfig.transactionPrefix());
     }
 
     /**
@@ -408,7 +396,7 @@ public abstract class SQLiteConnection
         if (connectionConfig.isAutoCommit())
             throw new SQLException("database in auto-commit mode");
         db.exec("commit;");
-        db.exec(beginCommandMap.get(db.getConfig().getTransactionMode()));
+        db.exec(connectionConfig.transactionPrefix());
     }
 
     /**
@@ -420,7 +408,7 @@ public abstract class SQLiteConnection
         if (connectionConfig.isAutoCommit())
             throw new SQLException("database in auto-commit mode");
         db.exec("rollback;");
-        db.exec(beginCommandMap.get(db.getConfig().getTransactionMode()));
+        db.exec(connectionConfig.transactionPrefix());
     }
 
 
@@ -457,7 +445,7 @@ public abstract class SQLiteConnection
 
             String [] kvp = parameter.split("=");
             String key = kvp[0].trim().toLowerCase();
-            if (pragmaSet.contains(key)) {
+            if (SQLiteConfig.pragmaSet.contains(key)) {
                 if (kvp.length == 1) {
                     throw new SQLException(String.format("Please specify a value for PRAGMA %s in URL %s", key, url));
                 }

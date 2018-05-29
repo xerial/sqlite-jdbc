@@ -17,7 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.sqlite.core.CoreConnection;
 import org.sqlite.jdbc3.JDBC3Statement;
 import org.sqlite.jdbc4.JDBC4Statement;
 
@@ -460,7 +459,7 @@ public class StatementTest
         assertTrue( conn.isWrapperFor(Connection.class) );
         assertFalse( conn.isWrapperFor(Statement.class) );
         assertEquals( conn, conn.unwrap(Connection.class) );
-        assertEquals( conn, conn.unwrap(CoreConnection.class) );
+        assertEquals( conn, conn.unwrap(SQLiteConnection.class) );
 
         assertTrue( stat.isWrapperFor(Statement.class) );
         assertEquals( stat, stat.unwrap(Statement.class) );

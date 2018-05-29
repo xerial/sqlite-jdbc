@@ -300,7 +300,6 @@ class SQLitePooledConnectionHandle extends SQLiteConnection
 
     @Override
     public int getTransactionIsolation()
-            throws SQLException
     {
         return 0;
     }

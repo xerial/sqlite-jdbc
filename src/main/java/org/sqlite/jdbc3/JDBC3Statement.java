@@ -25,13 +25,6 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#close()
      */
     public void close() throws SQLException {
-        if (metadata != null) {
-            metadata.refCount--;
-            metadata.close();
-
-            metadata = null;
-        }
-
         internalClose();
     }
 
@@ -341,12 +334,7 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#getGeneratedKeys()
      */
     public ResultSet getGeneratedKeys() throws SQLException {
-        if (metadata == null) {
-            metadata = (CoreDatabaseMetaData)conn.getMetaData();
-            metadata.refCount++;
-        }
-
-        return metadata.getGeneratedKeys();
+        return conn.getSQLiteDatabaseMetaData().getGeneratedKeys();
     }
 
     /**

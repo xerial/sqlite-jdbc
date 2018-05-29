@@ -16,6 +16,7 @@
 
 package org.sqlite.core;
 
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 
 import org.sqlite.SQLiteConnection;
 
-public abstract class CoreDatabaseMetaData
+public abstract class CoreDatabaseMetaData implements DatabaseMetaData
 {
     protected SQLiteConnection conn;
     protected PreparedStatement
@@ -41,11 +42,6 @@ public abstract class CoreDatabaseMetaData
      * Used to save generating a new statement every call.
      */
     protected PreparedStatement getGeneratedKeys = null;
-
-    /**
-     * Reference count.
-     */
-    public int refCount = 1;
 
     /**
      * Constructor that applies the Connection object.
@@ -70,7 +66,7 @@ public abstract class CoreDatabaseMetaData
      * @throws SQLException
      */
     public synchronized void close() throws SQLException {
-        if (conn == null || refCount > 0) {
+        if (conn == null) {
             return;
         }
 

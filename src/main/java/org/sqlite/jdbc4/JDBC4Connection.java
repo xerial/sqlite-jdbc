@@ -7,6 +7,7 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.SQLClientInfoException;
@@ -16,7 +17,7 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
 
-public abstract class JDBC4Connection extends JDBC3Connection implements Connection {
+public class JDBC4Connection extends JDBC3Connection {
 
     public JDBC4Connection(String url, String fileName, Properties prop) throws SQLException
     {

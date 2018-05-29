@@ -120,9 +120,6 @@ public abstract class JDBC3Connection
         }
     }
 
-    public abstract DatabaseMetaData getMetaData()
-            throws SQLException;
-
     /**
      * @see java.sql.Connection#nativeSQL(java.lang.String)
      */
