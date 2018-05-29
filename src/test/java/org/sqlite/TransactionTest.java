@@ -291,9 +291,11 @@ public class TransactionTest
         rs.close();
 
         synchronized (lock) {
-            lock.wait(5000);
-            if (!lock.done)
-                throw new Exception("should be done");
+            if(!lock.done) {
+                lock.wait(5000);
+                if (!lock.done)
+                    throw new Exception("should be done");
+            }
         }
     }
 

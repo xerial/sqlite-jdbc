@@ -240,7 +240,6 @@ public abstract class SQLiteConnection
             err.initCause(e);
             throw err;
         }
-
         db.open(fileName, config.getOpenModeFlags());
         return db;
     }

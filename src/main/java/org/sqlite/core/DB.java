@@ -17,7 +17,6 @@ package org.sqlite.core;
 
 import org.sqlite.BusyHandler;
 import java.sql.BatchUpdateException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,8 +44,9 @@ import org.sqlite.SQLiteException;
 public abstract class DB implements Codes
 {
     private final String url;
+    private final String fileName;
     private final SQLiteConfig config;
-    private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final AtomicBoolean closed = new AtomicBoolean(true);
 
     /** The "begin;"and "commit;" statement handles. */
     long                          begin  = 0;
@@ -59,15 +59,8 @@ public abstract class DB implements Codes
             throws SQLException
     {
         this.url = url;
+        this.fileName = fileName;
         this.config = config;
-        open(fileName, config.getOpenModeFlags());
-
-        if (fileName.startsWith("file:") && !fileName.contains("cache="))
-        {   // URI cache overrides flags
-            shared_cache(config.isEnabledSharedCache());
-        }
-        enable_load_extension(config.isEnabledLoadExtension());
-        busy_timeout(config.getBusyTimeout());
     }
 
     public String getUrl() {
@@ -200,6 +193,14 @@ public abstract class DB implements Codes
      */
     public final synchronized void open(String file, int openFlags) throws SQLException {
         _open(file, openFlags);
+        closed.set(false);
+
+        if (fileName.startsWith("file:") && !fileName.contains("cache=")) {
+            // URI cache overrides flags
+            shared_cache(config.isEnabledSharedCache());
+        }
+        enable_load_extension(config.isEnabledLoadExtension());
+        busy_timeout(config.getBusyTimeout());
     }
 
     /**
