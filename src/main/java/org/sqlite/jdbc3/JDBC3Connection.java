@@ -254,15 +254,15 @@ public abstract class JDBC3Connection
             throws SQLException
     {
         checkOpen();
-        if (getAutoCommit()) {
+        if(getAutoCommit()) {
             // when a SAVEPOINT is the outermost savepoint and not
             // with a BEGIN...COMMIT then the behavior is the same
             // as BEGIN DEFERRED TRANSACTION
             // http://www.sqlite.org/lang_savepoint.html
-            setAutoCommit(false);
+            getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), getAutoCommit());
+        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
         return sp;
     }
 
@@ -273,15 +273,15 @@ public abstract class JDBC3Connection
             throws SQLException
     {
         checkOpen();
-        if (getAutoCommit()) {
+        if(getAutoCommit()) {
             // when a SAVEPOINT is the outermost savepoint and not
             // with a BEGIN...COMMIT then the behavior is the same
             // as BEGIN DEFERRED TRANSACTION
             // http://www.sqlite.org/lang_savepoint.html
-            setAutoCommit(false);
+            getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), getAutoCommit());
+        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
         return sp;
     }
 
@@ -295,7 +295,7 @@ public abstract class JDBC3Connection
         if (getAutoCommit()) {
             throw new SQLException("database in auto-commit mode");
         }
-        getDatabase().exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()), getAutoCommit());
+        getDatabase().exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()), false);
     }
 
     /**

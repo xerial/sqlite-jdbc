@@ -210,7 +210,5 @@ public class SavepointTest
         assertTrue(rs.next());
         assertEquals(2, rs.getInt(1));
         rs.close();
-
     }
-
 }
