@@ -35,7 +35,7 @@ public class BusyHandlerTest {
         public BusyWork() throws Exception {
             conn = DriverManager.getConnection("jdbc:sqlite:target/test.db");
             stat = conn.createStatement();
-            stat.setQueryTimeout(10);
+            stat.setQueryTimeout(1);
         }
 
         @Override
@@ -68,7 +68,7 @@ public class BusyHandlerTest {
 
         // Generate some work for the sqlite vm
         int i = 0;
-        while (i<100) {
+        while (i<5) {
             stat.executeQuery("insert into foo (id) values (" + i + ")");
             i++;
         }

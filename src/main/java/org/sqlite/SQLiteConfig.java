@@ -80,8 +80,11 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
-        openMode = pragmaTable.getProperty(Pragma.SHARED_CACHE.pragmaName);
-        setOpenMode(SQLiteOpenMode.OPEN_URI); // Enable URI filenames
+        // Shared Cache
+        setSharedCache(Boolean.parseBoolean(pragmaTable.getProperty(Pragma.SHARED_CACHE.pragmaName, "false")));
+        // Enable URI filenames
+        setOpenMode(SQLiteOpenMode.OPEN_URI);
+
         this.busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
     }

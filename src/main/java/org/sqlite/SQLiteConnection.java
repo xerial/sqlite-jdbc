@@ -30,6 +30,10 @@ public abstract class SQLiteConnection
     private CoreDatabaseMetaData meta = null;
     private final SQLiteConnectionConfig connectionConfig;
 
+    /**
+     * Connection constructor for reusing an existing DB handle
+     * @param db
+     */
     public SQLiteConnection(DB db) {
         this.db = db;
         connectionConfig = db.getConfig().newConnectionConfig();
@@ -168,8 +172,11 @@ public abstract class SQLiteConnection
      * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
     private static DB open(String url, String origFileName, Properties props) throws SQLException {
+        // Create a copy of the given properties
         Properties newProps = new Properties();
         newProps.putAll(props);
+
+        // Extract pragma as properties
         String fileName = extractPragmasFromFilename(url, origFileName, newProps);
         SQLiteConfig config = new SQLiteConfig(newProps);
 
