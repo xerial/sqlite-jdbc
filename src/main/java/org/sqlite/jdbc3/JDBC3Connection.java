@@ -1,7 +1,6 @@
 package org.sqlite.jdbc3;
 
 import java.sql.CallableStatement;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +19,6 @@ import org.sqlite.SQLiteOpenMode;
 public abstract class JDBC3Connection
         extends SQLiteConnection
 {
-
     private final AtomicInteger savePoint = new AtomicInteger(0);
     private Map<String, Class<?>> typeMap;
 

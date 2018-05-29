@@ -21,7 +21,6 @@ import org.sqlite.jdbc4.JDBC4ResultSet;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class CoreStatement implements Codes
 {

@@ -2,11 +2,10 @@ package org.sqlite.jdbc3;
 
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
-import org.sqlite.core.CoreDatabaseMetaData;
+import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.core.DB;
 import org.sqlite.core.DB.ProgressObserver;
-import org.sqlite.SQLiteConnection;
 
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
