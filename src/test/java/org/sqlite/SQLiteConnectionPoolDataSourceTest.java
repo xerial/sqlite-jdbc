@@ -13,6 +13,7 @@
  *--------------------------------------------------------------------------*/
 package org.sqlite;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
@@ -63,6 +64,7 @@ public class SQLiteConnectionPoolDataSourceTest
         assertTrue(handle.isClosed());
     }
 
+    @Ignore
     @Test
     public void proxyConnectionCloseTest()
             throws SQLException
