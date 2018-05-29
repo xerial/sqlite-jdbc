@@ -54,12 +54,10 @@ public abstract class SQLiteConnection
      * @throws SQLException
      */
     public SQLiteConnection(String url, String fileName, Properties prop) throws SQLException {
-        this.db = open(url, fileName, new SQLiteConfig(prop));
+        this.db = open(url, fileName, prop);
         SQLiteConfig config = db.getConfig();
-        this.connectionConfig = config.newConnectionConfig();
+        this.connectionConfig = db.getConfig().newConnectionConfig();
 
-        // set pragmas
-        String pragmas = extractPragmasFromFilename(url, fileName, prop);
         config.apply(this);
     }
 
@@ -169,7 +167,12 @@ public abstract class SQLiteConnection
      *      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
-    private static DB open(String url, String fileName, SQLiteConfig config) throws SQLException {
+    private static DB open(String url, String origFileName, Properties props) throws SQLException {
+        Properties newProps = new Properties();
+        newProps.putAll(props);
+        String fileName = extractPragmasFromFilename(url, origFileName, newProps);
+        SQLiteConfig config = new SQLiteConfig(newProps);
+
         // check the path to the file exists
         if (!":memory:".equals(fileName) && !fileName.startsWith("file:") && !fileName.contains("mode=memory")) {
             if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
