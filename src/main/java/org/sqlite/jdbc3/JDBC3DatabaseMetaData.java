@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.sqlite.SQLiteConnection;
-import org.sqlite.core.Codes;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData.ImportedKeyFinder.ForeignKey;
 import org.sqlite.util.StringUtils;
@@ -397,7 +396,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * @see java.sql.DatabaseMetaData#getURL()
      */
     public String getURL() {
-        return conn.url();
+        return conn.getUrl();
     }
 
     /**

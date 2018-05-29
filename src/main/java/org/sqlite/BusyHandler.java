@@ -27,7 +27,7 @@ public abstract class BusyHandler {
         }
         
         SQLiteConnection sqliteConnection = (SQLiteConnection) conn;
-        sqliteConnection.db().busy_handler(busyHandler);
+        sqliteConnection.getDatabase().busy_handler(busyHandler);
     }
     
     /**

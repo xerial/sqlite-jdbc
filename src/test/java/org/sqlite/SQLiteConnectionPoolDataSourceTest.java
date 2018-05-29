@@ -13,21 +13,29 @@
  *--------------------------------------------------------------------------*/
 package org.sqlite;
 
-import static org.junit.Assert.*;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
-import org.junit.Test;
-import org.sqlite.javax.SQLiteConnectionPoolDataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-public class SQLiteConnectionPoolDataSourceTest {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class SQLiteConnectionPoolDataSourceTest
+{
 
     @Test
-    public void connectionTest () throws SQLException {
+    public void connectionTest()
+            throws SQLException
+    {
         ConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
 
         PooledConnection pooledConn = ds.getPooledConnection();
@@ -54,5 +62,26 @@ public class SQLiteConnectionPoolDataSourceTest {
 
         pooledConn.close();
         assertTrue(handle.isClosed());
+    }
+
+    @Ignore
+    @Test
+    public void proxyConnectionCloseTest()
+            throws SQLException
+    {
+        ConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
+        PooledConnection pooledConn = ds.getPooledConnection();
+        System.out.println("pooledConn: " + pooledConn.getClass());
+
+        Connection handle = pooledConn.getConnection();
+        System.out.println("pooledConn.getConnection: " + handle.getClass());
+
+        Statement st = handle.createStatement();
+        System.out.println("statement: " + st.getClass());
+        Connection stConn = handle.createStatement().getConnection();
+        System.out.println("statement connection:" + stConn.getClass());
+        stConn.close(); // This closes the physical connection, not the proxy
+
+        Connection handle2 = pooledConn.getConnection();
     }
 }

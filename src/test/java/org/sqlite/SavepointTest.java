@@ -49,12 +49,6 @@ public class SavepointTest
 
         stat1 = conn1.createStatement();
         stat2 = conn2.createStatement();
-
-        //        if (SQLiteJDBCLoader.isPureJavaMode()) {
-        //            stat1.setQueryTimeout(3);
-        //            stat2.setQueryTimeout(3);
-        //            stat3.setQueryTimeout(3);
-        //        }
     }
 
     @After
@@ -216,7 +210,5 @@ public class SavepointTest
         assertTrue(rs.next());
         assertEquals(2, rs.getInt(1));
         rs.close();
-
     }
-
 }

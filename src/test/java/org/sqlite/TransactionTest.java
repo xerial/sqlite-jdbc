@@ -3,7 +3,6 @@ package org.sqlite;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,7 +16,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sqlite.SQLiteConfig.TransactionMode;
-import org.sqlite.core.CoreConnection;
 
 /**
  * These tests assume that Statements and PreparedStatements are working as per
@@ -293,9 +291,11 @@ public class TransactionTest
         rs.close();
 
         synchronized (lock) {
-            lock.wait(5000);
-            if (!lock.done)
-                throw new Exception("should be done");
+            if(!lock.done) {
+                lock.wait(5000);
+                if (!lock.done)
+                    throw new Exception("should be done");
+            }
         }
     }
 
@@ -338,41 +338,32 @@ public class TransactionTest
     public void transactionModes() throws Exception {
         File tmpFile = File.createTempFile("test-trans", ".db");
 
-        Field transactionMode = CoreConnection.class.getDeclaredField("transactionMode");
-        transactionMode.setAccessible(true);
-        Field beginCommandMap = CoreConnection.class.getDeclaredField("beginCommandMap");
-        beginCommandMap.setAccessible(true);
-
         SQLiteDataSource ds = new SQLiteDataSource();
         ds.setUrl("jdbc:sqlite:" + tmpFile.getAbsolutePath());
 
         // deffered
         SQLiteConnection con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
-        assertEquals("begin;", 
-                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
+        assertEquals(TransactionMode.DEFFERED, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
         runUpdates(con, "tbl1");
         
         ds.setTransactionMode(TransactionMode.DEFFERED.name());
         con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.DEFFERED, transactionMode.get(con));
-        assertEquals("begin;", 
-                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.DEFFERED));
+        assertEquals(TransactionMode.DEFFERED, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
 
         // immediate
         ds.setTransactionMode(TransactionMode.IMMEDIATE.name());
         con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.IMMEDIATE, transactionMode.get(con));
-        assertEquals("begin immediate;", 
-                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.IMMEDIATE));
+        assertEquals(TransactionMode.IMMEDIATE, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin immediate;", con.getConnectionConfig().transactionPrefix());
         runUpdates(con, "tbl2");
 
         // exclusive
         ds.setTransactionMode(TransactionMode.EXCLUSIVE.name());
         con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.EXCLUSIVE, transactionMode.get(con));
-        assertEquals("begin exclusive;", 
-                 ((Map<?, ?>)beginCommandMap.get(con)).get(TransactionMode.EXCLUSIVE));
+        assertEquals(TransactionMode.EXCLUSIVE, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin exclusive;", con.getConnectionConfig().transactionPrefix());
         runUpdates(con, "tbl3");
 
         tmpFile.delete();

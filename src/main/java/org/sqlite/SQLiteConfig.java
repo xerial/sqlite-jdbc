@@ -24,6 +24,8 @@
 //--------------------------------------
 package org.sqlite;
 
+import org.sqlite.date.FastDateFormat;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
@@ -31,6 +33,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * SQLite Configuration
@@ -42,17 +46,15 @@ import java.util.Properties;
  */
 public class SQLiteConfig
 {
-    private final Properties pragmaTable;
-    private int openModeFlag = 0x00;
-    private TransactionMode transactionMode;
-    public final int busyTimeout;
-
     /* Date storage class*/
     public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-    public DateClass dateClass;
-    public DatePrecision datePrecision;
-    public long dateMultiplier;
-    public String dateStringFormat;
+
+    private final Properties pragmaTable;
+    private int openModeFlag = 0x00;
+
+    private final int busyTimeout;
+
+    private final SQLiteConnectionConfig defaultConnectionConfig;
 
     /**
      * Default constructor.
@@ -78,18 +80,18 @@ public class SQLiteConfig
             setOpenMode(SQLiteOpenMode.READWRITE);
             setOpenMode(SQLiteOpenMode.CREATE);
         }
-        openMode = pragmaTable.getProperty(Pragma.SHARED_CACHE.pragmaName);
-        setOpenMode(SQLiteOpenMode.OPEN_URI); // Enable URI filenames
+        // Shared Cache
+        setSharedCache(Boolean.parseBoolean(pragmaTable.getProperty(Pragma.SHARED_CACHE.pragmaName, "false")));
+        // Enable URI filenames
+        setOpenMode(SQLiteOpenMode.OPEN_URI);
 
-        transactionMode = TransactionMode.getMode(
-                pragmaTable.getProperty(Pragma.TRANSACTION_MODE.pragmaName, TransactionMode.DEFFERED.name()));
+        this.busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
+        this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
+    }
 
-        dateClass = DateClass.getDateClass(pragmaTable.getProperty(Pragma.DATE_CLASS.pragmaName, DateClass.INTEGER.name()));
-        datePrecision = DatePrecision.getPrecision(pragmaTable.getProperty(Pragma.DATE_PRECISION.pragmaName, DatePrecision.MILLISECONDS.name()));
-        dateMultiplier = (datePrecision == DatePrecision.MILLISECONDS) ? 1L : 1000L;
-        dateStringFormat = pragmaTable.getProperty(Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT);
-
-        busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
+    public SQLiteConnectionConfig newConnectionConfig()
+    {
+         return defaultConnectionConfig.copyConfig();
     }
 
     /**
@@ -228,10 +230,10 @@ public class SQLiteConfig
      */
     public Properties toProperties() {
         pragmaTable.setProperty(Pragma.OPEN_MODE.pragmaName, Integer.toString(openModeFlag));
-        pragmaTable.setProperty(Pragma.TRANSACTION_MODE.pragmaName, transactionMode.getValue());
-        pragmaTable.setProperty(Pragma.DATE_CLASS.pragmaName, dateClass.getValue());
-        pragmaTable.setProperty(Pragma.DATE_PRECISION.pragmaName, datePrecision.getValue());
-        pragmaTable.setProperty(Pragma.DATE_STRING_FORMAT.pragmaName, dateStringFormat);
+        pragmaTable.setProperty(Pragma.TRANSACTION_MODE.pragmaName, defaultConnectionConfig.getTransactionMode().getValue());
+        pragmaTable.setProperty(Pragma.DATE_CLASS.pragmaName, defaultConnectionConfig.getDateClass().getValue());
+        pragmaTable.setProperty(Pragma.DATE_PRECISION.pragmaName, defaultConnectionConfig.getDatePrecision().getValue());
+        pragmaTable.setProperty(Pragma.DATE_STRING_FORMAT.pragmaName, defaultConnectionConfig.getDateStringFormat());
 
         return pragmaTable;
     }
@@ -255,6 +257,14 @@ public class SQLiteConfig
     }
 
     private static final String[] OnOff = new String[] { "true", "false" };
+
+    final static Set<String> pragmaSet = new TreeSet<String>();
+
+    static {
+        for (SQLiteConfig.Pragma pragma : SQLiteConfig.Pragma.values()) {
+            pragmaSet.add(pragma.pragmaName);
+        }
+    }
 
     public static enum Pragma {
 
@@ -784,7 +794,7 @@ public class SQLiteConfig
      * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
      */
     public void setTransactionMode(TransactionMode transactionMode) {
-        this.transactionMode = transactionMode;
+        this.defaultConnectionConfig.setTransactionMode(transactionMode);
     }
 
     /**
@@ -800,7 +810,7 @@ public class SQLiteConfig
      * @return The transaction mode.
      */
     public TransactionMode getTransactionMode() {
-        return transactionMode;
+        return this.defaultConnectionConfig.getTransactionMode();
     }
 
     public static enum DatePrecision implements PragmaValue {
@@ -820,7 +830,7 @@ public class SQLiteConfig
      * @throws SQLException 
      */
     public void setDatePrecision(String datePrecision) throws SQLException {
-        this.datePrecision = DatePrecision.getPrecision(datePrecision);
+        this.defaultConnectionConfig.setDatePrecision(DatePrecision.getPrecision(datePrecision));
     }
 
     public static enum DateClass implements PragmaValue {
@@ -839,20 +849,25 @@ public class SQLiteConfig
      * @param dateClass One of INTEGER, TEXT or REAL
      */
     public void setDateClass(String dateClass) {
-        this.dateClass = DateClass.getDateClass(dateClass);
+        this.defaultConnectionConfig.setDateClass(DateClass.getDateClass(dateClass));
     }
 
     /**
      * @param dateStringFormat Format of date string
      */
     public void setDateStringFormat(String dateStringFormat) {
-        this.dateStringFormat = dateStringFormat;
+
+        this.defaultConnectionConfig.setDateStringFormat(dateStringFormat);
     }
 
     /**
      * @param milliseconds Connect to DB timeout in milliseconds
      */
-    public void setBusyTimeout(String milliseconds) {
-        setPragma(Pragma.BUSY_TIMEOUT, milliseconds);
+    public void setBusyTimeout(int milliseconds) {
+        setPragma(Pragma.BUSY_TIMEOUT, Integer.toString(milliseconds));
+    }
+
+    public int getBusyTimeout() {
+        return busyTimeout;
     }
 }

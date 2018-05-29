@@ -18,7 +18,7 @@ package org.sqlite.core;
 import org.sqlite.BusyHandler;
 import org.sqlite.Function;
 import org.sqlite.ProgressHandler;
-import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
 
@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  * This class is the interface to SQLite. It provides some helper functions
@@ -42,8 +43,10 @@ import java.util.Map;
  */
 public abstract class DB implements Codes
 {
-    /** The JDBC Connection that 'owns' this database instance. */
-    SQLiteConnection                          conn   = null;
+    private final String url;
+    private final String fileName;
+    private final SQLiteConfig config;
+    private final AtomicBoolean closed = new AtomicBoolean(true);
 
     /** The "begin;"and "commit;" statement handles. */
     long                          begin  = 0;
@@ -51,6 +54,26 @@ public abstract class DB implements Codes
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
     private final Map<Long, CoreStatement> stmts  = new HashMap<Long, CoreStatement>();
+
+    public DB(String url, String fileName, SQLiteConfig config)
+            throws SQLException
+    {
+        this.url = url;
+        this.fileName = fileName;
+        this.config = config;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public boolean isClosed() {
+        return closed.get();
+    }
+
+    public SQLiteConfig getConfig() {
+        return config;
+    }
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
@@ -140,14 +163,14 @@ public abstract class DB implements Codes
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/exec.html">http://www.sqlite.org/c3ref/exec.html</a>
      */
-    public final synchronized void exec(String sql) throws SQLException {
+    public final synchronized void exec(String sql, boolean autoCommit) throws SQLException {
         long pointer = 0;
         try {
             pointer = prepare(sql);
             int rc = step(pointer);
             switch (rc) {
             case SQLITE_DONE:
-                ensureAutoCommit();
+                ensureAutoCommit(autoCommit);
                 return;
             case SQLITE_ROW:
                 return;
@@ -162,16 +185,22 @@ public abstract class DB implements Codes
 
     /**
      * Creates an SQLite interface to a database for the given connection.
-     * @param conn The connection.
      * @param file The database.
      * @param openFlags File opening configurations
      * (<a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>)
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/open.html">http://www.sqlite.org/c3ref/open.html</a>
      */
-    public final synchronized void open(SQLiteConnection conn, String file, int openFlags) throws SQLException {
-        this.conn = conn;
+    public final synchronized void open(String file, int openFlags) throws SQLException {
         _open(file, openFlags);
+        closed.set(false);
+
+        if (fileName.startsWith("file:") && !fileName.contains("cache=")) {
+            // URI cache overrides flags
+            shared_cache(config.isEnabledSharedCache());
+        }
+        enable_load_extension(config.isEnabledLoadExtension());
+        busy_timeout(config.getBusyTimeout());
     }
 
     /**
@@ -208,6 +237,7 @@ public abstract class DB implements Codes
             commit = 0;
         }
 
+        closed.set(true);
         _close();
     }
 
@@ -746,7 +776,7 @@ public abstract class DB implements Codes
      *         commands execute successfully;
      * @throws SQLException
      */
-    final synchronized int[] executeBatch(long stmt, int count, Object[] vals) throws SQLException {
+    final synchronized int[] executeBatch(long stmt, int count, Object[] vals, boolean autoCommit) throws SQLException {
         if (count < 1) {
             throw new SQLException("count (" + count + ") < 1");
         }
@@ -779,7 +809,7 @@ public abstract class DB implements Codes
             }
         }
         finally {
-            ensureAutoCommit();
+            ensureAutoCommit(autoCommit);
         }
 
         reset(stmt);
@@ -813,7 +843,7 @@ public abstract class DB implements Codes
         switch (statusCode) {
         case SQLITE_DONE:
             reset(stmt.pointer);
-            ensureAutoCommit();
+            ensureAutoCommit(stmt.conn.getAutoCommit());
             return false;
         case SQLITE_ROW:
             return true;
@@ -835,13 +865,13 @@ public abstract class DB implements Codes
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/exec.html">http://www.sqlite.org/c3ref/exec.html</a>
      */
-    final synchronized boolean execute(String sql) throws SQLException {
+    final synchronized boolean execute(String sql, boolean autoCommit) throws SQLException {
         int statusCode = _exec(sql);
         switch (statusCode) {
         case SQLITE_OK:
             return false;
         case SQLITE_DONE:
-            ensureAutoCommit();
+            ensureAutoCommit(autoCommit);
             return false;
         case SQLITE_ROW:
             return true;
@@ -954,8 +984,8 @@ public abstract class DB implements Codes
      * mode.
      * @throws SQLException
      */
-    final void ensureAutoCommit() throws SQLException {
-        if (!conn.getAutoCommit()) {
+    final void ensureAutoCommit(boolean autoCommit) throws SQLException {
+        if (!autoCommit) {
             return;
         }
 

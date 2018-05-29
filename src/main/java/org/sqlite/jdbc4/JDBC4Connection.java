@@ -1,10 +1,10 @@
 package org.sqlite.jdbc4;
 
+import org.sqlite.jdbc3.JDBC3Connection;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.SQLClientInfoException;
@@ -14,38 +14,25 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.sqlite.SQLiteConnection;
-import org.sqlite.jdbc3.JDBC3Connection;
-
-public abstract class JDBC4Connection extends JDBC3Connection implements Connection {
+public class JDBC4Connection extends JDBC3Connection {
 
     public JDBC4Connection(String url, String fileName, Properties prop) throws SQLException
     {
         super(url, fileName, prop);
     }
 
-    public DatabaseMetaData getMetaData() throws SQLException {
-        checkOpen();
-
-        if (meta == null) {
-            meta = new JDBC4DatabaseMetaData((SQLiteConnection)this);
-        }
-
-        return (DatabaseMetaData)meta;
-    }
-
     public Statement createStatement(int rst, int rsc, int rsh) throws SQLException {
         checkOpen();
         checkCursor(rst, rsc, rsh);
 
-        return new JDBC4Statement((SQLiteConnection)this);
+        return new JDBC4Statement(this);
     }
 
     public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh) throws SQLException {
         checkOpen();
         checkCursor(rst, rsc, rsh);
 
-        return new JDBC4PreparedStatement((SQLiteConnection)this, sql);
+        return new JDBC4PreparedStatement(this, sql);
     }
 
     //JDBC 4
@@ -86,7 +73,7 @@ public abstract class JDBC4Connection extends JDBC3Connection implements Connect
     }
 
     public boolean isValid(int timeout) throws SQLException {
-        if (db == null) {
+        if (isClosed()) {
             return false;
         }
         Statement statement = createStatement();

@@ -1,18 +1,17 @@
 package org.sqlite.jdbc3;
 
+import org.sqlite.ExtendedCommand;
+import org.sqlite.ExtendedCommand.SQLExtension;
+import org.sqlite.SQLiteConnection;
+import org.sqlite.core.CoreStatement;
+import org.sqlite.core.DB;
+import org.sqlite.core.DB.ProgressObserver;
+
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-
-import org.sqlite.ExtendedCommand;
-import org.sqlite.ExtendedCommand.SQLExtension;
-import org.sqlite.SQLiteConnection;
-import org.sqlite.core.CoreDatabaseMetaData;
-import org.sqlite.core.CoreStatement;
-import org.sqlite.core.DB;
-import org.sqlite.core.DB.ProgressObserver;
 
 public abstract class JDBC3Statement extends CoreStatement {
     // PUBLIC INTERFACE /////////////////////////////////////////////
@@ -25,13 +24,6 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#close()
      */
     public void close() throws SQLException {
-        if (metadata != null) {
-            metadata.refCount--;
-            metadata.close();
-
-            metadata = null;
-        }
-
         internalClose();
     }
 
@@ -50,14 +42,14 @@ public abstract class JDBC3Statement extends CoreStatement {
 
         SQLExtension ext = ExtendedCommand.parse(sql);
         if (ext != null) { 
-            ext.execute(db);
+            ext.execute(conn.getDatabase());
 
             return false;
         }
 
         this.sql = sql;
 
-        db.prepare(this);
+        conn.getDatabase().prepare(this);
         return exec();
     }
 
@@ -78,7 +70,7 @@ public abstract class JDBC3Statement extends CoreStatement {
         internalClose();
         this.sql = sql;
 
-        db.prepare(this);
+        conn.getDatabase().prepare(this);
 
         if (!exec()) {
             internalClose();
@@ -101,6 +93,7 @@ public abstract class JDBC3Statement extends CoreStatement {
     public int executeUpdate(String sql) throws SQLException {
         internalClose();
         this.sql = sql;
+        DB db = conn.getDatabase();
 
         int changes = 0;
         SQLExtension ext = ExtendedCommand.parse(sql);
@@ -112,7 +105,7 @@ public abstract class JDBC3Statement extends CoreStatement {
             try {
                 changes = db.total_changes();
 
-                // directly invokes the exec API to support multiple SQL statements 
+                // directly invokes the exec API to support multiple SQL statements
                 int statusCode = db._exec(sql);
                 if (statusCode != SQLITE_OK)
                     throw DB.newSQLException(statusCode, "");
@@ -135,6 +128,7 @@ public abstract class JDBC3Statement extends CoreStatement {
         if (rs.isOpen()) {
             throw new SQLException("ResultSet already requested");
         }
+        DB db = conn.getDatabase();
 
         if (db.column_count(pointer) == 0) {
             return null;
@@ -158,6 +152,7 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#getUpdateCount()
      */
     public int getUpdateCount() throws SQLException {
+        DB db = conn.getDatabase();
         if (pointer != 0 && !rs.isOpen() && !resultsWaiting && db.column_count(pointer) == 0)
             return db.changes();
         return -1;
@@ -197,7 +192,7 @@ public abstract class JDBC3Statement extends CoreStatement {
             return new int[] {};
 
         int[] changes = new int[batchPos];
-
+        DB db = conn.getDatabase();
         synchronized (db) {
             try {
                 for (int i = 0; i < changes.length; i++) {
@@ -250,7 +245,7 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#cancel()
      */
     public void cancel() throws SQLException {
-        db.interrupt();
+        conn.getDatabase().interrupt();
     }
 
     /**
@@ -338,12 +333,7 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#getGeneratedKeys()
      */
     public ResultSet getGeneratedKeys() throws SQLException {
-        if (metadata == null) {
-            metadata = (CoreDatabaseMetaData)conn.getMetaData();
-            metadata.refCount++;
-        }
-
-        return metadata.getGeneratedKeys();
+        return conn.getSQLiteDatabaseMetaData().getGeneratedKeys();
     }
 
     /**
@@ -412,4 +402,5 @@ public abstract class JDBC3Statement extends CoreStatement {
         throws SQLException { throw unused(); }
     public boolean execute(String sql, int autokeys)
         throws SQLException { throw unused(); }
+
 }

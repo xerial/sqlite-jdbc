@@ -16,14 +16,15 @@
 
 package org.sqlite.core;
 
+import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteConnectionConfig;
+import org.sqlite.date.FastDateFormat;
+import org.sqlite.jdbc4.JDBC4Statement;
+
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.BitSet;
 import java.util.Calendar;
-
-import org.sqlite.SQLiteConnection;
-import org.sqlite.date.FastDateFormat;
-import org.sqlite.jdbc4.JDBC4Statement;
 
 public abstract class CorePreparedStatement extends JDBC4Statement
 {
@@ -42,6 +43,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         super(conn);
 
         this.sql = sql;
+        DB db = conn.getDatabase();
         db.prepare(this);
         rs.colsMeta = db.column_names(pointer);
         columnCount = db.column_count(pointer);
@@ -81,7 +83,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         checkParameters();
 
         try {
-            return db.executeBatch(pointer, batchQueryCount, batch);
+            return conn.getDatabase().executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
         }
         finally {
             clearBatch();
@@ -107,7 +109,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
             return -1;
         }
 
-        return db.changes();
+        return conn.getDatabase().changes();
     }
 
     // PARAMETER FUNCTIONS //////////////////////////////////////////
@@ -134,9 +136,10 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     * Store the date in the user's preferred format (text, int, or real)
     */
    protected void setDateByMilliseconds(int pos, Long value, Calendar calendar) throws SQLException {
-       switch(conn.dateClass) {
+       SQLiteConnectionConfig config = conn.getConnectionConfig();
+       switch(config.getDateClass()) {
            case TEXT:
-               batch(pos, FastDateFormat.getInstance(conn.dateStringFormat, calendar.getTimeZone()).format(new Date(value)));
+               batch(pos, FastDateFormat.getInstance(config.getDateStringFormat(), calendar.getTimeZone()).format(new Date(value)));
                break;
 
            case REAL:
@@ -145,7 +148,9 @@ public abstract class CorePreparedStatement extends JDBC4Statement
                break;
 
            default: //INTEGER:
-               batch(pos, new Long(value / conn.dateMultiplier));
+               batch(pos, new Long(value / config.getDateMultiplier()));
        }
    }
+
+
 }
