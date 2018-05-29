@@ -21,7 +21,7 @@ public class SQLiteConnectionConfig implements Cloneable
 
     private int transactionIsolation = Connection.TRANSACTION_SERIALIZABLE;
     private SQLiteConfig.TransactionMode transactionMode = SQLiteConfig.TransactionMode.DEFFERED;
-    private boolean autoCommit = false;
+    private boolean autoCommit = true;
 
     public static SQLiteConnectionConfig fromPragmaTable(Properties pragmaTable) {
         return new SQLiteConnectionConfig(
@@ -31,7 +31,7 @@ public class SQLiteConnectionConfig implements Cloneable
                 Connection.TRANSACTION_SERIALIZABLE,
                 SQLiteConfig.TransactionMode.getMode(
                         pragmaTable.getProperty(SQLiteConfig.Pragma.TRANSACTION_MODE.pragmaName, SQLiteConfig.TransactionMode.DEFFERED.name())),
-                false);
+                true);
     }
 
     public SQLiteConnectionConfig(
