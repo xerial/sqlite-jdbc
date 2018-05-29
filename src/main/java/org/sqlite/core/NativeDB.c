@@ -1179,7 +1179,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_value_1type(
 
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
-        JNIEnv *env, jobject this, jbyteArray name, jobject func)
+        JNIEnv *env, jobject this, jbyteArray name, jobject func, jint flags)
 {
     jint ret = 0;
     char *name_bytes;
@@ -1206,9 +1206,9 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
 
     ret = sqlite3_create_function(
             gethandle(env, this),
-            name_bytes,    // function name
-            -1,            // number of args
-            SQLITE_UTF16,  // preferred chars
+            name_bytes,            // function name
+            -1,                    // number of args
+            SQLITE_UTF16 | flags,  // preferred chars
             udf,
             isAgg ? 0 :&xFunc,
             isAgg ? &xStep : 0,

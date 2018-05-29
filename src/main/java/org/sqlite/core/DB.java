@@ -16,18 +16,17 @@
 package org.sqlite.core;
 
 import org.sqlite.BusyHandler;
-import java.sql.BatchUpdateException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.sqlite.Function;
 import org.sqlite.ProgressHandler;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
+
+import java.sql.BatchUpdateException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /*
  * This class is the interface to SQLite. It provides some helper functions
@@ -647,11 +646,12 @@ public abstract class DB implements Codes
      * Create a user defined function with given function name and the function object.
      * @param name The function name to be created.
      * @param f SQLite function object.
+     * @param flags Extra flags to use when creating the function, such as {@link Function#FLAG_DETERMINISTIC}
      * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/create_function.html">http://www.sqlite.org/c3ref/create_function.html</a>
      */
-    public abstract int create_function(String name, Function f) throws SQLException;
+    public abstract int create_function(String name, Function f, int flags) throws SQLException;
 
     /**
      * De-registers a user defined function
