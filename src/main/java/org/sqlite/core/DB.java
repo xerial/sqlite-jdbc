@@ -839,7 +839,7 @@ public abstract class DB implements Codes
             }
         }
 
-        int statusCode = step(stmt.pointer);
+        int statusCode = step(stmt.pointer) & 0xFF;
         switch (statusCode) {
         case SQLITE_DONE:
             reset(stmt.pointer);
@@ -850,6 +850,7 @@ public abstract class DB implements Codes
         case SQLITE_BUSY:
         case SQLITE_LOCKED:
         case SQLITE_MISUSE:
+        case SQLITE_CONSTRAINT:
             throw newSQLException(statusCode);
         default:
             finalize(stmt);
