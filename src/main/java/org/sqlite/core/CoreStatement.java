@@ -116,11 +116,10 @@ public abstract class CoreStatement implements Codes
     }
 
     protected void internalClose() throws SQLException {
-        if (conn.isClosed())
-            throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
-
         if (pointer == 0)
             return;
+        if (conn.isClosed())
+            throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
 
         rs.close();
 
