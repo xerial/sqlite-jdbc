@@ -4,18 +4,14 @@ import org.sqlite.core.CoreDatabaseMetaData;
 import org.sqlite.core.DB;
 import org.sqlite.core.NativeDB;
 import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
+import org.sqlite.util.StreamUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.nio.charset.Charset;
+import java.sql.*;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
@@ -26,6 +22,7 @@ public abstract class SQLiteConnection
         implements Connection
 {
     private static final String RESOURCE_NAME_PREFIX = ":resource:";
+    private static final String INIT_SCRIPT_KEY = "INIT";
     private final DB db;
     private CoreDatabaseMetaData meta = null;
     private final SQLiteConnectionConfig connectionConfig;
@@ -63,6 +60,7 @@ public abstract class SQLiteConnection
         this.connectionConfig = db.getConfig().newConnectionConfig();
 
         config.apply(this);
+        applyInitScript(prop);
     }
 
     public SQLiteConnectionConfig getConnectionConfig() {
@@ -242,6 +240,76 @@ public abstract class SQLiteConnection
         }
         db.open(fileName, config.getOpenModeFlags());
         return db;
+    }
+
+    private void applyInitScript(Properties prop) throws SQLException {
+        String initScript = prop.getProperty(INIT_SCRIPT_KEY);
+        if (initScript == null || initScript.isEmpty()) {
+            return;
+        }
+
+        String script;
+        if (initScript.startsWith("classpath:")) {
+            String resourceName = initScript.substring("classpath:".length()).trim();
+
+            ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+            InputStream in = contextCL.getResourceAsStream(resourceName);
+            if (in == null) {
+                throw new SQLException(String.format("resource %s not found", resourceName));
+            }
+
+            try {
+                try {
+                    script = StreamUtils.toString(in, Charset.forName("UTF-8"));
+                }
+                finally {
+                    in.close();
+                }
+            }
+            catch (IOException e) {
+                throw new SQLException(String.format("failed to load %s", resourceName), e);
+            }
+        }
+        else if (initScript.startsWith("file:")) {
+            String fileName = initScript.substring("file:".length()).trim();
+
+            try {
+                InputStream in = new FileInputStream(fileName);
+
+                try {
+                    script = StreamUtils.toString(in, Charset.forName("UTF-8"));
+                }
+                finally {
+                    in.close();
+                }
+            }
+            catch (IOException e) {
+                throw new SQLException(String.format("failed to load %s", fileName), e);
+            }
+        }
+        else {
+            script = initScript;
+        }
+
+        script = script.trim();
+        if (!script.isEmpty()) {
+            // split and trim spaces
+            String[] scripts = script.split("\\s*;\\s*");
+
+            Statement stat = this.createStatement();
+            try {
+                for (String part : scripts) {
+                    stat.addBatch(part);
+                }
+
+                stat.executeBatch();
+            }
+            finally {
+                if (stat != null) {
+                    stat.close();
+                }
+            }
+        }
     }
 
     /**
