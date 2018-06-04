@@ -445,6 +445,51 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_shared_1cache(
 }
 
 
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_dbconfig_1enable_1load_1extension
+  (JNIEnv *env, jobject this, jboolean enable)
+{
+    sqlite3 *db = gethandle(env, this);
+    if (!db)
+    {
+        throwex_db_closed(env);
+        return SQLITE_MISUSE;
+    }
+    return sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, enable ? 1 : 0, NULL);
+}
+
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_load_1extension_1utf8
+  (JNIEnv *env, jobject this, jbyteArray file, jbyteArray entry)
+{
+    sqlite3 *db = gethandle(env, this);
+    if (!db)
+    {
+        throwex_db_closed(env);
+    }
+
+    char *file_bytes;
+    utf8JavaByteArrayToUtf8Bytes(env, file, &file_bytes, NULL);
+    if (!file_bytes)
+    {
+        return;
+    }
+
+    char *entry_bytes; // may be null to let SQLite determine entry name
+    utf8JavaByteArrayToUtf8Bytes(env, entry, &entry_bytes, NULL);
+
+    char *error_msg;
+    int result = sqlite3_load_extension(db, file_bytes, entry_bytes, &error_msg);
+    if (result != SQLITE_OK)
+    {
+        throwex_msg(env, error_msg);
+    }
+    sqlite3_free(error_msg);
+
+    freeUtf8Bytes(entry_bytes);
+    freeUtf8Bytes(file_bytes);
+}
+
+
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_enable_1load_1extension(
         JNIEnv *env, jobject this, jboolean enable)
 {
