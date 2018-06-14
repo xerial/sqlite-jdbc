@@ -1256,7 +1256,6 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_free_1functions(
     }
 }
 
-
 // COMPOUND FUNCTIONS ///////////////////////////////////////////////
 
 JNIEXPORT jobjectArray JNICALL Java_org_sqlite_core_NativeDB_column_1metadata(
@@ -1534,4 +1533,77 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_clear_1progress_1handler(
 {
     sqlite3_progress_handler(gethandle(env, this), 0, NULL, NULL);
     (*env)->DeleteGlobalRef(env, progress_handler_context.phandler);
+}
+
+// Update hook
+
+struct UpdateHandlerContext {
+    JavaVM *vm;
+    jmethodID method;
+    jobject handler;
+};
+
+static struct UpdateHandlerContext update_handler_context;
+
+
+void update_hook(void *context, int type, char const *database, char const *table, sqlite3_int64 row) {
+    JNIEnv *env = 0;
+    (*update_handler_context.vm)->AttachCurrentThread(update_handler_context.vm, (void **)&env, 0);
+
+    jstring databaseString = (*env)->NewStringUTF(env, database);
+    jstring tableString    = (*env)->NewStringUTF(env, table);
+
+    (*env)->CallVoidMethod(env, update_handler_context.handler, update_handler_context.method, type, databaseString, tableString, row);
+
+    (*env)->DeleteLocalRef(env, databaseString);
+    (*env)->DeleteLocalRef(env, tableString);
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1update_1listener(JNIEnv *env, jobject this, jboolean enabled) {
+    if (enabled) {
+        update_handler_context.method = (*env)->GetMethodID(env, dbclass, "onUpdate", "(ILjava/lang/String;Ljava/lang/String;J)V");
+        update_handler_context.handler = (*env)->NewGlobalRef(env, this);
+        (*env)->GetJavaVM(env, &update_handler_context.vm);
+        sqlite3_update_hook(gethandle(env, this), &update_hook, NULL);
+    } else {
+        sqlite3_update_hook(gethandle(env, this), NULL, NULL);
+        (*env)->DeleteGlobalRef(env, update_handler_context.handler);
+    }
+}
+
+// Commit hook
+
+struct CommitHandlerContext {
+    JavaVM *vm;
+    jmethodID method;
+    jobject handler;
+};
+
+static struct CommitHandlerContext commit_handler_context;
+
+int commit_hook(void *context) {
+    JNIEnv *env = 0;
+    (*commit_handler_context.vm)->AttachCurrentThread(commit_handler_context.vm, (void **)&env, 0);
+    (*env)->CallVoidMethod(env, commit_handler_context.handler, commit_handler_context.method, 1);
+    return 0;
+}
+
+void rollback_hook(void *context) {
+    JNIEnv *env = 0;
+    (*commit_handler_context.vm)->AttachCurrentThread(commit_handler_context.vm, (void **)&env, 0);
+    (*env)->CallVoidMethod(env, commit_handler_context.handler, commit_handler_context.method, 0);
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1commit_1listener(JNIEnv *env, jobject this, jboolean enabled) {
+    if (enabled) {
+        commit_handler_context.method  = (*env)->GetMethodID(env, dbclass, "onCommit", "(Z)V");
+        commit_handler_context.handler = (*env)->NewGlobalRef(env, this);
+        (*env)->GetJavaVM(env, &commit_handler_context.vm);
+        sqlite3_commit_hook(gethandle(env, this), &commit_hook, NULL);
+        sqlite3_rollback_hook(gethandle(env, this), &rollback_hook, NULL);
+    }  else {
+        sqlite3_commit_hook(gethandle(env, this), NULL, NULL);
+        sqlite3_update_hook(gethandle(env, this), NULL, NULL);
+        (*env)->DeleteGlobalRef(env, commit_handler_context.handler);
+    }
 }
