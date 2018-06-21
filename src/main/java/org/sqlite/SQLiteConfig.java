@@ -55,6 +55,7 @@ public class SQLiteConfig {
     private int openModeFlag = 0x00;
 
     private final int busyTimeout;
+    private boolean explicitReadOnly = false;
 
     private final SQLiteConnectionConfig defaultConnectionConfig;
 
@@ -349,6 +350,14 @@ public class SQLiteConfig {
         for (SQLiteConfig.Pragma pragma : SQLiteConfig.Pragma.values()) {
             pragmaSet.add(pragma.pragmaName);
         }
+    }
+
+    public boolean isExplicitReadOnlyEnabled() {
+        return this.explicitReadOnly;
+    }
+
+    public void setExplicitReadOnly(boolean readOnly){
+        this.explicitReadOnly = readOnly;
     }
 
     public static enum Pragma {

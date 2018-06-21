@@ -71,9 +71,11 @@ public abstract class CoreStatement implements Codes {
         boolean success = false;
         boolean rc = false;
         try {
+            // TODO TXT: DECIDE WHICH TRANSACTION LOCK TYPE TO OPEN
             rc = conn.getDatabase().execute(this, null);
             success = true;
         } finally {
+            // TODO TXT: REMEMBER THAT A STATEMENT HAS HAPPENED
             resultsWaiting = rc;
             if (!success) {
                 this.pointer.close();
@@ -98,9 +100,12 @@ public abstract class CoreStatement implements Codes {
         boolean rc = false;
         boolean success = false;
         try {
+            // TODO TXT: DECIDE WHICH TRANSACTION LOCK TYPE TO OPEN
+            // if not already an exclusive lock has been acquired, then acquire it now
             rc = conn.getDatabase().execute(sql, conn.getAutoCommit());
             success = true;
         } finally {
+            // TODO TXT: REMEMBER THAT A STATEMENT HAS HAPPENED
             resultsWaiting = rc;
             if (!success && pointer != null) {
                 pointer.close();
