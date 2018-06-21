@@ -78,6 +78,7 @@ public class BusyHandlerTest {
     }
 
     @Test
+    @Ignore("This test is very flaky; disabling it for now")
     public void basicBusyHandler() throws Exception {
         final int[] calls = {0};
         BusyHandler.setHandler(
@@ -115,6 +116,7 @@ public class BusyHandlerTest {
     }
 
     @Test
+    @Ignore("This test is very flaky; disabling it for now")
     public void testUnregister() throws Exception {
         final int[] calls = {0};
         BusyHandler.setHandler(
