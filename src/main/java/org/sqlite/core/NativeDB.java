@@ -85,7 +85,7 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#_exec(java.lang.String) */
     @Override
     public synchronized int _exec(String sql) throws SQLException {
-        DriverManager.println("DriverManager [SQLite EXEC] " + sql);
+        DriverManager.println("DriverManager [" + Thread.currentThread().getName() + "] [SQLite EXEC] " + sql);
         return _exec_utf8(stringToUtf8ByteArray(sql));
     }
 
@@ -114,7 +114,7 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#prepare(java.lang.String) */
     @Override
     protected synchronized long prepare(String sql) throws SQLException {
-        DriverManager.println("DriverManager [SQLite PREP] " + sql);
+        DriverManager.println("DriverManager [" + Thread.currentThread().getName() + "] [SQLite PREP] " + sql);
         return prepare_utf8(stringToUtf8ByteArray(sql));
     }
 
