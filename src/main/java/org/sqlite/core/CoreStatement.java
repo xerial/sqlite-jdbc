@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
+import org.sqlite.jdbc3.JDBC3Connection;
 import org.sqlite.jdbc4.JDBC4ResultSet;
 
 public abstract class CoreStatement implements Codes {
@@ -68,14 +69,17 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
+        if(this.conn instanceof JDBC3Connection){
+            ((JDBC3Connection)this.conn).checkTransactionMode();
+        }
+
         boolean success = false;
         boolean rc = false;
         try {
-            // TODO TXT: DECIDE WHICH TRANSACTION LOCK TYPE TO OPEN
             rc = conn.getDatabase().execute(this, null);
             success = true;
         } finally {
-            // TODO TXT: REMEMBER THAT A STATEMENT HAS HAPPENED
+            notifyFirstStatementExecuted();
             resultsWaiting = rc;
             if (!success) {
                 this.pointer.close();
@@ -97,15 +101,17 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
+        if(this.conn instanceof JDBC3Connection){
+            ((JDBC3Connection)this.conn).checkTransactionMode();
+        }
+
         boolean rc = false;
         boolean success = false;
         try {
-            // TODO TXT: DECIDE WHICH TRANSACTION LOCK TYPE TO OPEN
-            // if not already an exclusive lock has been acquired, then acquire it now
             rc = conn.getDatabase().execute(sql, conn.getAutoCommit());
             success = true;
         } finally {
-            // TODO TXT: REMEMBER THAT A STATEMENT HAS HAPPENED
+            notifyFirstStatementExecuted();
             resultsWaiting = rc;
             if (!success && pointer != null) {
                 pointer.close();
@@ -114,6 +120,7 @@ public abstract class CoreStatement implements Codes {
 
         return pointer.safeRunInt(DB::column_count) != 0;
     }
+
 
     protected void internalClose() throws SQLException {
         if (this.pointer != null && !this.pointer.isClosed()) {
@@ -126,6 +133,12 @@ public abstract class CoreStatement implements Codes {
             int resp = this.pointer.close();
 
             if (resp != SQLITE_OK && resp != SQLITE_MISUSE) conn.getDatabase().throwex(resp);
+        }
+    }
+
+    protected void notifyFirstStatementExecuted() {
+        if(this.conn instanceof JDBC3Connection){
+            ((JDBC3Connection)this.conn).setFirstStatementWasExecuted(true);
         }
     }
 
