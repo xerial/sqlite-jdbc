@@ -242,8 +242,8 @@ public class JDBCTest {
                                             while(rs.next()){
                                                 int id = rs.getInt("ID");
                                                 int value = rs.getInt("testval");
-                                                statement.executeUpdate("UPDATE TestTable SET testval = " + (value+1) + " WHERE ID = " + id);
                                                 count.incrementAndGet();
+                                                statement.executeUpdate("UPDATE TestTable SET testval = " + (value+1) + " WHERE ID = " + id);
                                             }
                                         }finally{
                                             rs.close();
