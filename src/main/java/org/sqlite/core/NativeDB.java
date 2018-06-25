@@ -17,7 +17,10 @@
 package org.sqlite.core;
 
 import java.nio.ByteBuffer;
+
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import org.sqlite.BusyHandler;
@@ -84,6 +87,7 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#_exec(java.lang.String) */
     @Override
     public synchronized int _exec(String sql) throws SQLException {
+        DriverManager.println("DriverManager [SQLite EXEC] " + sql);
         return _exec_utf8(stringToUtf8ByteArray(sql));
     }
 
@@ -115,6 +119,7 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#prepare(java.lang.String) */
     @Override
     protected synchronized SafeStmtPtr prepare(String sql) throws SQLException {
+        DriverManager.println("DriverManager [SQLite PREP] " + sql);
         return new SafeStmtPtr(this, prepare_utf8(stringToUtf8ByteArray(sql)));
     }
 
