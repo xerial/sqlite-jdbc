@@ -341,7 +341,7 @@ public abstract class SQLiteConnection implements Connection {
 
         connectionConfig.setAutoCommit(ac);
         db.exec(
-                connectionConfig.isAutoCommit() ? "commit;" : connectionConfig.transactionPrefix(),
+                connectionConfig.isAutoCommit() ? "commit;" : this.transactionPrefix(),
                 ac);
     }
 
@@ -421,7 +421,7 @@ public abstract class SQLiteConnection implements Connection {
         checkOpen();
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("commit;", getAutoCommit());
-        db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
+        db.exec(this.transactionPrefix(), getAutoCommit());
     }
 
     /** @see java.sql.Connection#rollback() */
@@ -430,7 +430,7 @@ public abstract class SQLiteConnection implements Connection {
         checkOpen();
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("rollback;", getAutoCommit());
-        db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
+        db.exec(this.transactionPrefix(), getAutoCommit());
     }
 
     /**
@@ -535,4 +535,9 @@ public abstract class SQLiteConnection implements Connection {
         final String newFilename = sb.toString();
         return newFilename;
     }
+
+    protected String transactionPrefix(){
+        return this.connectionConfig.transactionPrefix();
+    }
+
 }

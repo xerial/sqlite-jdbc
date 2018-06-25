@@ -10,6 +10,7 @@
 package org.sqlite;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import java.io.PrintWriter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -121,23 +122,43 @@ public class JDBCTest {
 
     @Test
     public void canSetJdbcConnectionToReadOnlyAfterRollback() throws Exception {
+        System.out.println("Creating JDBC Datasource");
         SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        System.out.println("Creating JDBC Connection");
         Connection connection = dataSource.getConnection();
-
+        System.out.println("JDBC Connection created");
         try{
+            System.out.println("Disabling auto-commit");
             connection.setAutoCommit(false);
+            System.out.println("Creating statement");
             Statement statement = connection.createStatement();
             // execute a statement
             try{
-                boolean success = statement.execute("SELECT * FROM sqlite_master WHERE 1 = 1");
+                System.out.println("Executing query");
+                boolean success = statement.execute("SELECT * FROM sqlite_master");
                 assertTrue(success);
             }finally{
+                System.out.println("Closing statement");
                 statement.close();
             }
+            System.out.println("Performing rollback");
             connection.rollback();
 
+            System.out.println("Setting connection to read-only");
             // try to assign read-only
             connection.setReadOnly(true);
+            Statement statement2 = connection.createStatement();
+            // execute a statement
+            try{
+                System.out.println("Executing query 2");
+                boolean success = statement2.execute("SELECT * FROM sqlite_master");
+                assertTrue(success);
+            }finally{
+                System.out.println("Closing statement 2");
+                statement2.close();
+            }
+            System.out.println("Performing rollback 2");
+            connection.rollback();
         }finally{
             connection.close();
         }
@@ -173,6 +194,7 @@ public class JDBCTest {
     // helper methods -----------------------------------------------------------------
 
     private SQLiteDataSource createDatasourceWithExplicitReadonly() {
+        DriverManager.setLogWriter(new PrintWriter(System.out));
         SQLiteConfig config = new SQLiteConfig();
         config.setExplicitReadOnly(true);
 
