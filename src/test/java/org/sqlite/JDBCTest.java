@@ -48,4 +48,47 @@ public class JDBCTest {
     public void shouldReturnNullIfProtocolUnhandled() throws Exception {
         assertNull(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null));
     }
+
+    @Test
+    public void canSetJdbcConnectionToReadOnly() throws Exception {
+        SQLiteConfig config = new SQLiteConfig();
+//        config.setExplicitReadOnly(true);
+
+//        SQLiteDataSource dataSource = new SQLiteDataSource(config);
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+
+        Connection connection = dataSource.getConnection();
+        try{
+            assertFalse(connection.isReadOnly());
+            connection.setReadOnly(true);
+            assertTrue(connection.isReadOnly());
+            connection.setReadOnly(false);
+            assertFalse(connection.isReadOnly());
+            connection.setReadOnly(true);
+            assertTrue(connection.isReadOnly());
+        }finally{
+            connection.close();
+        }
+    }
+
+    @Test
+    public void cannotSetJdbcConnectionToReadOnlyAfterFirstStatement() throws Exception {
+
+    }
+
+    @Test
+    public void canSetJdbcConnectionToReadOnlyAfterCommit() throws Exception {
+
+    }
+
+    @Test
+    public void canSetJdbcConnectionToReadOnlyAfterRollback() throws Exception {
+
+    }
+
+    @Test
+    public void cannotExecuteUpdatesWhenConnectionIsSetToReadOnly() throws Exception {
+
+    }
+
 }
