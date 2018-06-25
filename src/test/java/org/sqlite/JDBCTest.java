@@ -9,15 +9,17 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import java.io.PrintWriter;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import java.io.File;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class JDBCTest {
     @Test
@@ -191,12 +193,118 @@ public class JDBCTest {
         }
     }
 
+    @Test
+    public void jdbcHammer() throws Exception{
+        final SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        File tempFile = File.createTempFile("myTestDB", ".db");
+        dataSource.setUrl("jdbc:sqlite:" + tempFile.getAbsolutePath());
+        Connection connection = dataSource.getConnection();
+        try{
+            connection.setAutoCommit(false);
+            Statement stmt = connection.createStatement();
+            try{
+                stmt.executeUpdate("CREATE TABLE TestTable(ID INT, testval INT, PRIMARY KEY(ID));");
+                stmt.executeUpdate("INSERT INTO TestTable (ID, testval) VALUES(1, 0);");
+            }finally{
+                stmt.close();
+            }
+            connection.commit();
+        }finally{
+            connection.close();
+        }
+
+        final AtomicInteger count = new AtomicInteger();
+        List<Thread> threads = new ArrayList<Thread>();
+        for(int i = 0; i < 10; i++){
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for(int i = 0; i < 100; i++){
+                        try{
+                            Connection connection = dataSource.getConnection();
+                            try{
+                                connection.setAutoCommit(false);
+                                boolean read = Math.random() < 0.5;
+                                if(read){
+                                    connection.setReadOnly(true);
+                                    Statement statement = connection.createStatement();
+                                    try{
+                                        ResultSet rs = statement.executeQuery("SELECT * FROM TestTable");
+                                        rs.close();
+                                    }finally{
+                                        statement.close();
+                                    }
+                                }else{
+                                    Statement statement = connection.createStatement();
+                                    try{
+                                        ResultSet rs = statement.executeQuery("SELECT * FROM TestTable");
+                                        try {
+                                            while(rs.next()){
+                                                int id = rs.getInt("ID");
+                                                int value = rs.getInt("testval");
+                                                statement.executeUpdate("UPDATE TestTable SET testval = " + (value+1) + " WHERE ID = " + id);
+                                                count.incrementAndGet();
+                                            }
+                                        }finally{
+                                            rs.close();
+                                        }
+                                    }finally{
+                                        statement.close();
+                                    }
+                                    connection.commit();
+                                }
+                            }finally{
+                                connection.close();
+                            }
+                        }catch(SQLException e){
+                            throw new RuntimeException("Worker failed", e);
+                        }
+                    }
+                }
+            });
+            thread.setName("Worker #" + (i + 1));
+            threads.add(thread );
+        }
+        for(Thread thread : threads){
+            thread.start();
+        }
+        for(Thread thread : threads){
+            thread.join();
+        }
+        Connection connection2 = dataSource.getConnection();
+        try{
+            connection2.setAutoCommit(false);
+            connection2.setReadOnly(true);
+            Statement stmt = connection2.createStatement();
+            try{
+                ResultSet rs = stmt.executeQuery("SELECT * FROM TestTable");
+                try{
+                    assertTrue(rs.next());
+                    int id = rs.getInt("ID");
+                    int val = rs.getInt("testval");
+                    assertEquals(1, id);
+                    assertEquals(count.get(), val);
+                    assertFalse(rs.next());
+                }finally{
+                    rs.close();
+                }
+            }finally{
+                stmt.close();
+            }
+            connection2.commit();
+        }finally{
+            connection2.close();
+        }
+
+    }
+
     // helper methods -----------------------------------------------------------------
 
     private SQLiteDataSource createDatasourceWithExplicitReadonly() {
         DriverManager.setLogWriter(new PrintWriter(System.out));
         SQLiteConfig config = new SQLiteConfig();
         config.setExplicitReadOnly(true);
+        config.setBusyTimeout(10000);
 
         return new SQLiteDataSource(config);
     }
