@@ -23,34 +23,18 @@ public abstract class JDBC3Connection extends SQLiteConnection {
     private final AtomicInteger savePoint = new AtomicInteger(0);
     private Map<String, Class<?>> typeMap;
 
-    private boolean firstStatementWasExecuted = false;
     private boolean readOnly = false;
-    private TransactionMode currentTransactionType;
+
 
     protected JDBC3Connection(String url, String fileName, Properties prop) throws SQLException {
         super(url, fileName, prop);
-        this.currentTransactionType = this.getDatabase().getConfig().getTransactionMode();
+
     }
 
-    public void setFirstStatementWasExecuted(final boolean firstStatementWasExecuted) {
-        this.firstStatementWasExecuted = firstStatementWasExecuted;
-    }
-
-    public boolean isFirstStatementWasExecuted() {
-        return firstStatementWasExecuted;
-    }
-
-    public TransactionMode getCurrentTransactionType(){
-        return this.currentTransactionType;
-    }
-
-    public void setCurrentTransactionType(final TransactionMode currentTransactionType) {
-        this.currentTransactionType = currentTransactionType;
-    }
 
     public void checkTransactionMode() throws SQLException {
         // important note: read-only mode is only supported when auto-commit is disabled
-        if(this.getDatabase().getConfig().isExplicitReadOnlyEnabled() && !this.getAutoCommit()){
+        if(this.getDatabase().getConfig().isExplicitReadOnlyEnabled() && !this.getAutoCommit() && this.getCurrentTransactionType() != null){
             if(this.isReadOnly()){
                 // this is a read-only transaction, make sure all writing operations are rejected by the DB
                 // (note: this pragma is evaluated on a per-transaction basis by SQLite)
@@ -62,44 +46,16 @@ public abstract class JDBC3Connection extends SQLiteConnection {
                         throw new SQLException("A statement has already been executed on this connection; cannot upgrade to write transaction!");
                     }else{
                         // this is the first statement in the transaction; close and create an immediate one
-                        this.getDatabase()._exec("commit;");
+                        this.getDatabase()._exec("commit; /* need to explicitly upgrade transaction */");
 
                         // start the write transaction
-                        this.getDatabase()._exec("BEGIN IMMEDIATE;");
+                        this.getDatabase()._exec("BEGIN IMMEDIATE; /* explicitly upgrade transaction */");
                         this.getDatabase()._exec("PRAGMA query_only = false;");
                         this.setCurrentTransactionType(TransactionMode.IMMEDIATE);
                     }
                 }
 
             }
-        }
-    }
-
-    @Override
-    public void commit() throws SQLException {
-        super.commit();
-        this.firstStatementWasExecuted = false;
-        this.currentTransactionType = this.getConnectionConfig().getTransactionMode();
-    }
-
-    @Override
-    public void rollback() throws SQLException {
-        super.rollback();
-        this.firstStatementWasExecuted = false;
-        this.currentTransactionType = this.getConnectionConfig().getTransactionMode();
-    }
-
-    @Override
-    public void setAutoCommit(final boolean ac) throws SQLException {
-        super.setAutoCommit(ac);
-        if(this.getDatabase().getConfig().isExplicitReadOnlyEnabled()){
-            if(this.isReadOnly()){
-                this.currentTransactionType = TransactionMode.DEFFERED;
-            }else{
-                this.currentTransactionType = TransactionMode.IMMEDIATE;
-            }
-        }else{
-            this.currentTransactionType = this.getConnectionConfig().getTransactionMode();
         }
     }
 
@@ -162,7 +118,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
      */
     public void setReadOnly(boolean ro) throws SQLException {
         if(this.getDatabase().getConfig().isExplicitReadOnlyEnabled()){
-            if(ro != this.readOnly && this.firstStatementWasExecuted){
+            if(ro != this.readOnly && this.isFirstStatementWasExecuted()){
                 throw new SQLException("Cannot change Read-Only status of this connection: the first statement was" +
                     " already executed and the transaction is open.");
             }
@@ -307,18 +263,6 @@ public abstract class JDBC3Connection extends SQLiteConnection {
                         getAutoCommit());
     }
 
-    @Override
-    protected String transactionPrefix() {
-        if(this.getDatabase().getConfig().isExplicitReadOnlyEnabled()){
-            if(this.isReadOnly()){
-                return "BEGIN;";
-            }else{
-                return "BEGIN IMMEDIATE;";
-            }
-        } else {
-            return super.transactionPrefix();
-        }
-    }
 
     // UNUSED FUNCTIONS /////////////////////////////////////////////
 

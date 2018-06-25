@@ -1,5 +1,11 @@
 package org.sqlite;
 
+import org.sqlite.SQLiteConfig.TransactionMode;
+import org.sqlite.core.CoreDatabaseMetaData;
+import org.sqlite.core.DB;
+import org.sqlite.core.NativeDB;
+import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,6 +30,9 @@ public abstract class SQLiteConnection implements Connection {
     private final DB db;
     private CoreDatabaseMetaData meta = null;
     private final SQLiteConnectionConfig connectionConfig;
+
+    private TransactionMode currentTransactionType;
+    private boolean firstStatementWasExecuted = false;
 
     /**
      * Connection constructor for reusing an existing DB handle
@@ -61,6 +70,9 @@ public abstract class SQLiteConnection implements Connection {
             SQLiteConfig config = this.db.getConfig();
             this.connectionConfig = this.db.getConfig().newConnectionConfig();
             config.apply(this);
+            this.currentTransactionType = this.getDatabase().getConfig().getTransactionMode();
+            // connection starts in "clean" state (even though some PRAGMA statements were executed)
+            this.firstStatementWasExecuted = false;
         } catch (Throwable t) {
             try {
                 if (newDB != null) {
@@ -72,6 +84,23 @@ public abstract class SQLiteConnection implements Connection {
             throw t;
         }
     }
+
+    public TransactionMode getCurrentTransactionType(){
+        return this.currentTransactionType;
+    }
+
+    public void setCurrentTransactionType(final TransactionMode currentTransactionType) {
+        this.currentTransactionType = currentTransactionType;
+    }
+
+    public void setFirstStatementWasExecuted(final boolean firstStatementWasExecuted) {
+        this.firstStatementWasExecuted = firstStatementWasExecuted;
+    }
+
+    public boolean isFirstStatementWasExecuted() {
+        return firstStatementWasExecuted;
+    }
+
 
     public SQLiteConnectionConfig getConnectionConfig() {
         return connectionConfig;
@@ -340,9 +369,15 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit() == ac) return;
 
         connectionConfig.setAutoCommit(ac);
-        db.exec(
-                connectionConfig.isAutoCommit() ? "commit;" : this.transactionPrefix(),
-                ac);
+        // db.exec(connectionConfig.isAutoCommit() ? "commit;" : this.transactionPrefix(), ac);
+
+        if(this.getConnectionConfig().isAutoCommit()){
+            db.exec("commit;", ac);
+            this.currentTransactionType = null;
+        }else{
+            db.exec(this.transactionPrefix(), ac);
+            this.currentTransactionType = this.getConnectionConfig().getTransactionMode();
+        }
     }
 
     /**
@@ -422,6 +457,8 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("commit;", getAutoCommit());
         db.exec(this.transactionPrefix(), getAutoCommit());
+        this.firstStatementWasExecuted = false;
+        this.setCurrentTransactionType(this.getConnectionConfig().getTransactionMode());
     }
 
     /** @see java.sql.Connection#rollback() */
@@ -431,6 +468,8 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("rollback;", getAutoCommit());
         db.exec(this.transactionPrefix(), getAutoCommit());
+        this.firstStatementWasExecuted = false;
+        this.setCurrentTransactionType(this.getConnectionConfig().getTransactionMode());
     }
 
     /**
