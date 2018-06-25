@@ -184,6 +184,9 @@ public class SQLiteConfig {
         pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
         pragmaParams.remove(Pragma.LIMIT_PAGE_COUNT.pragmaName);
 
+        // exclude this "fake" pragma from execution
+        pragmaParams.remove(Pragma.JDBC_EXPLICIT_READONLY.pragmaName);
+
         Statement stat = conn.createStatement();
         try {
             if (pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
