@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
@@ -51,14 +52,10 @@ public class JDBCTest {
 
     @Test
     public void canSetJdbcConnectionToReadOnly() throws Exception {
-        SQLiteConfig config = new SQLiteConfig();
-//        config.setExplicitReadOnly(true);
-
-//        SQLiteDataSource dataSource = new SQLiteDataSource(config);
-        SQLiteDataSource dataSource = new SQLiteDataSource();
-
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
         Connection connection = dataSource.getConnection();
         try{
+            connection.setAutoCommit(false);
             assertFalse(connection.isReadOnly());
             connection.setReadOnly(true);
             assertTrue(connection.isReadOnly());
@@ -73,22 +70,114 @@ public class JDBCTest {
 
     @Test
     public void cannotSetJdbcConnectionToReadOnlyAfterFirstStatement() throws Exception {
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        Connection connection = dataSource.getConnection();
 
+        try{
+            connection.setAutoCommit(false);
+            Statement statement = connection.createStatement();
+            // execute a statement
+            try{
+                boolean success = statement.execute("SELECT * FROM sqlite_master");
+                assertTrue(success);
+            }finally{
+                statement.close();
+            }
+            // try to assign read-only
+            try{
+                connection.setReadOnly(true);
+                fail("Managed to set readOnly = true on a dirty connection!");
+            }catch(SQLException expected){
+                // pass
+            }
+        }finally{
+            connection.close();
+        }
     }
 
     @Test
     public void canSetJdbcConnectionToReadOnlyAfterCommit() throws Exception {
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        Connection connection = dataSource.getConnection();
+        try{
+            connection.setAutoCommit(false);
+            connection.setReadOnly(true);
+            Statement statement = connection.createStatement();
+            // execute a statement
+            try{
+                boolean success = statement.execute("SELECT * FROM sqlite_master");
+                assertTrue(success);
+            }finally{
+                statement.close();
+            }
+            connection.commit();
 
+            // try to assign a new read-only value
+            connection.setReadOnly(false);
+        }finally{
+            connection.close();
+        }
     }
 
     @Test
     public void canSetJdbcConnectionToReadOnlyAfterRollback() throws Exception {
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        Connection connection = dataSource.getConnection();
 
+        try{
+            connection.setAutoCommit(false);
+            Statement statement = connection.createStatement();
+            // execute a statement
+            try{
+                boolean success = statement.execute("SELECT * FROM sqlite_master WHERE 1 = 1");
+                assertTrue(success);
+            }finally{
+                statement.close();
+            }
+            connection.rollback();
+
+            // try to assign read-only
+            connection.setReadOnly(true);
+        }finally{
+            connection.close();
+        }
     }
 
     @Test
     public void cannotExecuteUpdatesWhenConnectionIsSetToReadOnly() throws Exception {
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        Connection connection = dataSource.getConnection();
+        try{
+            connection.setAutoCommit(false);
+            connection.setReadOnly(true);
 
+            Statement statement = connection.createStatement();
+            // execute a statement
+            try {
+                statement.execute("CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))");
+                fail("Managed to modify DB contents on a read-only connection!");
+            }catch(SQLException expected){
+                // pass
+            }finally{
+                statement.close();
+            }
+            connection.rollback();
+
+            // try to assign read-only
+            connection.setReadOnly(true);
+        }finally{
+            connection.close();
+        }
     }
+
+    // helper methods -----------------------------------------------------------------
+
+    private SQLiteDataSource createDatasourceWithExplicitReadonly() {
+        SQLiteConfig config = new SQLiteConfig();
+        config.setExplicitReadOnly(true);
+
+        return new SQLiteDataSource(config);
+    }
+
 
 }

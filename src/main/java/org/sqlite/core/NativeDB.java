@@ -18,6 +18,7 @@ package org.sqlite.core;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
