@@ -30,7 +30,7 @@ is our utility to create personalized genome browsers.
 Public Discussion Forum
 =======================
 *  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en)
-*  Post bug reports or feqture requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
+*  Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
 
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
