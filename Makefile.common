@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9 SunOS-x86_64
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -132,7 +132,14 @@ SunOS-sparcv9_STRIP     := $(CROSS_PREFIX)strip
 SunOS-sparcv9_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -m64 -fvisibility=hidden
 SunOS-sparcv9_LINKFLAGS := -shared -static-libgcc
 SunOS-sparcv9_LIBNAME   := libsqlitejdbc.so
-SunOS-sparcv9_SQLITE_FLAGS  := 
+SunOS-sparcv9_SQLITE_FLAGS  :=
+
+SunOS-x86_64_CC        := $(CROSS_PREFIX)gcc
+SunOS-x86_64_STRIP     := $(CROSS_PREFIX)strip
+SunOS-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -m64 -fvisibility=hidden
+SunOS-x86_64_LINKFLAGS := -shared -static-libgcc
+SunOS-x86_64_LIBNAME   := libsqlitejdbc.so
+SunOS-x86_64_SQLITE_FLAGS  :=
 
 Mac-x86_CC        := gcc
 Mac-x86_STRIP     := strip -x
