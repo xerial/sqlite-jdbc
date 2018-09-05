@@ -631,8 +631,6 @@ public class PrepStmtTest
 
     @Test(expected = SQLException.class)
     public void preparedStatementShouldThrowIfNotAllParamsSetBatch() throws SQLException {
-        ResultSet rs;
-
         stat.executeUpdate("create table test (c1, c2);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?,?);");
         prep.setInt(1, 1);
