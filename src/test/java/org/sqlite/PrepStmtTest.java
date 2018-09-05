@@ -200,6 +200,16 @@ public class PrepStmtTest
         assertArrayEq(rs.getBytes(3), b3);
         assertFalse(rs.next());
         rs.close();
+        
+        // null date, time and timestamp (fix #363)
+        prep.setDate(1, null);
+        prep.setTime(2, null);
+        prep.setTimestamp(3, null);
+        rs = prep.executeQuery();
+        assertTrue(rs.next());
+        assertNull(rs.getDate(1));
+        assertNull(rs.getTime(2));
+        assertNull(rs.getTimestamp(3));
 
         // streams
         ByteArrayInputStream inByte = new ByteArrayInputStream(b1);
