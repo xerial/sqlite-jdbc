@@ -200,6 +200,16 @@ public class PrepStmtTest
         assertArrayEq(rs.getBytes(3), b3);
         assertFalse(rs.next());
         rs.close();
+        
+        // null date, time and timestamp (fix #363)
+        prep.setDate(1, null);
+        prep.setTime(2, null);
+        prep.setTimestamp(3, null);
+        rs = prep.executeQuery();
+        assertTrue(rs.next());
+        assertNull(rs.getDate(1));
+        assertNull(rs.getTime(2));
+        assertNull(rs.getTimestamp(3));
 
         // streams
         ByteArrayInputStream inByte = new ByteArrayInputStream(b1);
@@ -272,8 +282,8 @@ public class PrepStmtTest
 
         assertEquals(rs.getInt(1), Integer.MAX_VALUE);
         assertEquals((int) rs.getLong(1), Integer.MAX_VALUE);
-        assertEquals(rs.getFloat(2), Float.MAX_VALUE, 0f);
-        assertEquals(rs.getDouble(3), Double.MAX_VALUE, 0d);
+        assertEquals(rs.getFloat(2), Float.MAX_VALUE, 0.0001f);
+        assertEquals(rs.getDouble(3), Double.MAX_VALUE, 0.0001d);
         assertEquals(rs.getLong(4), Long.MAX_VALUE);
         assertFalse(rs.getBoolean(5));
         assertEquals(rs.getByte(6), (byte) 7);
@@ -621,8 +631,6 @@ public class PrepStmtTest
 
     @Test(expected = SQLException.class)
     public void preparedStatementShouldThrowIfNotAllParamsSetBatch() throws SQLException {
-        ResultSet rs;
-
         stat.executeUpdate("create table test (c1, c2);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?,?);");
         prep.setInt(1, 1);

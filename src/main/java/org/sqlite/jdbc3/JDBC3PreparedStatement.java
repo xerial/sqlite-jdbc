@@ -450,7 +450,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
      * @see java.sql.PreparedStatement#setDate(int, java.sql.Date, java.util.Calendar)
      */
     public void setDate(int pos, Date x, Calendar cal) throws SQLException {
-        setDateByMilliseconds(pos, x.getTime(), cal);
+        if (x == null) {
+            setObject(pos, null);
+        } else {
+            setDateByMilliseconds(pos, x.getTime(), cal);
+        }
     }
 
 
@@ -465,7 +469,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
       * @see java.sql.PreparedStatement#setTime(int, java.sql.Time, java.util.Calendar)
       */
      public void setTime(int pos, Time x, Calendar cal) throws SQLException {
-         setDateByMilliseconds(pos, x.getTime(), cal);
+         if (x == null) {
+             setObject(pos, null);
+         } else {
+             setDateByMilliseconds(pos, x.getTime(), cal);
+         }
      }
 
      /**
@@ -479,7 +487,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
       * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp, java.util.Calendar)
       */
      public void setTimestamp(int pos, Timestamp x, Calendar cal) throws SQLException {
-         setDateByMilliseconds(pos, x.getTime(), cal);
+         if (x == null) {
+             setObject(pos, null);
+         } else {
+             setDateByMilliseconds(pos, x.getTime(), cal);
+         }
      }
 
      /**
