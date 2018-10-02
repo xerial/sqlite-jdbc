@@ -271,7 +271,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSet#getCharacterStream(int)
      */
     public Reader getCharacterStream(int col) throws SQLException {
-        return new StringReader(getString(col));
+        String string = getString(col);
+        return string == null ? null : new StringReader(string);
     }
 
     /**
