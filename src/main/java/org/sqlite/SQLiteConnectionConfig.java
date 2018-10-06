@@ -10,7 +10,7 @@ import java.util.Properties;
 import static org.sqlite.SQLiteConfig.DEFAULT_DATE_STRING_FORMAT;
 
 /**
- * Connection local cofigurations
+ * Connection local configurations
  */
 public class SQLiteConnectionConfig implements Cloneable
 {
@@ -20,7 +20,7 @@ public class SQLiteConnectionConfig implements Cloneable
     private FastDateFormat dateFormat = FastDateFormat.getInstance(dateStringFormat);
 
     private int transactionIsolation = Connection.TRANSACTION_SERIALIZABLE;
-    private SQLiteConfig.TransactionMode transactionMode = SQLiteConfig.TransactionMode.DEFFERED;
+    private SQLiteConfig.TransactionMode transactionMode = SQLiteConfig.TransactionMode.DEFERRED;
     private boolean autoCommit = true;
 
     public static SQLiteConnectionConfig fromPragmaTable(Properties pragmaTable) {
@@ -30,7 +30,7 @@ public class SQLiteConnectionConfig implements Cloneable
                 pragmaTable.getProperty(SQLiteConfig.Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT),
                 Connection.TRANSACTION_SERIALIZABLE,
                 SQLiteConfig.TransactionMode.getMode(
-                        pragmaTable.getProperty(SQLiteConfig.Pragma.TRANSACTION_MODE.pragmaName, SQLiteConfig.TransactionMode.DEFFERED.name())),
+                        pragmaTable.getProperty(SQLiteConfig.Pragma.TRANSACTION_MODE.pragmaName, SQLiteConfig.TransactionMode.DEFERRED.name())),
                 true);
     }
 
@@ -128,8 +128,12 @@ public class SQLiteConnectionConfig implements Cloneable
         return transactionMode;
     }
 
+    @SuppressWarnings("deprecation")
     public void setTransactionMode(SQLiteConfig.TransactionMode transactionMode)
     {
+        if (transactionMode == SQLiteConfig.TransactionMode.DEFFERED) {
+            transactionMode = SQLiteConfig.TransactionMode.DEFERRED;
+        }
         this.transactionMode = transactionMode;
     }
 
@@ -139,7 +143,7 @@ public class SQLiteConnectionConfig implements Cloneable
 
 
     static {
-        beginCommandMap.put(SQLiteConfig.TransactionMode.DEFFERED, "begin;");
+        beginCommandMap.put(SQLiteConfig.TransactionMode.DEFERRED, "begin;");
         beginCommandMap.put(SQLiteConfig.TransactionMode.IMMEDIATE, "begin immediate;");
         beginCommandMap.put(SQLiteConfig.TransactionMode.EXCLUSIVE, "begin exclusive;");
     }

@@ -777,13 +777,20 @@ public class SQLiteConfig
     }
 
     public static enum TransactionMode implements PragmaValue {
-        DEFFERED, IMMEDIATE, EXCLUSIVE;
+        /**
+         * @deprecated Use {@code DEFERRED} instead.
+         */
+        @Deprecated DEFFERED,
+        DEFERRED, IMMEDIATE, EXCLUSIVE;
 
         public String getValue() {
             return name();
         }
 
         public static TransactionMode getMode(String mode) {
+            if ("DEFFERED".equalsIgnoreCase(mode)) {
+                return DEFERRED;
+            }
             return TransactionMode.valueOf(mode.toUpperCase());
         }
     }
@@ -799,7 +806,7 @@ public class SQLiteConfig
 
     /**
      * Sets the mode that will be used to start transactions.
-     * @param transactionMode One of DEFFERED, IMMEDIATE or EXCLUSIVE.
+     * @param transactionMode One of DEFERRED, IMMEDIATE or EXCLUSIVE.
      * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
      */
     public void setTransactionMode(String transactionMode) {
