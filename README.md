@@ -37,7 +37,7 @@ Public Discussion Forum
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/org.xerial/sqlite-jdbc/badge.svg)](http://www.javadoc.io/doc/org.xerial/sqlite-jdbc)
 
 * Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
-* Latest snapshot (pre-releasse) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+* Latest snapshot (pre-release) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
 
 Usage
 ============
@@ -110,7 +110,7 @@ id = 2
           catch(SQLException e)
           {
             // connection close failed.
-            System.err.println(e);
+            System.err.println(e.getMessage());
           }
         }
       }
@@ -146,25 +146,28 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2018-10-01: sqlite-jdbc-3.25.2
+    * Upgrade to SQLite [3.25.2](https://www.sqlite.org/releaselog/3_25_2.html)
+    * Fixes #74, #318, #349, #363, #365
 *   2018-05-25: sqlite-jdbc-3.23.1
-    * Upgrade to SQLite 3.23.1
-    * Fixes #312, 321, #323, #328
+    * Upgrade to SQLite [3.23.1](https://www.sqlite.org/releaselog/3_23_1.html)
+    * Fixes #312, #321, #323, #328
     * Dropped linux armv6 support temporarily
 *   2017-12-07: sqlite-jdbc-3.21.0.1
     * Metadata query fixes
     * Fix for Android
 *   2017-11-14: sqlite-jdbc-3.21.0
-    * Upgrade to SQLite 3.21.0
+    * Upgrade to SQLite [3.21.0](https://www.sqlite.org/releaselog/3_21_0.html)
     * Various fixes for metadata queries
 *   2017-10-08: sqlite-jdbc-3.20.1
-    * Upgrade to SQLite 3.20.1
+    * Upgrade to SQLite [3.20.1](https://www.sqlite.org/releaselog/3_20_1.html)
     * Various bug fixes
 *   2017-08-04: sqlite-jdbc-3.20.0
     * Upgrade to SQLite [3.20.0](https://www.sqlite.org/releaselog/3_20_0.html)
     * Support Linux aarch64
     * Fix #239
 *   2017-06-22: sqlite-jdbc-3.19.3
-    * Upgrade to SQLite [3.19.0](https://www.sqlite.org/releaselog/3_19_3.html)
+    * Upgrade to SQLite [3.19.3](https://www.sqlite.org/releaselog/3_19_3.html)
 *   2017-05-18: sqlite-jdbc-3.18.0
     * Upgrade to SQLite [3.18.0](http://sqlite.org/releaselog/3_18_0.html)
 *   2017-01-10: sqlite-jdbc-3.16.1
@@ -175,7 +178,7 @@ News
 *   2016-11-04: sqlite-jdbc-3.15.1
     * Upgrade to SQLite [3.15.1](https://sqlite.org/releaselog/3_15_1.html)
 *   2016-11-04: sqlite-jdbc-3.15.0
-    * Upgrade to SQLite 3.15.0
+    * Upgrade to SQLite [3.15.0](https://sqlite.org/releaselog/3_15_0.html)
     * Cleanup extracted temp library files upon start
     * Fix various metadata problems
 
@@ -185,7 +188,7 @@ News
 *   2016 09-26: sqlite-jdbc-3.14.2
     * Updated binaries (Using docker for the ease of cross compiling)
     * Fixes native libraries for Raspberry-Pi
-    * Dropped support for Mac x86 (The last Mac OS X supporiting this archictture was Snow Leopard, 7-year ago!)
+    * Dropped support for Mac x86 (The last Mac OS X supporting this architecture was Snow Leopard, 7-year ago!)
     * Default support of JSON1 extension (#76, #127)
     * Implement query progress callback (#137)
     * Use extended error codes (#119)
@@ -233,7 +236,7 @@ News
 *   2009 June 4th: [sqlite-jdbc-3.6.14.2](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.2/) released.
 *   2009 May 19th: [sqlite-jdbc-3.6.14.1](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.1/) released.
     *   This version supports "jdbc:sqlite::resource:" syntax to access read-only
-    DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the <http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76 detailes>
+    DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the [details](http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76))
 
 
 *   2009 February 18th: sqlite-jdbc-3.6.11 released.
@@ -269,8 +272,7 @@ News
     and contains pure-java and native versions.
 *   2008 July 17th: sqlite-jdbc-3.6.0 released. Compatible with SQLite 3.6.0, and
     includes both pure-java and native versions.
-*   2008 July 3rd: [sqlite-jdbc-3.5.9-universal]
-    (http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.5.9-universal) released.
+*   2008 July 3rd: [sqlite-jdbc-3.5.9-universal](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.5.9-universal) released.
     This version contains both native and pure-java SQLite libraries, so it probably works in any OS environment.
 
 
@@ -289,7 +291,7 @@ News
 *   2008 Mar. 10th: sqlite-jdbc-v042 released.
     *   Corresponding to SQLite 3.5.6, which integrates FTS3 (full text search).
 *   2008 Jan. 31st: sqlite-jdbc-v038.4 released.
-    *   SQLiteJDBCLoder.initialize() is no longer requried.
+    *   SQLiteJDBCLoader.initialize() is no longer required.
 *   2008 Jan. 11th: The Jar files for Windows, Mac OS X and Linux are packed into
     a single Jar file! So, no longer need to use an OS-specific jar file.
 *   2007 Dec. 31th: Upgraded to sqlitejdbc-v038
