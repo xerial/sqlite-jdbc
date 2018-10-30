@@ -341,15 +341,26 @@ public class TransactionTest
         SQLiteDataSource ds = new SQLiteDataSource();
         ds.setUrl("jdbc:sqlite:" + tmpFile.getAbsolutePath());
 
-        // deffered
+        // deferred
         SQLiteConnection con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.DEFFERED, con.getConnectionConfig().getTransactionMode());
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
         assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
         runUpdates(con, "tbl1");
         
-        ds.setTransactionMode(TransactionMode.DEFFERED.name());
+        ds.setTransactionMode(TransactionMode.DEFERRED.name());
         con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.DEFFERED, con.getConnectionConfig().getTransactionMode());
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
+
+        // Misspelled deferred should be accepted for backwards compatibility
+        ds.setTransactionMode("DEFFERED");
+        con = (SQLiteConnection)ds.getConnection();
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
+
+        con = (SQLiteConnection)ds.getConnection();
+        con.getConnectionConfig().setTransactionMode(TransactionMode.valueOf("DEFFERED"));
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
         assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
 
         // immediate

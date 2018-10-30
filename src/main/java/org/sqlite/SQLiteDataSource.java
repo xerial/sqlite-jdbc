@@ -372,7 +372,7 @@ public class SQLiteDataSource implements DataSource
 
     /**
      * Sets the mode that will be used to start transactions for this database.
-     * @param transactionMode One of DEFFERED, IMMEDIATE or EXCLUSIVE.
+     * @param transactionMode One of DEFERRED, IMMEDIATE or EXCLUSIVE.
      * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
      */
     public void setTransactionMode(String transactionMode) {
