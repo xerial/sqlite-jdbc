@@ -290,6 +290,54 @@ public class UDFTest
     }
 
     @Test
+    public void window() throws SQLException {
+        Function.create(conn, "mySum", new Function.Window() {
+            private int val = 0;
+
+            @Override
+            protected void xStep() throws SQLException {
+                for (int i = 0; i < args(); i++)
+                    val += value_int(i);
+            }
+
+            @Override
+            protected void xInverse() throws SQLException {
+                for (int i = 0; i < args(); i++)
+                    val -= value_int(i);
+            }
+
+            @Override
+            protected void xValue() throws SQLException {
+                result(val);
+            }
+
+            @Override
+            protected void xFinal() throws SQLException {
+                result(val);
+            }
+        });
+
+        stat.executeUpdate("create table t (x);");
+        stat.executeUpdate("insert into t values(1);");
+        stat.executeUpdate("insert into t values(2);");
+        stat.executeUpdate("insert into t values(3);");
+        stat.executeUpdate("insert into t values(4);");
+        stat.executeUpdate("insert into t values(5);");
+
+        ResultSet rs = stat.executeQuery("select mySum(x) over (order by x rows between 1 preceding and 1 following) from t order by x;");
+        assertTrue(rs.next());
+        assertEquals(3, rs.getInt(1));
+        assertTrue(rs.next());
+        assertEquals(6, rs.getInt(1));
+        assertTrue(rs.next());
+        assertEquals(9, rs.getInt(1));
+        assertTrue(rs.next());
+        assertEquals(12, rs.getInt(1));
+        assertTrue(rs.next());
+        assertEquals(9, rs.getInt(1));
+    }
+
+    @Test
     public void destroy() throws SQLException {
         Function.create(conn, "f1", new Function() {
             @Override
