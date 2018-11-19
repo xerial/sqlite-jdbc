@@ -826,8 +826,8 @@ public abstract class DB implements Codes
     public final synchronized boolean execute(CoreStatement stmt, Object[] vals) throws SQLException {
         if (vals != null) {
             final int params = bind_parameter_count(stmt.pointer);
-            if (params != vals.length) {
-                throw new SQLException("assertion failure: param count (" + params + ") != value count (" + vals.length
+            if (params > vals.length) {
+                throw new SQLException("assertion failure: param count (" + params + ") > value count (" + vals.length
                         + ")");
             }
 
