@@ -299,8 +299,8 @@ public class SQLiteJDBCLoader {
         String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
         if(sqliteNativeLibraryName == null) {
             sqliteNativeLibraryName = System.mapLibraryName("sqlitejdbc");
-            if(sqliteNativeLibraryName != null && sqliteNativeLibraryName.endsWith("dylib")) {
-                sqliteNativeLibraryName = sqliteNativeLibraryName.replace("dylib", "jnilib");
+            if(sqliteNativeLibraryName != null && sqliteNativeLibraryName.endsWith(".dylib")) {
+                sqliteNativeLibraryName = sqliteNativeLibraryName.replace(".dylib", ".jnilib");
             }
         }
 
