@@ -982,6 +982,8 @@ public class DBMetaDataTest
         stat.executeUpdate("CREATE TABLE `Pk11` (`Col1`, `Col2`, `Col3`, `Col4`, CONSTRAINT `NamedPk` PRIMARY KEY(`Col3`, `Col2`));");
         stat.executeUpdate("CREATE TABLE `Pk12` (`Col1`, `Col2`, `Col3`, `Col4`, CONSTRAINT`NamedPk`PRIMARY KEY(`Col3`,`Col2`));");
         stat.executeUpdate("CREATE TABLE \"Pk13\" (\"Col1\", \"Col2\", \"Col3\", \"Col4\", CONSTRAINT \"NamedPk\" PRIMARY KEY(\"Col3\",\"Col2\"));");
+        stat.executeUpdate("CREATE TABLE \"Pk14\" (\"Col1\", \"Col2\", \"Col3\", \"Col4\", PRIMARY KEY(\"Col3\"), FOREIGN KEY (\"Col1\") REFERENCES \"pk1\" (\"col1\"))");
+        stat.executeUpdate("CREATE TABLE \"Pk15\" (\"Col1\", \"Col2\", \"Col3\", \"Col4\", PRIMARY KEY(\"Col3\", \"Col2\"), FOREIGN KEY (\"Col1\") REFERENCES \"pk1\" (\"col1\"))");
         
         rs = meta.getPrimaryKeys(null, null, "nopk");
         assertFalse(rs.next());
@@ -1008,6 +1010,8 @@ public class DBMetaDataTest
         assertPrimaryKey(meta, "Pk11", "NamedPk", "Col3", "Col2");
         assertPrimaryKey(meta, "Pk12", "NamedPk", "Col3", "Col2");
         assertPrimaryKey(meta, "Pk13", "NamedPk", "Col3", "Col2");
+        assertPrimaryKey(meta, "Pk14", null, "Col3");
+        assertPrimaryKey(meta, "Pk15", null, "Col3", "Col2");
     }
     
     private void assertPrimaryKey(DatabaseMetaData meta, String tableName, String pkName, String... pkColumns) throws Exception {  
@@ -1028,6 +1032,9 @@ public class DBMetaDataTest
 		    assertEquals("DatabaseMetaData.getPrimaryKeys: KEY_SEQ", colSeq.get(pkColumns[i]).intValue(), rs.getInt("KEY_SEQ"));
 		    if (i < pkColumns.length - 1) assertTrue(rs.next());
 	    }
+
+	    assertFalse(rs.next());
+
 	    rs.close();
     }
 

@@ -1962,7 +1962,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * Pattern used to extract column order for an unnamed primary key.
      */
     protected final static Pattern PK_UNNAMED_PATTERN =
-        Pattern.compile(".*PRIMARY\\s+KEY\\s*\\((.*?,+.*?)\\).*",
+        Pattern.compile(".*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
