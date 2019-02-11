@@ -23,6 +23,7 @@
 static jclass dbclass = 0;
 static jclass  fclass = 0;
 static jclass  aclass = 0;
+static jclass  wclass = 0;
 static jclass pclass = 0;
 static jclass phandleclass = 0;
 
@@ -362,6 +363,42 @@ void xStep(sqlite3_context *context, int args, sqlite3_value** value)
     xCall(context, args, value, *func, mth);
 }
 
+void xInverse(sqlite3_context *context, int args, sqlite3_value** value)
+{
+    JNIEnv *env = 0;
+    struct UDFData *udf = 0;
+    jobject *func = 0;
+    static jmethodID mth = 0;
+
+    udf = (struct UDFData*)sqlite3_user_data(context);
+    (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
+
+    if (!mth) mth = (*env)->GetMethodID(env, wclass, "xInverse", "()V");
+
+    func = sqlite3_aggregate_context(context, sizeof(jobject));
+    assert(*func); // disaster
+
+    xCall(context, args, value, *func, mth);
+}
+
+void xValue(sqlite3_context *context)
+{
+    JNIEnv *env = 0;
+    struct UDFData *udf = 0;
+    jobject *func = 0;
+    static jmethodID mth = 0;
+
+    udf = (struct UDFData*)sqlite3_user_data(context);
+    (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
+
+    if (!mth) mth = (*env)->GetMethodID(env, wclass, "xValue", "()V");
+
+    func = sqlite3_aggregate_context(context, sizeof(jobject));
+    assert(*func); // disaster
+
+    xCall(context, 0, 0, *func, mth);
+}
+
 void xFinal(sqlite3_context *context)
 {
     JNIEnv *env = 0;
@@ -405,6 +442,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     if (!aclass) return JNI_ERR;
     aclass = (*env)->NewWeakGlobalRef(env, aclass);
 
+    wclass = (*env)->FindClass(env, "org/sqlite/Function$Window");
+    if (!wclass) return JNI_ERR;
+    wclass = (*env)->NewWeakGlobalRef(env, wclass);
+
     pclass = (*env)->FindClass(env, "org/sqlite/core/DB$ProgressObserver");
     if(!pclass) return JNI_ERR;
     pclass = (*env)->NewWeakGlobalRef(env, pclass);
@@ -429,6 +470,8 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     if (fclass) (*env)->DeleteWeakGlobalRef(env, fclass);
 
     if (aclass) (*env)->DeleteWeakGlobalRef(env, aclass);
+
+    if (wclass) (*env)->DeleteWeakGlobalRef(env, wclass);
 
     if (pclass) (*env)->DeleteWeakGlobalRef(env, pclass);
 
@@ -1183,7 +1226,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
 {
     jint ret = 0;
     char *name_bytes;
-    int isAgg = 0;
+    int isAgg = 0, isWindow = 0;
 
     static jfieldID udfdatalist = 0;
     struct UDFData *udf = malloc(sizeof(struct UDFData));
@@ -1194,6 +1237,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
         udfdatalist = (*env)->GetFieldID(env, dbclass, "udfdatalist", "J");
 
     isAgg = (*env)->IsInstanceOf(env, func, aclass);
+    isWindow = (*env)->IsInstanceOf(env, func, wclass);
     udf->func = (*env)->NewGlobalRef(env, func);
     (*env)->GetJavaVM(env, &udf->vm);
 
@@ -1204,16 +1248,32 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
     utf8JavaByteArrayToUtf8Bytes(env, name, &name_bytes, NULL);
     if (!name_bytes) { throwex_outofmemory(env); return 0; }
 
-    ret = sqlite3_create_function(
-            gethandle(env, this),
-            name_bytes,            // function name
-            -1,                    // number of args
-            SQLITE_UTF16 | flags,  // preferred chars
-            udf,
-            isAgg ? 0 :&xFunc,
-            isAgg ? &xStep : 0,
-            isAgg ? &xFinal : 0
-    );
+    if (isAgg) {
+        ret = sqlite3_create_window_function(
+                gethandle(env, this),
+                name_bytes,            // function name
+                -1,                    // number of args
+                SQLITE_UTF16 | flags,  // preferred chars
+                udf,
+                &xStep,
+                &xFinal,
+                isWindow ? &xValue : 0,
+                isWindow ? &xInverse : 0,
+                0
+        );
+    } else {
+        ret = sqlite3_create_function(
+                gethandle(env, this),
+                name_bytes,            // function name
+                -1,                    // number of args
+                SQLITE_UTF16 | flags,  // preferred chars
+                udf,
+                &xFunc,
+                0,
+                0
+        );
+    }
+
     freeUtf8Bytes(name_bytes);
 
     return ret;

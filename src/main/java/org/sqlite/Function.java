@@ -286,4 +286,26 @@ public abstract class Function
             return super.clone();
         }
     }
+
+    /**
+     * Provides an interface for creating SQLite user-defined window functions.
+     * @see Aggregate
+     */
+    public static abstract class Window
+            extends Aggregate
+    {
+        /**
+         * Defines the abstract window callback function
+         * @throws SQLException
+         * @see <a href="https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions">https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions</a>
+         */
+        protected abstract void xInverse() throws SQLException;
+
+        /**
+         * Defines the abstract window callback function
+         * @throws SQLException
+         * @see <a href="https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions">https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions</a>
+         */
+        protected abstract void xValue() throws SQLException;
+    }
 }
