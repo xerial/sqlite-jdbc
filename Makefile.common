@@ -147,7 +147,7 @@ MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
 ifeq ($(wildcard MAC_SDK),)
 	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk
 endif
-Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.5 -fvisibility=hidden
+Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.6 -fvisibility=hidden
 Mac-x86_64_LINKFLAGS := -dynamiclib 
 Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
