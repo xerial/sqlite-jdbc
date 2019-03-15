@@ -831,7 +831,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
             }
         }
 
-        return Types.NULL;
+        return Types.NUMERIC;
     }
 
     /**
@@ -857,11 +857,11 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         case SQLITE_BLOB:
             return "BLOB";
         case SQLITE_NULL:
-            return "NULL";
+            return "NUMERIC";
         case SQLITE_TEXT:
         	return "TEXT";
         default:
-            return "NULL";
+            return "NUMERIC";
         }
     }
 
