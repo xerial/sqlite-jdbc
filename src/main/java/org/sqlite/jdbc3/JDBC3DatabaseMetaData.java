@@ -1590,6 +1590,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         int i = 0;
         for (; rs.next(); i++) {
             int keySeq = rs.getInt(2) + 1;
+            int keyId = rs.getInt(1);
             String PKTabName = rs.getString(3);
             String FKColName = rs.getString(4);
             String PKColName = rs.getString(5);
@@ -1608,7 +1609,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
 
             String fkName = null;
-            if (fkNames.size() > i) fkName = fkNames.get(i).getFkName();
+            if (fkNames.size() > keyId) fkName = fkNames.get(keyId).getFkName();
             
             sql.append("select ").append(keySeq).append(" as ks,")
                 .append("'").append(escape(PKTabName)).append("' as ptn, '")

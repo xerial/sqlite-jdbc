@@ -357,6 +357,50 @@ public class DBMetaDataTest
         exportedKeys.close();
     }
 
+    @Test 
+    public void getImportedKeysMultipleColumns()throws SQLException{
+    	ResultSet importedKeys;
+    	stat.executeUpdate("CREATE TABLE PONE ( ID_FIRST_ONE INTEGER NOT NULL, ID_SECOND_ONE INTEGER NOT NULL, ADDITIONAL_ONE TEXT, CONSTRAINT PONE_PK PRIMARY KEY (ID_FIRST_ONE, ID_SECOND_ONE) )");
+    	stat.executeUpdate("CREATE TABLE PTWO ( ID_FIRST_TWO INTEGER NOT NULL, ID_SECOND_TWO INTEGER NOT NULL, ADDITIONAL_TWO TEXT, CONSTRAINT PTWO_PK PRIMARY KEY (ID_FIRST_TWO, ID_SECOND_TWO) )");
+    	stat.executeUpdate("CREATE TABLE CHILD ( ID_CHILD INTEGER NOT NULL, ID_CHILD_TO_ONE INTEGER NOT NULL, ID_CHILD_TO_TWO INTEGER NOT NULL, CONSTRAINT CHILD_PK PRIMARY KEY (ID_CHILD, ID_CHILD_TO_ONE), CONSTRAINT PONE_FK01 FOREIGN KEY (ID_CHILD, ID_CHILD_TO_ONE) REFERENCES PONE (ID_FIRST_ONE, ID_SECOND_ONE) ON DELETE CASCADE, CONSTRAINT PTWO_FK02 FOREIGN KEY (ID_CHILD, ID_CHILD_TO_TWO) REFERENCES PTWO (ID_FIRST_TWO, ID_SECOND_TWO) )");
+    	
+		importedKeys = meta.getImportedKeys(null, null, "CHILD");
+		
+        assertTrue(importedKeys.next());
+        assertEquals("PONE", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID_FIRST_ONE", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PONE_PK", importedKeys.getString("PK_NAME"));
+        assertEquals("PONE_FK01", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID_CHILD", importedKeys.getString("FKCOLUMN_NAME"));
+        
+        assertTrue(importedKeys.next());
+        assertEquals("PONE", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID_SECOND_ONE", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PONE_PK", importedKeys.getString("PK_NAME"));
+        assertEquals("PONE_FK01", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID_CHILD_TO_ONE", importedKeys.getString("FKCOLUMN_NAME"));
+
+        assertTrue(importedKeys.next());
+        assertEquals("PTWO", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID_FIRST_TWO", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PTWO_PK", importedKeys.getString("PK_NAME"));
+        assertEquals("PTWO_FK02", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID_CHILD", importedKeys.getString("FKCOLUMN_NAME"));
+
+        assertTrue(importedKeys.next());
+        assertEquals("PTWO", importedKeys.getString("PKTABLE_NAME"));
+        assertEquals("ID_SECOND_TWO", importedKeys.getString("PKCOLUMN_NAME"));
+        assertEquals("PTWO_PK", importedKeys.getString("PK_NAME"));
+        assertEquals("PTWO_FK02", importedKeys.getString("FK_NAME"));
+        assertEquals("CHILD", importedKeys.getString("FKTABLE_NAME"));
+        assertEquals("ID_CHILD_TO_TWO", importedKeys.getString("FKCOLUMN_NAME"));
+
+        assertFalse(importedKeys.next());
+        importedKeys.close();
+    }
     @Test
     public void getImportedKeysColsForNamedKeys() throws SQLException {
 
