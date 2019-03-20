@@ -146,9 +146,12 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2019-03-18: sqlite-jdbc-3.27.2
+    * Upgrade to SQLite [3.27.2](https://www.sqlite.org/releaselog/3_27_2.html)
 *   2018-10-01: sqlite-jdbc-3.25.2
     * Upgrade to SQLite [3.25.2](https://www.sqlite.org/releaselog/3_25_2.html)
     * Fixes #74, #318, #349, #363, #365
+    * Upsert is supported since this version.
 *   2018-05-25: sqlite-jdbc-3.23.1
     * Upgrade to SQLite [3.23.1](https://www.sqlite.org/releaselog/3_23_1.html)
     * Fixes #312, #321, #323, #328
