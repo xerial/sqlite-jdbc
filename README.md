@@ -146,6 +146,9 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2019-03-20: sqlite-jdbc-3.27.2.1
+    * Make smaller the jar size by using -Os compiler option
+    * Performance improvement for concurrent access.
 *   2019-03-18: sqlite-jdbc-3.27.2
     * Upgrade to SQLite [3.27.2](https://www.sqlite.org/releaselog/3_27_2.html)
 *   2018-10-01: sqlite-jdbc-3.25.2
