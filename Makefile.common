@@ -66,77 +66,77 @@ Default_SQLITE_FLAGS  :=
 
 Linux-x86_CC        := $(CROSS_PREFIX)gcc
 Linux-x86_STRIP     := $(CROSS_PREFIX)strip
-Linux-x86_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -m32 -fvisibility=hidden
+Linux-x86_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -m32 -fvisibility=hidden
 Linux-x86_LINKFLAGS := -shared -static-libgcc
 Linux-x86_LIBNAME   := libsqlitejdbc.so
 Linux-x86_SQLITE_FLAGS  := 
 
 Linux-x86_64_CC        := $(CROSS_PREFIX)gcc
 Linux-x86_64_STRIP     := $(CROSS_PREFIX)strip
-Linux-x86_64_CCFLAGS   := -Ilib/inc_linux -I$(JAVA_HOME)/include -O2 -fPIC -m64 -fvisibility=hidden
+Linux-x86_64_CCFLAGS   := -Ilib/inc_linux -I$(JAVA_HOME)/include -Os -fPIC -m64 -fvisibility=hidden
 Linux-x86_64_LINKFLAGS := -shared -static-libgcc
 Linux-x86_64_LIBNAME   := libsqlitejdbc.so
 Linux-x86_64_SQLITE_FLAGS  := 
 
 Linux-arm_CC          := $(CROSS_PREFIX)gcc
 Linux-arm_STRIP       := $(CROSS_PREFIX)strip
-Linux-arm_CCFLAGS     := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -mfloat-abi=softfp -mfpu=vfp -fvisibility=hidden
+Linux-arm_CCFLAGS     := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -mfloat-abi=softfp -mfpu=vfp -fvisibility=hidden
 Linux-arm_LINKFLAGS   := -shared -static-libgcc
 Linux-arm_LIBNAME     := libsqlitejdbc.so
 Linux-arm_SQLITE_FLAGS  :=
 
 Linux-armv6_CC        := $(CROSS_PREFIX)gcc
 Linux-armv6_STRIP     := $(CROSS_PREFIX)strip
-Linux-armv6_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-armv6_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
 Linux-armv6_LINKFLAGS := -shared -static-libgcc
 Linux-armv6_LIBNAME   := libsqlitejdbc.so
 Linux-armv6_SQLITE_FLAGS  :=
 
 Linux-armv7_CC        := $(CROSS_PREFIX)gcc
 Linux-armv7_STRIP     := $(CROSS_PREFIX)strip
-Linux-armv7_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
+Linux-armv7_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -mfloat-abi=hard -mfpu=vfp -fPIC -fvisibility=hidden
 Linux-armv7_LINKFLAGS := -shared -static-libgcc
 Linux-armv7_LIBNAME   := libsqlitejdbc.so
 Linux-armv7_SQLITE_FLAGS  :=
 
 Linux-android-arm_CC        := $(CROSS_PREFIX)gcc
 Linux-android-arm_STRIP     := $(CROSS_PREFIX)strip
-Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -O2 -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
+Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
 Linux-android-arm_LINKFLAGS := -shared -static-libgcc
 Linux-android-arm_LIBNAME   := libsqlitejdbc.so
 Linux-android-arm_SQLITE_FLAGS  :=
 
 Linux-ppc64_CC        := $(CROSS_PREFIX)gcc
 Linux-ppc64_STRIP     := $(CROSS_PREFIX)strip
-Linux-ppc64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -fvisibility=hidden
+Linux-ppc64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden
 Linux-ppc64_LINKFLAGS := -shared -static-libgcc
 Linux-ppc64_LIBNAME   := libsqlitejdbc.so
 Linux-ppc64_SQLITE_FLAGS  :=
 
 FreeBSD-x86_64_CC        := $(CROSS_PREFIX)cc
 FreeBSD-x86_64_STRIP     := $(CROSS_PREFIX)strip
-FreeBSD-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -fvisibility=hidden
+FreeBSD-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden
 FreeBSD-x86_64_LINKFLAGS := -shared
 FreeBSD-x86_64_LIBNAME   := libsqlitejdbc.so
 FreeBSD-x86_64_SQLITE_FLAGS  :=
 
 OpenBSD-x86_64_CC        := $(CROSS_PREFIX)gcc
 OpenBSD-x86_64_STRIP     := $(CROSS_PREFIX)strip
-OpenBSD-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -fvisibility=hidden
+OpenBSD-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden
 OpenBSD-x86_64_LINKFLAGS := -shared
 OpenBSD-x86_64_LIBNAME   := libsqlitejdbc.so
 OpenBSD-x86_64_SQLITE_FLAGS  := 
 
 SunOS-sparcv9_CC        := $(CROSS_PREFIX)gcc
 SunOS-sparcv9_STRIP     := $(CROSS_PREFIX)strip
-SunOS-sparcv9_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -m64 -fvisibility=hidden
+SunOS-sparcv9_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2s-fPIC -m64 -fvisibility=hidden
 SunOS-sparcv9_LINKFLAGS := -shared -static-libgcc
 SunOS-sparcv9_LIBNAME   := libsqlitejdbc.so
 SunOS-sparcv9_SQLITE_FLAGS  := 
 
 Mac-x86_CC        := gcc
 Mac-x86_STRIP     := strip -x
-Mac-x86_CCFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
+Mac-x86_CCFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
 Mac-x86_LINKFLAGS := -dynamiclib
 Mac-x86_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
@@ -147,21 +147,21 @@ MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
 ifeq ($(wildcard MAC_SDK),)
 	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk
 endif
-Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -O2 -fPIC -mmacosx-version-min=10.6 -fvisibility=hidden
+Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.6 -fvisibility=hidden
 Mac-x86_64_LINKFLAGS := -dynamiclib 
 Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
 
 Windows-x86_CC           := $(CROSS_PREFIX)gcc
 Windows-x86_STRIP        := $(CROSS_PREFIX)strip
-Windows-x86_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
+Windows-x86_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -Os
 Windows-x86_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
 Windows-x86_LIBNAME      := sqlitejdbc.dll
 Windows-x86_SQLITE_FLAGS := 
 
 Windows-x86_64_CC           := $(CROSS_PREFIX)gcc
 Windows-x86_64_STRIP        := $(CROSS_PREFIX)strip
-Windows-x86_64_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -O2
+Windows-x86_64_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -Os
 Windows-x86_64_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
 Windows-x86_64_LIBNAME      := sqlitejdbc.dll
 Windows-x86_64_SQLITE_FLAGS := 
