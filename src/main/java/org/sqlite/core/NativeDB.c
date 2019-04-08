@@ -522,16 +522,17 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1open_1utf8(
     ret = sqlite3_open_v2(file_bytes, &db, flags, NULL);
     freeUtf8Bytes(file_bytes);
 
+    sethandle(env, this, db);
     if (ret != SQLITE_OK) {
+        ret = sqlite3_extended_errcode(db);
         throwex_errorcode(env, this, ret);
+        sethandle(env, this, 0); // The handle is needed for throwex_errorcode
         sqlite3_close(db);
         return;
     }
 
     // Ignore failures, as we can tolerate regular result codes.
     (void) sqlite3_extended_result_codes(db, 1);
-
-    sethandle(env, this, db);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1close(
