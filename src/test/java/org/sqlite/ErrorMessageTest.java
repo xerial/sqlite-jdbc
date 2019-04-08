@@ -118,7 +118,9 @@ public class ErrorMessageTest {
         assumeTrue(dir.mkdir());
         dir.deleteOnExit();
 
-        thrown.expectMessage(JUnitMatchers.containsString("[SQLITE_CANTOPEN_ISDIR]"));
+        thrown.expectMessage(JUnitMatchers.either(
+            JUnitMatchers.containsString("[SQLITE_CANTOPEN]")).or(
+            JUnitMatchers.containsString("[SQLITE_CANTOPEN_ISDIR]")));
         Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dir.getAbsolutePath());
         conn.close();
     }
