@@ -103,6 +103,7 @@ public class SQLiteJDBCLoader {
      * otherwise.
      * @deprecated Pure Java no longer supported
      */
+    @Deprecated
     static boolean getPureJavaFlag() {
         return Boolean.parseBoolean(System.getProperty("sqlite.purejava", "false"));
     }
@@ -113,6 +114,7 @@ public class SQLiteJDBCLoader {
      * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
      * @deprecated Pure Java nolonger supported
      */
+    @Deprecated
     public static boolean isPureJavaMode() {
         return false;
     }
