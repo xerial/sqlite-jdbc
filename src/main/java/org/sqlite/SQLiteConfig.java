@@ -24,8 +24,6 @@
 //--------------------------------------
 package org.sqlite;
 
-import org.sqlite.date.FastDateFormat;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
@@ -415,6 +413,7 @@ public class SQLiteConfig
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_count_changes">www.sqlite.org/pragma.html#pragma_count_changes</a>
      */
+    @Deprecated
     public void enableCountChanges(boolean enable) {
         set(Pragma.COUNT_CHANGES, enable);
     }
@@ -437,6 +436,7 @@ public class SQLiteConfig
      * false.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks">http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks</a>
      */
+    @Deprecated
     public void enableEmptyResultCallBacks(boolean enable) {
         set(Pragma.EMPTY_RESULT_CALLBACKS, enable);
     }
@@ -528,6 +528,7 @@ public class SQLiteConfig
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_full_column_names">www.sqlite.org/pragma.html#pragma_full_column_names</a>
      */
+    @Deprecated
     public void enableFullColumnNames(boolean enable) {
         set(Pragma.FULL_COLUMN_NAMES, enable);
     }
