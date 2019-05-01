@@ -24,8 +24,6 @@
 //--------------------------------------
 package org.sqlite;
 
-import java.sql.SQLException;
-
 /**
  * SQLite3 error code
  * 
