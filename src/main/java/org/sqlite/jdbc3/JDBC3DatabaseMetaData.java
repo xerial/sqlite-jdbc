@@ -1809,7 +1809,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("    FROM").append("\n");
         sql.append("      sqlite_master").append("\n");
         sql.append("    WHERE").append("\n");
-        sql.append("      NAME NOT LIKE 'sqlite_%'").append("\n");
+        sql.append("      NAME NOT LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("      AND UPPER(TYPE) IN ('TABLE', 'VIEW')").append("\n");
         sql.append("    UNION ALL").append("\n");
         sql.append("    SELECT").append("\n");
@@ -1824,7 +1824,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("    FROM").append("\n");
         sql.append("      sqlite_master").append("\n");
         sql.append("    WHERE").append("\n");
-        sql.append("      NAME LIKE 'sqlite_%'").append("\n");
+        sql.append("      NAME LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("  )").append("\n");
         sql.append(" WHERE TABLE_NAME LIKE '").append(tblNamePattern).append("' AND TABLE_TYPE IN (");
 
