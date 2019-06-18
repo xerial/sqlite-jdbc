@@ -49,8 +49,8 @@ public abstract class JDBC3Connection extends SQLiteConnection {
                         this.getDatabase()._exec("commit; /* need to explicitly upgrade transaction */");
 
                         // start the write transaction
-                        this.getDatabase()._exec("BEGIN IMMEDIATE; /* explicitly upgrade transaction */");
                         this.getDatabase()._exec("PRAGMA query_only = false;");
+                        this.getDatabase()._exec("BEGIN IMMEDIATE; /* explicitly upgrade transaction */");
                         this.setCurrentTransactionType(TransactionMode.IMMEDIATE);
                     }
                 }
