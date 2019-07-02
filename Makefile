@@ -41,6 +41,7 @@ $(TARGET)/common-lib/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 jni-header: $(TARGET)/common-lib/NativeDB.h
 
 $(TARGET)/common-lib/NativeDB.h: src/main/java/org/sqlite/core/NativeDB.java
+	@mkdir -p $(TARGET)/common-lib
 	$(JAVAC) -d $(TARGET)/common-lib -sourcepath $(SRC) -h $(TARGET)/common-lib src/main/java/org/sqlite/core/NativeDB.java
 	mv target/common-lib/org_sqlite_core_NativeDB.h target/common-lib/NativeDB.h
 
