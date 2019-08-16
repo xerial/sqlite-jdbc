@@ -279,6 +279,7 @@ public class SQLiteConfig
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
         COUNT_CHANGES("count_changes", OnOff),
         DEFAULT_CACHE_SIZE("default_cache_size"),
+	DEFER_FOREIGN_KEYS("defer_foreign_keys", OnOff),
         EMPTY_RESULT_CALLBACKS("empty_result_callback", OnOff),
         ENCODING("encoding", toStringArray(Encoding.values())),
         FOREIGN_KEYS("foreign_keys", OnOff),
@@ -428,6 +429,16 @@ public class SQLiteConfig
      */
     public void setDefaultCacheSize(int numberOfPages) {
         set(Pragma.DEFAULT_CACHE_SIZE, numberOfPages);
+    }
+
+    /**
+     * Defers enforcement of foreign key constraints until the outermost
+     * transaction is committed.
+     * @param enable True to enable; false to disable;
+     * @see <a href="https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys">https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys</a>
+     */
+    public void deferForeignKeys(boolean enable) {
+        set(Pragma.DEFER_FOREIGN_KEYS, enable);
     }
 
     /**
