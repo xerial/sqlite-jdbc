@@ -1222,7 +1222,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_value_1type(
 
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
-        JNIEnv *env, jobject this, jbyteArray name, jobject func, jint flags)
+        JNIEnv *env, jobject this, jbyteArray name, jobject func, jint nArgs, jint flags)
 {
     jint ret = 0;
     char *name_bytes;
@@ -1252,7 +1252,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
         ret = sqlite3_create_window_function(
                 gethandle(env, this),
                 name_bytes,            // function name
-                -1,                    // number of args
+                nArgs,                 // number of args
                 SQLITE_UTF16 | flags,  // preferred chars
                 udf,
                 &xStep,
@@ -1265,7 +1265,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
         ret = sqlite3_create_function(
                 gethandle(env, this),
                 name_bytes,            // function name
-                -1,                    // number of args
+                nArgs,                 // number of args
                 SQLITE_UTF16 | flags,  // preferred chars
                 udf,
                 &xFunc,
@@ -1280,7 +1280,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
 }
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1function_1utf8(
-        JNIEnv *env, jobject this, jbyteArray name)
+        JNIEnv *env, jobject this, jbyteArray name, jint nArgs)
 {
     jint ret = 0;
     char* name_bytes;
@@ -1289,7 +1289,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1function_1utf8(
     if (!name_bytes) { throwex_outofmemory(env); return 0; }
     
     ret = sqlite3_create_function(
-        gethandle(env, this), name_bytes, -1, SQLITE_UTF16, 0, 0, 0, 0
+        gethandle(env, this), name_bytes, nArgs, SQLITE_UTF16, 0, 0, 0, 0
     );
     freeUtf8Bytes(name_bytes);
 

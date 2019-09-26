@@ -652,7 +652,7 @@ public abstract class DB implements Codes
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/create_function.html">http://www.sqlite.org/c3ref/create_function.html</a>
      */
-    public abstract int create_function(String name, Function f, int flags) throws SQLException;
+    public abstract int create_function(String name, Function f, int nArgs, int flags) throws SQLException;
 
     /**
      * De-registers a user defined function
@@ -660,7 +660,7 @@ public abstract class DB implements Codes
      * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
      * @throws SQLException
      */
-    public abstract int destroy_function(String name) throws SQLException;
+    public abstract int destroy_function(String name, int nArgs) throws SQLException;
 
     /**
      * Unused as we use the user_data pointer to store a single word.
