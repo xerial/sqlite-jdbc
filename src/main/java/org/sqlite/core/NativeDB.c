@@ -405,6 +405,7 @@ void xFinal(sqlite3_context *context)
     struct UDFData *udf = 0;
     jobject *func = 0;
     static jmethodID mth = 0;
+    static jmethodID clone = 0;
 
     udf = (struct UDFData*)sqlite3_user_data(context);
     (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
@@ -412,7 +413,17 @@ void xFinal(sqlite3_context *context)
     if (!mth) mth = (*env)->GetMethodID(env, aclass, "xFinal", "()V");
 
     func = sqlite3_aggregate_context(context, sizeof(jobject));
-    assert(*func); // disaster
+    // func may not have been allocated if xStep never ran
+    if (!*func) {
+        udf = (struct UDFData*)sqlite3_user_data(context);
+        (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
+
+        clone = (*env)->GetMethodID(env, aclass, "clone",
+            "()Ljava/lang/Object;");
+
+        *func = (*env)->CallObjectMethod(env, udf->func, clone);
+        *func = (*env)->NewGlobalRef(env, *func);
+    }
 
     xCall(context, 0, 0, *func, mth);
 
