@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9 HPUX-ia64_32
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -140,6 +140,13 @@ Mac-x86_CCFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC -mmacosx-ve
 Mac-x86_LINKFLAGS := -dynamiclib
 Mac-x86_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
+
+HPUX-ia64_32_CC			:= cc
+HPUX-ia64_32_STRIP		:= strip
+HPUX-ia64_32_CCFLAGS	:= -Ilib/inc_linux +Osize +z -Bhidden
+HPUX-ia64_32_LINKFLAGS	:= -b
+HPUX-ia64_32_LIBNAME	:= libsqlitejdbc.so
+HPUX-ia64_32_SQLITE_FLAGS :=
 
 Mac-x86_64_CC        := gcc -arch $(OS_ARCH) 
 Mac-x86_64_STRIP     := strip -x
