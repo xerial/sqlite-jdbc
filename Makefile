@@ -13,14 +13,18 @@ deploy:
 MVN:=mvn
 SRC:=src/main/java
 SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
+SQLITE_OBJ?=$(SQLITE_OUT)/sqlite3.o
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
 SQLITE_SOURCE?=$(TARGET)/$(SQLITE_AMAL_PREFIX)
+SQLITE_HEADER?=$(SQLITE_SOURCE)/sqlite3.h
 ifneq ($(SQLITE_SOURCE),$(TARGET)/$(SQLITE_AMAL_PREFIX))
 	created := $(shell touch $(SQLITE_UNPACKED))
 endif
 
-CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_SOURCE) $(CCFLAGS)
+SQLITE_INCLUDE := $(shell dirname "$(SQLITE_HEADER)")
+
+CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
 
 $(SQLITE_ARCHIVE):
 	@mkdir -p $(@D)
@@ -78,10 +82,12 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3.c
 
-$(SQLITE_OUT)/$(LIBNAME): $(SQLITE_OUT)/sqlite3.o $(SRC)/org/sqlite/core/NativeDB.c
+$(SQLITE_SOURCE)/sqlite3.h: $(SQLITE_UNPACKED)
+
+$(SQLITE_OUT)/$(LIBNAME): $(SQLITE_HEADER) $(SQLITE_OBJ) $(SRC)/org/sqlite/core/NativeDB.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -I $(TARGET)/common-lib -c -o $(SQLITE_OUT)/NativeDB.o $(SRC)/org/sqlite/core/NativeDB.c
-	$(CC) $(CCFLAGS) -o $@ $(SQLITE_OUT)/*.o $(LINKFLAGS)
+	$(CC) $(CCFLAGS) -o $@ $(SQLITE_OUT)/NativeDB.o $(SQLITE_OBJ) $(LINKFLAGS)
 # Workaround for strip Protocol error when using VirtualBox on Mac
 	cp $@ /tmp/$(@F)
 	$(STRIP) /tmp/$(@F)
@@ -95,7 +101,7 @@ NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 # Disabled linux-armv6 build because of this issue; https://github.com/dockcross/dockcross/issues/190
 native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv7 linux-arm64 linux-android-arm linux-ppc64
 
-native: $(SQLITE_UNPACKED) $(NATIVE_DLL)
+native: $(NATIVE_DLL)
 
 $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	@mkdir -p $(@D)
