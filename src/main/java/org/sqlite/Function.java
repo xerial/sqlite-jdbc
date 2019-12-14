@@ -87,7 +87,20 @@ public abstract class Function
      * @param f The function to register.
      * @param flags Extra flags to pass, such as {@link #FLAG_DETERMINISTIC}
      */
-    public static final void create(Connection conn, String name, Function f, int flags)
+    public static final void create(Connection conn, String name, Function f, int flags) throws SQLException
+    {
+        create(conn, name, f, -1, flags);
+    }
+
+    /**
+     * Registers a given function with the connection.
+     * @param conn The connection.
+     * @param name The name of the function.
+     * @param f The function to register.
+     * @param nArgs The number of arguments that the function takes.
+     * @param flags Extra flags to pass, such as {@link #FLAG_DETERMINISTIC}
+     */
+    public static final void create(Connection conn, String name, Function f, int nArgs, int flags)
             throws SQLException {
         if (conn == null || !(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
@@ -99,11 +112,15 @@ public abstract class Function
         f.conn = (SQLiteConnection)conn;
         f.db = f.conn.getDatabase();
 
+        if (nArgs < -1 || nArgs > 127) {
+            throw new SQLException("invalid args provided: "+nArgs);
+        }
+
         if (name == null || name.length() > 255) {
             throw new SQLException("invalid function name: '"+name+"'");
         }
 
-        if (f.db.create_function(name, f, flags) != Codes.SQLITE_OK) {
+        if (f.db.create_function(name, f, nArgs, flags) != Codes.SQLITE_OK) {
             throw new SQLException("error creating function");
         }
     }
@@ -112,14 +129,26 @@ public abstract class Function
      * Removes a named function from the given connection.
      * @param conn The connection to remove the function from.
      * @param name The name of the function.
+     * @param nArgs The number of args for the function.
      * @throws SQLException
      */
-    public static final void destroy(Connection conn, String name)
+    public static final void destroy(Connection conn, String name, int nArgs)
             throws SQLException {
         if (conn == null || !(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
-        ((SQLiteConnection)conn).getDatabase().destroy_function(name);
+        ((SQLiteConnection)conn).getDatabase().destroy_function(name, nArgs);
+    }
+
+    /**
+     * Removes a named function from the given connection.
+     * @param conn The connection to remove the function from.
+     * @param name The name of the function.
+     * @throws SQLException
+     */
+    public static final void destroy(Connection conn, String name) throws SQLException
+    {
+        destroy(conn, name, -1);
     }
 
 

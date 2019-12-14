@@ -405,6 +405,7 @@ void xFinal(sqlite3_context *context)
     struct UDFData *udf = 0;
     jobject *func = 0;
     static jmethodID mth = 0;
+    static jmethodID clone = 0;
 
     udf = (struct UDFData*)sqlite3_user_data(context);
     (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
@@ -412,7 +413,17 @@ void xFinal(sqlite3_context *context)
     if (!mth) mth = (*env)->GetMethodID(env, aclass, "xFinal", "()V");
 
     func = sqlite3_aggregate_context(context, sizeof(jobject));
-    assert(*func); // disaster
+    // func may not have been allocated if xStep never ran
+    if (!*func) {
+        udf = (struct UDFData*)sqlite3_user_data(context);
+        (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
+
+        clone = (*env)->GetMethodID(env, aclass, "clone",
+            "()Ljava/lang/Object;");
+
+        *func = (*env)->CallObjectMethod(env, udf->func, clone);
+        *func = (*env)->NewGlobalRef(env, *func);
+    }
 
     xCall(context, 0, 0, *func, mth);
 
@@ -1223,7 +1234,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_value_1type(
 
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
-        JNIEnv *env, jobject this, jbyteArray name, jobject func, jint flags)
+        JNIEnv *env, jobject this, jbyteArray name, jobject func, jint nArgs, jint flags)
 {
     jint ret = 0;
     char *name_bytes;
@@ -1253,7 +1264,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
         ret = sqlite3_create_window_function(
                 gethandle(env, this),
                 name_bytes,            // function name
-                -1,                    // number of args
+                nArgs,                 // number of args
                 SQLITE_UTF16 | flags,  // preferred chars
                 udf,
                 &xStep,
@@ -1266,7 +1277,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
         ret = sqlite3_create_function(
                 gethandle(env, this),
                 name_bytes,            // function name
-                -1,                    // number of args
+                nArgs,                 // number of args
                 SQLITE_UTF16 | flags,  // preferred chars
                 udf,
                 &xFunc,
@@ -1281,7 +1292,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1function_1utf8(
 }
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1function_1utf8(
-        JNIEnv *env, jobject this, jbyteArray name)
+        JNIEnv *env, jobject this, jbyteArray name, jint nArgs)
 {
     jint ret = 0;
     char* name_bytes;
@@ -1290,7 +1301,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1function_1utf8(
     if (!name_bytes) { throwex_outofmemory(env); return 0; }
     
     ret = sqlite3_create_function(
-        gethandle(env, this), name_bytes, -1, SQLITE_UTF16, 0, 0, 0, 0
+        gethandle(env, this), name_bytes, nArgs, SQLITE_UTF16, 0, 0, 0, 0
     );
     freeUtf8Bytes(name_bytes);
 
