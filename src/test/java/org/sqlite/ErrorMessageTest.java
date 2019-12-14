@@ -112,6 +112,20 @@ public class ErrorMessageTest {
     }
 
     @Test
+    public void cantOpenDir() throws SQLException, IOException {
+        File dir = File.createTempFile("error-message-test-cant-open-dir", "");
+        assumeTrue(dir.delete());
+        assumeTrue(dir.mkdir());
+        dir.deleteOnExit();
+
+        thrown.expectMessage(JUnitMatchers.either(
+            JUnitMatchers.containsString("[SQLITE_CANTOPEN]")).or(
+            JUnitMatchers.containsString("[SQLITE_CANTOPEN_ISDIR]")));
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dir.getAbsolutePath());
+        conn.close();
+    }
+
+    @Test
     public void shouldUsePlainErrorCodeAsVendorCodeAndExtendedAsResultCode() throws SQLException, IOException {
         File from = File.createTempFile("error-message-test-plain-1", ".sqlite");
         from.deleteOnExit();
