@@ -576,10 +576,6 @@ public class SQLiteConfig
         setPragma(Pragma.JOURNAL_MODE, mode.name());
     }
 
-    //    public void setJournalMode(String databaseName, JournalMode mode) {
-    //        setPragma(databaseName, Pragma.JOURNAL_MODE, mode.name());
-    //    }
-
     /**
      * Sets the journal_size_limit. This setting limits the size of the
      * rollback-journal and WAL files left in the file-system after transactions
