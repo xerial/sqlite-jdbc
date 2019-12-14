@@ -40,12 +40,14 @@ $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 
 $(TARGET)/common-lib/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
-	$(JAVAC) -source 1.5 -target 1.5 -sourcepath $(SRC) -d $(TARGET)/common-lib $<
+	$(JAVAC) -source 1.6 -target 1.6 -sourcepath $(SRC) -d $(TARGET)/common-lib $<
 
 jni-header: $(TARGET)/common-lib/NativeDB.h
 
-$(TARGET)/common-lib/NativeDB.h: $(TARGET)/common-lib/org/sqlite/core/NativeDB.class
-	$(JAVAH) -classpath $(TARGET)/common-lib -jni -o $@ org.sqlite.core.NativeDB
+$(TARGET)/common-lib/NativeDB.h: src/main/java/org/sqlite/core/NativeDB.java
+	@mkdir -p $(TARGET)/common-lib
+	$(JAVAC) -d $(TARGET)/common-lib -sourcepath $(SRC) -h $(TARGET)/common-lib src/main/java/org/sqlite/core/NativeDB.java
+	mv target/common-lib/org_sqlite_core_NativeDB.h target/common-lib/NativeDB.h
 
 test:
 	mvn test
@@ -163,6 +165,7 @@ clean-native:
 
 clean-java:
 	rm -rf $(TARGET)/*classes
+	rm -rf $(TARGET)/common-lib/*
 	rm -rf $(TARGET)/sqlite-jdbc-*jar
 
 clean-tests:
