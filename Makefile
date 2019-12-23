@@ -61,7 +61,10 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    $(SQLITE_SOURCE)/sqlite3ext.h > $(SQLITE_OUT)/sqlite3ext.h
 # insert a code for loading extension functions
 	perl -p -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
-	    $(SQLITE_SOURCE)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c
+	    $(SQLITE_SOURCE)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c.tmp
+# register compile option 'JDBC_EXTENSIONS'
+	perl -p -e "s/#if SQLITE_LIKE_DOESNT_MATCH_BLOBS/  \"JDBC_EXTENSIONS\",\n#if SQLITE_LIKE_DOESNT_MATCH_BLOBS/;" \
+	    $(SQLITE_OUT)/sqlite3.c.tmp > $(SQLITE_OUT)/sqlite3.c
 	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
 	$(CC) -o $@ -c $(CCFLAGS) \
 	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
