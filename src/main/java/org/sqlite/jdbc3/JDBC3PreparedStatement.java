@@ -36,7 +36,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void clearParameters() throws SQLException {
         checkOpen();
         conn.getDatabase().clear_bindings(pointer);
-        paramValid.clear();
         if (batch != null)
             for (int i = batchPos; i < batchPos + paramCount; i++)
                 batch[i] = null;
@@ -49,7 +48,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         checkOpen();
         rs.close();
         conn.getDatabase().reset(pointer);
-        checkParameters();
 
         boolean success = false;
         try {
@@ -73,7 +71,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
         rs.close();
         conn.getDatabase().reset(pointer);
-        checkParameters();
 
         boolean success = false;
         try {
@@ -97,7 +94,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
         rs.close();
         conn.getDatabase().reset(pointer);
-        checkParameters();
 
         return conn.getDatabase().executeUpdate(this, batch);
     }
@@ -107,12 +103,10 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
      */
     public void addBatch() throws SQLException {
         checkOpen();
-        checkParameters();
         batchPos += paramCount;
         batchQueryCount++;
         if (batch == null) {
             batch = new Object[paramCount];
-            paramValid.clear();
         }
         if (batchPos + paramCount > batch.length) {
             Object[] nb = new Object[batch.length * 2];
