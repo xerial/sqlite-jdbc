@@ -113,6 +113,33 @@ public class OSInfo
         return System.getProperty("java.runtime.name", "").toLowerCase().contains("android");
     }
 
+    public static boolean isAlpine() {
+        try {
+            Process p = Runtime.getRuntime().exec("cat /etc/os-release | grep ^ID");
+            p.waitFor();
+
+            InputStream in = p.getInputStream();
+            try {
+                int readLen = 0;
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                byte[] buf = new byte[32];
+                while((readLen = in.read(buf, 0, buf.length)) >= 0) {
+                    b.write(buf, 0, readLen);
+                }
+                return b.toString().toLowerCase().contains("alpine");
+            }
+            finally {
+                if(in != null) {
+                    in.close();
+                }
+            }
+                
+        } catch (Throwable e) {
+            return false;
+        }
+        
+    }
+
     static String getHardwareName() {
         try {
             Process p = Runtime.getRuntime().exec("uname -m");
@@ -221,6 +248,9 @@ public class OSInfo
         }
         else if (osName.contains("Mac") || osName.contains("Darwin")) {
             return "Mac";
+        }
+        else if (isAlpine()) {
+            return "Linux-Alpine";
         }
         else if (osName.contains("Linux")) {
             return "Linux";
