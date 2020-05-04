@@ -8,28 +8,9 @@ our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
-What is different from Zentus' SQLite JDBC?
---------------------------------------------
-The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
-
-* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
-* Remove manual configurations
-
-In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments,
-e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc.
-This process was error-prone and bothersome to tell every user to set these variables.
-Our SQLiteJDBC library completely does away these inconveniences.
-
-Another difference is that we are keeping this SQLiteJDBC library up-to-date to
-the newest version of SQLite engine, because we are one of the hottest users of
-this library. For example, SQLite JDBC is a core component of
-[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
-is our utility to create personalized genome browsers.
-
 
 Public Discussion Forum
 =======================
-*  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en)
 *  Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
 
 
@@ -146,6 +127,12 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2020-05-04: sqlite-jdbc-3.31.1
+    * Upgrade to sqlite 3.31.1 
+    * Support update/commit/rollback event notifications #350 
+    * Remove sparse index checks #476 
+    * Support alpine linux (Linux-alpine)
+    * Enabled SQLITE_ENABLE_STAT4 flag 
 *   2019-12-23: sqlite-jdbc-3.30.1
     * Upgrade to sqlite 3.30.1
     * Various fixes
@@ -424,3 +411,21 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
         <version>(version)</version>
         <scope>provided</scope>
     </dependency>
+
+What is different from Zentus' SQLite JDBC?
+--------------------------------------------
+The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
+
+* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
+* Remove manual configurations
+
+In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments,
+e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc.
+This process was error-prone and bothersome to tell every user to set these variables.
+Our SQLiteJDBC library completely does away these inconveniences.
+
+Another difference is that we are keeping this SQLiteJDBC library up-to-date to
+the newest version of SQLite engine, because we are one of the hottest users of
+this library. For example, SQLite JDBC is a core component of
+[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
+is our utility to create personalized genome browsers.
