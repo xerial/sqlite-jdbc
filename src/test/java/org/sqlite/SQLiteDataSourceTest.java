@@ -11,6 +11,8 @@ package org.sqlite;
 
 import static org.junit.Assert.*;
 
+import java.nio.ByteOrder;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -65,8 +67,15 @@ public class SQLiteDataSourceTest
                 "UTF16", "UTF-16", "UTF_16",
                 "UTF_16LE", "UTF-16LE", "UTF16_LITTLE_ENDIAN",
                 "UTF_16BE", "UTF-16BE","UTF16_BIG_ENDIAN" };
+
+        String nativeOrder;
+        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+            nativeOrder = "le";
+        } else {
+            nativeOrder = "be";
+        }
         String[] encodingArray = new String[] {
-                "UTF-8", "UTF-16le", "UTF-16le", "UTF-16be" };
+                "UTF-8", "UTF-16" + nativeOrder, "UTF-16le", "UTF-16be" };
 
         for (int i = 0; i < configArray.length; i++) {
             SQLiteDataSource ds = new SQLiteDataSource();
