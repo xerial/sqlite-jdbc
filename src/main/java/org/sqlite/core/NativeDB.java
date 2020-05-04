@@ -469,6 +469,12 @@ public final class NativeDB extends DB
     @Override
     native synchronized boolean[][] column_metadata(long stmt);
 
+    @Override
+    native synchronized void set_commit_listener(boolean enabled);
+
+    @Override
+    native synchronized void set_update_listener(boolean enabled);
+
     /**
      * Throws an SQLException
      * @param msg Message for the SQLException.
