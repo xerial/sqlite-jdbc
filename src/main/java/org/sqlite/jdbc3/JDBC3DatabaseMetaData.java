@@ -1590,6 +1590,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         int i = 0;
         for (; rs.next(); i++) {
             int keySeq = rs.getInt(2) + 1;
+            int keyId = rs.getInt(1);
             String PKTabName = rs.getString(3);
             String FKColName = rs.getString(4);
             String PKColName = rs.getString(5);
@@ -1608,7 +1609,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
 
             String fkName = null;
-            if (fkNames.size() > i) fkName = fkNames.get(i).getFkName();
+            if (fkNames.size() > keyId) fkName = fkNames.get(keyId).getFkName();
             
             sql.append("select ").append(keySeq).append(" as ks,")
                 .append("'").append(escape(PKTabName)).append("' as ptn, '")
@@ -1808,7 +1809,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("    FROM").append("\n");
         sql.append("      sqlite_master").append("\n");
         sql.append("    WHERE").append("\n");
-        sql.append("      NAME NOT LIKE 'sqlite_%'").append("\n");
+        sql.append("      NAME NOT LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("      AND UPPER(TYPE) IN ('TABLE', 'VIEW')").append("\n");
         sql.append("    UNION ALL").append("\n");
         sql.append("    SELECT").append("\n");
@@ -1823,7 +1824,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("    FROM").append("\n");
         sql.append("      sqlite_master").append("\n");
         sql.append("    WHERE").append("\n");
-        sql.append("      NAME LIKE 'sqlite_%'").append("\n");
+        sql.append("      NAME LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("  )").append("\n");
         sql.append(" WHERE TABLE_NAME LIKE '").append(tblNamePattern).append("' AND TABLE_TYPE IN (");
 
@@ -1962,7 +1963,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      * Pattern used to extract column order for an unnamed primary key.
      */
     protected final static Pattern PK_UNNAMED_PATTERN =
-        Pattern.compile(".*PRIMARY\\s+KEY\\s*\\((.*?,+.*?)\\).*",
+        Pattern.compile(".*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**

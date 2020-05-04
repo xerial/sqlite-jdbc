@@ -9,17 +9,7 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -27,6 +17,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 import org.sqlite.date.FastDateFormat;
+
+import static org.junit.Assert.*;
 
 public class QueryTest
 {
@@ -306,4 +298,44 @@ public class QueryTest
 
     }
 
+    @Test
+    public void clobTest() throws SQLException {
+        String content = "test_clob";
+        Connection conn = getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("select cast(? as clob)");
+            try {
+                stmt.setString(1, content);
+                ResultSet rs = stmt.executeQuery();
+                try {
+                    assertTrue(rs.next());
+                    Clob clob = rs.getClob(1);
+                    int length = (int) clob.length();
+                    try {
+                        clob.getSubString(0, length);
+                        fail("SQLException expected because position is less than 1");
+                    }
+                    catch (SQLException ignore) {
+                    }
+                    try {
+                        clob.getSubString(1, -1);
+                        fail("SQLException expected because length is less than 0");
+                    }
+                    catch (SQLException ignore) {
+                    }
+                    assertEquals("", clob.getSubString(1, 0));
+                    assertEquals(content, clob.getSubString(1, length));
+                    assertEquals(content.substring(2, content.length() - 1), clob.getSubString(3, content.length() - 3));
+                }
+                finally {
+                    if (rs != null) rs.close();
+                }
+            } finally {
+                if (stmt != null) stmt.close();
+            }
+        }
+        finally {
+            if (conn != null) conn.close();
+        }
+    }
 }

@@ -36,7 +36,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void clearParameters() throws SQLException {
         checkOpen();
         conn.getDatabase().clear_bindings(pointer);
-        paramValid.clear();
         if (batch != null)
             for (int i = batchPos; i < batchPos + paramCount; i++)
                 batch[i] = null;
@@ -49,7 +48,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         checkOpen();
         rs.close();
         conn.getDatabase().reset(pointer);
-        checkParameters();
 
         boolean success = false;
         try {
@@ -73,7 +71,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
         rs.close();
         conn.getDatabase().reset(pointer);
-        checkParameters();
 
         boolean success = false;
         try {
@@ -97,7 +94,6 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
         rs.close();
         conn.getDatabase().reset(pointer);
-        checkParameters();
 
         return conn.getDatabase().executeUpdate(this, batch);
     }
@@ -107,12 +103,10 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
      */
     public void addBatch() throws SQLException {
         checkOpen();
-        checkParameters();
         batchPos += paramCount;
         batchQueryCount++;
         if (batch == null) {
             batch = new Object[paramCount];
-            paramValid.clear();
         }
         if (batchPos + paramCount > batch.length) {
             Object[] nb = new Object[batch.length * 2];
@@ -450,7 +444,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
      * @see java.sql.PreparedStatement#setDate(int, java.sql.Date, java.util.Calendar)
      */
     public void setDate(int pos, Date x, Calendar cal) throws SQLException {
-        setDateByMilliseconds(pos, x.getTime(), cal);
+        if (x == null) {
+            setObject(pos, null);
+        } else {
+            setDateByMilliseconds(pos, x.getTime(), cal);
+        }
     }
 
 
@@ -465,7 +463,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
       * @see java.sql.PreparedStatement#setTime(int, java.sql.Time, java.util.Calendar)
       */
      public void setTime(int pos, Time x, Calendar cal) throws SQLException {
-         setDateByMilliseconds(pos, x.getTime(), cal);
+         if (x == null) {
+             setObject(pos, null);
+         } else {
+             setDateByMilliseconds(pos, x.getTime(), cal);
+         }
      }
 
      /**
@@ -479,7 +481,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
       * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp, java.util.Calendar)
       */
      public void setTimestamp(int pos, Timestamp x, Calendar cal) throws SQLException {
-         setDateByMilliseconds(pos, x.getTime(), cal);
+         if (x == null) {
+             setObject(pos, null);
+         } else {
+             setDateByMilliseconds(pos, x.getTime(), cal);
+         }
      }
 
      /**

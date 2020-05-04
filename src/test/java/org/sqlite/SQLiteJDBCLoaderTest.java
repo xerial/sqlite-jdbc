@@ -36,6 +36,7 @@ import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -117,6 +118,7 @@ public class SQLiteJDBCLoaderTest
 
     @Test
     public void test() throws Throwable {
+        final AtomicInteger completedThreads = new AtomicInteger(0);
         ExecutorService pool = Executors.newFixedThreadPool(32);
         for (int i = 0; i < 32; i++) {
             final String connStr = "jdbc:sqlite:target/sample-" + i + ".db";
@@ -136,9 +138,12 @@ public class SQLiteJDBCLoaderTest
                         e.printStackTrace();
                         Assert.fail(e.getLocalizedMessage());
                     }
+                    completedThreads.incrementAndGet();
                 }
             });
         }
+        pool.shutdown();
         pool.awaitTermination(3, TimeUnit.SECONDS);
+        assertEquals(32, completedThreads.get());
     }
 }

@@ -200,6 +200,16 @@ public class PrepStmtTest
         assertArrayEq(rs.getBytes(3), b3);
         assertFalse(rs.next());
         rs.close();
+        
+        // null date, time and timestamp (fix #363)
+        prep.setDate(1, null);
+        prep.setTime(2, null);
+        prep.setTimestamp(3, null);
+        rs = prep.executeQuery();
+        assertTrue(rs.next());
+        assertNull(rs.getDate(1));
+        assertNull(rs.getTime(2));
+        assertNull(rs.getTimestamp(3));
 
         // streams
         ByteArrayInputStream inByte = new ByteArrayInputStream(b1);
@@ -272,8 +282,8 @@ public class PrepStmtTest
 
         assertEquals(rs.getInt(1), Integer.MAX_VALUE);
         assertEquals((int) rs.getLong(1), Integer.MAX_VALUE);
-        assertEquals(rs.getFloat(2), Float.MAX_VALUE, 0f);
-        assertEquals(rs.getDouble(3), Double.MAX_VALUE, 0d);
+        assertEquals(rs.getFloat(2), Float.MAX_VALUE, 0.0001f);
+        assertEquals(rs.getDouble(3), Double.MAX_VALUE, 0.0001d);
         assertEquals(rs.getLong(4), Long.MAX_VALUE);
         assertFalse(rs.getBoolean(5));
         assertEquals(rs.getByte(6), (byte) 7);
@@ -568,6 +578,7 @@ public class PrepStmtTest
     public void clearParameters() throws SQLException {
         stat.executeUpdate("create table tbl (colid integer primary key AUTOINCREMENT, col varchar)");
         stat.executeUpdate("insert into tbl(col) values (\"foo\")");
+        stat.executeUpdate("insert into tbl(col) values (?)");
 
         PreparedStatement prep = conn.prepareStatement("select colid from tbl where col = ?");
 
@@ -581,36 +592,26 @@ public class PrepStmtTest
 
         rs.close();
 
-        try {
-            prep.execute();
-            fail("Returned result when values not bound to prepared statement");
-        } catch (Exception e) {
-            assertEquals("Values not bound to statement", e.getMessage());
-        }
+        // should not throw
+        prep.execute();
 
-        try {
-            rs = prep.executeQuery();
-            fail("Returned result when values not bound to prepared statement");
-        } catch (Exception e) {
-            assertEquals("Values not bound to statement", e.getMessage());
-        }
+        // should not throw
+        PreparedStatement nullPrep = conn.prepareStatement("select colid from tbl where col is null");
+        rs = nullPrep.executeQuery();
+        rs.next();
 
-        prep.close();
+        // gets the row with the NULL column
+        assertEquals(2, rs.getInt(1));
 
-        try {
-            prep = conn.prepareStatement("insert into tbl(col) values (?)");
-            prep.clearParameters();
-            prep.executeUpdate();
-            fail("Returned result when values not bound to prepared statement");
-        } catch (Exception e) {
-            assertEquals("Values not bound to statement", e.getMessage());
-        }
+        rs.close();
+        nullPrep.close();
     }
 
-    @Test(expected = SQLException.class)
-    public void preparedStatementShouldThrowIfNotAllParamsSet() throws SQLException {
+    public void preparedStatementShouldNotThrowIfNotAllParamsSet() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ? as col1, ? as col2, ? as col3;");
         ResultSetMetaData meta = prep.getMetaData();
+
+        // leaves 0 and 1 unbound
         assertEquals(meta.getColumnCount(), 3);
 
         // we only set one 1 param of the expected 3 params
@@ -619,17 +620,13 @@ public class PrepStmtTest
         prep.close();
     }
 
-    @Test(expected = SQLException.class)
-    public void preparedStatementShouldThrowIfNotAllParamsSetBatch() throws SQLException {
-        ResultSet rs;
-
+    public void preparedStatementShouldNotThrowIfNotAllParamsSetBatch() throws SQLException {
         stat.executeUpdate("create table test (c1, c2);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?,?);");
+
+        // leaves param 0 unbound
         prep.setInt(1, 1);
 
-        // addBatch should throw since we added a command with invalid params set
-        // which becomes immutable once added to the batch so it makes sense to verify
-        // at the point when you add a command instead of delaying till batch execution
         prep.addBatch();
     }
 

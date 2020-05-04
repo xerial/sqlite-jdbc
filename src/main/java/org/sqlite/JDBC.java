@@ -96,8 +96,7 @@ public class JDBC implements Driver
      * @return The location to the database.
      */
     static String extractAddress(String url) {
-        // if no file name is given use a memory database
-        return PREFIX.equalsIgnoreCase(url) ? ":memory:" : url.substring(PREFIX.length());
+        return url.substring(PREFIX.length());
     }
 
     /**

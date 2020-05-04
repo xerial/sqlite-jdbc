@@ -271,7 +271,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
      * @see java.sql.ResultSet#getCharacterStream(int)
      */
     public Reader getCharacterStream(int col) throws SQLException {
-        return new StringReader(getString(col));
+        String string = getString(col);
+        return string == null ? null : new StringReader(string);
     }
 
     /**
@@ -830,7 +831,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
             }
         }
 
-        return Types.NULL;
+        return Types.NUMERIC;
     }
 
     /**
@@ -856,11 +857,11 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         case SQLITE_BLOB:
             return "BLOB";
         case SQLITE_NULL:
-            return "NULL";
+            return "NUMERIC";
         case SQLITE_TEXT:
         	return "TEXT";
         default:
-            return "NULL";
+            return "NUMERIC";
         }
     }
 

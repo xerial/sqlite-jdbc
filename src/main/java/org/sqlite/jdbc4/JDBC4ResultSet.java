@@ -393,7 +393,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     	return new SqliteClob(getString(col)); 
     }
     
-    public Clob getClob(String col) throws SQLException { 
+    public Clob getClob(String col) throws SQLException {
     	return new SqliteClob(getString(col)); 
     }
     
@@ -570,11 +570,18 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
 			return getNCharacterStreamInternal(data);
 		}
 
-		public String getSubString(long beginIndex, int endIndex) throws SQLException {
+		public String getSubString(long position, int length) throws SQLException {
 			if (data == null) {
 				throw new SQLException("no data");
 			}
-			return data.substring((int) beginIndex, endIndex);
+			if (position < 1) {
+			  throw new SQLException("Position must be greater than or equal to 1");
+      }
+      if (length < 0) {
+        throw new SQLException("Length must be greater than or equal to 0");
+      }
+      int start = (int) position - 1;
+      return data.substring(start, Math.min(start + length, data.length()));
 		}
 
 		public long length() throws SQLException {

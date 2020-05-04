@@ -24,8 +24,6 @@
 //--------------------------------------
 package org.sqlite;
 
-import org.sqlite.date.FastDateFormat;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
@@ -279,6 +277,7 @@ public class SQLiteConfig
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
         COUNT_CHANGES("count_changes", OnOff),
         DEFAULT_CACHE_SIZE("default_cache_size"),
+	DEFER_FOREIGN_KEYS("defer_foreign_keys", OnOff),
         EMPTY_RESULT_CALLBACKS("empty_result_callback", OnOff),
         ENCODING("encoding", toStringArray(Encoding.values())),
         FOREIGN_KEYS("foreign_keys", OnOff),
@@ -415,6 +414,7 @@ public class SQLiteConfig
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_count_changes">www.sqlite.org/pragma.html#pragma_count_changes</a>
      */
+    @Deprecated
     public void enableCountChanges(boolean enable) {
         set(Pragma.COUNT_CHANGES, enable);
     }
@@ -431,12 +431,23 @@ public class SQLiteConfig
     }
 
     /**
+     * Defers enforcement of foreign key constraints until the outermost
+     * transaction is committed.
+     * @param enable True to enable; false to disable;
+     * @see <a href="https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys">https://www.sqlite.org/pragma.html#pragma_defer_foreign_keys</a>
+     */
+    public void deferForeignKeys(boolean enable) {
+        set(Pragma.DEFER_FOREIGN_KEYS, enable);
+    }
+
+    /**
      * @deprecated
      * Enables or disables the empty_result_callbacks flag.
      * @param enable True to enable; false to disable.
      * false.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks">http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks</a>
      */
+    @Deprecated
     public void enableEmptyResultCallBacks(boolean enable) {
         set(Pragma.EMPTY_RESULT_CALLBACKS, enable);
     }
@@ -528,6 +539,7 @@ public class SQLiteConfig
      * @param enable True to enable; false to disable.
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_full_column_names">www.sqlite.org/pragma.html#pragma_full_column_names</a>
      */
+    @Deprecated
     public void enableFullColumnNames(boolean enable) {
         set(Pragma.FULL_COLUMN_NAMES, enable);
     }
@@ -564,10 +576,6 @@ public class SQLiteConfig
     public void setJournalMode(JournalMode mode) {
         setPragma(Pragma.JOURNAL_MODE, mode.name());
     }
-
-    //    public void setJournalMode(String databaseName, JournalMode mode) {
-    //        setPragma(databaseName, Pragma.JOURNAL_MODE, mode.name());
-    //    }
 
     /**
      * Sets the journal_size_limit. This setting limits the size of the
@@ -777,13 +785,20 @@ public class SQLiteConfig
     }
 
     public static enum TransactionMode implements PragmaValue {
-        DEFFERED, IMMEDIATE, EXCLUSIVE;
+        /**
+         * @deprecated Use {@code DEFERRED} instead.
+         */
+        @Deprecated DEFFERED,
+        DEFERRED, IMMEDIATE, EXCLUSIVE;
 
         public String getValue() {
             return name();
         }
 
         public static TransactionMode getMode(String mode) {
+            if ("DEFFERED".equalsIgnoreCase(mode)) {
+                return DEFERRED;
+            }
             return TransactionMode.valueOf(mode.toUpperCase());
         }
     }
@@ -799,7 +814,7 @@ public class SQLiteConfig
 
     /**
      * Sets the mode that will be used to start transactions.
-     * @param transactionMode One of DEFFERED, IMMEDIATE or EXCLUSIVE.
+     * @param transactionMode One of DEFERRED, IMMEDIATE or EXCLUSIVE.
      * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
      */
     public void setTransactionMode(String transactionMode) {

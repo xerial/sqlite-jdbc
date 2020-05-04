@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.23.2-SNAPSHOT</version>
+  <version>3.31.1-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -62,7 +62,7 @@
         <includes>
           <include>**/sqlite-jdbc.properties</include>
         </includes>
-      </resource>      
+      </resource>
       <resource>
         <directory>${basedir}</directory>
         <targetPath>META-INF/maven/${project.groupId}/${project.artifactId}</targetPath>
@@ -95,7 +95,7 @@
           <target>1.6</target>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
@@ -122,7 +122,7 @@
           <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.3.2</version>
@@ -134,7 +134,7 @@
         </configuration>
       </plugin>
 
-      
+
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -149,7 +149,7 @@
       </plugin>
     </plugins>
 
-    
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -159,7 +159,7 @@
           <extensions>true</extensions>
           <executions>
             <execution>
-              <!-- Need to have MANIFEST.MF in place before 
+              <!-- Need to have MANIFEST.MF in place before
                     packaging, so unit-tests will work -->
               <phase>process-classes</phase>
               <goals>

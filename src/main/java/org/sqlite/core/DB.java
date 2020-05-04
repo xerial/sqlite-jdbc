@@ -18,15 +18,19 @@ package org.sqlite.core;
 import org.sqlite.BusyHandler;
 import org.sqlite.Function;
 import org.sqlite.ProgressHandler;
+import org.sqlite.SQLiteCommitListener;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
+import org.sqlite.SQLiteUpdateListener;
 
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
@@ -54,6 +58,9 @@ public abstract class DB implements Codes
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
     private final Map<Long, CoreStatement> stmts  = new HashMap<Long, CoreStatement>();
+
+    private final Set<SQLiteUpdateListener> updateListeners = new HashSet<SQLiteUpdateListener>();
+    private final Set<SQLiteCommitListener> commitListeners = new HashSet<SQLiteCommitListener>();
 
     public DB(String url, String fileName, SQLiteConfig config)
             throws SQLException
@@ -652,7 +659,7 @@ public abstract class DB implements Codes
      * @throws SQLException
      * @see <a href="http://www.sqlite.org/c3ref/create_function.html">http://www.sqlite.org/c3ref/create_function.html</a>
      */
-    public abstract int create_function(String name, Function f, int flags) throws SQLException;
+    public abstract int create_function(String name, Function f, int nArgs, int flags) throws SQLException;
 
     /**
      * De-registers a user defined function
@@ -660,7 +667,7 @@ public abstract class DB implements Codes
      * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
      * @throws SQLException
      */
-    public abstract int destroy_function(String name) throws SQLException;
+    public abstract int destroy_function(String name, int nArgs) throws SQLException;
 
     /**
      * Unused as we use the user_data pointer to store a single word.
@@ -826,8 +833,8 @@ public abstract class DB implements Codes
     public final synchronized boolean execute(CoreStatement stmt, Object[] vals) throws SQLException {
         if (vals != null) {
             final int params = bind_parameter_count(stmt.pointer);
-            if (params != vals.length) {
-                throw new SQLException("assertion failure: param count (" + params + ") != value count (" + vals.length
+            if (params > vals.length) {
+                throw new SQLException("assertion failure: param count (" + params + ") > value count (" + vals.length
                         + ")");
             }
 
@@ -899,6 +906,68 @@ public abstract class DB implements Codes
             if (stmt.pointer != 0) reset(stmt.pointer);
         }
         return changes();
+    }
+
+    abstract void set_commit_listener(boolean enabled);
+    abstract void set_update_listener(boolean enabled);
+
+    public synchronized void addUpdateListener(SQLiteUpdateListener listener) {
+        if (updateListeners.add(listener) && updateListeners.size() == 1) {
+            set_update_listener(true);
+        }
+    }
+
+    public synchronized void addCommitListener(SQLiteCommitListener listener) {
+        if (commitListeners.add(listener) && commitListeners.size() == 1) {
+            set_commit_listener(true);
+        }
+    }
+
+    public synchronized void removeUpdateListener(SQLiteUpdateListener listener) {
+        if (updateListeners.remove(listener) && updateListeners.isEmpty()) {
+            set_update_listener(false);
+        }
+    }
+
+    public synchronized void removeCommitListener(SQLiteCommitListener listener) {
+        if (commitListeners.remove(listener) && commitListeners.isEmpty()) {
+            set_commit_listener(false);
+        }
+    }
+
+    void onUpdate(int type, String database, String table, long rowId) {
+        Set<SQLiteUpdateListener> listeners;
+
+        synchronized (this) {
+            listeners = new HashSet<SQLiteUpdateListener>(updateListeners);
+        }
+
+        for (SQLiteUpdateListener listener : listeners) {
+            SQLiteUpdateListener.Type operationType;
+
+            switch (type) {
+                case 18: operationType = SQLiteUpdateListener.Type.INSERT; break;
+                case 9:  operationType = SQLiteUpdateListener.Type.DELETE; break;
+                case 23: operationType = SQLiteUpdateListener.Type.UPDATE; break;
+                default: throw new AssertionError("Unknown type: " + type);
+            }
+
+
+            listener.onUpdate(operationType, database, table, rowId);
+        }
+    }
+
+    void onCommit(boolean commit) {
+        Set<SQLiteCommitListener> listeners;
+
+        synchronized (this) {
+            listeners = new HashSet<SQLiteCommitListener>(commitListeners);
+        }
+
+        for (SQLiteCommitListener listener : listeners) {
+            if (commit) listener.onCommit();
+            else        listener.onRollback();
+        }
     }
 
     /**

@@ -80,6 +80,7 @@ public class TransactionTest
         // Second transaction starts and tries to complete but fails because first is still running
         boolean gotException = false;
         try {
+            ((SQLiteConnection) conn2).setBusyTimeout(10);
             conn2.setAutoCommit(false);
             if (pstat2 != null) {
                 // The prepared case would fail regardless of whether this was "execute" or "executeUpdate"
@@ -308,6 +309,7 @@ public class TransactionTest
         ResultSet rs = stat1.executeQuery("select * from t;");
         assertTrue(rs.next());
 
+        ((SQLiteConnection) conn2).setBusyTimeout(10);
         stat2.executeUpdate("insert into t values (3);"); // can't be done
     }
 
@@ -341,15 +343,26 @@ public class TransactionTest
         SQLiteDataSource ds = new SQLiteDataSource();
         ds.setUrl("jdbc:sqlite:" + tmpFile.getAbsolutePath());
 
-        // deffered
+        // deferred
         SQLiteConnection con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.DEFFERED, con.getConnectionConfig().getTransactionMode());
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
         assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
         runUpdates(con, "tbl1");
         
-        ds.setTransactionMode(TransactionMode.DEFFERED.name());
+        ds.setTransactionMode(TransactionMode.DEFERRED.name());
         con = (SQLiteConnection)ds.getConnection();
-        assertEquals(TransactionMode.DEFFERED, con.getConnectionConfig().getTransactionMode());
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
+
+        // Misspelled deferred should be accepted for backwards compatibility
+        ds.setTransactionMode("DEFFERED");
+        con = (SQLiteConnection)ds.getConnection();
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
+        assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
+
+        con = (SQLiteConnection)ds.getConnection();
+        con.getConnectionConfig().setTransactionMode(TransactionMode.valueOf("DEFFERED"));
+        assertEquals(TransactionMode.DEFERRED, con.getConnectionConfig().getTransactionMode());
         assertEquals("begin;", con.getConnectionConfig().transactionPrefix());
 
         // immediate

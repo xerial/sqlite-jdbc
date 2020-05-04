@@ -181,7 +181,7 @@ public abstract class SQLiteConnection
         SQLiteConfig config = new SQLiteConfig(newProps);
 
         // check the path to the file exists
-        if (!":memory:".equals(fileName) && !fileName.startsWith("file:") && !fileName.contains("mode=memory")) {
+        if (!fileName.isEmpty() && !":memory:".equals(fileName) && !fileName.startsWith("file:") && !fileName.contains("mode=memory")) {
             if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
                 String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
 
@@ -417,6 +417,42 @@ public abstract class SQLiteConnection
         db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
     }
 
+    /**
+     * Add a listener for DB update events, see https://www.sqlite.org/c3ref/update_hook.html
+     *
+     * @param listener The listener to receive update events
+     */
+    public void addUpdateListener(SQLiteUpdateListener listener) {
+        db.addUpdateListener(listener);
+    }
+
+    /**
+     * Remove a listener registered for DB update events.
+     *
+     * @param listener The listener to no longer receive update events
+     */
+    public void removeUpdateListener(SQLiteUpdateListener listener) {
+        db.removeUpdateListener(listener);
+    }
+
+
+    /**
+     * Add a listener for DB commit/rollback events, see https://www.sqlite.org/c3ref/commit_hook.html
+     *
+     * @param listener The listener to receive commit events
+     */
+    public void addCommitListener(SQLiteCommitListener listener) {
+        db.addCommitListener(listener);
+    }
+
+    /**
+     * Remove a listener registered for DB commit/rollback events.
+     *
+     * @param listener The listener to no longer receive commit/rollback events.
+     */
+    public void removeCommitListener(SQLiteCommitListener listener) {
+        db.removeCommitListener(listener);
+    }
 
     /**
      * Extracts PRAGMA values from the filename and sets them into the Properties

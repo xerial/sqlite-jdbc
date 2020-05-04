@@ -140,4 +140,18 @@ public class ResultSetTest {
         resultSet.findColumn("test.id");
     }
 
+    @Test
+    public void testCloseStatement()
+        throws SQLException {
+        ResultSet resultSet = stat.executeQuery("select test.id from test");
+
+        stat.close();
+
+        assertTrue(stat.isClosed());
+        assertTrue(resultSet.isClosed());
+
+        resultSet.close();
+
+        assertTrue(resultSet.isClosed());
+    }
 }
