@@ -318,7 +318,7 @@ Beta Release
 The early releases (beta) of sqlite-jdbc with some advanced features are available
 from [here](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
 
-*   The old releases are still available from [here](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
+*   The old releases are still available from [here](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
 
 Supported Operating Systems
 ===========================
@@ -376,7 +376,7 @@ See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more det
 Using SQLiteJDBC with Maven2
 ============================
 If you are familiar with [Maven2](http://maven.apache.org), add the following XML
-fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
+fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
 
     <dependencies>
         <dependency>
