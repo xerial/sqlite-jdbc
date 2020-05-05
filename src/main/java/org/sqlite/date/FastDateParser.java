@@ -41,14 +41,14 @@ import java.util.regex.Pattern;
  * <p>FastDateParser is a fast and thread-safe version of
  * {@link java.text.SimpleDateFormat}.</p>
  *
- * <p>To obtain a proxy to a FastDateParser, use {@link FastDateFormat#getInstance(String, TimeZone, Locale)} 
+ * <p>To obtain a proxy to a FastDateParser, use {@link FastDateFormat#getInstance(String, TimeZone, Locale)}
  * or another variation of the factory methods of {@link FastDateFormat}.</p>
- * 
+ *
  * <p>Since FastDateParser is thread safe, you can use a static member instance:</p>
  * <code>
  *     private static final DateParser DATE_PARSER = FastDateFormat.getInstance("yyyy-MM-dd");
  * </code>
- * 
+ *
  * <p>This class can be used as a direct replacement for
  * <code>SimpleDateFormat</code> in most parsing situations.
  * This class is especially useful in multi-threaded server environments.
@@ -96,8 +96,8 @@ public class FastDateParser implements DateParser, Serializable {
 
     /**
      * <p>Constructs a new FastDateParser.</p>
-     * 
-     * Use {@link FastDateFormat#getInstance(String, TimeZone, Locale)} or another variation of the 
+     *
+     * Use {@link FastDateFormat#getInstance(String, TimeZone, Locale)} or another variation of the
      * factory methods of {@link FastDateFormat} to get a cached FastDateParser instance.
      *
      * @param pattern non-null {@link java.text.SimpleDateFormat} compatible
@@ -317,7 +317,7 @@ public class FastDateParser implements DateParser, Serializable {
      * given by {@link ParsePosition#getIndex()} has been updated. If the input buffer has been fully
      * parsed, then the index will point to just after the end of the input buffer.
      *
-     * @see org.apache.commons.lang3.time.DateParser#parse(java.lang.String, java.text.ParsePosition)
+     * See org.apache.commons.lang3.time.DateParser#parse(java.lang.String, java.text.ParsePosition)
      * {@inheritDoc}
      */
     public Date parse(final String source, final ParsePosition pos) {
@@ -430,7 +430,7 @@ public class FastDateParser implements DateParser, Serializable {
      * A strategy to parse a single field from the parsing pattern
      */
     private static abstract class Strategy {
-        
+
         /**
          * Is this field a number?
          * The default implementation returns false.
@@ -440,7 +440,7 @@ public class FastDateParser implements DateParser, Serializable {
         boolean isNumber() {
             return false;
         }
-        
+
         /**
          * Set the Calendar with the parsed field.
          *
@@ -453,7 +453,7 @@ public class FastDateParser implements DateParser, Serializable {
         void setCalendar(final FastDateParser parser, final Calendar cal, final String value) {
 
         }
-        
+
         /**
          * Generate a <code>Pattern</code> regular expression to the <code>StringBuilder</code>
          * which will accept this field
@@ -497,7 +497,7 @@ public class FastDateParser implements DateParser, Serializable {
             return getLocaleSpecificStrategy(Calendar.ERA, definingCalendar);
         case 'H':  // Hour in day (0-23)
             return HOUR_OF_DAY_STRATEGY;
-        case 'K':  // Hour in am/pm (0-11) 
+        case 'K':  // Hour in am/pm (0-11)
             return HOUR_STRATEGY;
         case 'M':
             return formatField.length()>=3 ?getLocaleSpecificStrategy(Calendar.MONTH, definingCalendar) :NUMBER_MONTH_STRATEGY;
@@ -830,9 +830,9 @@ public class FastDateParser implements DateParser, Serializable {
             cal.setTimeZone(tz);
         }
     }
-    
+
     private static class ISO8601TimeZoneStrategy extends Strategy {
-        // Z, +hh, -hh, +hhmm, -hhmm, +hh:mm or -hh:mm 
+        // Z, +hh, -hh, +hhmm, -hhmm, +hh:mm or -hh:mm
         private final String pattern;
 
         /**
@@ -842,7 +842,7 @@ public class FastDateParser implements DateParser, Serializable {
         ISO8601TimeZoneStrategy(String pattern) {
             this.pattern = pattern;
         }
-        
+
         /**
          * {@inheritDoc}
          */
@@ -851,7 +851,7 @@ public class FastDateParser implements DateParser, Serializable {
             regex.append(pattern);
             return true;
         }
-        
+
         /**
          * {@inheritDoc}
          */
@@ -863,14 +863,14 @@ public class FastDateParser implements DateParser, Serializable {
                 cal.setTimeZone(TimeZone.getTimeZone("GMT" + value));
             }
         }
-        
+
         private static final Strategy ISO_8601_1_STRATEGY = new ISO8601TimeZoneStrategy("(Z|(?:[+-]\\d{2}))");
         private static final Strategy ISO_8601_2_STRATEGY = new ISO8601TimeZoneStrategy("(Z|(?:[+-]\\d{2}\\d{2}))");
         private static final Strategy ISO_8601_3_STRATEGY = new ISO8601TimeZoneStrategy("(Z|(?:[+-]\\d{2}(?::)\\d{2}))");
 
         /**
          * Factory method for ISO8601TimeZoneStrategies.
-         * 
+         *
          * @param tokenLen a token indicating the length of the TimeZone String to be formatted.
          * @return a ISO8601TimeZoneStrategy that can format TimeZone String of length {@code tokenLen}. If no such
          *          strategy exists, an IllegalArgumentException will be thrown.

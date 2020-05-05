@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.31.1-SNAPSHOT</version>
+  <version>3.31.1</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -117,9 +117,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
+        <version>3.2.0</version>
         <configuration>
           <additionalparam>-Xdoclint:none</additionalparam>
+          <additionalOptions>-Xdoclint:none</additionalOptions>
+          <additionalJOption>-Xdoclint:none</additionalJOption>
         </configuration>
       </plugin>
 
