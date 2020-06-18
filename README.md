@@ -127,6 +127,8 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2020-6-18: sqlite-jdbc-3.32.3
+    * Fix multiple CVE reported issues https://github.com/xerial/sqlite-jdbc/issues/501
 *   2020-05-04: sqlite-jdbc-3.31.1
     * Upgrade to sqlite 3.31.1 
     * Support update/commit/rollback event notifications #350 
