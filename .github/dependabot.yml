@@ -1,0 +1,10 @@
+# Basic set up for dependabot
+
+version: 2
+updates:
+
+  # Maintain dependencies for maven (pom.xml in root directory)
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
