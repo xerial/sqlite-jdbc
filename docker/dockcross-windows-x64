@@ -179,7 +179,7 @@ fi
 #------------------------------------------------------------------------------
 # Now, finally, run the command in a container
 #
-docker run --rm \
+sudo docker run --rm \
     -v $PWD:/work \
     "${USER_IDS[@]}" \
     $FINAL_ARGS \
