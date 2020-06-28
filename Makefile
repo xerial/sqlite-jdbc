@@ -38,9 +38,8 @@ $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 	touch $@
 
 $(SQLITE_CONFIGURED): $(SQLITE_UNPACKED)
-	cp $(TARGET)/$(SQLITE_SRC_PREFIX)/configure $(TARGET)/$(SQLITE_SRC_PREFIX)/configure.bak
-	perl -p -e 's/enableval=\$$enable_update_limit;\n/enableval=\$$enable_update_limit;enable_udlimit=yes\nelse\n  enable_udlimit=no\n/g' \
-		 $(TARGET)/$(SQLITE_SRC_PREFIX)/configure.bak > $(TARGET)/$(SQLITE_SRC_PREFIX)/configure
+	perl -i -p -e 's/enableval=\$$enable_update_limit;\n/enableval=\$$enable_update_limit;enable_udlimit=yes\nelse\n  enable_udlimit=no\n/g' \
+		 $(TARGET)/$(SQLITE_SRC_PREFIX)/configure
 	cd $(@D) && ./configure --enable-update-limit
 
 $(SQLITE_BUILD_AMAL): $(SQLITE_CONFIGURED)
@@ -135,13 +134,13 @@ win64: $(SQLITE_BUILD_AMAL) jni-header
 	./docker/dockcross-windows-x64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=x86_64-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86_64'
 
 linux32: $(SQLITE_BUILD_AMAL) jni-header
-	sudo docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/centos5-linux-x86 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86'
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/centos5-linux-x86 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86'
 
 linux64: $(SQLITE_BUILD_AMAL) jni-header
-	sudo docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
 
 alpine-linux64: $(SQLITE_BUILD_AMAL) jni-header
-	sudo docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux-Alpine OS_ARCH=x86_64'
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux-Alpine OS_ARCH=x86_64'
 
 linux-arm: $(SQLITE_BUILD_AMAL) jni-header
 	./docker/dockcross-armv5 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/xcc/armv5-unknown-linux-gnueabi/bin/armv5-unknown-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm'
@@ -162,11 +161,11 @@ linux-ppc64: $(SQLITE_BUILD_AMAL) jni-header
 	./docker/dockcross-ppc64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=powerpc64le-linux-gnu- OS_NAME=Linux OS_ARCH=ppc64'
 
 mac64: $(SQLITE_BUILD_AMAL) jni-header
-	sudo docker run -it $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=x86_64-apple-darwin multiarch/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=x86_64
+	docker run -it $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=x86_64-apple-darwin multiarch/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=x86_64
 
 # deprecated
 mac32: $(SQLITE_BUILD_AMAL) jni-header
-	sudo docker run -it $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=i386-apple-darwin multiarch/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=x86
+	docker run -it $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=i386-apple-darwin multiarch/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=x86
 
 sparcv9:
 	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
