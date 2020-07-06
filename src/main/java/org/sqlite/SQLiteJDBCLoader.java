@@ -25,12 +25,15 @@
 package org.sqlite;
 
 import org.sqlite.util.OSInfo;
+import org.sqlite.util.StringUtils;
 
 import java.io.*;
 import java.net.URL;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -296,6 +299,8 @@ public class SQLiteJDBCLoader {
             return;
         }
 
+        List<String> triedPaths = new LinkedList<String>();
+
         // Try loading library from org.sqlite.lib.path library path */
         String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
         String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
@@ -310,6 +315,8 @@ public class SQLiteJDBCLoader {
             if(loadNativeLibrary(sqliteNativeLibraryPath, sqliteNativeLibraryName)) {
                 extracted = true;
                 return;
+            } else {
+                triedPaths.add(sqliteNativeLibraryPath);
             }
         }
 
@@ -330,21 +337,35 @@ public class SQLiteJDBCLoader {
             }
         }
 
-        if(!hasNativeLib) {
-            extracted = false;
-            throw new Exception(String.format("No native library is found for os.name=%s and os.arch=%s. path=%s", OSInfo.getOSName(), OSInfo.getArchName(), sqliteNativeLibraryPath));
+        if(hasNativeLib) {
+            // temporary library folder
+            String tempFolder = getTempDir().getAbsolutePath();
+            // Try extracting the library from jar
+            if(extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
+                extracted = true;
+                return;
+            } else {
+                triedPaths.add(sqliteNativeLibraryPath);
+            }
         }
 
-        // temporary library folder
-        String tempFolder = getTempDir().getAbsolutePath();
-        // Try extracting the library from jar
-        if(extractAndLoadLibraryFile(sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
-            extracted = true;
-            return;
+        // As a last resort try from java.library.path
+        String javaLibraryPath = System.getProperty("java.library.path", "");
+        for(String ldPath : javaLibraryPath.split(File.pathSeparator)) {
+            if(ldPath.isEmpty()) {
+                continue;
+            }
+            if(loadNativeLibrary(ldPath, sqliteNativeLibraryName)) {
+                extracted = true;
+                return;
+            } else {
+                triedPaths.add(ldPath);
+            }
         }
 
         extracted = false;
-        return;
+        throw new Exception(String.format("No native library found for os.name=%s, os.arch=%s, paths=[%s]",
+                OSInfo.getOSName(), OSInfo.getArchName(), StringUtils.join(triedPaths, File.pathSeparator)));
     }
 
     private static boolean hasResource(String path) {
