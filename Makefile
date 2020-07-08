@@ -104,7 +104,7 @@ NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
 # Disabled linux-armv6 build because of this issue; https://github.com/dockcross/dockcross/issues/190
-native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv7 linux-arm64 linux-android-arm linux-ppc64 alpine-linux64
+native-all: native win32 win64 mac64 linux32 linux64 linux-arm linux-armv7 linux-arm64 linux-android-arm linux-ppc64 alpine-linux32 alpine-linux64
 
 native: $(NATIVE_DLL)
 
@@ -127,6 +127,9 @@ linux32: $(SQLITE_UNPACKED) jni-header
 
 linux64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/centos5-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux OS_ARCH=x86_64'
+
+alpine-linux32: $(SQLITE_UNPACKED) jni-header
+	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86 bash -c 'make clean-native native OS_NAME=Linux-Alpine OS_ARCH=x86'
 
 alpine-linux64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -ti -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux-Alpine OS_ARCH=x86_64'
@@ -179,6 +182,9 @@ docker-linux64:
 
 docker-linux32:
 	docker build -f docker/Dockerfile.linux_x86 -t xerial/centos5-linux-x86 .
+
+docker-alpine-linux32:
+	docker build -f docker/Dockerfile.alpine-linux_x86 -t xerial/alpine-linux-x86 .
 
 docker-alpine-linux64:
 	docker build -f docker/Dockerfile.alpine-linux_x86_64 -t xerial/alpine-linux-x86_64 .
