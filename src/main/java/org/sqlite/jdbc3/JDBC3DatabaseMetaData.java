@@ -1237,7 +1237,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 ResultSet rscol = null;
                 try {
                     // For each table, get the column info and build into overall SQL
-                    String pragmaStatement = "PRAGMA table_info('"+ tableName + "')";
+                    String pragmaStatement = "PRAGMA table_info('"+ escape(tableName) + "')";
                     rscol = colstat.executeQuery(pragmaStatement);
 
                     for (int i = 0; rscol.next(); i++) {
@@ -2088,8 +2088,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
             try {
                 stat = conn.createStatement();
-                rs = stat.executeQuery("pragma foreign_key_list('" + this.fkTableName.toLowerCase()
-                		+ "')");
+                rs = stat.executeQuery("pragma foreign_key_list('"
+                		+ escape(this.fkTableName.toLowerCase()) + "')");
 
                 int prevFkId = -1;
                 int count = 0;
