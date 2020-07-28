@@ -227,20 +227,6 @@ docker run $TTY_ARGS --name $CONTAINER_NAME \
     $FINAL_IMAGE "$@"
 run_exit_code=$?
 
-# Attempt to delete container
-rm_output=$(docker rm -f $CONTAINER_NAME 2>&1)
-rm_exit_code=$?
-if [[ $rm_exit_code != 0 ]]; then
-  if [[ "$CI" == "true" ]] && [[ $rm_output == *"Driver btrfs failed to remove"* ]]; then
-    : # Ignore error because of https://circleci.com/docs/docker-btrfs-error/
-  else
-    echo "$rm_output"
-    exit $rm_exit_code
-  fi
-fi
-
-exit $run_exit_code
-
 ################################################################################
 #
 # This image is not intended to be run manually.
