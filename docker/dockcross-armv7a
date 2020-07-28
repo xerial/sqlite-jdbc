@@ -231,7 +231,7 @@ run_exit_code=$?
 rm_output=$(docker rm -f $CONTAINER_NAME 2>&1)
 rm_exit_code=$?
 if [[ $rm_exit_code != 0 ]]; then
-  if [[ "$CIRCLECI" == "true" ]] && [[ $rm_output == *"Driver btrfs failed to remove"* ]]; then
+  if [[ "$CI" == "true" ]] && [[ $rm_output == *"Driver btrfs failed to remove"* ]]; then
     : # Ignore error because of https://circleci.com/docs/docker-btrfs-error/
   else
     echo "$rm_output"
