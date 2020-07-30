@@ -679,6 +679,24 @@ public class PrepStmtTest
         }
     }
 
+    @Test
+    public void constraintExtendedResultCodeExecute() throws SQLException {
+        assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
+        assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
+        // try to insert a row with duplicate id
+        try {
+            PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
+            statement.setInt(1, 1);
+            statement.execute();
+            fail("expected exception");
+        } catch (SQLException e) {
+            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
+
+            // Extended error code should be preserved in SQLiteException#resultCode
+            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE, ((SQLiteException) e).getResultCode());
+        }
+    }
+
     private void assertArrayEq(byte[] a, byte[] b) {
         assertNotNull(a);
         assertNotNull(b);
