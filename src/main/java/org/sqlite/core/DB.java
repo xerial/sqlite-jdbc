@@ -846,8 +846,8 @@ public abstract class DB implements Codes
             }
         }
 
-        int statusCode = step(stmt.pointer) & 0xFF;
-        switch (statusCode) {
+        int statusCode = step(stmt.pointer);
+        switch (statusCode & 0xFF) {
         case SQLITE_DONE:
             reset(stmt.pointer);
             ensureAutoCommit(stmt.conn.getAutoCommit());
