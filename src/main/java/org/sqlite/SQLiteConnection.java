@@ -354,6 +354,14 @@ public abstract class SQLiteConnection
         db.busy_timeout(timeoutMillis);
     }
 
+    public void setLimit(SQLiteLimits limit, int value) throws SQLException {
+        db.limit(limit.getId(), value);
+    }
+
+    public void getLimit(SQLiteLimits limit) throws SQLException {
+        db.limit(limit.getId(), -1);
+    }
+
     @Override
     public boolean isClosed() throws SQLException
     {

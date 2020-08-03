@@ -340,6 +340,19 @@ public class ConnectionTest
          conn.close();
     }
 
+    @Test(expected = SQLException.class)
+    public void limits() throws Exception{
+        File testDB = copyToTemp("sample.db");
+
+        assertTrue(testDB.exists());
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s?limit_attached=0", testDB));
+        Statement stat = conn.createStatement();
+
+        stat.executeUpdate("ATTACH DATABASE attach_test.db AS attachDb");
+
+        stat.close();
+    }
+
     @Test
     public void ignoreUnknownParametersInURI() throws Exception {
     	Connection conn = DriverManager.getConnection("jdbc:sqlite:file::memory:?cache=shared&foreign_keys=ON&debug=&invalid");
