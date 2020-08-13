@@ -157,14 +157,6 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /**
-     * @see java.lang.Object#finalize()
-     */
-    @Override
-    protected void finalize() throws SQLException {
-        close();
-    }
-
-    /**
      * @see java.sql.ResultSet#getRow()
      */
     public int getRow() throws SQLException {

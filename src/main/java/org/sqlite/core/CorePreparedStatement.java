@@ -52,14 +52,6 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     }
 
     /**
-     * @see org.sqlite.core.CoreStatement#finalize()
-     */
-    @Override
-    protected void finalize() throws SQLException {
-        close();
-    }
-
-    /**
      * @see org.sqlite.jdbc3.JDBC3Statement#executeBatch()
      */
     @Override
