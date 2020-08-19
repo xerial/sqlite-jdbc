@@ -113,6 +113,57 @@ public class SQLiteConfig
             pragmaParams.add(each.pragmaName);
         }
 
+        if(conn instanceof SQLiteConnection) {
+            if(pragmaTable.containsKey(Pragma.LIMIT_ATTACHED.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_ATTACHED, getInteger(Pragma.LIMIT_ATTACHED, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_COLUMN.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_COLUMN, getInteger(Pragma.LIMIT_COLUMN, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_COMPOUND_SELECT.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_COMPOUND_SELECT, getInteger(Pragma.LIMIT_COMPOUND_SELECT, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_EXPR_DEPTH.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_EXPR_DEPTH, getInteger(Pragma.LIMIT_EXPR_DEPTH, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_FUNCTION_ARG.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_FUNCTION_ARG, getInteger(Pragma.LIMIT_FUNCTION_ARG, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_LENGTH.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_LENGTH, getInteger(Pragma.LIMIT_LENGTH, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_LIKE_PATTERN_LENGTH.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_LIKE_PATTERN_LENGTH, getInteger(Pragma.LIMIT_LIKE_PATTERN_LENGTH, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_SQL_LENGTH.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_SQL_LENGTH, getInteger(Pragma.LIMIT_SQL_LENGTH, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_TRIGGER_DEPTH.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_TRIGGER_DEPTH, getInteger(Pragma.LIMIT_TRIGGER_DEPTH, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_VARIABLE_NUMBER, getInteger(Pragma.LIMIT_VARIABLE_NUMBER, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_VDBE_OP.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_VDBE_OP, getInteger(Pragma.LIMIT_VDBE_OP, "-1"));
+            }
+
+            if(pragmaTable.containsKey(Pragma.LIMIT_WORKER_THREADS.pragmaName)) {
+                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_WORKER_THREADS, getInteger(Pragma.LIMIT_WORKER_THREADS, "-1"));
+            }
+
+        }
+
         pragmaParams.remove(Pragma.OPEN_MODE.pragmaName);
         pragmaParams.remove(Pragma.SHARED_CACHE.pragmaName);
         pragmaParams.remove(Pragma.LOAD_EXTENSION.pragmaName);
@@ -121,6 +172,19 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
         pragmaParams.remove(Pragma.PASSWORD.pragmaName);
         pragmaParams.remove(Pragma.HEXKEY_MODE.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_ATTACHED.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_COLUMN.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_COMPOUND_SELECT.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_EXPR_DEPTH.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_FUNCTION_ARG.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_LENGTH.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_LIKE_PATTERN_LENGTH.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_SQL_LENGTH.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_TRIGGER_DEPTH.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_VDBE_OP.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
+
 
         Statement stat = conn.createStatement();
         try {
@@ -187,6 +251,16 @@ public class SQLiteConfig
      */
     private boolean getBoolean(Pragma pragma, String defaultValue) {
         return Boolean.parseBoolean(pragmaTable.getProperty(pragma.pragmaName, defaultValue));
+    }
+
+    /**
+     * Retrives a pragma integer value.
+     * @param pragma The pragma.
+     * @param defaultValue The default value.
+     * @return The value of the pragma or defaultValue.
+     */
+    private int getInteger(Pragma pragma, String defaultValue) {
+        return Integer.parseInt(pragmaTable.getProperty(pragma.pragmaName, defaultValue));
     }
 
     /**
@@ -277,7 +351,7 @@ public class SQLiteConfig
         CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
         COUNT_CHANGES("count_changes", OnOff),
         DEFAULT_CACHE_SIZE("default_cache_size"),
-	DEFER_FOREIGN_KEYS("defer_foreign_keys", OnOff),
+	    DEFER_FOREIGN_KEYS("defer_foreign_keys", OnOff),
         EMPTY_RESULT_CALLBACKS("empty_result_callback", OnOff),
         ENCODING("encoding", toStringArray(Encoding.values())),
         FOREIGN_KEYS("foreign_keys", OnOff),
@@ -300,7 +374,21 @@ public class SQLiteConfig
         TEMP_STORE_DIRECTORY("temp_store_directory"),
         USER_VERSION("user_version"),
         APPLICATION_ID("application_id"),
-        
+
+        // Limits
+        LIMIT_LENGTH("limit_length", "The maximum size of any string or BLOB or table row, in bytes.", null),
+        LIMIT_SQL_LENGTH("limit_sql_length", "The maximum length of an SQL statement, in bytes.", null),
+        LIMIT_COLUMN("limit_column", "The maximum number of columns in a table definition or in the result set of a SELECT or the maximum number of columns in an index or in an ORDER BY or GROUP BY clause.", null),
+        LIMIT_EXPR_DEPTH("limit_expr_depth", "The maximum depth of the parse tree on any expression.", null),
+        LIMIT_COMPOUND_SELECT("limit_compound_select", "The maximum number of terms in a compound SELECT statement.", null),
+        LIMIT_VDBE_OP("limit_vdbe_op", "The maximum number of instructions in a virtual machine program used to implement an SQL statement. If sqlite3_prepare_v2() or the equivalent tries to allocate space for more than this many opcodes in a single prepared statement, an SQLITE_NOMEM error is returned.", null),
+        LIMIT_FUNCTION_ARG("limit_function_arg", "The maximum number of arguments on a function.", null),
+        LIMIT_ATTACHED("limit_attached", "The maximum number of attached databases.", null),
+        LIMIT_LIKE_PATTERN_LENGTH("limit_like_pattern_length", "The maximum length of the pattern argument to the LIKE or GLOB operators.", null),
+        LIMIT_VARIABLE_NUMBER("limit_variable_number", "The maximum index number of any parameter in an SQL statement.", null),
+        LIMIT_TRIGGER_DEPTH("limit_trigger_depth", "The maximum depth of recursion for triggers.", null),
+        LIMIT_WORKER_THREADS("limit_worker_threads", "The maximum number of auxiliary worker threads that a single prepared statement may start.", null),
+
         // Others
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
         DATE_PRECISION("date_precision", "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).", toStringArray(DatePrecision.values())),

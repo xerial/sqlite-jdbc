@@ -1328,6 +1328,21 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_free_1functions(
     }
 }
 
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_limit(JNIEnv *env, jobject this, jint id, jint value)
+{
+    sqlite3* db;
+
+    db = gethandle(env, this);
+
+    if (!db)
+    {
+        throwex_db_closed(env);
+        return 0;
+    }
+
+    return sqlite3_limit(db, id, value);
+}
+
 // COMPOUND FUNCTIONS ///////////////////////////////////////////////
 
 JNIEXPORT jobjectArray JNICALL Java_org_sqlite_core_NativeDB_column_1metadata(
@@ -1564,7 +1579,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
 #else
   return SQLITE_INTERNAL;
 #endif
-} 
+}
 
 
 // Progress handler

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.xerial</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.32.4-SNAPSHOT</version>
+  <version>3.32.3.3-SNAPSHOT</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
 
@@ -91,8 +91,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
 
