@@ -364,7 +364,7 @@ public class SQLiteConfig
         LOCKING_MODE("locking_mode", toStringArray(LockingMode.values())),
         PAGE_SIZE("page_size"),
         MAX_PAGE_COUNT("max_page_count"),
-        READ_UNCOMMITED("read_uncommited", OnOff),
+        READ_UNCOMMITTED("read_uncommitted", OnOff),
         RECURSIVE_TRIGGERS("recursive_triggers", OnOff),
         REVERSE_UNORDERED_SELECTS("reverse_unordered_selects", OnOff),
         SECURE_DELETE("secure_delete", new String[] { "true", "false", "fast" }),
@@ -735,7 +735,7 @@ public class SQLiteConfig
      * @see <a href="http://www.sqlite.org/pragma.html#pragma_read_uncommitted">www.sqlite.org/pragma.html#pragma_read_uncommitted</a>
      */
     public void setReadUncommited(boolean useReadUncommitedIsolationMode) {
-        set(Pragma.READ_UNCOMMITED, useReadUncommitedIsolationMode);
+        set(Pragma.READ_UNCOMMITTED, useReadUncommitedIsolationMode);
     }
 
     /**

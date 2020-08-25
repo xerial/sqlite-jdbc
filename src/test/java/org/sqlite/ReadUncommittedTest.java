@@ -20,6 +20,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class ReadUncommittedTest
 {
     private Connection conn;
@@ -59,5 +61,29 @@ public class ReadUncommittedTest
     public void setUnsupportedIsolationLevel() throws SQLException
     {
         conn.setTransactionIsolation(SQLiteConnection.TRANSACTION_REPEATABLE_READ);
+    }
+
+    @Test
+    public void setReadUncommittedWithConfig() throws SQLException
+    {
+        // Override original setup
+        Properties prop = new Properties();
+        prop.setProperty("shared_cache", "true");
+        conn = DriverManager.getConnection("jdbc:sqlite:", prop);
+        stat = conn.createStatement();
+        assertEquals("Fail to set pragma read_uncommitted", "0",
+            stat.executeQuery("PRAGMA read_uncommitted;").getString(1));
+
+        prop.setProperty("read_uncommitted", "true");
+        conn = DriverManager.getConnection("jdbc:sqlite:", prop);
+        stat = conn.createStatement();
+        assertEquals("Fail to set pragma read_uncommitted", "1",
+            stat.executeQuery("PRAGMA read_uncommitted;").getString(1));
+
+        prop.setProperty("read_uncommitted", "false");
+        conn = DriverManager.getConnection("jdbc:sqlite:", prop);
+        stat = conn.createStatement();
+        assertEquals("Fail to set pragma read_uncommitted", "0",
+            stat.executeQuery("PRAGMA read_uncommitted;").getString(1));
     }
 }
