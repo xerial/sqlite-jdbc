@@ -1,30 +1,26 @@
 SQLite JDBC Driver [![Build Status](https://travis-ci.org/xerial/sqlite-jdbc.svg?branch=master)](https://travis-ci.org/xerial/sqlite-jdbc) [![Join the chat at https://gitter.im/xerial/sqlite-jdbc](https://badges.gitter.im/xerial/sqlite-jdbc.svg)](https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ==================
 
-SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
+SQLite JDBC is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
-Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
+Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://github.com/xerial/sqlite-jdbc/releases)
 our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
-
-Public Discussion Forum
-=======================
-*  Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
-
-
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/org.xerial/sqlite-jdbc/badge.svg)](http://www.javadoc.io/doc/org.xerial/sqlite-jdbc)
 
-* Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
+* Release versions: [Download](https://github.com/xerial/sqlite-jdbc/releases) or Maven https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
 * Latest snapshot (pre-release) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+
+Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
 
 Usage
 ============
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#using-sqlitejdbc-with-maven2))
+1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://github.com/xerial/sqlite-jdbc/releases) (or by using [Maven](#using-sqlitejdbc-with-maven2))
 then append this jar file into your classpath.
 2.  Open a SQLite database connection from your code. (see the example below)
 
