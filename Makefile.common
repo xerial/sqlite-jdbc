@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 DragonFly-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9 HPUX-ia64_32
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 DragonFly-x86_64 FreeBSD-x86_64 FreeBSD-aarch64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9 HPUX-ia64_32
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -126,6 +126,13 @@ FreeBSD-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fv
 FreeBSD-x86_64_LINKFLAGS := -shared
 FreeBSD-x86_64_LIBNAME   := libsqlitejdbc.so
 FreeBSD-x86_64_SQLITE_FLAGS  :=
+
+FreeBSD-aarch64_CC        := $(CROSS_PREFIX)cc
+FreeBSD-aarch64_STRIP     := $(CROSS_PREFIX)strip
+FreeBSD-aarch64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden
+FreeBSD-aarch64_LINKFLAGS := -shared
+FreeBSD-aarch64_LIBNAME   := libsqlitejdbc.so
+FreeBSD-aarch64_SQLITE_FLAGS  :=
 
 OpenBSD-x86_64_CC        := $(CROSS_PREFIX)gcc
 OpenBSD-x86_64_STRIP     := $(CROSS_PREFIX)strip
