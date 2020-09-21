@@ -1485,7 +1485,12 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
   }
 
   /* Open the database file identified by dFileName. */
-  rc = sqlite3_open(dFileName, &pFile);
+  int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+  if (sqlite3_strnicmp(dFileName, "file:", 5) == 0) {
+    flags |= SQLITE_OPEN_URI;
+  }
+  rc = sqlite3_open_v2(dFileName, &pFile, flags, NULL);
+
   if( rc==SQLITE_OK ){
 
     /* Open the sqlite3_backup object used to accomplish the transfer */
@@ -1549,7 +1554,12 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   }
 
   /* Open the database file identified by dFileName. */
-  rc = sqlite3_open(dFileName, &pFile);
+  int flags = SQLITE_OPEN_READONLY;
+  if (sqlite3_strnicmp(dFileName, "file:", 5) == 0) {
+    flags |= SQLITE_OPEN_URI;
+  }
+  rc = sqlite3_open_v2(dFileName, &pFile, flags, NULL);
+
   if( rc==SQLITE_OK ){
 
     /* Open the sqlite3_backup object used to accomplish the transfer */

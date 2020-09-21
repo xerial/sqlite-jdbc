@@ -38,11 +38,10 @@ public class ExtendedCommand
      */
     public static SQLExtension parse(String sql) throws SQLException {
         if (sql == null)
-            return null;
-
-        if (sql.startsWith("backup"))
+            return null;            
+        if (sql.length() > 5 && sql.substring(0, 6).toLowerCase().equals("backup"))
             return BackupCommand.parse(sql);
-        else if (sql.startsWith("restore"))
+        else if (sql.length() > 6 && sql.substring(0, 7).toLowerCase().equals("restore"))
             return RestoreCommand.parse(sql);
 
         return null;
@@ -78,8 +77,8 @@ public class ExtendedCommand
             this.destFile = destFile;
         }
 
-        private static Pattern backupCmd = Pattern
-                                                 .compile("backup(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+to\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)");
+        private static Pattern backupCmd = Pattern.compile(
+            "backup(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+to\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)", Pattern.CASE_INSENSITIVE);
 
         /**
          * Parses SQLite database backup command and creates a BackupCommand object.
@@ -112,8 +111,8 @@ public class ExtendedCommand
     {
         public final String    targetDB;
         public final String    srcFile;
-        private static Pattern restoreCmd = Pattern
-                                                  .compile("restore(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+from\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)");
+        private static Pattern restoreCmd = Pattern.compile(
+            "restore(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+from\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)", Pattern.CASE_INSENSITIVE);
 
         /**
          * Constructs a RestoreCommand instance that restores the database from a given source file. 
