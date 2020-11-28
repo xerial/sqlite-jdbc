@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides OS name and architecture name.
@@ -116,7 +117,7 @@ public class OSInfo
     public static boolean isAlpine() {
         try {
             Process p = Runtime.getRuntime().exec("cat /etc/os-release | grep ^ID");
-            p.waitFor();
+            p.waitFor(300, TimeUnit.MILLISECONDS);
 
             InputStream in = p.getInputStream();
             try {
