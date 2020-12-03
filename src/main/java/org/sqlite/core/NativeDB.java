@@ -16,14 +16,10 @@
 
 package org.sqlite.core;
 
-import org.sqlite.BusyHandler;
+import org.sqlite.*;
+
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-
-import org.sqlite.Function;
-import org.sqlite.ProgressHandler;
-import org.sqlite.SQLiteConfig;
-import org.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 public final class NativeDB extends DB
@@ -406,30 +402,33 @@ public final class NativeDB extends DB
     public native synchronized int value_type(Function f, int arg);
 
     /**
-     * @see org.sqlite.core.DB#create_function(java.lang.String, org.sqlite.Function, int)
+     * @see org.sqlite.core.DB#create_function(java.lang.String, org.sqlite.Function, int, int)
      */
     @Override
-    public synchronized int create_function(String name, Function func, int flags) {
-        return create_function_utf8(stringToUtf8ByteArray(name), func, flags);
+    public synchronized int create_function(String name, Function func, int nArgs, int flags) {
+        return create_function_utf8(stringToUtf8ByteArray(name), func, nArgs, flags);
     }
 
-    native synchronized int create_function_utf8(byte[] nameUtf8, Function func, int flags);
+    native synchronized int create_function_utf8(byte[] nameUtf8, Function func, int nArgs, int flags);
 
     /**
-     * @see org.sqlite.core.DB#destroy_function(java.lang.String)
+     * @see org.sqlite.core.DB#destroy_function(java.lang.String, int)
      */
     @Override
-    public synchronized int destroy_function(String name) {
-        return destroy_function_utf8(stringToUtf8ByteArray(name));
+    public synchronized int destroy_function(String name, int nArgs) {
+        return destroy_function_utf8(stringToUtf8ByteArray(name), nArgs);
     }
 
-    native synchronized int destroy_function_utf8(byte[] nameUtf8);
+    native synchronized int destroy_function_utf8(byte[] nameUtf8, int nArgs);
 
     /**
      * @see org.sqlite.core.DB#free_functions()
      */
     @Override
     native synchronized void free_functions();
+
+    @Override
+    public native synchronized int limit(int id, int value) throws SQLException;
 
     /**
      * @see org.sqlite.core.DB#backup(java.lang.String, java.lang.String, org.sqlite.core.DB.ProgressObserver)
@@ -468,6 +467,12 @@ public final class NativeDB extends DB
      */
     @Override
     native synchronized boolean[][] column_metadata(long stmt);
+
+    @Override
+    native synchronized void set_commit_listener(boolean enabled);
+
+    @Override
+    native synchronized void set_update_listener(boolean enabled);
 
     /**
      * Throws an SQLException

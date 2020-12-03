@@ -23,7 +23,6 @@ import org.sqlite.jdbc4.JDBC4Statement;
 
 import java.sql.Date;
 import java.sql.SQLException;
-import java.util.BitSet;
 import java.util.Calendar;
 
 public abstract class CorePreparedStatement extends JDBC4Statement
@@ -31,7 +30,6 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     protected int columnCount;
     protected int paramCount;
     protected int batchQueryCount;
-    protected BitSet paramValid;
 
     /**
      * Constructs a prepared statement on a provided connection.
@@ -48,27 +46,9 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         rs.colsMeta = db.column_names(pointer);
         columnCount = db.column_count(pointer);
         paramCount = db.bind_parameter_count(pointer);
-        paramValid = new BitSet(paramCount);
         batchQueryCount = 0;
         batch = null;
         batchPos = 0;
-    }
-
-    /**
-     * @see org.sqlite.core.CoreStatement#finalize()
-     */
-    @Override
-    protected void finalize() throws SQLException {
-        close();
-    }
-
-    /**
-     * Checks if values are bound to statement parameters.
-     * @throws SQLException
-     */
-    protected void checkParameters() throws SQLException {
-        if (paramValid.cardinality() != paramCount)
-            throw new SQLException("Values not bound to statement");
     }
 
     /**
@@ -79,8 +59,6 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         if (batchQueryCount == 0) {
             return new int[] {};
         }
-
-        checkParameters();
 
         try {
             return conn.getDatabase().executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
@@ -96,7 +74,6 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     @Override
     public void clearBatch() throws SQLException {
         super.clearBatch();
-        paramValid.clear();
         batchQueryCount = 0;
     }
 
@@ -125,10 +102,8 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         checkOpen();
         if (batch == null) {
             batch = new Object[paramCount];
-            paramValid.clear();
         }
         batch[batchPos + pos - 1] = value;
-        paramValid.set(pos - 1);
     }
 
 

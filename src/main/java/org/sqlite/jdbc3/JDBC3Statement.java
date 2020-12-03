@@ -28,13 +28,6 @@ public abstract class JDBC3Statement extends CoreStatement {
     }
 
     /**
-     * @see java.lang.Object#finalize()
-     */
-    protected void finalize() throws SQLException {
-        close();
-    }
-
-    /**
      * @see java.sql.Statement#execute(java.lang.String)
      */
     public boolean execute(String sql) throws SQLException {

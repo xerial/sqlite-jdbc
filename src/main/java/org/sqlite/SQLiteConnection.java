@@ -354,6 +354,14 @@ public abstract class SQLiteConnection
         db.busy_timeout(timeoutMillis);
     }
 
+    public void setLimit(SQLiteLimits limit, int value) throws SQLException {
+        db.limit(limit.getId(), value);
+    }
+
+    public void getLimit(SQLiteLimits limit) throws SQLException {
+        db.limit(limit.getId(), -1);
+    }
+
     @Override
     public boolean isClosed() throws SQLException
     {
@@ -417,6 +425,42 @@ public abstract class SQLiteConnection
         db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
     }
 
+    /**
+     * Add a listener for DB update events, see https://www.sqlite.org/c3ref/update_hook.html
+     *
+     * @param listener The listener to receive update events
+     */
+    public void addUpdateListener(SQLiteUpdateListener listener) {
+        db.addUpdateListener(listener);
+    }
+
+    /**
+     * Remove a listener registered for DB update events.
+     *
+     * @param listener The listener to no longer receive update events
+     */
+    public void removeUpdateListener(SQLiteUpdateListener listener) {
+        db.removeUpdateListener(listener);
+    }
+
+
+    /**
+     * Add a listener for DB commit/rollback events, see https://www.sqlite.org/c3ref/commit_hook.html
+     *
+     * @param listener The listener to receive commit events
+     */
+    public void addCommitListener(SQLiteCommitListener listener) {
+        db.addCommitListener(listener);
+    }
+
+    /**
+     * Remove a listener registered for DB commit/rollback events.
+     *
+     * @param listener The listener to no longer receive commit/rollback events.
+     */
+    public void removeCommitListener(SQLiteCommitListener listener) {
+        db.removeCommitListener(listener);
+    }
 
     /**
      * Extracts PRAGMA values from the filename and sets them into the Properties

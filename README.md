@@ -1,49 +1,26 @@
 SQLite JDBC Driver [![Build Status](https://travis-ci.org/xerial/sqlite-jdbc.svg?branch=master)](https://travis-ci.org/xerial/sqlite-jdbc) [![Join the chat at https://gitter.im/xerial/sqlite-jdbc](https://badges.gitter.im/xerial/sqlite-jdbc.svg)](https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ==================
 
-SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
+SQLite JDBC is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
-Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
+Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://github.com/xerial/sqlite-jdbc/releases)
 our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
-What is different from Zentus' SQLite JDBC?
---------------------------------------------
-The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
-
-* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
-* Remove manual configurations
-
-In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments,
-e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc.
-This process was error-prone and bothersome to tell every user to set these variables.
-Our SQLiteJDBC library completely does away these inconveniences.
-
-Another difference is that we are keeping this SQLiteJDBC library up-to-date to
-the newest version of SQLite engine, because we are one of the hottest users of
-this library. For example, SQLite JDBC is a core component of
-[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
-is our utility to create personalized genome browsers.
-
-
-Public Discussion Forum
-=======================
-*  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en)
-*  Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
-
-
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/org.xerial/sqlite-jdbc/badge.svg)](http://www.javadoc.io/doc/org.xerial/sqlite-jdbc)
+[![javadoc](https://javadoc.io/badge2/org.xerial/sqlite-jdbc/javadoc.svg)](https://javadoc.io/doc/org.xerial/sqlite-jdbc)
 
-* Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
+* Release versions: [Download](https://github.com/xerial/sqlite-jdbc/releases) or Maven https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
 * Latest snapshot (pre-release) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+
+Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
 
 Usage
 ============
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#using-sqlitejdbc-with-maven2))
+1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://github.com/xerial/sqlite-jdbc/releases) (or by using [Maven](#using-sqlitejdbc-with-maven2))
 then append this jar file into your classpath.
 2.  Open a SQLite database connection from your code. (see the example below)
 
@@ -146,6 +123,22 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2020-07-28: sqlite-jdbc-3.32.3.2
+    * Enable SQLITE_MAX_MMAP_SIZE compile option again.
+    * Fixes issues when using Arm Cortex A8, A9 (32-bit architecture)
+*   2020-07-15: sqlite-jdbc-3.32.3.1
+    * Remove SQLITE_MAX_MMAP_SIZE compile option, which might be causing performance issuess.
+*   2020-06-18: sqlite-jdbc-3.32.3
+    * Fix multiple CVE reported issues https://github.com/xerial/sqlite-jdbc/issues/501
+*   2020-05-04: sqlite-jdbc-3.31.1
+    * Upgrade to sqlite 3.31.1 
+    * Support update/commit/rollback event notifications #350 
+    * Remove sparse index checks #476 
+    * Support alpine linux (Linux-alpine)
+    * Enabled SQLITE_ENABLE_STAT4 flag 
+*   2019-12-23: sqlite-jdbc-3.30.1
+    * Upgrade to sqlite 3.30.1
+    * Various fixes
 *   2019-06-24: sqlite-jdbc-3.28.0
     * Upgrade to sqlite 3.28.0
 *   2019-03-20: sqlite-jdbc-3.27.2.1
@@ -315,7 +308,7 @@ Beta Release
 The early releases (beta) of sqlite-jdbc with some advanced features are available
 from [here](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
 
-*   The old releases are still available from [here](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
+*   The old releases are still available from [here](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
 
 Supported Operating Systems
 ===========================
@@ -373,7 +366,7 @@ See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more det
 Using SQLiteJDBC with Maven2
 ============================
 If you are familiar with [Maven2](http://maven.apache.org), add the following XML
-fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
+fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
 
     <dependencies>
         <dependency>
@@ -421,3 +414,21 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
         <version>(version)</version>
         <scope>provided</scope>
     </dependency>
+
+What is different from Zentus' SQLite JDBC?
+--------------------------------------------
+The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
+
+* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
+* Remove manual configurations
+
+In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments,
+e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc.
+This process was error-prone and bothersome to tell every user to set these variables.
+Our SQLiteJDBC library completely does away these inconveniences.
+
+Another difference is that we are keeping this SQLiteJDBC library up-to-date to
+the newest version of SQLite engine, because we are one of the hottest users of
+this library. For example, SQLite JDBC is a core component of
+[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
+is our utility to create personalized genome browsers.

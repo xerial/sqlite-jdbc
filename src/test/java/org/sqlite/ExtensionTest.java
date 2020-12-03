@@ -1,6 +1,7 @@
 package org.sqlite;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,6 +58,21 @@ public class ExtensionTest {
 
     @Test
     public void extFunctions() throws Exception {
+        {
+            ResultSet rs = stat.executeQuery("pragma compile_options");
+            boolean hasJdbcExtensions = false;
+            while (rs.next()) {
+                String compileOption = rs.getString(1);
+                if (compileOption.equals("JDBC_EXTENSIONS")) {
+                    hasJdbcExtensions = true;
+                    break;
+                }
+            }
+            rs.close();
+            // SQLite has to be compiled with JDBC Extensions for this test to
+            // continue.
+            Assume.assumeTrue(hasJdbcExtensions);
+        }
         {
             ResultSet rs = stat.executeQuery("select cos(radians(45))");
             assertTrue(rs.next());

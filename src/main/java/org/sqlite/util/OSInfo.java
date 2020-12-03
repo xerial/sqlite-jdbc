@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides OS name and architecture name.
@@ -111,6 +112,33 @@ public class OSInfo
 
     public static boolean isAndroid() {
         return System.getProperty("java.runtime.name", "").toLowerCase().contains("android");
+    }
+
+    public static boolean isAlpine() {
+        try {
+            Process p = Runtime.getRuntime().exec("cat /etc/os-release | grep ^ID");
+            p.waitFor(300, TimeUnit.MILLISECONDS);
+
+            InputStream in = p.getInputStream();
+            try {
+                int readLen = 0;
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                byte[] buf = new byte[32];
+                while((readLen = in.read(buf, 0, buf.length)) >= 0) {
+                    b.write(buf, 0, readLen);
+                }
+                return b.toString().toLowerCase().contains("alpine");
+            }
+            finally {
+                if(in != null) {
+                    in.close();
+                }
+            }
+                
+        } catch (Throwable e) {
+            return false;
+        }
+        
     }
 
     static String getHardwareName() {
@@ -221,6 +249,9 @@ public class OSInfo
         }
         else if (osName.contains("Mac") || osName.contains("Darwin")) {
             return "Mac";
+        }
+        else if (isAlpine()) {
+            return "Linux-Alpine";
         }
         else if (osName.contains("Linux")) {
             return "Linux";

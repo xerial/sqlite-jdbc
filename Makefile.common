@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 Mac-aarch64 DragonFly-x86_64 FreeBSD-x86_64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9 HPUX-ia64_32
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -113,6 +113,13 @@ Linux-ppc64_LINKFLAGS := -shared -static-libgcc
 Linux-ppc64_LIBNAME   := libsqlitejdbc.so
 Linux-ppc64_SQLITE_FLAGS  :=
 
+DragonFly-x86_64_CC        := $(CROSS_PREFIX)cc
+DragonFly-x86_64_STRIP     := $(CROSS_PREFIX)strip
+DragonFly-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -O2 -fPIC -fvisibility=hidden
+DragonFly-x86_64_LINKFLAGS := -shared
+DragonFly-x86_64_LIBNAME   := libsqlitejdbc.so
+DragonFly-x86_64_SQLITE_FLAGS  :=
+
 FreeBSD-x86_64_CC        := $(CROSS_PREFIX)cc
 FreeBSD-x86_64_STRIP     := $(CROSS_PREFIX)strip
 FreeBSD-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden
@@ -141,6 +148,13 @@ Mac-x86_LINKFLAGS := -dynamiclib
 Mac-x86_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
 
+HPUX-ia64_32_CC			:= cc
+HPUX-ia64_32_STRIP		:= strip
+HPUX-ia64_32_CCFLAGS	:= -Ilib/inc_linux +Osize +z -Bhidden
+HPUX-ia64_32_LINKFLAGS	:= -b
+HPUX-ia64_32_LIBNAME	:= libsqlitejdbc.so
+HPUX-ia64_32_SQLITE_FLAGS :=
+
 Mac-x86_64_CC        := gcc -arch $(OS_ARCH) 
 Mac-x86_64_STRIP     := strip -x
 MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
@@ -151,6 +165,17 @@ Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework
 Mac-x86_64_LINKFLAGS := -dynamiclib 
 Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
+
+Mac-aarch64_CC        := gcc -arch arm64
+Mac-aarch64_STRIP     := strip -x
+MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
+ifeq ($(wildcard MAC_SDK),)
+	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk
+endif
+Mac-aarch64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.6 -fvisibility=hidden -Wno-implicit-function-declaration
+Mac-aarch64_LINKFLAGS  := -dynamiclib
+Mac-aarch64_LIBNAME    := libsqlitejdbc.jnilib
+Mac-aarch64_SQLITE_FLAGS := 
 
 Windows-x86_CC           := $(CROSS_PREFIX)gcc
 Windows-x86_STRIP        := $(CROSS_PREFIX)strip
