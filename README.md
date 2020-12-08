@@ -123,6 +123,8 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2020-12-08: sqlite-jdbc-3.32.3.3
+    * Apple Silicon (M1) support
 *   2020-07-28: sqlite-jdbc-3.32.3.2
     * Enable SQLITE_MAX_MMAP_SIZE compile option again.
     * Fixes issues when using Arm Cortex A8, A9 (32-bit architecture)
