@@ -434,3 +434,19 @@ the newest version of SQLite engine, because we are one of the hottest users of
 this library. For example, SQLite JDBC is a core component of
 [UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
 is our utility to create personalized genome browsers.
+
+## Buliding sqlite-jdbc
+
+Building native libraries:
+```
+# For the current platform
+$ make native
+
+# For all platforms (Requires docker for launching cross-compilers)
+$ make native-all
+
+# For Apple Silicon (M1). Need to install a jdk compiled for M1 https://github.com/microsoft/openjdk-aarch64
+$ JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-16+10/Contents/Home make native
+```
+
+
