@@ -9,13 +9,19 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
+import java.util.Arrays;
 
 import org.sqlite.SQLiteConnection;
 import org.sqlite.jdbc3.JDBC3PreparedStatement;
 
 public class JDBC4PreparedStatement extends JDBC3PreparedStatement implements PreparedStatement, ParameterMetaData {
 
-    public JDBC4PreparedStatement(SQLiteConnection conn, String sql) throws SQLException {
+    @Override
+	public String toString() {
+		return sql + " \n parameters=" + Arrays.toString(batch);
+	}
+
+	public JDBC4PreparedStatement(SQLiteConnection conn, String sql) throws SQLException {
         super(conn, sql);
     }
 
