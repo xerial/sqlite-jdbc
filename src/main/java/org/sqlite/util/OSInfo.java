@@ -184,9 +184,9 @@ public class OSInfo
                 // Use armv5, soft-float ABI
                 return "arm";
             }
-            else if (armType.equals("aarch64")) {
+            else if (armType.startsWith("aarch64")) {
                 // Use arm64
-                return "arm64";
+                return "aarch64";
             }
 
             // Java 1.8 introduces a system property to determine armel or armhf
