@@ -46,6 +46,13 @@ public class SQLiteConfig
 {
     /* Date storage class*/
     public final static String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+    /* Default limits used by SQLite: https://www.sqlite.org/limits.html */
+    private final static int DEFAULT_MAX_LENGTH = 1000000000;
+    private final static int DEFAULT_MAX_COLUMN = 2000;
+    private final static int DEFAULT_MAX_SQL_LENGTH = 1000000;
+    private final static int DEFAULT_MAX_FUNCTION_ARG = 100;
+    private final static int DEFAULT_MAX_ATTACHED = 10;
+    private final static int DEFAULT_MAX_PAGE_COUNT = 1073741823;
 
     private final Properties pragmaTable;
     private int openModeFlag = 0x00;
@@ -114,54 +121,20 @@ public class SQLiteConfig
         }
 
         if(conn instanceof SQLiteConnection) {
-            if(pragmaTable.containsKey(Pragma.LIMIT_ATTACHED.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_ATTACHED, getInteger(Pragma.LIMIT_ATTACHED, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_COLUMN.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_COLUMN, getInteger(Pragma.LIMIT_COLUMN, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_COMPOUND_SELECT.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_COMPOUND_SELECT, getInteger(Pragma.LIMIT_COMPOUND_SELECT, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_EXPR_DEPTH.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_EXPR_DEPTH, getInteger(Pragma.LIMIT_EXPR_DEPTH, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_FUNCTION_ARG.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_FUNCTION_ARG, getInteger(Pragma.LIMIT_FUNCTION_ARG, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_LENGTH.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_LENGTH, getInteger(Pragma.LIMIT_LENGTH, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_LIKE_PATTERN_LENGTH.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_LIKE_PATTERN_LENGTH, getInteger(Pragma.LIMIT_LIKE_PATTERN_LENGTH, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_SQL_LENGTH.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_SQL_LENGTH, getInteger(Pragma.LIMIT_SQL_LENGTH, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_TRIGGER_DEPTH.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_TRIGGER_DEPTH, getInteger(Pragma.LIMIT_TRIGGER_DEPTH, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_VARIABLE_NUMBER, getInteger(Pragma.LIMIT_VARIABLE_NUMBER, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_VDBE_OP.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_VDBE_OP, getInteger(Pragma.LIMIT_VDBE_OP, "-1"));
-            }
-
-            if(pragmaTable.containsKey(Pragma.LIMIT_WORKER_THREADS.pragmaName)) {
-                ((SQLiteConnection) conn).setLimit(SQLiteLimits.SQLITE_LIMIT_WORKER_THREADS, getInteger(Pragma.LIMIT_WORKER_THREADS, "-1"));
-            }
-
+            SQLiteConnection sqliteConn = (SQLiteConnection) conn;
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_ATTACHED, parseLimitPragma(Pragma.LIMIT_ATTACHED, DEFAULT_MAX_ATTACHED));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_COLUMN, parseLimitPragma(Pragma.LIMIT_COLUMN, DEFAULT_MAX_COLUMN));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_COMPOUND_SELECT, parseLimitPragma(Pragma.LIMIT_COMPOUND_SELECT, -1));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_EXPR_DEPTH, parseLimitPragma(Pragma.LIMIT_EXPR_DEPTH, -1));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_FUNCTION_ARG, parseLimitPragma(Pragma.LIMIT_FUNCTION_ARG, DEFAULT_MAX_FUNCTION_ARG));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_LENGTH, parseLimitPragma(Pragma.LIMIT_LENGTH, DEFAULT_MAX_LENGTH));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_LIKE_PATTERN_LENGTH, parseLimitPragma(Pragma.LIMIT_LIKE_PATTERN_LENGTH, -1));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_SQL_LENGTH, parseLimitPragma(Pragma.LIMIT_SQL_LENGTH, DEFAULT_MAX_SQL_LENGTH));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_TRIGGER_DEPTH, parseLimitPragma(Pragma.LIMIT_TRIGGER_DEPTH, -1));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_VARIABLE_NUMBER, parseLimitPragma(Pragma.LIMIT_VARIABLE_NUMBER, -1));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_VDBE_OP, parseLimitPragma(Pragma.LIMIT_VDBE_OP, -1));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_WORKER_THREADS, parseLimitPragma(Pragma.LIMIT_WORKER_THREADS, -1));
+            sqliteConn.setLimit(SQLiteLimits.SQLITE_LIMIT_PAGE_COUNT, parseLimitPragma(Pragma.LIMIT_PAGE_COUNT, DEFAULT_MAX_PAGE_COUNT));
         }
 
         pragmaParams.remove(Pragma.OPEN_MODE.pragmaName);
@@ -184,6 +157,7 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName);
         pragmaParams.remove(Pragma.LIMIT_VDBE_OP.pragmaName);
         pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
+        pragmaParams.remove(Pragma.LIMIT_PAGE_COUNT.pragmaName);
 
 
         Statement stat = conn.createStatement();
@@ -259,8 +233,16 @@ public class SQLiteConfig
      * @param defaultValue The default value.
      * @return The value of the pragma or defaultValue.
      */
-    private int getInteger(Pragma pragma, String defaultValue) {
-        return Integer.parseInt(pragmaTable.getProperty(pragma.pragmaName, defaultValue));
+    private int parseLimitPragma(Pragma pragma, int defaultValue) {
+        if (!pragmaTable.containsKey(pragma.pragmaName)) {
+            return defaultValue;
+        }
+        String valueString = pragmaTable.getProperty(pragma.pragmaName);
+        try {
+            return Integer.parseInt(valueString);
+        } catch (NumberFormatException ex) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -388,6 +370,7 @@ public class SQLiteConfig
         LIMIT_VARIABLE_NUMBER("limit_variable_number", "The maximum index number of any parameter in an SQL statement.", null),
         LIMIT_TRIGGER_DEPTH("limit_trigger_depth", "The maximum depth of recursion for triggers.", null),
         LIMIT_WORKER_THREADS("limit_worker_threads", "The maximum number of auxiliary worker threads that a single prepared statement may start.", null),
+        LIMIT_PAGE_COUNT("limit_page_count", "The maximum number of pages allowed in a single database file.", null),
 
         // Others
         TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
