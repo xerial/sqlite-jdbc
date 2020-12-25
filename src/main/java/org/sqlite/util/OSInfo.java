@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides OS name and architecture name.
@@ -116,7 +117,7 @@ public class OSInfo
     public static boolean isAlpine() {
         try {
             Process p = Runtime.getRuntime().exec("cat /etc/os-release | grep ^ID");
-            p.waitFor();
+            p.waitFor(300, TimeUnit.MILLISECONDS);
 
             InputStream in = p.getInputStream();
             try {
@@ -183,9 +184,9 @@ public class OSInfo
                 // Use armv5, soft-float ABI
                 return "arm";
             }
-            else if (armType.equals("aarch64")) {
+            else if (armType.startsWith("aarch64")) {
                 // Use arm64
-                return "arm64";
+                return "aarch64";
             }
 
             // Java 1.8 introduces a system property to determine armel or armhf
