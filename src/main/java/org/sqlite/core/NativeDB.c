@@ -27,21 +27,21 @@ static jclass  wclass = 0;
 static jclass pclass = 0;
 static jclass phandleclass = 0;
 
-static void * toref(jlong value)
+inline static void * toref(jlong value)
 {
     jvalue ret;
     ret.j = value;
     return (void *) ret.l;
 }
 
-static jlong fromref(void * value)
+inline static jlong fromref(void * value)
 {
     jvalue ret;
     ret.l = value;
     return ret.j;
 }
 
-static void throwex(JNIEnv *env, jobject this)
+inline static void throwex(JNIEnv *env, jobject this)
 {
     static jmethodID mth_throwex = 0;
 
@@ -51,7 +51,7 @@ static void throwex(JNIEnv *env, jobject this)
     (*env)->CallVoidMethod(env, this, mth_throwex);
 }
 
-static void throwex_errorcode(JNIEnv *env, jobject this, int errorCode)
+inline static void throwex_errorcode(JNIEnv *env, jobject this, int errorCode)
 {
     static jmethodID mth_throwex = 0;
 
@@ -61,7 +61,7 @@ static void throwex_errorcode(JNIEnv *env, jobject this, int errorCode)
     (*env)->CallVoidMethod(env, this, mth_throwex, (jint) errorCode);
 }
 
-static void throwex_msg(JNIEnv *env, const char *str)
+inline static void throwex_msg(JNIEnv *env, const char *str)
 {
     static jmethodID mth_throwexmsg = 0;
 
@@ -72,41 +72,45 @@ static void throwex_msg(JNIEnv *env, const char *str)
                                 (*env)->NewStringUTF(env, str));
 }
 
-static void throwex_outofmemory(JNIEnv *env)
+inline static void throwex_outofmemory(JNIEnv *env)
 {
     throwex_msg(env, "Out of memory");
 }
 
-static void throwex_stmt_finalized(JNIEnv *env)
+inline static void throwex_stmt_finalized(JNIEnv *env)
 {
     throwex_msg(env, "The prepared statement has been finalized");
 }
 
-static void throwex_db_closed(JNIEnv *env)
+inline static void throwex_db_closed(JNIEnv *env)
 {
     throwex_msg(env, "The database has been closed");
 }
 
-static jobject utf8BytesToDirectByteBuffer(JNIEnv *env, const char* bytes, int nbytes)
+inline static jbyteArray utf8BytesToJavaByteArray(JNIEnv *env, const char* bytes, int nbytes)
 {
-    jobject result;
+    jbyteArray result;
 
     if (!bytes)
     {
         return NULL;
     }
 
-    result = (*env)->NewDirectByteBuffer(env, (void*) bytes, nbytes);
+    result = (*env)->NewByteArray(env, (jsize) nbytes);
     if (!result)
     {
         throwex_outofmemory(env);
         return NULL;
     }
 
+    if (nbytes) {
+        (*env)->SetByteArrayRegion(env, result, (jsize) 0, (jsize) nbytes, (const jbyte*) bytes);
+    }
+ 
     return result;
 }
 
-static void utf8JavaByteArrayToUtf8Bytes(JNIEnv *env, jbyteArray utf8bytes, char** bytes, int* nbytes)
+inline static void utf8JavaByteArrayToUtf8Bytes(JNIEnv *env, jbyteArray utf8bytes, char** bytes, int* nbytes)
 {
     jsize utf8bytes_length;
     char* buf;
@@ -136,7 +140,7 @@ static void utf8JavaByteArrayToUtf8Bytes(JNIEnv *env, jbyteArray utf8bytes, char
     if (nbytes) *nbytes = (int) utf8bytes_length;
 }
 
-static jbyteArray stringToUtf8ByteArray(JNIEnv *env, jstring str)
+inline static jbyteArray stringToUtf8ByteArray(JNIEnv *env, jstring str)
 {
     static jmethodID mth_stringToUtf8ByteArray = 0;
 
@@ -150,7 +154,7 @@ static jbyteArray stringToUtf8ByteArray(JNIEnv *env, jstring str)
     return (jbyteArray) result;
 }
 
-static void stringToUtf8Bytes(JNIEnv *env, jstring str, char** bytes, int* nbytes)
+inline static void stringToUtf8Bytes(JNIEnv *env, jstring str, char** bytes, int* nbytes)
 {
     jbyteArray utf8bytes;
     jsize utf8bytes_length;
@@ -187,7 +191,7 @@ static void stringToUtf8Bytes(JNIEnv *env, jstring str, char** bytes, int* nbyte
     if (nbytes) *nbytes = (int) utf8bytes_length;
 }
 
-static void freeUtf8Bytes(char* bytes)
+inline static void freeUtf8Bytes(char* bytes)
 {
     if (bytes)
     {
@@ -195,7 +199,7 @@ static void freeUtf8Bytes(char* bytes)
     }
 }
 
-static sqlite3 * gethandle(JNIEnv *env, jobject this)
+inline static sqlite3 * gethandle(JNIEnv *env, jobject this)
 {
     static jfieldID pointer = 0;
     if (!pointer) pointer = (*env)->GetFieldID(env, dbclass, "pointer", "J");
@@ -203,7 +207,7 @@ static sqlite3 * gethandle(JNIEnv *env, jobject this)
     return (sqlite3 *)toref((*env)->GetLongField(env, this, pointer));
 }
 
-static void sethandle(JNIEnv *env, jobject this, sqlite3 * ref)
+inline static void sethandle(JNIEnv *env, jobject this, sqlite3 * ref)
 {
     static jfieldID pointer = 0;
     if (!pointer) pointer = (*env)->GetFieldID(env, dbclass, "pointer", "J");
@@ -691,7 +695,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB__1exec_1utf8(
 }
 
 
-JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_errmsg_1utf8(JNIEnv *env, jobject this)
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_errmsg_1utf8(JNIEnv *env, jobject this)
 {
     sqlite3 *db;
     const char *str;
@@ -705,14 +709,14 @@ JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_errmsg_1utf8(JNIEnv *env
     
     str = (const char*) sqlite3_errmsg(db);
     if (!str) return NULL;
-    return utf8BytesToDirectByteBuffer(env, str, strlen(str));
+    return utf8BytesToJavaByteArray(env, str, strlen(str));
 }
 
-JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_libversion_1utf8(
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_libversion_1utf8(
         JNIEnv *env, jobject this)
 {
     const char* version = sqlite3_libversion();
-    return utf8BytesToDirectByteBuffer(env, version, strlen(version));
+    return utf8BytesToJavaByteArray(env, version, strlen(version));
 }
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_changes(
@@ -825,7 +829,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_column_1type(
     return sqlite3_column_type(toref(stmt), col);
 }
 
-JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1decltype_1utf8(
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1decltype_1utf8(
         JNIEnv *env, jobject this, jlong stmt, jint col)
 {
     const char *str;
@@ -838,10 +842,10 @@ JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1decltype_1utf8(
 
     str = (const char*) sqlite3_column_decltype(toref(stmt), col);
     if (!str) return NULL;
-    return utf8BytesToDirectByteBuffer(env, str, strlen(str));
+    return utf8BytesToJavaByteArray(env, str, strlen(str));
 }
 
-JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1table_1name_1utf8(
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1table_1name_1utf8(
         JNIEnv *env, jobject this, jlong stmt, jint col)
 {
     const char *str;
@@ -854,10 +858,10 @@ JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1table_1name_1utf
 
     str = sqlite3_column_table_name(toref(stmt), col);
     if (!str) return NULL;
-    return utf8BytesToDirectByteBuffer(env, str, strlen(str));
+    return utf8BytesToJavaByteArray(env, str, strlen(str));
 }
 
-JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1name_1utf8(
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1name_1utf8(
         JNIEnv *env, jobject this, jlong stmt, jint col)
 {
     const char *str;
@@ -871,10 +875,10 @@ JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1name_1utf8(
     str = sqlite3_column_name(toref(stmt), col);
     if (!str) return NULL;
 
-    return utf8BytesToDirectByteBuffer(env, str, strlen(str));
+    return utf8BytesToJavaByteArray(env, str, strlen(str));
 }
 
-JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1text_1utf8(
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1text_1utf8(
         JNIEnv *env, jobject this, jlong stmt, jint col)
 {
     sqlite3 *db;
@@ -903,7 +907,7 @@ JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_column_1text_1utf8(
         return NULL;
     }
 
-    return utf8BytesToDirectByteBuffer(env, bytes, nbytes);
+    return utf8BytesToJavaByteArray(env, bytes, nbytes);
 }
 
 JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1blob(
@@ -912,7 +916,6 @@ JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1blob(
     sqlite3 *db;
     int type;
     int length;
-    jbyteArray jBlob;
     const void *blob;
 
     db = gethandle(env, this);
@@ -942,19 +945,13 @@ JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_column_1blob(
         }
         else {
             // The return value from sqlite3_column_blob() for a zero-length BLOB is a NULL pointer.
-            jBlob = (*env)->NewByteArray(env, 0);
-            if (!jBlob) { throwex_outofmemory(env); return NULL; }
-            return jBlob;
+            return utf8BytesToJavaByteArray(env, "", 0);
         }
     }
 
     length = sqlite3_column_bytes(toref(stmt), col);
-    jBlob = (*env)->NewByteArray(env, length);
-    if (!jBlob) { throwex_outofmemory(env); return NULL; }
 
-    (*env)->SetByteArrayRegion(env, jBlob, (jsize) 0, (jsize) length, (const jbyte*) blob);
-
-    return jBlob;
+    return utf8BytesToJavaByteArray(env, (const jbyte*) blob, length);
 }
 
 JNIEXPORT jdouble JNICALL Java_org_sqlite_core_NativeDB_column_1double(
@@ -1167,7 +1164,7 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_result_1error_1utf8(
     freeUtf8Bytes(err_bytes);
 }
 
-JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_value_1text_1utf8(
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_value_1text_1utf8(
         JNIEnv *env, jobject this, jobject f, jint arg)
 {
     const char* bytes;
@@ -1179,14 +1176,13 @@ JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_value_1text_1utf8(
     bytes = (const char*) sqlite3_value_text(value);
     nbytes = sqlite3_value_bytes(value);
 
-    return utf8BytesToDirectByteBuffer(env, bytes, nbytes);
+    return utf8BytesToJavaByteArray(env, bytes, nbytes);
 }
 
 JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_value_1blob(
         JNIEnv *env, jobject this, jobject f, jint arg)
 {
     int length;
-    jbyteArray jBlob;
     const void *blob;
     sqlite3_value *value = tovalue(env, f, arg);
     if (!value) return NULL;
@@ -1195,12 +1191,8 @@ JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_value_1blob(
     if (!blob) return NULL;
 
     length = sqlite3_value_bytes(value);
-    jBlob = (*env)->NewByteArray(env, length);
-    if (!jBlob) { throwex_outofmemory(env); return NULL; }
 
-    (*env)->SetByteArrayRegion(env, jBlob, (jsize) 0, (jsize) length, (const jbyte*) blob);
-
-    return jBlob;
+    return utf8BytesToJavaByteArray(env, (const jbyte*) blob, (jsize) length);
 }
 
 JNIEXPORT jdouble JNICALL Java_org_sqlite_core_NativeDB_value_1double(
