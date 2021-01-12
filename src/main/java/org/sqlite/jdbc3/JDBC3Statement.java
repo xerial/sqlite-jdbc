@@ -309,14 +309,23 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#getFetchDirection()
      */
     public int getFetchDirection() throws SQLException {
-        return ((ResultSet)rs).getFetchDirection();
+        return ResultSet.FETCH_FORWARD;
     }
 
     /**
      * @see java.sql.Statement#setFetchDirection(int)
      */
-    public void setFetchDirection(int d) throws SQLException {
-        ((ResultSet)rs).setFetchDirection(d);
+    public void setFetchDirection(int direction) throws SQLException {
+        switch (direction) {
+        case ResultSet.FETCH_FORWARD:
+        case ResultSet.FETCH_REVERSE:
+        case ResultSet.FETCH_UNKNOWN:
+            // No-op: SQLite does not support a value other than FETCH_FORWARD
+            break;
+        default:
+            throw new SQLException("Unknown fetch direction " + direction + ". " +
+                    "Must be one of FETCH_FORWARD, FETCH_REVERSE, or FETCH_UNKNOWN in java.sql.ResultSet");
+        }
     }
 
     /**
