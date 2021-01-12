@@ -504,7 +504,9 @@ public final class NativeDB extends DB
             return null;
         }
         try {
-            return Charset.forName("UTF-8").decode(buffer).toString();
+            byte[] buff = new byte[buffer.remaining()];
+            buffer.get(buff);
+            return new String(buff, Charset.forName("UTF-8"));
         }
         catch (UnsupportedCharsetException e) {
             throw new RuntimeException("UTF-8 is not supported", e);
