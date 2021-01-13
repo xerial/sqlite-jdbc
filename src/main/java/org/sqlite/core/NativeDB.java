@@ -16,7 +16,6 @@
 
 package org.sqlite.core;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 import org.sqlite.BusyHandler;
@@ -75,10 +74,10 @@ public final class NativeDB extends DB
      */
     @Override
     protected synchronized void _open(String file, int openFlags) throws SQLException {
-        _open_utf8(stringToUtf8ByteArray(file), openFlags);
+        _open_utf8(file, openFlags);
     }
 
-    native synchronized void _open_utf8(byte[] fileUtf8, int openFlags) throws SQLException;
+    native synchronized void _open_utf8(String fileUtf8, int openFlags) throws SQLException;
 
     /**
      * @see org.sqlite.core.DB#_close()
@@ -91,10 +90,10 @@ public final class NativeDB extends DB
      */
     @Override
     public synchronized int _exec(String sql) throws SQLException {
-        return _exec_utf8(stringToUtf8ByteArray(sql));
+        return _exec_utf8(sql);
     }
 
-    native synchronized int _exec_utf8(byte[] sqlUtf8) throws SQLException;
+    native synchronized int _exec_utf8(String sqlUtf8) throws SQLException;
 
     /**
      * @see org.sqlite.core.DB#shared_cache(boolean)
@@ -131,30 +130,30 @@ public final class NativeDB extends DB
      */
     @Override
     protected synchronized long prepare(String sql) throws SQLException {
-        return prepare_utf8(stringToUtf8ByteArray(sql));
+        return prepare_utf8(sql);
     }
 
-    native synchronized long prepare_utf8(byte[] sqlUtf8) throws SQLException;
+    native synchronized long prepare_utf8(String sqlUtf8) throws SQLException;
 
     /**
      * @see org.sqlite.core.DB#errmsg()
      */
     @Override
     synchronized String errmsg() {
-        return utf8ByteArrayToString(errmsg_utf8());
+        return errmsg_utf8();
     }
 
-    native synchronized byte[] errmsg_utf8();
+    native synchronized String errmsg_utf8();
 
     /**
      * @see org.sqlite.core.DB#libversion()
      */
     @Override
     public synchronized String libversion() {
-        return utf8ByteArrayToString(libversion_utf8());
+        return libversion_utf8();
     }
 
-    native byte[] libversion_utf8();
+    native String libversion_utf8();
 
     /**
      * @see org.sqlite.core.DB#changes()
@@ -215,20 +214,20 @@ public final class NativeDB extends DB
      */
     @Override
     public synchronized String column_decltype(long stmt, int col) {
-        return utf8ByteArrayToString(column_decltype_utf8(stmt, col));
+        return column_decltype_utf8(stmt, col);
     }
 
-    native synchronized byte[] column_decltype_utf8(long stmt, int col);
+    native synchronized String column_decltype_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_table_name(long, int)
      */
     @Override
     public synchronized String column_table_name(long stmt, int col) {
-        return utf8ByteArrayToString(column_table_name_utf8(stmt, col));
+        return column_table_name_utf8(stmt, col);
     }
 
-    native synchronized byte[] column_table_name_utf8(long stmt, int col);
+    native synchronized String column_table_name_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_name(long, int)
@@ -236,20 +235,20 @@ public final class NativeDB extends DB
     @Override
     public synchronized String column_name(long stmt, int col)
     {
-        return utf8ByteArrayToString(column_name_utf8(stmt, col));
+        return column_name_utf8(stmt, col);
     }
 
-    native synchronized byte[] column_name_utf8(long stmt, int col);
+    native synchronized String column_name_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_text(long, int)
      */
     @Override
     public synchronized String column_text(long stmt, int col) {
-        return utf8ByteArrayToString(column_text_utf8(stmt, col));
+        return column_text_utf8(stmt, col);
     }
 
-    native synchronized byte[] column_text_utf8(long stmt, int col);
+    native synchronized String column_text_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_blob(long, int)
@@ -304,10 +303,10 @@ public final class NativeDB extends DB
      */
     @Override
     synchronized int bind_text(long stmt, int pos, String v) {
-        return bind_text_utf8(stmt, pos, stringToUtf8ByteArray(v));
+        return bind_text_utf8(stmt, pos, v);
     }
 
-    native synchronized int bind_text_utf8(long stmt, int pos, byte[] vUtf8);
+    native synchronized int bind_text_utf8(long stmt, int pos, String vUtf8);
 
     /**
      * @see org.sqlite.core.DB#bind_blob(long, int, byte[])
@@ -326,10 +325,10 @@ public final class NativeDB extends DB
      */
     @Override
     public synchronized void result_text(long context, String val) {
-        result_text_utf8(context, stringToUtf8ByteArray(val));
+        result_text_utf8(context, val);
     }
 
-    native synchronized void result_text_utf8(long context, byte[] valUtf8);
+    native synchronized void result_text_utf8(long context, String valUtf8);
 
     /**
      * @see org.sqlite.core.DB#result_blob(long, byte[])
@@ -360,20 +359,20 @@ public final class NativeDB extends DB
      */
     @Override
     public synchronized void result_error(long context, String err) {
-        result_error_utf8(context, stringToUtf8ByteArray(err));
+        result_error_utf8(context, err);
     }
 
-    native synchronized void result_error_utf8(long context, byte[] errUtf8);
+    native synchronized void result_error_utf8(long context, String errUtf8);
 
     /**
      * @see org.sqlite.core.DB#value_text(org.sqlite.Function, int)
      */
     @Override
     public synchronized String value_text(Function f, int arg) {
-        return utf8ByteArrayToString(value_text_utf8(f, arg));
+        return value_text_utf8(f, arg);
     }
 
-    native synchronized byte[] value_text_utf8(Function f, int argUtf8);
+    native synchronized String value_text_utf8(Function f, int argUtf8);
 
     /**
      * @see org.sqlite.core.DB#value_blob(org.sqlite.Function, int)
@@ -410,20 +409,20 @@ public final class NativeDB extends DB
      */
     @Override
     public synchronized int create_function(String name, Function func, int nArgs, int flags) {
-        return create_function_utf8(stringToUtf8ByteArray(name), func, nArgs, flags);
+        return create_function_utf8(name, func, nArgs, flags);
     }
 
-    native synchronized int create_function_utf8(byte[] nameUtf8, Function func, int nArgs, int flags);
+    native synchronized int create_function_utf8(String nameUtf8, Function func, int nArgs, int flags);
 
     /**
      * @see org.sqlite.core.DB#destroy_function(java.lang.String, int)
      */
     @Override
     public synchronized int destroy_function(String name, int nArgs) {
-        return destroy_function_utf8(stringToUtf8ByteArray(name), nArgs);
+        return destroy_function_utf8(name, nArgs);
     }
 
-    native synchronized int destroy_function_utf8(byte[] nameUtf8, int nArgs);
+    native synchronized int destroy_function_utf8(String nameUtf8, int nArgs);
 
     /**
      * @see org.sqlite.core.DB#free_functions()
@@ -438,11 +437,10 @@ public final class NativeDB extends DB
      * @see org.sqlite.core.DB#backup(java.lang.String, java.lang.String, org.sqlite.core.DB.ProgressObserver)
      */
     @Override
-    public int backup(String dbName, String destFileName, ProgressObserver observer) throws SQLException {
-        return backup(stringToUtf8ByteArray(dbName), stringToUtf8ByteArray(destFileName), observer);
-    }
-
-    native synchronized int backup(byte[] dbNameUtf8, byte[] destFileNameUtf8,
+//    public int backup(String dbName, String destFileName, ProgressObserver observer) throws SQLException {
+//        return backup(stringToUtf8ByteArray(dbName), stringToUtf8ByteArray(destFileName), observer);
+//    }
+    public native synchronized int backup(String dbNameUtf8, String destFileNameUtf8,
             ProgressObserver observer) throws SQLException;
 
     /**
@@ -450,13 +448,12 @@ public final class NativeDB extends DB
      *      org.sqlite.core.DB.ProgressObserver)
      */
     @Override
-    public synchronized int restore(String dbName, String sourceFileName, ProgressObserver observer)
-            throws SQLException {
-
-        return restore(stringToUtf8ByteArray(dbName), stringToUtf8ByteArray(sourceFileName), observer);
-    }
-
-    native synchronized int restore(byte[] dbNameUtf8, byte[] sourceFileName,
+//    public synchronized int restore(String dbName, String sourceFileName, ProgressObserver observer)
+//            throws SQLException {
+//
+//        return restore(stringToUtf8ByteArray(dbName), stringToUtf8ByteArray(sourceFileName), observer);
+//    }
+    public native synchronized int restore(String dbNameUtf8, String sourceFileName,
             ProgressObserver observer) throws SQLException;
 
     // COMPOUND FUNCTIONS (for optimisation) /////////////////////////
@@ -486,21 +483,7 @@ public final class NativeDB extends DB
     static void throwex(String msg) throws SQLException {
         throw new SQLException(msg);
     }
-
-    static byte[] stringToUtf8ByteArray(String str) {
-        if (str == null) {
-            return null;
-        }
-        return str.getBytes(StandardCharsets.UTF_8);
-    }
-
-    static String utf8ByteArrayToString(byte[] buffer) {
-        if (buffer == null) {
-            return null;
-        }
-        return new String(buffer, StandardCharsets.UTF_8);
-    }
-
+    
     public native synchronized void register_progress_handler(int vmCalls, ProgressHandler progressHandler) throws SQLException;
 
     public native synchronized void clear_progress_handler() throws SQLException;
