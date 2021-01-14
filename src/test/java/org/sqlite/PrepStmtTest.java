@@ -700,6 +700,10 @@ public class PrepStmtTest
     private void assertArrayEq(byte[] a, byte[] b) {
         assertNotNull(a);
         assertNotNull(b);
+        if (a.length != b.length) {
+        	for (byte c : a) System.out.println(c);
+        	for (byte c : b) System.out.println(c);
+        }
         assertEquals(a.length, b.length);
         for (int i = 0; i < a.length; i++)
             assertEquals(a[i], b[i]);
