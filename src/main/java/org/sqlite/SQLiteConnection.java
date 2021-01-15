@@ -154,6 +154,9 @@ public abstract class SQLiteConnection
         checkOpen();
 
         switch (level) {
+            case java.sql.Connection.TRANSACTION_READ_COMMITTED:
+            case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
+                // Fall-through: Spec allows upgrading isolation to a higher level
             case java.sql.Connection.TRANSACTION_SERIALIZABLE:
                 getDatabase().exec("PRAGMA read_uncommitted = false;", getAutoCommit());
                 break;
@@ -161,7 +164,9 @@ public abstract class SQLiteConnection
                 getDatabase().exec("PRAGMA read_uncommitted = true;", getAutoCommit());
                 break;
             default:
-                throw new SQLException("SQLite supports only TRANSACTION_SERIALIZABLE and TRANSACTION_READ_UNCOMMITTED.");
+                throw new SQLException("Unsupported transaction isolation level: " + level + ". " +
+                        "Must be one of TRANSACTION_READ_UNCOMMITTED, TRANSACTION_READ_COMMITTED, " +
+                        "TRANSACTION_REPEATABLE_READ, or TRANSACTION_SERIALIZABLE in java.sql.Connection");
         }
         connectionConfig.setTransactionIsolation(level);
     }
