@@ -492,4 +492,20 @@ public class StatementTest
         assertTrue( stat.isClosed() );
     }
 
+    @Test
+    public void setFetchDirection() throws SQLException {
+        stat.setFetchDirection(ResultSet.FETCH_FORWARD);
+        stat.setFetchDirection(ResultSet.FETCH_REVERSE);
+        stat.setFetchDirection(ResultSet.FETCH_UNKNOWN);
+    }
+
+    @Test(expected = SQLException.class)
+    public void setFetchDirectionBadArgument() throws SQLException {
+        stat.setFetchDirection(999);
+    }
+
+    @Test
+    public void getFetchDirection() throws SQLException {
+        assertEquals(ResultSet.FETCH_FORWARD, stat.getFetchDirection());
+    }
 }

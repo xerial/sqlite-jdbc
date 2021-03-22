@@ -5,6 +5,9 @@ on:
     paths:
       - '**.java'
       - '**.xml'
+      - '**.so'
+      - '**.jnilib'
+      - '**.dll'
       - '.github/workflows/*.yml'
   push:
     branches:
@@ -12,6 +15,9 @@ on:
     paths:
       - '**.java'
       - '**.xml'
+      - '**.so'
+      - '**.jnilib'
+      - '**.dll'
       - '.github/workflows/*.yml'
 
 jobs:

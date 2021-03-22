@@ -1,10 +1,12 @@
 package org.sqlite;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -153,5 +155,19 @@ public class ResultSetTest {
         resultSet.close();
 
         assertTrue(resultSet.isClosed());
+    }
+
+    @Test
+    public void testReturnsNonAsciiCodepoints()
+        throws SQLException {
+        String nonAsciiString = "국정의 중요한 사항에 관한";
+        PreparedStatement pstat = conn.prepareStatement("select ?");
+        pstat.setString(1, nonAsciiString);
+
+        ResultSet resultSet = pstat.executeQuery();
+
+        assertTrue(resultSet.next());
+        assertEquals(nonAsciiString, resultSet.getString(1));
+        assertFalse(resultSet.next());
     }
 }

@@ -19,6 +19,10 @@ package org.sqlite.core;
 import org.sqlite.*;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.sql.SQLException;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
@@ -137,20 +141,20 @@ public final class NativeDB extends DB
      */
     @Override
     synchronized String errmsg() {
-        return utf8ByteArrayToString(errmsg_utf8());
+        return utf8ByteBufferToString(errmsg_utf8());
     }
 
-    native synchronized byte[] errmsg_utf8();
+    native synchronized ByteBuffer errmsg_utf8();
 
     /**
      * @see org.sqlite.core.DB#libversion()
      */
     @Override
     public synchronized String libversion() {
-        return utf8ByteArrayToString(libversion_utf8());
+        return utf8ByteBufferToString(libversion_utf8());
     }
 
-    native byte[] libversion_utf8();
+    native ByteBuffer libversion_utf8();
 
     /**
      * @see org.sqlite.core.DB#changes()
@@ -211,20 +215,20 @@ public final class NativeDB extends DB
      */
     @Override
     public synchronized String column_decltype(long stmt, int col) {
-        return utf8ByteArrayToString(column_decltype_utf8(stmt, col));
+        return utf8ByteBufferToString(column_decltype_utf8(stmt, col));
     }
 
-    native synchronized byte[] column_decltype_utf8(long stmt, int col);
+    native synchronized ByteBuffer column_decltype_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_table_name(long, int)
      */
     @Override
     public synchronized String column_table_name(long stmt, int col) {
-        return utf8ByteArrayToString(column_table_name_utf8(stmt, col));
+        return utf8ByteBufferToString(column_table_name_utf8(stmt, col));
     }
 
-    native synchronized byte[] column_table_name_utf8(long stmt, int col);
+    native synchronized ByteBuffer column_table_name_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_name(long, int)
@@ -232,20 +236,20 @@ public final class NativeDB extends DB
     @Override
     public synchronized String column_name(long stmt, int col)
     {
-        return utf8ByteArrayToString(column_name_utf8(stmt, col));
+        return utf8ByteBufferToString(column_name_utf8(stmt, col));
     }
 
-    native synchronized byte[] column_name_utf8(long stmt, int col);
+    native synchronized ByteBuffer column_name_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_text(long, int)
      */
     @Override
     public synchronized String column_text(long stmt, int col) {
-        return utf8ByteArrayToString(column_text_utf8(stmt, col));
+        return utf8ByteBufferToString(column_text_utf8(stmt, col));
     }
 
-    native synchronized byte[] column_text_utf8(long stmt, int col);
+    native synchronized ByteBuffer column_text_utf8(long stmt, int col);
 
     /**
      * @see org.sqlite.core.DB#column_blob(long, int)
@@ -366,10 +370,10 @@ public final class NativeDB extends DB
      */
     @Override
     public synchronized String value_text(Function f, int arg) {
-        return utf8ByteArrayToString(value_text_utf8(f, arg));
+        return utf8ByteBufferToString(value_text_utf8(f, arg));
     }
 
-    native synchronized byte[] value_text_utf8(Function f, int argUtf8);
+    native synchronized ByteBuffer value_text_utf8(Function f, int argUtf8);
 
     /**
      * @see org.sqlite.core.DB#value_blob(org.sqlite.Function, int)
@@ -495,14 +499,14 @@ public final class NativeDB extends DB
         }
     }
 
-    static String utf8ByteArrayToString(byte[] utf8bytes) {
-        if (utf8bytes == null) {
+    static String utf8ByteBufferToString(ByteBuffer buffer) {
+        if (buffer == null) {
             return null;
         }
         try {
-            return new String(utf8bytes, "UTF-8");
+            return Charset.forName("UTF-8").decode(buffer).toString();
         }
-        catch (UnsupportedEncodingException e) {
+        catch (UnsupportedCharsetException e) {
             throw new RuntimeException("UTF-8 is not supported", e);
         }
     }

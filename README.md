@@ -123,6 +123,12 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2020-12-10: sqlite-jdbc-3.34.0
+    * Improved the performance of reading String columns
+    * Support URI file names (file://...) in backup/restore commands https://sqlite.org/uri.html
+    * Show SQL strings in PreparedStatements.toString()
+*   2020-12-08: sqlite-jdbc-3.32.3.3
+    * Apple Silicon (M1) support
 *   2020-07-28: sqlite-jdbc-3.32.3.2
     * Enable SQLITE_MAX_MMAP_SIZE compile option again.
     * Fixes issues when using Arm Cortex A8, A9 (32-bit architecture)
@@ -432,3 +438,19 @@ the newest version of SQLite engine, because we are one of the hottest users of
 this library. For example, SQLite JDBC is a core component of
 [UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
 is our utility to create personalized genome browsers.
+
+## Buliding sqlite-jdbc
+
+Building native libraries:
+```
+# For the current platform
+$ make native
+
+# For all platforms (Requires docker for launching cross-compilers)
+$ make native-all
+
+# For Apple Silicon (M1). Need to install a jdk compiled for M1 https://github.com/microsoft/openjdk-aarch64
+$ JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-16+10/Contents/Home make native
+```
+
+
