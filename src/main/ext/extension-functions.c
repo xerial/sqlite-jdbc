@@ -565,6 +565,7 @@ static void atn2Func(sqlite3_context *context, int argc, sqlite3_value **argv){
   }
 }
 
+#if SQLITE_VERSION_NUMBER < 3035000
 /*
 ** Implementation of the sign() function
 ** return one of 3 possibilities +1,0 or -1 when the argument is respectively
@@ -596,6 +597,7 @@ static void signFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
     }
   }
 }
+#endif
 
 
 /*
@@ -1729,7 +1731,9 @@ int RegisterExtensionFunctions(sqlite3 *db){
     { "log",                1, 0, SQLITE_UTF8,    0, logFunc  },
     { "log10",              1, 0, SQLITE_UTF8,    0, log10Func  },
     { "power",              2, 0, SQLITE_UTF8,    0, powerFunc  },
+#if SQLITE_VERSION_NUMBER < 3035000
     { "sign",               1, 0, SQLITE_UTF8,    0, signFunc },
+#endif
     { "sqrt",               1, 0, SQLITE_UTF8,    0, sqrtFunc },
     { "square",             1, 0, SQLITE_UTF8,    0, squareFunc },
 
