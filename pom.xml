@@ -133,7 +133,7 @@
           <archive>
             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
             <manifestEntries>
-              <Automatic-Module-Name>org.sqlite.jdbc</Automatic-Module-Name>
+              <Automatic-Module-Name>org.xerial.sqlitejdbc</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>
