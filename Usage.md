@@ -41,7 +41,13 @@ stmt.executeUpdate("insert into sample values(1, \"leo\")");
 stmt.executeUpdate("insert into sample values(2, \"yui\")");
 // Dump the database contents to a file
 stmt.executeUpdate("backup to backup.db");
+
+```
+
 Restore the database from a backup file:
+
+```java
+
 // Create a memory database
 Connection conn = DriverManager.getConnection("jdbc:sqlite:");
 // Restore the database from a backup file
