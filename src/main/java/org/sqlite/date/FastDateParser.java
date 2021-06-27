@@ -288,16 +288,15 @@ public class FastDateParser implements DateParser, Serializable {
      * @see org.apache.commons.lang3.time.DateParser#parse(java.lang.String)
      */
     public Date parse(final String source) throws ParseException {
-        String normalizedSource = source.length() == 19 ? (source + ".000") : source;
-        final Date date= parse(normalizedSource, new ParsePosition(0));
+        final Date date= parse(source, new ParsePosition(0));
         if(date==null) {
             // Add a note re supported date range
             if (locale.equals(JAPANESE_IMPERIAL)) {
                 throw new ParseException(
                         "(The " +locale + " locale does not support dates before 1868 AD)\n" +
-                                "Unparseable date: \""+normalizedSource+"\" does not match "+parsePattern.pattern(), 0);
+                                "Unparseable date: \""+source+"\" does not match "+parsePattern.pattern(), 0);
             }
-            throw new ParseException("Unparseable date: \""+normalizedSource+"\" does not match "+parsePattern.pattern(), 0);
+            throw new ParseException("Unparseable date: \""+source+"\" does not match "+parsePattern.pattern(), 0);
         }
         return date;
     }
