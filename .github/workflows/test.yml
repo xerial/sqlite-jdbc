@@ -51,3 +51,18 @@ jobs:
           restore-keys: ${{ runner.os }}-jdk8-
       - name: Test
         run: mvn test
+  test_jdk16:
+    name: test jdk16
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 16
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-jdk8-${{ hashFiles('**/*.sbt') }}
+          restore-keys: ${{ runner.os }}-jdk8-
+      - name: Test
+        run: mvn test
