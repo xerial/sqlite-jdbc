@@ -421,18 +421,6 @@ public class StatementTest
         Date d = rs.getDate(1);
         assertEquals(day.getTime(), d.getTime());
     }
-    
-    @Test
-    public void defaultDateTimeTest() throws SQLException {
-        stat.executeUpdate("create table daywithdefaultdatetime (id integer, datetime datatime default current_timestamp)");
-        PreparedStatement prep = conn.prepareStatement("insert into daywithdefaultdatetime (id) values (1)");
-        prep.setInt(1, 1);
-        prep.executeUpdate();
-        ResultSet rs = stat.executeQuery("select * from day");
-        assertTrue(rs.next());
-        Date d = rs.getDate(2);
-        assertTrue(d != null);
-    }
 
     @Test
     public void maxRows() throws SQLException {
