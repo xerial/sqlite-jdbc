@@ -360,7 +360,11 @@ public abstract class SQLiteConnection
     }
 
     public void setLimit(SQLiteLimits limit, int value) throws SQLException {
-        db.limit(limit.getId(), value);
+        // Calling sqlite3_limit with a negative number is a no-op:
+        // https://www.sqlite.org/c3ref/limit.html
+        if (value >= 0) {
+            db.limit(limit.getId(), value);
+        }
     }
 
     public void getLimit(SQLiteLimits limit) throws SQLException {

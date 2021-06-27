@@ -64,6 +64,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	perl -p -e "s/^opendb_out:/  if(!db->mallocFailed && rc==SQLITE_OK){ rc = RegisterExtensionFunctions(db); }\nopendb_out:/;" \
 	    $(SQLITE_SOURCE)/sqlite3.c > $(SQLITE_OUT)/sqlite3.c.tmp
 # register compile option 'JDBC_EXTENSIONS'
+# limits defined here: https://www.sqlite.org/limits.html
 	perl -p -e "s/#if SQLITE_LIKE_DOESNT_MATCH_BLOBS/  \"JDBC_EXTENSIONS\",\n#if SQLITE_LIKE_DOESNT_MATCH_BLOBS/;" \
 	    $(SQLITE_OUT)/sqlite3.c.tmp > $(SQLITE_OUT)/sqlite3.c
 	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
@@ -85,6 +86,12 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    -DSQLITE_DEFAULT_FILE_PERMISSIONS=0666 \
 	    -DSQLITE_MAX_VARIABLE_NUMBER=250000 \
 	    -DSQLITE_MAX_MMAP_SIZE=1099511627776 \
+	    -DSQLITE_MAX_LENGTH=2147483647 \
+	    -DSQLITE_MAX_COLUMN=32767 \
+	    -DSQLITE_MAX_SQL_LENGTH=1073741824 \
+	    -DSQLITE_MAX_FUNCTION_ARG=127 \
+	    -DSQLITE_MAX_ATTACHED=125 \
+	    -DSQLITE_MAX_PAGE_COUNT=4294967294 \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3.c
 
