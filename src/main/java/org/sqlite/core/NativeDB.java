@@ -491,24 +491,16 @@ public final class NativeDB extends DB
         if (str == null) {
             return null;
         }
-        try {
-            return str.getBytes("UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("UTF-8 is not supported", e);
-        }
+        return str.getBytes(StandardCharsets.UTF_8);
     }
 
     static String utf8ByteBufferToString(ByteBuffer buffer) {
         if (buffer == null) {
             return null;
         }
-        try {
-            return Charset.forName("UTF-8").decode(buffer).toString();
-        }
-        catch (UnsupportedCharsetException e) {
-            throw new RuntimeException("UTF-8 is not supported", e);
-        }
+        byte[] buff = new byte[buffer.remaining()];
+        buffer.get(buff);
+        return new String(buff, StandardCharsets.UTF_8);
     }
 
     public native synchronized void register_progress_handler(int vmCalls, ProgressHandler progressHandler) throws SQLException;
