@@ -28,6 +28,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -37,6 +45,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -145,5 +155,108 @@ public class SQLiteJDBCLoaderTest
         pool.shutdown();
         pool.awaitTermination(3, TimeUnit.SECONDS);
         assertEquals(32, completedThreads.get());
+    }
+
+    @Test
+    public void multipleClassLoader() throws Throwable {
+        // Get current classpath
+        String[] stringUrls = System.getProperty("java.class.path")
+                .split(System.getProperty("path.separator"));
+        // Find the classes under test.
+        String targetFolderName = "sqlite-jdbc/target/classes";
+        File classesDir = null;
+        String classesDirPrefix = null;
+        for (String stringUrl : stringUrls) {
+            int indexOf = stringUrl.indexOf(targetFolderName);
+            if (indexOf != -1) {
+                classesDir = new File(stringUrl);
+                classesDirPrefix = stringUrl.substring(0, indexOf + targetFolderName.length());
+                break;
+            }
+        }
+        if (classesDir == null) {
+            Assert.fail("Couldn't find classes under test.");
+        }
+        // Create a JAR file out the classes and resources
+        File jarFile = File.createTempFile("jar-for-test-", ".jar");
+        createJar(classesDir, classesDirPrefix, jarFile);
+        URL[] jarUrl = new URL[] { new URL("file://" + jarFile.getAbsolutePath()) };
+
+        final AtomicInteger completedThreads = new AtomicInteger(0);
+        ExecutorService pool = Executors.newFixedThreadPool(4);
+        for (int i = 0; i < 4; i++) {
+            final int sleepMillis = i;
+            pool.execute(new Runnable() {
+                public void run() {
+                    try {
+                        Thread.sleep(sleepMillis * 10);
+                        // Create an isolated class loader, it should load *different* instances
+                        // of SQLiteJDBCLoader.class
+                        URLClassLoader classLoader = new URLClassLoader(
+                                jarUrl, ClassLoader.getSystemClassLoader().getParent());
+                        Class<?> clazz =
+                                classLoader.loadClass("org.sqlite.SQLiteJDBCLoader");
+                        Method initMethod = clazz.getDeclaredMethod("initialize");
+                        initMethod.invoke(null);
+                        classLoader.close();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                        Assert.fail(e.getLocalizedMessage());
+                    }
+                    completedThreads.incrementAndGet();
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(3, TimeUnit.SECONDS);
+        assertEquals(4, completedThreads.get());
+    }
+
+    private static void createJar(File inputDir, String changeDir, File outputFile) throws IOException {
+        JarOutputStream target = new JarOutputStream(new FileOutputStream(outputFile));
+        addJarEntry(inputDir, changeDir, target);
+        target.close();
+    }
+
+    private static void addJarEntry(File source, String changeDir, JarOutputStream target) throws IOException {
+        BufferedInputStream in = null;
+        try {
+            if (source.isDirectory()) {
+                String name = source.getPath().replace("\\", "/");
+                if (!name.isEmpty()) {
+                    if (!name.endsWith("/")) {
+                        name += "/";
+                    }
+                    JarEntry entry = new JarEntry(name.substring(changeDir.length() + 1));
+                    entry.setTime(source.lastModified());
+                    target.putNextEntry(entry);
+                    target.closeEntry();
+                }
+                for (File nestedFile : source.listFiles()) {
+                    addJarEntry(nestedFile, changeDir, target);
+                }
+                return;
+            }
+
+            JarEntry entry = new JarEntry(
+                    source.getPath().replace("\\", "/").substring(changeDir.length() + 1));
+            entry.setTime(source.lastModified());
+            target.putNextEntry(entry);
+            in = new BufferedInputStream(new FileInputStream(source));
+
+            byte[] buffer = new byte[8192];
+            while (true) {
+                int count = in.read(buffer);
+                if (count == -1) {
+                    break;
+                }
+                target.write(buffer, 0, count);
+            }
+            target.closeEntry();
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
     }
 }

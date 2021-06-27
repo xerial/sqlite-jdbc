@@ -29,6 +29,7 @@ import org.sqlite.util.StringUtils;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -204,7 +205,7 @@ public class SQLiteJDBCLoader {
 
         try {
             // Extract a native library file into the target directory
-            InputStream reader = SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath);
+            InputStream reader = getResourceAsStream(nativeLibraryFilePath);
             if(!extractedLckFile.exists()) {
                 new FileOutputStream(extractedLckFile).close();
             }
@@ -237,7 +238,7 @@ public class SQLiteJDBCLoader {
 
             // Check whether the contents are properly copied from the resource folder
             {
-                InputStream nativeIn = SQLiteJDBCLoader.class.getResourceAsStream(nativeLibraryFilePath);
+                InputStream nativeIn = getResourceAsStream(nativeLibraryFilePath);
                 InputStream extractedLibIn = new FileInputStream(extractedLibFile);
                 try {
                     if(!contentsEquals(nativeIn, extractedLibIn)) {
@@ -256,10 +257,31 @@ public class SQLiteJDBCLoader {
             return loadNativeLibrary(targetFolder, extractedLibFileName);
         }
         catch(IOException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
             return false;
         }
 
+    }
+
+    // Replacement of java.lang.Class#getResourceAsStream(String) to disable sharing the resource stream
+    // in multiple class loaders and specifically to avoid https://bugs.openjdk.java.net/browse/JDK-8205976
+    private static InputStream getResourceAsStream(String name) {
+        // Remove leading '/' since all our resource paths include a leading directory
+        // See: https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/Class.java#L3054
+        String resolvedName = name.substring(1);
+        ClassLoader cl = SQLiteJDBCLoader.class.getClassLoader();
+        URL url = cl.getResource(resolvedName);
+        if (url == null) {
+            return null;
+        }
+        try {
+            URLConnection connection = url.openConnection();
+            connection.setDefaultUseCaches(false);
+            return connection.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
