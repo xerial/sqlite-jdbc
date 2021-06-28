@@ -425,7 +425,7 @@ public class StatementTest
     @Test
     public void defaultDateTimeTest() throws SQLException {
         stat.executeUpdate("create table daywithdefaultdatetime (id integer, datetime datatime default current_timestamp)");
-        PreparedStatement prep = conn.prepareStatement("insert into daywithdefaultdatetime (id) values (1)");
+        PreparedStatement prep = conn.prepareStatement("insert into daywithdefaultdatetime (id) values (?)");
         prep.setInt(1, 1);
         prep.executeUpdate();
         ResultSet rs = stat.executeQuery("select * from day");
