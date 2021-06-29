@@ -428,7 +428,7 @@ public class StatementTest
         PreparedStatement prep = conn.prepareStatement("insert into daywithdefaultdatetime (id) values (?)");
         prep.setInt(1, 1);
         prep.executeUpdate();
-        ResultSet rs = stat.executeQuery("select * from day");
+        ResultSet rs = stat.executeQuery("select * from daywithdefaultdatetime");
         assertTrue(rs.next());
         Date d = rs.getDate(2);
         assertTrue(d != null);
