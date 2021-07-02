@@ -19,6 +19,7 @@ package org.sqlite.core;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.date.FastDateFormat;
+import org.sqlite.jdbc3.JDBC3Connection;
 import org.sqlite.jdbc4.JDBC4Statement;
 
 import java.sql.Date;
@@ -60,12 +61,23 @@ public abstract class CorePreparedStatement extends JDBC4Statement
             return new int[] {};
         }
 
-        try {
-            return conn.getDatabase().executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
+        if(this.conn instanceof JDBC3Connection){
+            ((JDBC3Connection)this.conn).checkTransactionMode();
         }
-        finally {
-            clearBatch();
-        }
+
+        return this.withConnectionTimeout(new SQLCallable<int[]>() {
+
+            @Override
+            public int[] call() throws SQLException {
+                try {
+                    return conn.getDatabase().executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
+                }
+                finally {
+                    clearBatch();
+                }
+            }
+        });
+
     }
 
     /**

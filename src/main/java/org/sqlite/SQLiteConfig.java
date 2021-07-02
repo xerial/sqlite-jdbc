@@ -58,6 +58,7 @@ public class SQLiteConfig
     private int openModeFlag = 0x00;
 
     private final int busyTimeout;
+    private boolean explicitReadOnly = false;
 
     private final SQLiteConnectionConfig defaultConnectionConfig;
 
@@ -92,6 +93,7 @@ public class SQLiteConfig
 
         this.busyTimeout = Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
+        this.explicitReadOnly = Boolean.parseBoolean(pragmaTable.getProperty(Pragma.JDBC_EXPLICIT_READONLY.pragmaName, "false"));
     }
 
     public SQLiteConnectionConfig newConnectionConfig()
@@ -159,6 +161,9 @@ public class SQLiteConfig
         pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
         pragmaParams.remove(Pragma.LIMIT_PAGE_COUNT.pragmaName);
 
+
+        // exclude this "fake" pragma from execution
+        pragmaParams.remove(Pragma.JDBC_EXPLICIT_READONLY.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
@@ -288,7 +293,7 @@ public class SQLiteConfig
         pragmaTable.setProperty(Pragma.DATE_CLASS.pragmaName, defaultConnectionConfig.getDateClass().getValue());
         pragmaTable.setProperty(Pragma.DATE_PRECISION.pragmaName, defaultConnectionConfig.getDatePrecision().getValue());
         pragmaTable.setProperty(Pragma.DATE_STRING_FORMAT.pragmaName, defaultConnectionConfig.getDateStringFormat());
-
+        pragmaTable.setProperty(Pragma.JDBC_EXPLICIT_READONLY.pragmaName, this.explicitReadOnly ? "true" : "false");
         return pragmaTable;
     }
 
@@ -318,6 +323,14 @@ public class SQLiteConfig
         for (SQLiteConfig.Pragma pragma : SQLiteConfig.Pragma.values()) {
             pragmaSet.add(pragma.pragmaName);
         }
+    }
+
+    public boolean isExplicitReadOnlyEnabled() {
+        return this.explicitReadOnly;
+    }
+
+    public void setExplicitReadOnly(boolean readOnly){
+        this.explicitReadOnly = readOnly;
     }
 
     public static enum Pragma {
@@ -379,7 +392,10 @@ public class SQLiteConfig
         DATE_STRING_FORMAT("date_string_format", "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"", null),
         BUSY_TIMEOUT("busy_timeout", null),
         HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
-        PASSWORD("password", null);
+        PASSWORD("password", null),
+
+        // extensions: "fake" pragmas to allow conformance with JDBC
+        JDBC_EXPLICIT_READONLY("jdbc.explicit_readonly");
 
         public final String   pragmaName;
         public final String[] choices;

@@ -49,14 +49,23 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         rs.close();
         conn.getDatabase().reset(pointer);
 
-        boolean success = false;
-        try {
-            resultsWaiting = conn.getDatabase().execute(this, batch);
-            success = true;
-            return columnCount != 0;
-        } finally {
-            if (!success && pointer != 0) conn.getDatabase().reset(pointer);
+        if(this.conn instanceof JDBC3Connection){
+            ((JDBC3Connection)this.conn).checkTransactionMode();
         }
+
+        return this.withConnectionTimeout(new SQLCallable<Boolean>() {
+            @Override
+            public Boolean call() throws SQLException {
+                boolean success = false;
+                try {
+                    resultsWaiting = conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
+                    success = true;
+                    return columnCount != 0;
+                } finally {
+                    if (!success && pointer != 0) conn.getDatabase().reset(pointer);
+                }
+            }
+        });
     }
 
     /**
@@ -72,14 +81,24 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         rs.close();
         conn.getDatabase().reset(pointer);
 
-        boolean success = false;
-        try {
-            resultsWaiting = conn.getDatabase().execute(this, batch);
-            success = true;
-        } finally {
-            if (!success && pointer != 0) conn.getDatabase().reset(pointer);
+        if(this.conn instanceof JDBC3Connection){
+            ((JDBC3Connection)this.conn).checkTransactionMode();
         }
-        return getResultSet();
+
+        return this.withConnectionTimeout(new SQLCallable<ResultSet>() {
+            @Override
+            public ResultSet call() throws SQLException {
+                boolean success = false;
+                try {
+                    resultsWaiting = conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
+                    success = true;
+                } finally {
+                    if (!success && pointer != 0) conn.getDatabase().reset(pointer);
+                }
+                return getResultSet();
+            }
+        });
+
     }
 
     /**
@@ -95,7 +114,17 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         rs.close();
         conn.getDatabase().reset(pointer);
 
-        return conn.getDatabase().executeUpdate(this, batch);
+        if(this.conn instanceof JDBC3Connection){
+            ((JDBC3Connection)this.conn).checkTransactionMode();
+        }
+
+        return this.withConnectionTimeout(new SQLCallable<Integer>(){
+
+            @Override
+            public Integer call() throws SQLException {
+                return conn.getDatabase().executeUpdate(JDBC3PreparedStatement.this, batch);
+            }
+        });
     }
 
     /**

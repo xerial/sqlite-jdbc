@@ -2,6 +2,7 @@ package org.sqlite;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -75,6 +76,7 @@ public class BusyHandlerTest {
     }
 
     @Test
+    @Ignore("This test is very flaky; disabling it for now")
     public void basicBusyHandler() throws Exception {
         final int[] calls = {0};
         BusyHandler.setHandler(conn, new BusyHandler() {
@@ -110,6 +112,7 @@ public class BusyHandlerTest {
     }
 
     @Test
+    @Ignore("This test is very flaky; disabling it for now")
     public void testUnregister() throws Exception {
         final int[] calls = {0};
         BusyHandler.setHandler(conn, new BusyHandler() {

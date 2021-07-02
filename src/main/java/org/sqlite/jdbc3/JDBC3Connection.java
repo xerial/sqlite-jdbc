@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteConfig.TransactionMode;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteOpenMode;
 
@@ -22,10 +24,42 @@ public abstract class JDBC3Connection
     private final AtomicInteger savePoint = new AtomicInteger(0);
     private Map<String, Class<?>> typeMap;
 
+    private boolean readOnly = false;
+
+
     protected JDBC3Connection(String url, String fileName, Properties prop)
             throws SQLException
     {
         super(url, fileName, prop);
+
+    }
+
+    @SuppressWarnings("deprecation")
+    public void checkTransactionMode() throws SQLException {
+        // important note: read-only mode is only supported when auto-commit is disabled
+        if(this.getDatabase().getConfig().isExplicitReadOnlyEnabled() && !this.getAutoCommit() && this.getCurrentTransactionType() != null){
+            if(this.isReadOnly()){
+                // this is a read-only transaction, make sure all writing operations are rejected by the DB
+                // (note: this pragma is evaluated on a per-transaction basis by SQLite)
+                this.getDatabase()._exec("PRAGMA query_only = true;");
+            }else{
+                if(this.getCurrentTransactionType() == TransactionMode.DEFERRED || this.getCurrentTransactionType() == TransactionMode.DEFFERED){
+                    if(this.isFirstStatementWasExecuted()){
+                        // first statement was already executed; cannot upgrade to write transaction!
+                        throw new SQLException("A statement has already been executed on this connection; cannot upgrade to write transaction!");
+                    }else{
+                        // this is the first statement in the transaction; close and create an immediate one
+                        this.getDatabase()._exec("commit; /* need to explicitly upgrade transaction */");
+
+                        // start the write transaction
+                        this.getDatabase()._exec("PRAGMA query_only = false;");
+                        this.getDatabase()._exec("BEGIN IMMEDIATE; /* explicitly upgrade transaction */");
+                        this.setCurrentTransactionType(TransactionMode.IMMEDIATE);
+                    }
+                }
+
+            }
+        }
     }
 
     /**
@@ -98,24 +132,34 @@ public abstract class JDBC3Connection
     /**
      * @see java.sql.Connection#isReadOnly()
      */
-    public boolean isReadOnly()
-            throws SQLException
-    {
-        return (getDatabase().getConfig().getOpenModeFlags() & SQLiteOpenMode.READONLY.flag) != 0;
+    public boolean isReadOnly() {
+        SQLiteConfig config = getDatabase().getConfig();
+        return (
+                // the entire database is read-only
+                ((config.getOpenModeFlags() & SQLiteOpenMode.READONLY.flag) != 0)
+                // the flag was set explicitly by the user on this connection
+                || (config.isExplicitReadOnlyEnabled() && this.readOnly)
+        );
     }
 
     /**
      * @see java.sql.Connection#setReadOnly(boolean)
      */
-    public void setReadOnly(boolean ro)
-            throws SQLException
-    {
-        // trying to change read-only flag
-        if (ro != isReadOnly()) {
-            throw new SQLException(
+    public void setReadOnly(boolean ro) throws SQLException {
+        if(this.getDatabase().getConfig().isExplicitReadOnlyEnabled()){
+            if(ro != this.readOnly && this.isFirstStatementWasExecuted()){
+                throw new SQLException("Cannot change Read-Only status of this connection: the first statement was" +
+                    " already executed and the transaction is open.");
+            }
+        }else{
+            // trying to change read-only flag
+            if (ro != isReadOnly()) {
+                throw new SQLException(
                     "Cannot change read-only flag after establishing a connection." +
-                            " Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
+                        " Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
+            }
         }
+        this.readOnly = ro;
     }
 
     /**
@@ -311,6 +355,7 @@ public abstract class JDBC3Connection
         getDatabase().exec(String.format("ROLLBACK TO SAVEPOINT %s", savepoint.getSavepointName()), getAutoCommit());
     }
 
+
     // UNUSED FUNCTIONS /////////////////////////////////////////////
 
     public Struct createStruct(String t, Object[] attr)
@@ -318,4 +363,6 @@ public abstract class JDBC3Connection
     {
         throw new SQLException("unsupported by SQLite");
     }
+
+
 }
