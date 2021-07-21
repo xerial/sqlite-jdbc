@@ -22,6 +22,7 @@
 
 static jclass dbclass = 0;
 static jclass  fclass = 0;
+static jclass  cclass = 0;
 static jclass  aclass = 0;
 static jclass  wclass = 0;
 static jclass pclass = 0;
@@ -211,6 +212,10 @@ static void sethandle(JNIEnv *env, jobject this, sqlite3 * ref)
     (*env)->SetLongField(env, this, pointer, fromref(ref));
 }
 
+struct CollationData {
+    JavaVM *vm;
+    jobject func;
+};
 
 // User Defined Function SUPPORT ////////////////////////////////////
 
@@ -429,6 +434,23 @@ void xFinal(sqlite3_context *context)
     (*env)->DeleteGlobalRef(env, *func);
 }
 
+int xCompare(void* context, int len1, const void* str1, int len2, const void* str2)
+{
+    static jmethodID mth = 0;
+    JNIEnv *env;
+    struct CollationData *coll = (struct CollationData*)context;
+    (*coll->vm)->AttachCurrentThread(coll->vm, (void **)&env, 0);
+
+    if (!mth) {
+        mth = (*env)->GetMethodID(env, cclass, "xCompare", "(Ljava/lang/String;Ljava/lang/String;)I");
+    }
+
+    jstring jstr1=(*env)->NewStringUTF(env, str1);
+    jstring jstr2=(*env)->NewStringUTF(env, str2);
+
+    return (*env)->CallIntMethod(env, coll->func, mth, jstr1, jstr2);
+}
+
 
 // INITIALISATION ///////////////////////////////////////////////////
 
@@ -446,6 +468,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     fclass = (*env)->FindClass(env, "org/sqlite/Function");
     if (!fclass) return JNI_ERR;
     fclass = (*env)->NewWeakGlobalRef(env, fclass);
+
+    cclass = (*env)->FindClass(env, "org/sqlite/Collation");
+    if (!cclass) return JNI_ERR;
+    cclass = (*env)->NewWeakGlobalRef(env, cclass);
 
     aclass = (*env)->FindClass(env, "org/sqlite/Function$Aggregate");
     if (!aclass) return JNI_ERR;
@@ -477,6 +503,8 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     if (dbclass) (*env)->DeleteWeakGlobalRef(env, dbclass);
 
     if (fclass) (*env)->DeleteWeakGlobalRef(env, fclass);
+
+    if (cclass) (*env)->DeleteWeakGlobalRef(env, cclass);
 
     if (aclass) (*env)->DeleteWeakGlobalRef(env, aclass);
 
@@ -1301,6 +1329,35 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1function_1utf8(
     ret = sqlite3_create_function(
         gethandle(env, this), name_bytes, nArgs, SQLITE_UTF16, 0, 0, 0, 0
     );
+    freeUtf8Bytes(name_bytes);
+
+    return ret;
+}
+
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1collation_1utf8(
+        JNIEnv *env, jobject this, jbyteArray name, jobject func)
+{
+    jint ret = 0;
+    char *name_bytes;
+
+    struct CollationData *coll = malloc(sizeof(struct CollationData));
+
+    if (!coll) { throwex_outofmemory(env); return 0; }
+
+    coll->func = (*env)->NewGlobalRef(env, func);
+    (*env)->GetJavaVM(env, &coll->vm);
+
+    utf8JavaByteArrayToUtf8Bytes(env, name, &name_bytes, NULL);
+    if (!name_bytes) { throwex_outofmemory(env); return 0; }
+
+    ret = sqlite3_create_collation(
+            gethandle(env, this),
+            name_bytes,            // collation name
+            SQLITE_UTF16,          // preferred chars
+            coll,
+            &xCompare
+    );
+
     freeUtf8Bytes(name_bytes);
 
     return ret;
