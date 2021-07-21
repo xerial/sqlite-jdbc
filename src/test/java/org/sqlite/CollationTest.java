@@ -41,15 +41,15 @@ public class CollationTest {
             }
         });
         stat.executeUpdate("create table t (c1);");
-        stat.executeUpdate("insert into t values ('a');");
-        stat.executeUpdate("insert into t values ('b');");
-        stat.executeUpdate("insert into t values ('c');");
+        stat.executeUpdate("insert into t values ('aaa');");
+        stat.executeUpdate("insert into t values ('aba');");
+        stat.executeUpdate("insert into t values ('aca');");
         ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate REVERSE;");
         assertTrue(rs.next());
-        assertEquals(rs.getString(1), "c");
+        assertEquals(rs.getString(1), "aca");
         assertTrue(rs.next());
-        assertEquals(rs.getString(1), "b");
+        assertEquals(rs.getString(1), "aba");
         assertTrue(rs.next());
-        assertEquals(rs.getString(1), "a");
+        assertEquals(rs.getString(1), "aaa");
     }
 }
