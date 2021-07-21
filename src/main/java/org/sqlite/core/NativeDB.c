@@ -1353,7 +1353,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1collation_1utf8(
     ret = sqlite3_create_collation(
             gethandle(env, this),
             name_bytes,            // collation name
-            SQLITE_UTF16,          // preferred chars
+            SQLITE_UTF8,          // preferred chars
             coll,
             &xCompare
     );
