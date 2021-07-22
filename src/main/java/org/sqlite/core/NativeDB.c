@@ -445,8 +445,11 @@ int xCompare(void* context, int len1, const void* str1, int len2, const void* st
         mth = (*env)->GetMethodID(env, cclass, "xCompare", "(Ljava/lang/String;Ljava/lang/String;)I");
     }
 
-    jstring jstr1=(*env)->NewString(env, str1, len1);
-    jstring jstr2=(*env)->NewString(env, str2, len2);
+    // According to https://bugs.openjdk.java.net/browse/JDK-8163861 the len param of NewString
+    // expects a length in terms of code unit. Being UTF-16, code unit is 16 bytes
+    // SQLite pass the length in bytes for len1 and len2, which is usually 8 bytes
+    jstring jstr1=(*env)->NewString(env, str1, len1 / 2);
+    jstring jstr2=(*env)->NewString(env, str2, len2 / 2);
 
     return (*env)->CallIntMethod(env, coll->func, mth, jstr1, jstr2);
 }

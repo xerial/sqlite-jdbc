@@ -10,7 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Arrays;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -35,11 +38,14 @@ public class CollationTest {
 
     @Test
     public void reverseCollation() throws SQLException {
+        ArrayList<String> received = new ArrayList<>();
         Collation.create(conn, "REVERSE", new Collation() {
             @Override
             protected int xCompare(String str1, String str2) {
                 System.out.println("string 1:" + str1);
                 System.out.println("string 2:" + str2);
+                received.add(str1);
+                received.add(str2);
                 return str1.compareTo(str2) * -1;
             }
         });
@@ -54,15 +60,24 @@ public class CollationTest {
         assertEquals(rs.getString(1), "aba");
         assertTrue(rs.next());
         assertEquals(rs.getString(1), "aaa");
+
+        String[] expected = {"aba", "aca", "aaa"};
+        assertArrayEquals(
+            Arrays.stream(expected).distinct().sorted().toArray(),
+            received.stream().distinct().sorted().toArray()
+        );
     }
 
     @Test
     public void unicodeCollation() throws SQLException {
+        ArrayList<String> received = new ArrayList<>();
         Collation.create(conn, "UNICODE", new Collation() {
             @Override
             protected int xCompare(String str1, String str2) {
                 System.out.println("string 1:" + str1);
                 System.out.println("string 2:" + str2);
+                received.add(str1);
+                received.add(str2);
 
                 Collator collator = Collator.getInstance();
                 collator.setDecomposition(Collator.TERTIARY);
@@ -82,5 +97,44 @@ public class CollationTest {
         assertEquals(rs.getString(1), "aéb");
         assertTrue(rs.next());
         assertEquals(rs.getString(1), "aec");
+
+        String[] expected = {"aea", "aéb", "aec"};
+        assertArrayEquals(
+            Arrays.stream(expected).distinct().sorted().toArray(),
+            received.stream().distinct().sorted().toArray()
+        );
+    }
+
+    @Test
+    public void validateSpecialCharactersAreCorrectlyPassedToJava() throws SQLException {
+        ArrayList<String> received = new ArrayList<>();
+        Collation.create(conn, "UNICODE", new Collation() {
+            @Override
+            protected int xCompare(String str1, String str2) {
+                System.out.println("string 1:" + str1);
+                System.out.println("string 2:" + str2);
+                received.add(str1);
+                received.add(str2);
+
+                Collator collator = Collator.getInstance();
+                collator.setDecomposition(Collator.TERTIARY);
+                collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+
+                return collator.compare(str1, str2);
+            }
+        });
+        stat.executeUpdate("create table t (c1);");
+        stat.executeUpdate("insert into t values ('😀');");
+        stat.executeUpdate("insert into t values ('おはよう');");
+        stat.executeUpdate("insert into t values ('你好');");
+        stat.executeUpdate("insert into t values ('안녕하세요');");
+        ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate UNICODE;");
+
+        String[] expected = {"😀", "おはよう", "你好", "안녕하세요"};
+
+        assertArrayEquals(
+            Arrays.stream(expected).distinct().sorted().toArray(),
+            received.stream().distinct().sorted().toArray()
+        );
     }
 }
