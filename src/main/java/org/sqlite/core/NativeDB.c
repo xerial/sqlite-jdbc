@@ -445,8 +445,8 @@ int xCompare(void* context, int len1, const void* str1, int len2, const void* st
         mth = (*env)->GetMethodID(env, cclass, "xCompare", "(Ljava/lang/String;Ljava/lang/String;)I");
     }
 
-    jstring jstr1=(*env)->NewStringUTF(env, str1);
-    jstring jstr2=(*env)->NewStringUTF(env, str2);
+    jstring jstr1=(*env)->NewString(env, str1, len1);
+    jstring jstr2=(*env)->NewString(env, str2, len2);
 
     return (*env)->CallIntMethod(env, coll->func, mth, jstr1, jstr2);
 }
@@ -1353,7 +1353,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1collation_1utf8(
     ret = sqlite3_create_collation(
             gethandle(env, this),
             name_bytes,            // collation name
-            SQLITE_UTF8,          // preferred chars
+            SQLITE_UTF16,          // preferred chars
             coll,
             &xCompare
     );
