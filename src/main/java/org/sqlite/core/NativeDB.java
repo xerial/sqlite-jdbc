@@ -436,6 +436,16 @@ public final class NativeDB extends DB
     native synchronized int create_collation_utf8(byte[] nameUtf8, Collation coll);
 
     /**
+     * @see org.sqlite.core.DB#destroy_collation(String)
+     */
+    @Override
+    public synchronized int destroy_collation(String name) {
+        return destroy_collation_utf8(stringToUtf8ByteArray(name));
+    }
+
+    native synchronized int destroy_collation_utf8(byte[] nameUtf8);
+
+    /**
      * @see org.sqlite.core.DB#free_functions()
      */
     @Override

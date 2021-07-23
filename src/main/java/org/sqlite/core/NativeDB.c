@@ -1366,6 +1366,23 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1collation_1utf8(
     return ret;
 }
 
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1collation_1utf8(
+        JNIEnv *env, jobject this, jbyteArray name)
+{
+    jint ret = 0;
+    char *name_bytes;
+
+    utf8JavaByteArrayToUtf8Bytes(env, name, &name_bytes, NULL);
+    if (!name_bytes) { throwex_outofmemory(env); return 0; }
+
+    ret = sqlite3_create_collation(
+            gethandle(env, this), name_bytes, SQLITE_UTF16, 0, 0
+    );
+    freeUtf8Bytes(name_bytes);
+
+    return ret;
+}
+
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_free_1functions(
         JNIEnv *env, jobject this)
 {

@@ -24,6 +24,9 @@ public class CollationTest {
     private Connection conn;
     private Statement stat;
 
+    private static String valStr1 = "";
+    private static String valStr2 = "";
+
     @Before
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
@@ -128,7 +131,7 @@ public class CollationTest {
         stat.executeUpdate("insert into t values ('おはよう');");
         stat.executeUpdate("insert into t values ('你好');");
         stat.executeUpdate("insert into t values ('안녕하세요');");
-        ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate UNICODE;");
+        stat.executeQuery("select c1 from t order by c1 collate UNICODE;");
 
         String[] expected = {"😀", "おはよう", "你好", "안녕하세요"};
 
@@ -136,5 +139,27 @@ public class CollationTest {
             Arrays.stream(expected).distinct().sorted().toArray(),
             received.stream().distinct().sorted().toArray()
         );
+    }
+
+    @Test
+    public void destroy() throws SQLException {
+        Collation.create(conn, "c1", new Collation() {
+            @Override
+            protected int xCompare(String str1, String str2) {
+                valStr1 = str1;
+                valStr2 = str2;
+                return str1.compareTo(str2) * -1;
+            }
+        });
+        stat.executeUpdate("create table t (c1);");
+        stat.executeUpdate("insert into t values ('a');");
+        stat.executeUpdate("insert into t values ('b');");
+        stat.executeQuery("select c1 from t order by c1 collate c1;");
+
+        assertEquals(valStr1, "a");
+        assertEquals(valStr2, "b");
+
+        Collation.destroy(conn, "c1");
+        Collation.destroy(conn, "c1");
     }
 }

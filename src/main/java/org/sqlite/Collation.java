@@ -75,6 +75,20 @@ public abstract class Collation
         }
     }
 
+    /**
+     * Removes a named collation from the given connection.
+     * @param conn The connection to remove the collation from.
+     * @param name The name of the collation.
+     * @throws SQLException
+     */
+    public static final void destroy(Connection conn, String name)
+        throws SQLException {
+        if (conn == null || !(conn instanceof SQLiteConnection)) {
+            throw new SQLException("connection must be to an SQLite db");
+        }
+        ((SQLiteConnection)conn).getDatabase().destroy_collation(name);
+    }
+
 
     /**
      * Called by SQLite as a custom collation to compare two strings.
