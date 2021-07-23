@@ -446,8 +446,8 @@ int xCompare(void* context, int len1, const void* str1, int len2, const void* st
     }
 
     // According to https://bugs.openjdk.java.net/browse/JDK-8163861 the len param of NewString
-    // expects a length in terms of code unit. Being UTF-16, code unit is 16 bytes
-    // SQLite pass the length in bytes for len1 and len2, which is usually 8 bytes
+    // expects a length in terms of code unit. Being UTF-16, code unit is 16 bits
+    // SQLite pass the length in bytes for len1 and len2, which is 8 bits
     jstring jstr1=(*env)->NewString(env, str1, len1 / 2);
     jstring jstr2=(*env)->NewString(env, str2, len2 / 2);
 
