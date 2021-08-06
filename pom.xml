@@ -51,6 +51,12 @@
       </resource>
       <resource>
         <directory>src/main/resources</directory>
+        <includes>
+          <include>META-INF/native-image/**</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
         <targetPath>META-INF/services</targetPath>
         <includes>
           <include>java.sql.Driver</include>
