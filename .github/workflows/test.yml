@@ -12,7 +12,6 @@ on:
   push:
     branches:
       - master
-      - github-actions
     paths:
       - '**.java'
       - '**.xml'
