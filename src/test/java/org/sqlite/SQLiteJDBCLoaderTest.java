@@ -181,31 +181,29 @@ public class SQLiteJDBCLoaderTest
         // Create a JAR file out the classes and resources
         File jarFile = File.createTempFile("jar-for-test-", ".jar");
         createJar(classesDir, classesDirPrefix, jarFile);
-        URL[] jarUrl = new URL[] { new URL("file://" + jarFile.getAbsolutePath()) };
+        URL[] jarUrl = new URL[] { jarFile.toPath().toUri().toURL() };
 
         final AtomicInteger completedThreads = new AtomicInteger(0);
         ExecutorService pool = Executors.newFixedThreadPool(4);
         for (int i = 0; i < 4; i++) {
             final int sleepMillis = i;
-            pool.execute(new Runnable() {
-                public void run() {
-                    try {
-                        Thread.sleep(sleepMillis * 10);
-                        // Create an isolated class loader, it should load *different* instances
-                        // of SQLiteJDBCLoader.class
-                        URLClassLoader classLoader = new URLClassLoader(
-                                jarUrl, ClassLoader.getSystemClassLoader().getParent());
-                        Class<?> clazz =
-                                classLoader.loadClass("org.sqlite.SQLiteJDBCLoader");
-                        Method initMethod = clazz.getDeclaredMethod("initialize");
-                        initMethod.invoke(null);
-                        classLoader.close();
-                    } catch (Throwable e) {
-                        e.printStackTrace();
-                        Assert.fail(e.getLocalizedMessage());
-                    }
-                    completedThreads.incrementAndGet();
+            pool.execute(() -> {
+                try {
+                    Thread.sleep(sleepMillis * 10);
+                    // Create an isolated class loader, it should load *different* instances
+                    // of SQLiteJDBCLoader.class
+                    URLClassLoader classLoader = new URLClassLoader(
+                            jarUrl, ClassLoader.getSystemClassLoader().getParent());
+                    Class<?> clazz =
+                            classLoader.loadClass("org.sqlite.SQLiteJDBCLoader");
+                    Method initMethod = clazz.getDeclaredMethod("initialize");
+                    initMethod.invoke(null);
+                    classLoader.close();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    Assert.fail(e.getLocalizedMessage());
                 }
+                completedThreads.incrementAndGet();
             });
         }
         pool.shutdown();
