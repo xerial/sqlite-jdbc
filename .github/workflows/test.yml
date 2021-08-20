@@ -23,7 +23,7 @@ on:
 
 jobs:
   test_ubuntu:
-    name: test Ubuntu jdk${{ matrix.java }}
+    name: test jdk${{ matrix.java }} ${{ matrix.os }}
     strategy:
       matrix:
         java: [8, 11, 16]
