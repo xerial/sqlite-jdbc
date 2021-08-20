@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -163,11 +164,10 @@ public class SQLiteJDBCLoaderTest
         String[] stringUrls = System.getProperty("java.class.path")
                 .split(System.getProperty("path.separator"));
         // Find the classes under test.
-        String targetFolderName = "sqlite-jdbc/target/classes";
+        String targetFolderName = Paths.get("sqlite-jdbc","target","classes").toString();
         File classesDir = null;
         String classesDirPrefix = null;
         for (String stringUrl : stringUrls) {
-            System.out.println(stringUrl);
             int indexOf = stringUrl.indexOf(targetFolderName);
             if (indexOf != -1) {
                 classesDir = new File(stringUrl);
