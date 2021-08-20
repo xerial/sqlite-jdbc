@@ -40,3 +40,41 @@ jobs:
           restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
       - name: Test
         run: mvn test
+
+  test_windows:
+    name: test Windows jdk${{ matrix.java }}
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        java: [8, 11, 16]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
+          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
+      - name: Test
+        run: mvn test
+
+  test_mac:
+    name: test Mac jdk${{ matrix.java }}
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        java: [8, 11, 16]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
+          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
+      - name: Test
+        run: mvn test
