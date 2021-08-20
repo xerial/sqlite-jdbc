@@ -167,6 +167,7 @@ public class SQLiteJDBCLoaderTest
         File classesDir = null;
         String classesDirPrefix = null;
         for (String stringUrl : stringUrls) {
+            System.out.println(stringUrl);
             int indexOf = stringUrl.indexOf(targetFolderName);
             if (indexOf != -1) {
                 classesDir = new File(stringUrl);
