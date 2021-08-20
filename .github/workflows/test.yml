@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - master
+      - github-actions
     paths:
       - '**.java'
       - '**.xml'
@@ -21,48 +22,21 @@ on:
       - '.github/workflows/*.yml'
 
 jobs:
-  test:
-    name: test jdk11
+  test_ubuntu:
+    name: test Ubuntu jdk${{ matrix.java }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [8, 11, 16]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: ${{ matrix.java }}
       - uses: actions/cache@v1
         with:
           path: ~/.cache
-          key: ${{ runner.os }}-jdk11-${{ hashFiles('**/*.sbt') }}
-          restore-keys: ${{ runner.os }}-jdk11-
-      - name: Test
-        run: mvn test
-  test_jdk8:
-    name: test jdk8
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 8
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-jdk8-${{ hashFiles('**/*.sbt') }}
-          restore-keys: ${{ runner.os }}-jdk8-
-      - name: Test
-        run: mvn test
-  test_jdk16:
-    name: test jdk16
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 16
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-jdk8-${{ hashFiles('**/*.sbt') }}
-          restore-keys: ${{ runner.os }}-jdk8-
+          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
+          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
       - name: Test
         run: mvn test
