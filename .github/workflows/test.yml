@@ -22,7 +22,7 @@ on:
       - '.github/workflows/*.yml'
 
 jobs:
-  test_ubuntu:
+  test:
     name: test ${{ matrix.os }} jdk${{ matrix.java }}
     strategy:
       matrix:
