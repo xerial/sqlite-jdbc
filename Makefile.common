@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 Mac-aarch64 DragonFly-x86_64 FreeBSD-x86 FreeBSD-x86_64 FreeBSD-aarch64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 SunOS-sparcv9 HPUX-ia64_32
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 Mac-aarch64 DragonFly-x86_64 FreeBSD-x86 FreeBSD-x86_64 FreeBSD-aarch64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 Windows-armv7 Windows-aarch64 SunOS-sparcv9 HPUX-ia64_32
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -203,7 +203,21 @@ Windows-x86_64_STRIP        := $(CROSS_PREFIX)strip
 Windows-x86_64_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -Os
 Windows-x86_64_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
 Windows-x86_64_LIBNAME      := sqlitejdbc.dll
-Windows-x86_64_SQLITE_FLAGS := 
+Windows-x86_64_SQLITE_FLAGS :=
+
+Windows-armv7_CC           := $(CROSS_PREFIX)clang
+Windows-armv7_STRIP        := $(CROSS_PREFIX)strip
+Windows-armv7_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -Os
+Windows-armv7_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
+Windows-armv7_LIBNAME      := sqlitejdbc.dll
+Windows-armv7_SQLITE_FLAGS :=
+
+Windows-aarch64_CC           := $(CROSS_PREFIX)clang
+Windows-aarch64_STRIP        := $(CROSS_PREFIX)strip
+Windows-aarch64_CCFLAGS      := -D_JNI_IMPLEMENTATION_ -Ilib/inc_win -Os
+Windows-aarch64_LINKFLAGS    := -Wl,--kill-at -shared -static-libgcc
+Windows-aarch64_LIBNAME      := sqlitejdbc.dll
+Windows-aarch64_SQLITE_FLAGS :=
 
 
 CC        := $($(target)_CC)
