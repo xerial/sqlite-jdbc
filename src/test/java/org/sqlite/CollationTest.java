@@ -109,6 +109,51 @@ public class CollationTest {
     }
 
     @Test
+    public void twoCollationsNoConflict() throws SQLException {
+        Collation.create(conn, "REVERSE", new Collation() {
+            @Override
+            protected int xCompare(String str1, String str2) {
+                return str1.compareTo(str2) * -1;
+            }
+        });
+        Collation.create(conn, "NORMAL", new Collation() {
+            @Override
+            protected int xCompare(String str1, String str2) {
+                return str1.compareTo(str2);
+            }
+        });
+
+        stat.executeUpdate("create table t (c1);");
+        stat.executeUpdate("insert into t values ('a');");
+        stat.executeUpdate("insert into t values ('b');");
+        stat.executeUpdate("insert into t values ('c');");
+
+        ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate REVERSE;");
+        assertTrue(rs.next());
+        assertEquals(rs.getString(1), "c");
+        assertTrue(rs.next());
+        assertEquals(rs.getString(1), "b");
+        assertTrue(rs.next());
+        assertEquals(rs.getString(1), "a");
+
+        ResultSet rs2 = stat.executeQuery("select c1 from t order by c1 collate NORMAL;");
+        assertTrue(rs2.next());
+        assertEquals(rs2.getString(1), "a");
+        assertTrue(rs2.next());
+        assertEquals(rs2.getString(1), "b");
+        assertTrue(rs2.next());
+        assertEquals(rs2.getString(1), "c");
+
+        ResultSet rs3 = stat.executeQuery("select c1 from t order by c1 collate REVERSE;");
+        assertTrue(rs3.next());
+        assertEquals(rs3.getString(1), "c");
+        assertTrue(rs3.next());
+        assertEquals(rs3.getString(1), "b");
+        assertTrue(rs3.next());
+        assertEquals(rs3.getString(1), "a");
+    }
+
+    @Test
     public void validateSpecialCharactersAreCorrectlyPassedToJava() throws SQLException {
         ArrayList<String> received = new ArrayList<>();
         Collation.create(conn, "UNICODE", new Collation() {
