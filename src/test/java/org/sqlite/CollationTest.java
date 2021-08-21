@@ -45,8 +45,6 @@ public class CollationTest {
         Collation.create(conn, "REVERSE", new Collation() {
             @Override
             protected int xCompare(String str1, String str2) {
-                System.out.println("string 1:" + str1);
-                System.out.println("string 2:" + str2);
                 received.add(str1);
                 received.add(str2);
                 return str1.compareTo(str2) * -1;
@@ -77,8 +75,6 @@ public class CollationTest {
         Collation.create(conn, "UNICODE", new Collation() {
             @Override
             protected int xCompare(String str1, String str2) {
-                System.out.println("string 1:" + str1);
-                System.out.println("string 2:" + str2);
                 received.add(str1);
                 received.add(str2);
 
@@ -159,8 +155,6 @@ public class CollationTest {
         Collation.create(conn, "UNICODE", new Collation() {
             @Override
             protected int xCompare(String str1, String str2) {
-                System.out.println("string 1:" + str1);
-                System.out.println("string 2:" + str2);
                 received.add(str1);
                 received.add(str2);
 
