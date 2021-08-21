@@ -215,6 +215,7 @@ static void sethandle(JNIEnv *env, jobject this, sqlite3 * ref)
 struct CollationData {
     JavaVM *vm;
     jobject func;
+    struct CollationData *next;  // linked list of all CollationData instances
 };
 
 // User Defined Function SUPPORT ////////////////////////////////////
@@ -1343,12 +1344,20 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1collation_1utf8(
     jint ret = 0;
     char *name_bytes;
 
+    static jfieldID colldatalist = 0;
     struct CollationData *coll = malloc(sizeof(struct CollationData));
 
     if (!coll) { throwex_outofmemory(env); return 0; }
 
+    if (!colldatalist)
+        colldatalist = (*env)->GetFieldID(env, dbclass, "colldatalist", "J");
+
     coll->func = (*env)->NewGlobalRef(env, func);
     (*env)->GetJavaVM(env, &coll->vm);
+
+    // add new function def to linked list
+    coll->next = toref((*env)->GetLongField(env, this, colldatalist));
+    (*env)->SetLongField(env, this, colldatalist, fromref(coll));
 
     utf8JavaByteArrayToUtf8Bytes(env, name, &name_bytes, NULL);
     if (!name_bytes) { throwex_outofmemory(env); return 0; }
@@ -1400,6 +1409,22 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_free_1functions(
         (*env)->DeleteGlobalRef(env, udf->func);
         free(udf);
         udf = udfpass;
+    }
+
+    // clean up all the malloc()ed CollationData instances using the
+    // linked list stored in DB.colldatalist
+    jfieldID colldatalist;
+    struct CollationData *coll, *collpass;
+
+    colldatalist = (*env)->GetFieldID(env, dbclass, "colldatalist", "J");
+    coll = toref((*env)->GetLongField(env, this, colldatalist));
+    (*env)->SetLongField(env, this, colldatalist, 0);
+
+    while (coll) {
+        collpass = coll->next;
+        (*env)->DeleteGlobalRef(env, coll->func);
+        free(coll);
+        coll = collpass;
     }
 }
 

@@ -68,6 +68,9 @@ public final class NativeDB extends DB
     /** linked list of all instanced UDFDatas */
     private final long udfdatalist = 0;
 
+    /** linked list of all instanced CollationData */
+    private final long colldatalist = 0;
+
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
     /**
