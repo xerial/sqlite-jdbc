@@ -47,9 +47,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-#        os: [ubuntu-latest, windows-latest, macos-latest]
         arch: [armv6, armv7, aarch64]
-        distro: [alpine_latest, buster]
+        distro: [buster, bullseye]
 #        java: [8, 11, 16]
     runs-on: ubuntu-latest
     steps:
