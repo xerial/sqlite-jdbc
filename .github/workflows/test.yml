@@ -74,10 +74,12 @@ jobs:
               ubuntu*|jessie|stretch|buster|bullseye)
                 apt-get update -q -y
                 apt-get install -q -y maven
+                adduser --disabled-password --gecos "" runner
                 ;;
               alpine*)
                 apk update
                 apk add maven
+                adduser --disabled-password --gecos "" runner
                 ;;
             esac
 
