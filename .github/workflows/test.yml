@@ -49,7 +49,7 @@ jobs:
       matrix:
         arch: [ armv7, aarch64 ]
         distro: [ ubuntu20.04 ]
-        java: [ 8, 11, 16 ]
+        java: [ 16 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -70,7 +70,7 @@ jobs:
           # no secrets are present in the container state or logs.
           install: |
             apt-get update -q -y
-            apt-get install -q -y openjdk-${{ matrix.java }}-jdk wget
+            apt-get install -q -y openjdk-${{ matrix.java }}-jdk wget ca-certificates
             export VER="3.8.2"
             wget https://downloads.apache.org/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
             tar xvf apache-maven-${VER}-bin.tar.gz
