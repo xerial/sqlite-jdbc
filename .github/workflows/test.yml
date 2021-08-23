@@ -54,6 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: whoami
+        run: id `whoami`
       - uses: uraimo/run-on-arch-action@v2.1.1
         name: Test
         with:
