@@ -88,5 +88,5 @@ jobs:
             which mvn
             which java
             java -version
-            mvn --version
+            mvn -X --version
             cd /work && mvn test
