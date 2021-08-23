@@ -85,5 +85,8 @@ jobs:
 
           run: |
             echo "Architecture: `uname -a`"
+            which mvn
+            which java
+            java -version
             mvn --version
             cd /work && mvn test
