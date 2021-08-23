@@ -89,4 +89,6 @@ jobs:
 
           run: |
             uname -a
+            whoami
+            ls -al /work
             cd /work && mvn test
