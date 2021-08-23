@@ -72,12 +72,10 @@ jobs:
             apt-get update -q -y
             apt-get install -q -y curl ca-certificates
             VER="3.8.2"
-            curl -O -L https://downloads.apache.org/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
-            tar xvf apache-maven-${VER}-bin.tar.gz
+            curl -s -O -L https://downloads.apache.org/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
+            tar xf apache-maven-${VER}-bin.tar.gz
             mv apache-maven-${VER} /opt/maven
-            export MAVEN_HOME=/opt/maven
-            export PATH=${PATH}:${MAVEN_HOME}/bin
-
+            ln -s /opt/maven/bin/mvn /usr/local/bin/mvn
 
           # We use the Github Action user, 1001:121, so that maven can access
           # the /work directory and create target/classes
