@@ -164,7 +164,7 @@ public class SQLiteJDBCLoaderTest
         String[] stringUrls = System.getProperty("java.class.path")
                 .split(System.getProperty("path.separator"));
         // Find the classes under test.
-        String targetFolderName = Paths.get("sqlite-jdbc","target","classes").toString();
+        String targetFolderName = Paths.get("").toAbsolutePath().resolve(Paths.get("target","classes")).toString();
         File classesDir = null;
         String classesDirPrefix = null;
         for (String stringUrl : stringUrls) {
