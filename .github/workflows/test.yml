@@ -22,39 +22,37 @@ on:
       - '.github/workflows/*.yml'
 
 jobs:
-#  test:
-#    name: test ${{ matrix.os }} jdk${{ matrix.java }}
-#    strategy:
-#      matrix:
-#        os: [ubuntu-latest, windows-latest, macos-latest]
-#        java: [8, 11, 16]
-#    runs-on: ${{ matrix.os }}
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: actions/setup-java@v1
-#        with:
-#          java-version: ${{ matrix.java }}
-#      - uses: actions/cache@v1
-#        with:
-#          path: ~/.cache
-#          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
-#          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
-#      - name: Test
-#        run: mvn test
+  #  test:
+  #    name: test ${{ matrix.os }} jdk${{ matrix.java }}
+  #    strategy:
+  #      matrix:
+  #        os: [ubuntu-latest, windows-latest, macos-latest]
+  #        java: [8, 11, 16]
+  #    runs-on: ${{ matrix.os }}
+  #    steps:
+  #      - uses: actions/checkout@v2
+  #      - uses: actions/setup-java@v1
+  #        with:
+  #          java-version: ${{ matrix.java }}
+  #      - uses: actions/cache@v1
+  #        with:
+  #          path: ~/.cache
+  #          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
+  #          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
+  #      - name: Test
+  #        run: mvn test
 
   test_multiarch:
-    name: test ${{ matrix.arch }} ${{ matrix.distro }}
+    name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
     strategy:
       fail-fast: false
       matrix:
-        arch: [armv6, armv7, aarch64]
-        distro: [buster, bullseye]
-#        java: [8, 11, 16]
+        arch: [ armv7, aarch64 ]
+        distro: [ buster, bullseye ]
+        java: [ 11, 17 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: whoami
-        run: id `whoami`
       - uses: uraimo/run-on-arch-action@v2.1.1
         name: Test
         with:
@@ -71,22 +69,15 @@ jobs:
           # publicly in your project's package repository, so it is vital that
           # no secrets are present in the container state or logs.
           install: |
-            case "${{ matrix.distro }}" in
-              ubuntu*|jessie|stretch|buster|bullseye)
-                apt-get update -q -y
-                apt-get install -q -y maven openjdk-11-jdk
-                ;;
-              alpine*)
-                apk update
-                apk add maven
-                ;;
-            esac
+            apt-get update -q -y
+            apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
 
           dockerRunArgs: |
             --volume "${PWD}:/work"
             --user 1001:121
 
           run: |
-            uname -a
-            ls -al /work
+            echo "Architecture: `uname -a`"
+            echo "Java version: `java -version`"
+            echo "Java home: $JAVA_HOME"
             cd /work && mvn test
