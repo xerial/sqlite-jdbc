@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - master
+      - '*'
     paths:
       - '**.java'
       - '**.xml'
@@ -21,22 +22,68 @@ on:
       - '.github/workflows/*.yml'
 
 jobs:
-  test:
-    name: test ${{ matrix.os }} jdk${{ matrix.java }}
+#  test:
+#    name: test ${{ matrix.os }} jdk${{ matrix.java }}
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest, windows-latest, macos-latest]
+#        java: [8, 11, 16]
+#    runs-on: ${{ matrix.os }}
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-java@v1
+#        with:
+#          java-version: ${{ matrix.java }}
+#      - uses: actions/cache@v1
+#        with:
+#          path: ~/.cache
+#          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
+#          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
+#      - name: Test
+#        run: mvn test
+
+  test_multiarch:
+    name: test ${{ matrix.arch }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        java: [8, 11, 16]
-    runs-on: ${{ matrix.os }}
+#        os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: [armv6, armv7, aarch64]
+        distro: [alpine_latest, buster]
+#        java: [8, 11, 16]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: uraimo/run-on-arch-action@v2.0.5
+        name: Test
         with:
-          java-version: ${{ matrix.java }}
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
-          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
-      - name: Test
-        run: mvn test
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -q -y
+                apt-get install -q -y maven
+                ;;
+              alpine*)
+                apk update
+                apk add maven
+                ;;
+            esac
+
+          dockerRunArgs: |
+            --volume "${( github.workspace }}:/work"
+
+          run: |
+            uname -a
+            cd /work && mvn test
