@@ -72,7 +72,7 @@ jobs:
             apt-get update -q -y
             apt-get install -q -y openjdk-${{ matrix.java }}-jdk wget
             export VER="3.8.2"
-            wget http://www-eu.apache.org/dist/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
+            wget https://downloads.apache.org/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
             tar xvf apache-maven-${VER}-bin.tar.gz
             mv apache-maven-${VER} /opt/maven
             export MAVEN_HOME=/opt/maven
