@@ -49,7 +49,7 @@ jobs:
       matrix:
         arch: [ armv7, aarch64 ]
         distro: [ ubuntu20.04 ]
-        java: [ 16 ]
+        java: [ 8, 11 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -70,12 +70,7 @@ jobs:
           # no secrets are present in the container state or logs.
           install: |
             apt-get update -q -y
-            apt-get install -q -y curl ca-certificates openjdk-${{ matrix.java }}-jdk
-            VER="3.8.2"
-            curl -s -O -L https://downloads.apache.org/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
-            tar xf apache-maven-${VER}-bin.tar.gz
-            mv apache-maven-${VER} /opt/maven
-            ln -s /opt/maven/bin/mvn /usr/local/bin/mvn
+            apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
 
           # We use the Github Action user, 1001:121, so that maven can access
           # the /work directory and create target/classes
@@ -85,8 +80,5 @@ jobs:
 
           run: |
             echo "Architecture: `uname -a`"
-            which mvn
-            which java
-            java -version
-            mvn -X --version
+            mvn --version
             cd /work && mvn test
