@@ -70,7 +70,7 @@ jobs:
           # no secrets are present in the container state or logs.
           install: |
             apt-get update -q -y
-            apt-get install -q -y openjdk-${{ matrix.java }}-jdk ca-certificates
+            apt-get install -q -y curl ca-certificates
             VER="3.8.2"
             curl -O -L https://downloads.apache.org/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
             tar xvf apache-maven-${VER}-bin.tar.gz
