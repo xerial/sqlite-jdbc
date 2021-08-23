@@ -48,7 +48,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [ armv7, aarch64 ]
-        distro: [ buster, bullseye ]
+        distro: [ bullseye ]
         java: [ 11, 17 ]
     runs-on: ubuntu-latest
     steps:
