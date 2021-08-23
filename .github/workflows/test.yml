@@ -70,13 +70,13 @@ jobs:
           # no secrets are present in the container state or logs.
           install: |
             apt-get update -q -y
-            apt-get install -q -y openjdk-${{ matrix.java }}-jdk
+            apt-get install -q -y openjdk-${{ matrix.java }}-jdk wget
             export VER="3.8.2"
             wget http://www-eu.apache.org/dist/maven/maven-3/${VER}/binaries/apache-maven-${VER}-bin.tar.gz
             tar xvf apache-maven-${VER}-bin.tar.gz
             mv apache-maven-${VER} /opt/maven
             export MAVEN_HOME=/opt/maven
-            export PATH={$PATH}:${MAVEN_HOME}/bin
+            export PATH=${PATH}:${MAVEN_HOME}/bin
 
 
           # We use the Github Action user, 1001:121, so that maven can access
