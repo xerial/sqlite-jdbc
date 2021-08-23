@@ -43,7 +43,7 @@ jobs:
 #        run: mvn test
 
   test_multiarch:
-    name: test ${{ matrix.arch }}
+    name: test ${{ matrix.arch }} ${{ matrix.distro }}
     strategy:
       fail-fast: false
       matrix:
@@ -82,7 +82,7 @@ jobs:
             esac
 
           dockerRunArgs: |
-            --volume "${( github.workspace }}:/work"
+            --volume "${PWD}:/work"
 
           run: |
             uname -a
