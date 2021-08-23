@@ -48,8 +48,8 @@ jobs:
       fail-fast: false
       matrix:
         arch: [ armv7, aarch64 ]
-        distro: [ bullseye ]
-        java: [ 11, 17 ]
+        distro: [ ubuntu20.04 ]
+        java: [ 8, 11, 16 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -72,6 +72,8 @@ jobs:
             apt-get update -q -y
             apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
 
+          # We use the Github Action user, 1001:121, so that maven can access
+          # the /work directory and create target/classes
           dockerRunArgs: |
             --volume "${PWD}:/work"
             --user 1001:121
