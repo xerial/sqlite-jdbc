@@ -48,7 +48,7 @@ jobs:
       fail-fast: false
       matrix:
         # armv6 cannot install the JDK properly via apt-get on Debian
-        arch: [ armv7, aarch64 ]
+        arch: [ armv7, aarch64, ppc64le ]
         # no point adding Alpine, as we only have x86_64 binaries for it
         distro: [ ubuntu20.04 ]
         # cannot add Java 16, maven installed by apt-get is 3.6.x and does not support Java 16
