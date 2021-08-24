@@ -12,7 +12,7 @@ on:
   push:
     branches:
       - master
-      - 'ci-multibranch'
+      - 'ci-multiarch'
     paths:
       - '**.java'
       - '**.xml'
@@ -56,11 +56,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: uraimo/run-on-arch-action@v2.1.1
+      - uses: gotson/run-on-arch-action@cachetag
         name: Test
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
+          cacheTag: jdk${{ matrix.java }}
 
           # Not required, but speeds up builds
           githubToken: ${{ github.token }}
