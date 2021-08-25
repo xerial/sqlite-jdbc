@@ -68,6 +68,9 @@ public final class NativeDB extends DB
     /** linked list of all instanced UDFDatas */
     private final long udfdatalist = 0;
 
+    /** linked list of all instanced CollationData */
+    private final long colldatalist = 0;
+
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
     /**
@@ -424,6 +427,26 @@ public final class NativeDB extends DB
     }
 
     native synchronized int destroy_function_utf8(byte[] nameUtf8, int nArgs);
+
+    /**
+     * @see org.sqlite.core.DB#create_collation(String, Collation)
+     */
+    @Override
+    public synchronized int create_collation(String name, Collation coll) {
+        return create_collation_utf8(stringToUtf8ByteArray(name), coll);
+    }
+
+    native synchronized int create_collation_utf8(byte[] nameUtf8, Collation coll);
+
+    /**
+     * @see org.sqlite.core.DB#destroy_collation(String)
+     */
+    @Override
+    public synchronized int destroy_collation(String name) {
+        return destroy_collation_utf8(stringToUtf8ByteArray(name));
+    }
+
+    native synchronized int destroy_collation_utf8(byte[] nameUtf8);
 
     /**
      * @see org.sqlite.core.DB#free_functions()

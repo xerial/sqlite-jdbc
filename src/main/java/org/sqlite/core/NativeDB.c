@@ -22,6 +22,7 @@
 
 static jclass dbclass = 0;
 static jclass  fclass = 0;
+static jclass  cclass = 0;
 static jclass  aclass = 0;
 static jclass  wclass = 0;
 static jclass pclass = 0;
@@ -211,6 +212,11 @@ static void sethandle(JNIEnv *env, jobject this, sqlite3 * ref)
     (*env)->SetLongField(env, this, pointer, fromref(ref));
 }
 
+struct CollationData {
+    JavaVM *vm;
+    jobject func;
+    struct CollationData *next;  // linked list of all CollationData instances
+};
 
 // User Defined Function SUPPORT ////////////////////////////////////
 
@@ -429,6 +435,26 @@ void xFinal(sqlite3_context *context)
     (*env)->DeleteGlobalRef(env, *func);
 }
 
+int xCompare(void* context, int len1, const void* str1, int len2, const void* str2)
+{
+    static jmethodID mth = 0;
+    JNIEnv *env;
+    struct CollationData *coll = (struct CollationData*)context;
+    (*coll->vm)->AttachCurrentThread(coll->vm, (void **)&env, 0);
+
+    if (!mth) {
+        mth = (*env)->GetMethodID(env, cclass, "xCompare", "(Ljava/lang/String;Ljava/lang/String;)I");
+    }
+
+    // According to https://bugs.openjdk.java.net/browse/JDK-8163861 the len param of NewString
+    // expects a length in terms of code unit. Being UTF-16, code unit is 16 bits
+    // SQLite pass the length in bytes for len1 and len2, which is 8 bits
+    jstring jstr1=(*env)->NewString(env, str1, len1 / 2);
+    jstring jstr2=(*env)->NewString(env, str2, len2 / 2);
+
+    return (*env)->CallIntMethod(env, coll->func, mth, jstr1, jstr2);
+}
+
 
 // INITIALISATION ///////////////////////////////////////////////////
 
@@ -446,6 +472,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     fclass = (*env)->FindClass(env, "org/sqlite/Function");
     if (!fclass) return JNI_ERR;
     fclass = (*env)->NewWeakGlobalRef(env, fclass);
+
+    cclass = (*env)->FindClass(env, "org/sqlite/Collation");
+    if (!cclass) return JNI_ERR;
+    cclass = (*env)->NewWeakGlobalRef(env, cclass);
 
     aclass = (*env)->FindClass(env, "org/sqlite/Function$Aggregate");
     if (!aclass) return JNI_ERR;
@@ -477,6 +507,8 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     if (dbclass) (*env)->DeleteWeakGlobalRef(env, dbclass);
 
     if (fclass) (*env)->DeleteWeakGlobalRef(env, fclass);
+
+    if (cclass) (*env)->DeleteWeakGlobalRef(env, cclass);
 
     if (aclass) (*env)->DeleteWeakGlobalRef(env, aclass);
 
@@ -1306,6 +1338,60 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1function_1utf8(
     return ret;
 }
 
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_create_1collation_1utf8(
+        JNIEnv *env, jobject this, jbyteArray name, jobject func)
+{
+    jint ret = 0;
+    char *name_bytes;
+
+    static jfieldID colldatalist = 0;
+    struct CollationData *coll = malloc(sizeof(struct CollationData));
+
+    if (!coll) { throwex_outofmemory(env); return 0; }
+
+    if (!colldatalist)
+        colldatalist = (*env)->GetFieldID(env, dbclass, "colldatalist", "J");
+
+    coll->func = (*env)->NewGlobalRef(env, func);
+    (*env)->GetJavaVM(env, &coll->vm);
+
+    // add new function def to linked list
+    coll->next = toref((*env)->GetLongField(env, this, colldatalist));
+    (*env)->SetLongField(env, this, colldatalist, fromref(coll));
+
+    utf8JavaByteArrayToUtf8Bytes(env, name, &name_bytes, NULL);
+    if (!name_bytes) { throwex_outofmemory(env); return 0; }
+
+    ret = sqlite3_create_collation(
+            gethandle(env, this),
+            name_bytes,            // collation name
+            SQLITE_UTF16,          // preferred chars
+            coll,
+            &xCompare
+    );
+
+    freeUtf8Bytes(name_bytes);
+
+    return ret;
+}
+
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_destroy_1collation_1utf8(
+        JNIEnv *env, jobject this, jbyteArray name)
+{
+    jint ret = 0;
+    char *name_bytes;
+
+    utf8JavaByteArrayToUtf8Bytes(env, name, &name_bytes, NULL);
+    if (!name_bytes) { throwex_outofmemory(env); return 0; }
+
+    ret = sqlite3_create_collation(
+            gethandle(env, this), name_bytes, SQLITE_UTF16, 0, 0
+    );
+    freeUtf8Bytes(name_bytes);
+
+    return ret;
+}
+
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_free_1functions(
         JNIEnv *env, jobject this)
 {
@@ -1323,6 +1409,22 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_free_1functions(
         (*env)->DeleteGlobalRef(env, udf->func);
         free(udf);
         udf = udfpass;
+    }
+
+    // clean up all the malloc()ed CollationData instances using the
+    // linked list stored in DB.colldatalist
+    jfieldID colldatalist;
+    struct CollationData *coll, *collpass;
+
+    colldatalist = (*env)->GetFieldID(env, dbclass, "colldatalist", "J");
+    coll = toref((*env)->GetLongField(env, this, colldatalist));
+    (*env)->SetLongField(env, this, colldatalist, 0);
+
+    while (coll) {
+        collpass = coll->next;
+        (*env)->DeleteGlobalRef(env, coll->func);
+        free(coll);
+        coll = collpass;
     }
 }
 

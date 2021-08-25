@@ -663,6 +663,24 @@ public abstract class DB implements Codes
     public abstract int destroy_function(String name, int nArgs) throws SQLException;
 
     /**
+     * Create a user defined collation with given collation name and the collation object.
+     * @param name The collation name to be created.
+     * @param c SQLite collation object.
+     * @return <a href="https://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
+     * @throws SQLException
+     * @see <a href="https://www.sqlite.org/c3ref/create_collation.html">https://www.sqlite.org/c3ref/create_collation.html</a>
+     */
+    public abstract int create_collation(String name, Collation c) throws SQLException;
+
+    /**
+     * Create a user defined collation with given collation name and the collation object.
+     * @param name The collation name to be created.
+     * @return <a href="https://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
+     * @throws SQLException
+     */
+    public abstract int destroy_collation(String name) throws SQLException;
+
+    /**
      * Unused as we use the user_data pointer to store a single word.
      * @throws SQLException
      */
