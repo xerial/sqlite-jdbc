@@ -27,6 +27,13 @@
         "methods":[{"name":"<init>","parameterTypes":[] }]
     },
     {
+        "name":"org.sqlite.Collation",
+        "allDeclaredMethods":true,
+        "allPublicMethods": true,
+        "allDeclaredFields":true,
+        "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
         "name":"org.sqlite.ProgressHandler",
         "allDeclaredMethods":true,
         "allPublicMethods": true,
