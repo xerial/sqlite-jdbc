@@ -220,7 +220,7 @@ public class PrepStmtTest {
         prep.setAsciiStream(2, inAscii, b2.length);
         byte[] b3 = utf08.getBytes(StandardCharsets.UTF_8);
         ByteArrayInputStream inUnicode = new ByteArrayInputStream(b3);
-        prep.setCharacterStream(3, new InputStreamReader(inUnicode), b3.length);
+        prep.setUnicodeStream(3, inUnicode, b3.length);
 
         rs = prep.executeQuery();
         assertTrue(rs.next());
