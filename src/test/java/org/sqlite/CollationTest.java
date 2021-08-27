@@ -1,8 +1,8 @@
 package org.sqlite;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,9 +13,9 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests User Defined Collations.
@@ -27,13 +27,13 @@ public class CollationTest {
     private static String valStr1 = "";
     private static String valStr2 = "";
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         stat.close();
         conn.close();

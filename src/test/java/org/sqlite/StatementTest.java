@@ -1,6 +1,11 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.sqlite.jdbc3.JDBC3Statement;
+import org.sqlite.jdbc4.JDBC4Statement;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -13,26 +18,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.sqlite.jdbc3.JDBC3Statement;
-import org.sqlite.jdbc4.JDBC4Statement;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** These tests are designed to stress Statements on memory databases. */
-public class StatementTest
-{
+/**
+ * These tests are designed to stress Statements on memory databases.
+ */
+public class StatementTest {
     private Connection conn;
-    private Statement  stat;
+    private Statement stat;
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         stat.close();
         conn.close();
@@ -51,17 +58,17 @@ public class StatementTest
         // multiple SQL statements
         assertEquals(
             stat.executeUpdate("insert into s1 values (11);" +
-                               "insert into s1 values (12)"),
+                "insert into s1 values (12)"),
             2);
         assertEquals(
             stat.executeUpdate("update s1 set c1 = 21 where c1 = 11;" +
-                               "update s1 set c1 = 22 where c1 = 12;" +
-                               "update s1 set c1 = 23 where c1 = 13"),
+                "update s1 set c1 = 22 where c1 = 12;" +
+                "update s1 set c1 = 23 where c1 = 13"),
             2); // c1 = 13 does not exist
         assertEquals(
             stat.executeUpdate("delete from s1 where c1 = 21;" +
-                               "delete from s1 where c1 = 22;" +
-                               "delete from s1 where c1 = 23"),
+                "delete from s1 where c1 = 22;" +
+                "delete from s1 where c1 = 23"),
             2); // c1 = 23 does not exist
 
         assertEquals(stat.executeUpdate("drop table s1;"), 0);
@@ -196,8 +203,9 @@ public class StatementTest
     public void insert1000() throws SQLException {
         assertEquals(stat.executeUpdate("create table in1000 (a);"), 0);
         conn.setAutoCommit(false);
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 1000; i++) {
             assertEquals(stat.executeUpdate("insert into in1000 values (" + i + ");"), 1);
+        }
         conn.commit();
 
         ResultSet rs = stat.executeQuery("select count(a) from in1000;");
@@ -212,8 +220,9 @@ public class StatementTest
         assertNotNull(a);
         assertNotNull(b);
         assertEquals(a.length, b.length);
-        for (int i = 0; i < a.length; i++)
+        for (int i = 0; i < a.length; i++) {
             assertEquals(a[i], b[i]);
+        }
     }
 
     @Test
@@ -224,16 +233,16 @@ public class StatementTest
         stat.addBatch("insert into batch values (2);");
         stat.addBatch("insert into batch values (3);");
         stat.addBatch("insert into batch values (4);");
-        assertArrayEq(new int[] { 0, 1, 1, 1, 1, 1 }, stat.executeBatch());
+        assertArrayEq(new int[] {0, 1, 1, 1, 1, 1}, stat.executeBatch());
         assertArrayEq(new int[] {}, stat.executeBatch());
         stat.clearBatch();
         stat.addBatch("insert into batch values (9);");
-        assertArrayEq(new int[] { 1 }, stat.executeBatch());
+        assertArrayEq(new int[] {1}, stat.executeBatch());
         assertArrayEq(new int[] {}, stat.executeBatch());
         stat.clearBatch();
         stat.addBatch("insert into batch values (7);");
         stat.addBatch("insert into batch values (7);");
-        assertArrayEq(new int[] { 1, 1 }, stat.executeBatch());
+        assertArrayEq(new int[] {1, 1}, stat.executeBatch());
         stat.clearBatch();
 
         ResultSet rs = stat.executeQuery("select count(*) from batch;");
@@ -266,7 +275,7 @@ public class StatementTest
 
         // closing one statement shouldn't close shared db metadata object.
         stat.close();
-        Statement stat2  = conn.createStatement();
+        Statement stat2 = conn.createStatement();
         rs = stat2.getGeneratedKeys();
         assertNotNull(rs);
         rs.close();
@@ -305,13 +314,13 @@ public class StatementTest
     public void nullDate() throws SQLException {
         ResultSet rs = stat.executeQuery("select null;");
         assertTrue(rs.next());
-        assertEquals(rs.getDate(1), null);
-        assertEquals(rs.getTime(1), null);
+        assertNull(rs.getDate(1));
+        assertNull(rs.getTime(1));
         rs.close();
     }
 
-    @Ignore
-    @Test(expected = SQLException.class)
+    @Disabled
+    @Test
     public void ambiguousColumnNaming() throws SQLException {
         stat.executeUpdate("create table t1 (c1 int);");
         stat.executeUpdate("create table t2 (c1 int, c2 int);");
@@ -323,50 +332,49 @@ public class StatementTest
         rs.close();
     }
 
-    @Test(expected = SQLException.class)
+    @Test
     public void failToDropWhenRSOpen() throws SQLException {
         stat.executeUpdate("create table t1 (c1);");
         stat.executeUpdate("insert into t1 values (4);");
         stat.executeUpdate("insert into t1 values (4);");
         conn.createStatement().executeQuery("select * from t1;").next();
-        stat.executeUpdate("drop table t1;");
+        assertThrows(SQLException.class, () -> stat.executeUpdate("drop table t1;"));
     }
 
-    @Test(expected = SQLException.class)
-    public void executeNoRS() throws SQLException {
-        assertFalse(stat.execute("insert into test values (8);"));
-        stat.getResultSet();
+    @Test
+    public void executeNoRS() {
+        assertThrows(SQLException.class, () -> stat.execute("insert into test values (8);"));
     }
 
-    @Test(expected = SQLException.class)
+    @Test
     public void executeClearRS() throws SQLException {
         assertTrue(stat.execute("select null;"));
         assertNotNull(stat.getResultSet());
         assertFalse(stat.getMoreResults());
-        stat.getResultSet();
+        assertThrows(SQLException.class, () -> stat.getResultSet());
     }
 
-    @Test(expected = BatchUpdateException.class)
+    @Test
     public void batchReturnsResults() throws SQLException {
         stat.addBatch("select null;");
-        stat.executeBatch();
+        assertThrows(BatchUpdateException.class, () -> stat.executeBatch());
     }
 
-    @Test(expected = SQLException.class)
-    public void noSuchTable() throws SQLException {
-        stat.executeQuery("select * from doesnotexist;");
+    @Test
+    public void noSuchTable() {
+        assertThrows(SQLException.class, () -> stat.executeQuery("select * from doesnotexist;"));
     }
 
-    @Test(expected = SQLException.class)
-    public void noSuchCol() throws SQLException {
-        stat.executeQuery("select notacol from (select 1);");
+    @Test
+    public void noSuchCol() {
+        assertThrows(SQLException.class, () -> stat.executeQuery("select notacol from (select 1);"));
     }
 
-    @Test(expected = SQLException.class)
+    @Test
     public void noSuchColName() throws SQLException {
         ResultSet rs = stat.executeQuery("select 1;");
         assertTrue(rs.next());
-        rs.getInt("noSuchColName");
+        assertThrows(SQLException.class, () -> rs.getInt("noSuchColName"));
     }
 
     @Test
@@ -388,26 +396,26 @@ public class StatementTest
     public void bytesTest() throws SQLException, UnsupportedEncodingException {
         stat.executeUpdate("CREATE TABLE blobs (Blob BLOB)");
         PreparedStatement prep = conn.prepareStatement("insert into blobs values(?)");
-        
+
         String str = "This is a test";
         byte[] strBytes = str.getBytes("UTF-8");
-        
+
         prep.setBytes(1, strBytes);
         prep.executeUpdate();
-        
+
         ResultSet rs = stat.executeQuery("select * from blobs");
         assertTrue(rs.next());
 
         byte[] resultBytes = rs.getBytes(1);
         assertArrayEquals(strBytes, resultBytes);
-        
+
         String resultStr = rs.getString(1);
         assertEquals(str, resultStr);
 
         byte[] resultBytesAfterConversionToString = rs.getBytes(1);
         assertArrayEquals(strBytes, resultBytesAfterConversionToString);
     }
-    
+
     @Test
     public void dateTimeTest() throws SQLException {
         Date day = new Date(new java.util.Date().getTime());
@@ -421,7 +429,7 @@ public class StatementTest
         Date d = rs.getDate(1);
         assertEquals(day.getTime(), d.getTime());
     }
-    
+
     @Test
     public void defaultDateTimeTest() throws SQLException {
         stat.executeUpdate("create table daywithdefaultdatetime (id integer, datetime datatime default current_timestamp)");
@@ -461,34 +469,35 @@ public class StatementTest
         stat.setEscapeProcessing(false);
     }
 
-    @Test(expected=SQLException.class)
+    @Test
     public void setEscapeProcessingToTrue() throws SQLException {
-        stat.setEscapeProcessing(true);
+        assertThrows(SQLException.class, () -> stat.setEscapeProcessing(true));
     }
 
     @Test
     public void unwrapTest() throws SQLException {
-        assertTrue( conn.isWrapperFor(Connection.class) );
-        assertFalse( conn.isWrapperFor(Statement.class) );
-        assertEquals( conn, conn.unwrap(Connection.class) );
-        assertEquals( conn, conn.unwrap(SQLiteConnection.class) );
+        assertTrue(conn.isWrapperFor(Connection.class));
+        assertFalse(conn.isWrapperFor(Statement.class));
+        assertEquals(conn, conn.unwrap(Connection.class));
+        assertEquals(conn, conn.unwrap(SQLiteConnection.class));
 
-        assertTrue( stat.isWrapperFor(Statement.class) );
-        assertEquals( stat, stat.unwrap(Statement.class) );
-        assertEquals( stat, stat.unwrap(JDBC3Statement.class) );
+        assertTrue(stat.isWrapperFor(Statement.class));
+        assertEquals(stat, stat.unwrap(Statement.class));
+        assertEquals(stat, stat.unwrap(JDBC3Statement.class));
 
         ResultSet rs = stat.executeQuery("select 1");
 
-        assertTrue( rs.isWrapperFor(ResultSet.class) );
-        assertEquals( rs, rs.unwrap(ResultSet.class) );
+        assertTrue(rs.isWrapperFor(ResultSet.class));
+        assertEquals(rs, rs.unwrap(ResultSet.class));
 
         rs.close();
     }
 
     @Test
     public void closeOnCompletionTest() throws Exception {
-        if ( ! (stat instanceof JDBC4Statement) )
+        if (!(stat instanceof JDBC4Statement)) {
             return;
+        }
 
         // Run the following code only for JDK7 or higher
         Method mIsCloseOnCompletion = JDBC4Statement.class.getDeclaredMethod("isCloseOnCompletion");
@@ -501,7 +510,7 @@ public class StatementTest
         ResultSet rs = stat.executeQuery("select 1");
         rs.close();
 
-        assertTrue( stat.isClosed() );
+        assertTrue(stat.isClosed());
     }
 
     @Test
@@ -511,9 +520,9 @@ public class StatementTest
         stat.setFetchDirection(ResultSet.FETCH_UNKNOWN);
     }
 
-    @Test(expected = SQLException.class)
-    public void setFetchDirectionBadArgument() throws SQLException {
-        stat.setFetchDirection(999);
+    @Test
+    public void setFetchDirectionBadArgument() {
+        assertThrows(SQLException.class, () -> stat.setFetchDirection(999));
     }
 
     @Test

@@ -1,6 +1,8 @@
 package org.sqlite;
 
-import static junit.framework.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,26 +10,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by IntelliJ IDEA. User: david_donn Date: 19/01/2010 Time: 11:50:24 AM
  * To change this template use File | Settings | File Templates.
  */
-public class FetchSizeTest
-{
+public class FetchSizeTest {
 
     private Connection conn;
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         conn.close();
     }

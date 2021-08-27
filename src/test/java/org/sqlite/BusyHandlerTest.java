@@ -1,8 +1,8 @@
 package org.sqlite;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,21 +10,20 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.assertEquals;
-
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BusyHandlerTest {
     private Connection conn;
     private Statement stat;
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:target/test.db");
         stat = conn.createStatement();
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         stat.close();
         conn.close();
@@ -55,20 +54,22 @@ public class BusyHandlerTest {
         }
 
         @Override
-        public void run(){
+        public void run() {
             try {
                 // Generate some work for the sqlite vm
                 stat.executeUpdate("drop table if exists foo;");
                 stat.executeUpdate("create table foo (id integer);");
                 stat.execute("insert into foo (id) values (wait_for_latch());");
-            } catch (SQLException ex) {System.out.println("HERE"+ex.toString());}
+            } catch (SQLException ex) {
+                System.out.println("HERE" + ex.toString());
+            }
         }
     }
 
     private void workWork() throws SQLException {
         // Generate some work for the sqlite vm
         int i = 0;
-        while (i<5) {
+        while (i < 5) {
             stat.execute("insert into foo (id) values (" + i + ")");
             i++;
         }
@@ -97,10 +98,10 @@ public class BusyHandlerTest {
         // let busyWork block inside insert
         busyWork.lockedLatch.await();
 
-        try{
+        try {
             workWork();
             fail("Should throw SQLITE_BUSY exception");
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             assertEquals(SQLiteErrorCode.SQLITE_BUSY.code, ex.getErrorCode());
         }
 
@@ -130,10 +131,10 @@ public class BusyHandlerTest {
         busyWork.start();
         // let busyWork block inside insert
         busyWork.lockedLatch.await();
-        try{
+        try {
             workWork();
             fail("Should throw SQLITE_BUSY exception");
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             assertEquals(SQLiteErrorCode.SQLITE_BUSY.code, ex.getErrorCode());
         }
         busyWork.completeLatch.countDown();
@@ -146,10 +147,10 @@ public class BusyHandlerTest {
         busyWork.start();
         // let busyWork block inside insert
         busyWork.lockedLatch.await();
-        try{
+        try {
             workWork();
             fail("Should throw SQLITE_BUSY exception");
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             assertEquals(SQLiteErrorCode.SQLITE_BUSY.code, ex.getErrorCode());
         }
 

@@ -24,9 +24,9 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -49,36 +49,31 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class SQLiteJDBCLoaderTest
-{
+public class SQLiteJDBCLoaderTest {
 
     private Connection connection = null;
 
-    @Before
-    public void setUp() throws Exception
-    {
+    @BeforeEach
+    public void setUp() throws Exception {
         connection = null;
         // create a database connection
         connection = DriverManager.getConnection("jdbc:sqlite::memory:");
     }
 
-    @After
-    public void tearDown() throws Exception
-    {
-        if (connection != null)
+    @AfterEach
+    public void tearDown() throws Exception {
+        if (connection != null) {
             connection.close();
+        }
     }
 
     @Test
-    public void query() throws ClassNotFoundException
-    {
-        try
-        {
+    public void query() throws ClassNotFoundException {
+        try {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30); // set timeout to 30 sec.
 
@@ -87,15 +82,12 @@ public class SQLiteJDBCLoaderTest
             statement.executeUpdate("insert into person values(2, 'yui')");
 
             ResultSet rs = statement.executeQuery("select * from person order by id");
-            while (rs.next())
-            {
+            while (rs.next()) {
                 // read the result set
                 rs.getInt(1);
                 rs.getString(2);
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             // if e.getMessage() is "out of memory", it probably means no
             // database file is found
             fail(e.getMessage());
@@ -103,15 +95,14 @@ public class SQLiteJDBCLoaderTest
     }
 
     @Test
-    public void function() throws SQLException
-    {
+    public void function() throws SQLException {
         Function.create(connection, "total", new Function() {
             @Override
-            protected void xFunc() throws SQLException
-            {
+            protected void xFunc() throws SQLException {
                 int sum = 0;
-                for (int i = 0; i < args(); i++)
+                for (int i = 0; i < args(); i++) {
                     sum += value_int(i);
+                }
                 result(sum);
             }
         });
@@ -122,9 +113,8 @@ public class SQLiteJDBCLoaderTest
     }
 
     @Test
-    public void version()
-    {
-    // System.out.println(SQLiteJDBCLoader.getVersion());
+    public void version() {
+        // System.out.println(SQLiteJDBCLoader.getVersion());
     }
 
     @Test
@@ -147,7 +137,7 @@ public class SQLiteJDBCLoaderTest
                         //}
                     } catch (SQLException e) {
                         e.printStackTrace();
-                        Assert.fail(e.getLocalizedMessage());
+                        fail(e.getLocalizedMessage());
                     }
                     completedThreads.incrementAndGet();
                 }
@@ -162,9 +152,9 @@ public class SQLiteJDBCLoaderTest
     public void multipleClassLoader() throws Throwable {
         // Get current classpath
         String[] stringUrls = System.getProperty("java.class.path")
-                .split(System.getProperty("path.separator"));
+            .split(System.getProperty("path.separator"));
         // Find the classes under test.
-        String targetFolderName = Paths.get("").toAbsolutePath().resolve(Paths.get("target","classes")).toString();
+        String targetFolderName = Paths.get("").toAbsolutePath().resolve(Paths.get("target", "classes")).toString();
         File classesDir = null;
         String classesDirPrefix = null;
         for (String stringUrl : stringUrls) {
@@ -176,12 +166,12 @@ public class SQLiteJDBCLoaderTest
             }
         }
         if (classesDir == null) {
-            Assert.fail("Couldn't find classes under test.");
+            fail("Couldn't find classes under test.");
         }
         // Create a JAR file out the classes and resources
         File jarFile = File.createTempFile("jar-for-test-", ".jar");
         createJar(classesDir, classesDirPrefix, jarFile);
-        URL[] jarUrl = new URL[] { jarFile.toPath().toUri().toURL() };
+        URL[] jarUrl = new URL[] {jarFile.toPath().toUri().toURL()};
 
         final AtomicInteger completedThreads = new AtomicInteger(0);
         ExecutorService pool = Executors.newFixedThreadPool(4);
@@ -193,15 +183,15 @@ public class SQLiteJDBCLoaderTest
                     // Create an isolated class loader, it should load *different* instances
                     // of SQLiteJDBCLoader.class
                     URLClassLoader classLoader = new URLClassLoader(
-                            jarUrl, ClassLoader.getSystemClassLoader().getParent());
+                        jarUrl, ClassLoader.getSystemClassLoader().getParent());
                     Class<?> clazz =
-                            classLoader.loadClass("org.sqlite.SQLiteJDBCLoader");
+                        classLoader.loadClass("org.sqlite.SQLiteJDBCLoader");
                     Method initMethod = clazz.getDeclaredMethod("initialize");
                     initMethod.invoke(null);
                     classLoader.close();
                 } catch (Throwable e) {
                     e.printStackTrace();
-                    Assert.fail(e.getLocalizedMessage());
+                    fail(e.getLocalizedMessage());
                 }
                 completedThreads.incrementAndGet();
             });
@@ -238,7 +228,7 @@ public class SQLiteJDBCLoaderTest
             }
 
             JarEntry entry = new JarEntry(
-                    source.getPath().replace("\\", "/").substring(changeDir.length() + 1));
+                source.getPath().replace("\\", "/").substring(changeDir.length() + 1));
             entry.setTime(source.lastModified());
             target.putNextEntry(entry);
             in = new BufferedInputStream(new FileInputStream(source));
