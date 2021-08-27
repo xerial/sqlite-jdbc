@@ -1228,30 +1228,4 @@ public class DBMetaDataTest {
         assertNotNull(rs);
         assertNotNull(rsmd);
     }
-
-
-    @Test
-    public void version() throws Exception {
-        Properties version;
-        try (InputStream resourceAsStream = DBMetaDataTest.class.getResourceAsStream("/META-INF/maven/org.xerial/sqlite-jdbc/VERSION")) {
-            version = new Properties();
-            Assumptions.assumeTrue(resourceAsStream != null);
-            version.load(resourceAsStream);
-        }
-        String versionString = version.getProperty("version");
-        int majorVersion = Integer.parseInt(versionString.split("\\.")[0]);
-        int minorVersion = Integer.parseInt(versionString.split("\\.")[1]);
-
-        assertTrue(majorVersion > 0, "major version check");
-        assertEquals("SQLite JDBC", meta.getDriverName(), "driver name");
-        assertTrue(meta.getDriverVersion().startsWith(String.format("%d.%d", majorVersion, minorVersion)), "driver version");
-        assertEquals(majorVersion, meta.getDriverMajorVersion(), "driver major version");
-        assertEquals(minorVersion, meta.getDriverMinorVersion(), "driver minor version");
-        assertEquals("SQLite", meta.getDatabaseProductName(), "db name");
-        assertEquals(versionString, meta.getDatabaseProductVersion(), "db version");
-        assertEquals(majorVersion, meta.getDatabaseMajorVersion(), "db major version");
-        assertEquals(minorVersion, meta.getDatabaseMinorVersion(), "db minor version");
-        assertNull(meta.getUserName(), "user name");
-    }
-
 }
