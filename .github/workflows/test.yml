@@ -22,29 +22,30 @@ on:
       - '.github/workflows/*.yml'
 
 jobs:
-  test:
-    name: test ${{ matrix.os }} jdk${{ matrix.java }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        java: [8, 11, 16]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
-        with:
-          java-version: ${{ matrix.java }}
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
-          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
-      - name: Test
-        run: mvn test
+#  test:
+#    name: test ${{ matrix.os }} jdk${{ matrix.java }}
+#    strategy:
+#      matrix:
+#        os: [ubuntu-latest, windows-latest, macos-latest]
+#        java: [8, 11, 16]
+#    runs-on: ${{ matrix.os }}
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-java@v1
+#        with:
+#          java-version: ${{ matrix.java }}
+#      - uses: actions/cache@v1
+#        with:
+#          path: ~/.cache
+#          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
+#          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
+#      - name: Test
+#        run: mvn test
 
   test_graalvm:
-    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM
+    name: test ${{ matrix.os }} ${{ matrix.java }} GraalVM native-image
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         java: [java8, java11]
