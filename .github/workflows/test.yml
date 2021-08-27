@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - master
+      - ci-native
     paths:
       - '**.java'
       - '**.xml'
@@ -40,3 +41,34 @@ jobs:
           restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
       - name: Test
         run: mvn test
+
+  test_graalvm:
+    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        java: [java8, java11]
+        gu-binary: [ gu, gu.cmd ]
+        exclude:
+          - os: ubuntu-latest
+            gu-binary: gu.cmd
+          - os: macos-latest
+            gu-binary: gu.cmd
+          - os: windows-latest
+            gu-binary: gu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: DeLaGuardo/setup-graalvm@master
+        with:
+          # GraalVM version, no pattern syntax available atm
+          graalvm: '21.0.0.2'
+          # Java version, optional, defaults to 'java8'. Available options are 'java8' and 'java11'.
+          java: ${{ matrix.java }}
+          # Architecture flag, optional, defaults to 'amd64'. Available options are 'amd64' and 'aarch64'. Later is available only for linux runners.
+          arch: 'amd64'
+      - name: Install native-image component
+        run: |
+          ${{ matrix.gu-binary }} install native-image
+      - name: Test
+        run: mvn -Pnative test
