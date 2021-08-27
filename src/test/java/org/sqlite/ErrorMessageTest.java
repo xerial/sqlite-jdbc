@@ -11,10 +11,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class ErrorMessageTest {
@@ -84,7 +83,7 @@ public class ErrorMessageTest {
         assumeTrue(from.renameTo(to));
 
         Exception exception = assertThrows(SQLException.class, () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
-        assertThat(exception.getMessage(), containsString("[SQLITE_READONLY_DBMOVED]"));
+        assertTrue(exception.getMessage().contains("[SQLITE_READONLY_DBMOVED]"));
 
         stmt.close();
         conn.close();
@@ -108,7 +107,7 @@ public class ErrorMessageTest {
         stmt = conn.createStatement();
         Statement finalStmt = stmt;
         Exception exception = assertThrows(SQLException.class, () -> finalStmt.executeUpdate("insert into sample values(2, \"bar\")"));
-        assertThat(exception.getMessage(), containsString("[SQLITE_READONLY]"));
+        assertTrue(exception.getMessage().contains("[SQLITE_READONLY]"));
         stmt.close();
         conn.close();
     }
@@ -121,9 +120,8 @@ public class ErrorMessageTest {
         dir.deleteOnExit();
 
         Exception exception = assertThrows(SQLException.class, () -> DriverManager.getConnection("jdbc:sqlite:" + dir.getAbsolutePath()));
-        assertThat(exception.getMessage(), anyOf(
-            containsString("[SQLITE_CANTOPEN]"),
-            containsString("[SQLITE_CANTOPEN_ISDIR]")));
+        assertTrue(exception.getMessage().contains("[SQLITE_CANTOPEN]")
+            || exception.getMessage().contains("[SQLITE_CANTOPEN_ISDIR]"));
     }
 
     @Test
@@ -141,7 +139,7 @@ public class ErrorMessageTest {
         assumeTrue(from.renameTo(to));
 
         Exception exception = assertThrows(SQLException.class, () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
-        assertThat(exception.getMessage(), containsString("[SQLITE_READONLY_DBMOVED]"));
+        assertTrue(exception.getMessage().contains("[SQLITE_READONLY_DBMOVED]"));
         assertThat(exception, new VendorCodeMatcher(SQLiteErrorCode.SQLITE_READONLY));
         assertThat(exception, new ResultCodeMatcher(SQLiteErrorCode.SQLITE_READONLY_DBMOVED));
 
