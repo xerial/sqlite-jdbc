@@ -135,7 +135,9 @@ public class ErrorMessageTest {
         stmt.executeUpdate("insert into sample values(1, \"foo\")");
 
         File to = File.createTempFile("error-message-test-plain-2", ".sqlite");
-        assumeTrue(to.delete());
+//        assumeTrue(to.delete());
+//        assumeTrue(from.renameTo(to));
+        to.delete();
         assumeTrue(from.renameTo(to));
 
         Exception exception = assertThrows(SQLException.class, () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
