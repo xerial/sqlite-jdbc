@@ -137,8 +137,8 @@ public class ErrorMessageTest {
         File to = File.createTempFile("error-message-test-plain-2", ".sqlite");
 //        assumeTrue(to.delete());
 //        assumeTrue(from.renameTo(to));
-        to.delete();
-        assumeTrue(from.renameTo(to));
+        assumeTrue(to.delete());
+        from.renameTo(to);
 
         Exception exception = assertThrows(SQLException.class, () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
         assertTrue(exception.getMessage().contains("[SQLITE_READONLY_DBMOVED]"));
