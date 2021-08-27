@@ -153,7 +153,7 @@ public class PrepStmtTest {
     }
 
     @Test
-    public void set() throws SQLException, UnsupportedEncodingException {
+    public void set() throws SQLException {
         ResultSet rs;
         PreparedStatement prep = conn.prepareStatement("select ?, ?, ?;");
 
@@ -225,8 +225,8 @@ public class PrepStmtTest {
         rs = prep.executeQuery();
         assertTrue(rs.next());
         assertArrayEq(b1, rs.getBytes(1));
-        assertEquals(new String(b2, "UTF-8"), rs.getString(2));
-        assertEquals(new String(b3, "UTF-8"), rs.getString(3));
+        assertEquals(new String(b2, StandardCharsets.UTF_8), rs.getString(2));
+        assertEquals(new String(b3, StandardCharsets.UTF_8), rs.getString(3));
         assertFalse(rs.next());
         rs.close();
     }
