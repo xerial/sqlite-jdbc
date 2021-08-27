@@ -278,7 +278,7 @@
                 <!--  SegFault  -->
                 <exclude>**/UDFCustomErrorTest.java</exclude>
                 <!--  ${project.name} not properly replaced on Windows and MacOS in CI  -->
-<!--                <exclude>**/DBMetaDataVersionTest.java</exclude>-->
+                <exclude>**/DBMetaDataVersionTest.java</exclude>
               </excludes>
             </configuration>
           </plugin>
