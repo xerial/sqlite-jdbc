@@ -53,6 +53,8 @@ jobs:
         exclude:
           - os: ubuntu-latest
             gu-binary: gu.cmd
+          - os: ubuntu-latest
+            java: java8
           - os: macos-latest
             gu-binary: gu.cmd
           - os: windows-latest
