@@ -9,26 +9,26 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteOrder;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SQLiteDataSourceTest
-{
+public class SQLiteDataSourceTest {
 
-    @Before
-    public void setUp() throws Exception {}
+    @BeforeEach
+    public void setUp() throws Exception {
+    }
 
-    @After
-    public void tearDown() throws Exception {}
+    @AfterEach
+    public void tearDown() throws Exception {
+    }
 
     @Test
     public void enumParam() throws Exception {
@@ -51,8 +51,7 @@ public class SQLiteDataSourceTest
             }
             assertEquals(1, count);
 
-        }
-        finally {
+        } finally {
             stat.close();
             conn.close();
         }
@@ -63,10 +62,10 @@ public class SQLiteDataSourceTest
     public void encoding() throws Exception {
 
         String[] configArray = new String[] {
-                "UTF8", "UTF-8", "UTF_8",
-                "UTF16", "UTF-16", "UTF_16",
-                "UTF_16LE", "UTF-16LE", "UTF16_LITTLE_ENDIAN",
-                "UTF_16BE", "UTF-16BE","UTF16_BIG_ENDIAN" };
+            "UTF8", "UTF-8", "UTF_8",
+            "UTF16", "UTF-16", "UTF_16",
+            "UTF_16LE", "UTF-16LE", "UTF16_LITTLE_ENDIAN",
+            "UTF_16BE", "UTF-16BE", "UTF16_BIG_ENDIAN"};
 
         String nativeOrder;
         if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
@@ -75,7 +74,7 @@ public class SQLiteDataSourceTest
             nativeOrder = "be";
         }
         String[] encodingArray = new String[] {
-                "UTF-8", "UTF-16" + nativeOrder, "UTF-16le", "UTF-16be" };
+            "UTF-8", "UTF-16" + nativeOrder, "UTF-16le", "UTF-16be"};
 
         for (int i = 0; i < configArray.length; i++) {
             SQLiteDataSource ds = new SQLiteDataSource();

@@ -9,27 +9,24 @@
 //--------------------------------------
 package org.sqlite;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.junit.Assert.assertEquals;
-
-public class ReadUncommittedTest
-{
+public class ReadUncommittedTest {
     private Connection conn;
     private Statement stat;
 
-    @Before
-    public void connect() throws Exception
-    {
+    @BeforeEach
+    public void connect() throws Exception {
         Properties prop = new Properties();
         prop.setProperty("shared_cache", "true");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
@@ -38,52 +35,47 @@ public class ReadUncommittedTest
         stat.executeUpdate("create view testView as select * from test;");
     }
 
-    @After
-    public void close() throws SQLException
-    {
+    @AfterEach
+    public void close() throws SQLException {
         stat.close();
         conn.close();
     }
 
     @Test
-    public void setReadUncommitted() throws SQLException
-    {
+    public void setReadUncommitted() throws SQLException {
         conn.setTransactionIsolation(SQLiteConnection.TRANSACTION_READ_UNCOMMITTED);
     }
 
     @Test
-    public void setSerializable() throws SQLException
-    {
+    public void setSerializable() throws SQLException {
         conn.setTransactionIsolation(SQLiteConnection.TRANSACTION_SERIALIZABLE);
     }
 
     @Test
-    public void setIsolationPromotedToSerializable() throws SQLException
-    {
+    public void setIsolationPromotedToSerializable() throws SQLException {
         conn.setTransactionIsolation(SQLiteConnection.TRANSACTION_REPEATABLE_READ);
     }
 
     @Test
-    public void setReadUncommittedWithConfig() throws SQLException
-    {
+    public void setReadUncommittedWithConfig() throws SQLException {
         // Override original setup
         Properties prop = new Properties();
         prop.setProperty("shared_cache", "true");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals("Fail to set pragma read_uncommitted", "0",
-            stat.executeQuery("PRAGMA read_uncommitted;").getString(1));
+        assertEquals(stat.executeQuery("PRAGMA read_uncommitted;").getString(1), "0",
+            "Fail to set pragma read_uncommitted");
 
         prop.setProperty("read_uncommitted", "true");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals("Fail to set pragma read_uncommitted", "1",
-            stat.executeQuery("PRAGMA read_uncommitted;").getString(1));
+        assertEquals("1", stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
+            "Fail to set pragma read_uncommitted");
 
         prop.setProperty("read_uncommitted", "false");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals("Fail to set pragma read_uncommitted", "0",
-            stat.executeQuery("PRAGMA read_uncommitted;").getString(1));
+        assertEquals("0", stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
+            "Fail to set pragma read_uncommitted");
     }
 }

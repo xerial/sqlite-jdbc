@@ -9,16 +9,16 @@
 //--------------------------------------
 package org.sqlite.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OSInfoTest {
-    private static Logger logger = Logger.getLogger(OSInfoTest.class.getName());
+    private static final Logger logger = Logger.getLogger(OSInfoTest.class.getName());
 
     @Test
     public void osName() {
@@ -65,10 +65,9 @@ public class OSInfoTest {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             PrintStream tmpOut = new PrintStream(buf);
             System.setOut(tmpOut);
-            OSInfo.main(new String[]{"--os"});
+            OSInfo.main(new String[] {"--os"});
             assertEquals(OSInfo.getOSName(), buf.toString());
-        }
-        finally {
+        } finally {
             // reset STDOUT
             System.setOut(out);
         }
@@ -85,10 +84,9 @@ public class OSInfoTest {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             PrintStream tmpOut = new PrintStream(buf);
             System.setOut(tmpOut);
-            OSInfo.main(new String[]{"--arch"});
+            OSInfo.main(new String[] {"--arch"});
             assertEquals(OSInfo.getArchName(), buf.toString());
-        }
-        finally {
+        } finally {
             // reset STDOUT
             System.setOut(out);
         }

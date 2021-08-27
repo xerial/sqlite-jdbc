@@ -1,34 +1,37 @@
 package org.sqlite;
 
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class ExtensionTest {
     Connection conn;
     Statement stat;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
-        if(stat != null)
+        if (stat != null) {
             stat.close();
-        if(conn != null)
+        }
+        if (conn != null) {
             conn.close();
+        }
 
     }
 
@@ -71,7 +74,7 @@ public class ExtensionTest {
             rs.close();
             // SQLite has to be compiled with JDBC Extensions for this test to
             // continue.
-            Assume.assumeTrue(hasJdbcExtensions);
+            assumeTrue(hasJdbcExtensions);
         }
         {
             ResultSet rs = stat.executeQuery("select cos(radians(45))");

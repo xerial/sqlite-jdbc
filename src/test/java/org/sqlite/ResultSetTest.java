@@ -1,8 +1,8 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,16 +10,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResultSetTest {
 
     private Connection conn;
     private Statement stat;
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
@@ -27,7 +29,7 @@ public class ResultSetTest {
         stat.executeUpdate("insert into test values (1, 'description', 'bar')");
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         stat.close();
         conn.close();
@@ -35,7 +37,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnLowerNowFindLowerCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("id"));
@@ -43,7 +45,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnLowerNowFindUpperCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("ID"));
@@ -51,7 +53,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnLowerNowFindMixedCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("Id"));
@@ -59,7 +61,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnUpperNowFindLowerCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(2, resultSet.findColumn("description"));
@@ -67,7 +69,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnUpperNowFindUpperCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(2, resultSet.findColumn("DESCRIPTION"));
@@ -75,7 +77,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnUpperNowFindMixedCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(2, resultSet.findColumn("Description"));
@@ -83,7 +85,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnMixedNowFindLowerCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(3, resultSet.findColumn("foo"));
@@ -91,7 +93,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnMixedNowFindUpperCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(3, resultSet.findColumn("FOO"));
@@ -99,7 +101,7 @@ public class ResultSetTest {
 
     @Test
     public void testTableColumnMixedNowFindMixedCaseColumn()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(3, resultSet.findColumn("fOo"));
@@ -107,7 +109,7 @@ public class ResultSetTest {
 
     @Test
     public void testSelectWithTableNameAliasNowFindWithoutTableNameAlias()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select t.id from test as t");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("id"));
@@ -118,28 +120,28 @@ public class ResultSetTest {
      * https://www.sqlite.org/c3ref/column_name.html :
      * "If there is no AS clause then the name of the column is unspecified"
      */
-    @Test(expected = SQLException.class)
+    @Test
     public void testSelectWithTableNameAliasNowNotFindWithTableNameAlias()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select t.id from test as t");
         assertTrue(resultSet.next());
-        resultSet.findColumn("t.id");
+        assertThrows(SQLException.class, () -> resultSet.findColumn("t.id"));
     }
 
     @Test
     public void testSelectWithTableNameNowFindWithoutTableName()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("id"));
     }
 
-    @Test(expected = SQLException.class)
+    @Test
     public void testSelectWithTableNameNowNotFindWithTableName()
-            throws SQLException {
+        throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
         assertTrue(resultSet.next());
-        resultSet.findColumn("test.id");
+        assertThrows(SQLException.class, () -> resultSet.findColumn("test.id"));
     }
 
     @Test
