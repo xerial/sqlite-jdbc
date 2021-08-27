@@ -1,11 +1,11 @@
 package org.sqlite;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -1232,9 +1232,12 @@ public class DBMetaDataTest {
 
     @Test
     public void version() throws Exception {
-        File versionFile = new File("./VERSION");
-        Properties version = new Properties();
-        version.load(new FileReader(versionFile));
+        Properties version;
+        try (InputStream resourceAsStream = DBMetaDataTest.class.getResourceAsStream("/META-INF/maven/org.xerial/sqlite-jdbc/VERSION")) {
+            version = new Properties();
+            Assumptions.assumeTrue(resourceAsStream != null);
+            version.load(resourceAsStream);
+        }
         String versionString = version.getProperty("version");
         int majorVersion = Integer.parseInt(versionString.split("\\.")[0]);
         int minorVersion = Integer.parseInt(versionString.split("\\.")[1]);
