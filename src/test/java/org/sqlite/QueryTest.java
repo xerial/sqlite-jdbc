@@ -9,19 +9,28 @@
 //--------------------------------------
 package org.sqlite;
 
-import java.sql.*;
+import org.junit.jupiter.api.Test;
+import org.sqlite.date.FastDateFormat;
+
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.junit.Test;
-import org.sqlite.date.FastDateFormat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import static org.junit.Assert.*;
-
-public class QueryTest
-{
+public class QueryTest {
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:sqlite::memory:");
     }
@@ -30,10 +39,10 @@ public class QueryTest
     public void nullQuery() throws Exception {
         Connection conn = getConnection();
         Statement stmt = conn.createStatement();
-	try {
-		stmt.execute(null);
-	} catch (NullPointerException e) {
-	}
+        try {
+            stmt.execute(null);
+        } catch (NullPointerException e) {
+        }
         stmt.close();
         conn.close();
     }
@@ -49,8 +58,7 @@ public class QueryTest
         try {
             ResultSet rs = stmt.executeQuery("SELECT * FROM sample");
             rs.next();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -109,8 +117,7 @@ public class QueryTest
         try {
             statement = conn.createStatement();
             statement.execute("create table sample (date_time datetime)");
-        }
-        finally {
+        } finally {
             if (statement != null) statement.close();
         }
 
@@ -131,8 +138,7 @@ public class QueryTest
             preparedStatement.executeUpdate();
             preparedStatement.setDate(1, nowLikeCustomZoneIsUtc, utcCalendar);
             preparedStatement.executeUpdate();
-        }
-        finally {
+        } finally {
             if (preparedStatement != null) preparedStatement.close();
         }
 
@@ -146,8 +152,7 @@ public class QueryTest
             assertTrue(resultSet.next());
             assertEquals(now, resultSet.getDate(1, customCalendar));
             assertEquals(nowLikeCustomZoneIsUtc, resultSet.getDate(1, utcCalendar));
-        }
-        finally {
+        } finally {
             if (resultSet != null) resultSet.close();
         }
     }
@@ -250,20 +255,20 @@ public class QueryTest
             statement.executeUpdate("insert into mxp values(3,2,'T')");
 
             ResultSet rs = statement
-                    .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=2 and mxp.pid=person.id and mxp.type='T'");
+                .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=2 and mxp.pid=person.id and mxp.type='T'");
             while (rs.next()) {
                 // read the result set
                 assertEquals("Y,abc", rs.getString(1));
             }
             rs = statement
-                    .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=1 and mxp.pid=person.id and mxp.type='T'");
+                .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=1 and mxp.pid=person.id and mxp.type='T'");
             while (rs.next()) {
                 // read the result set
                 assertEquals("Y", rs.getString(1));
             }
 
             PreparedStatement ps = conn
-                    .prepareStatement("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=? and mxp.pid=person.id and mxp.type='T'");
+                .prepareStatement("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=? and mxp.pid=person.id and mxp.type='T'");
             ps.clearParameters();
             ps.setInt(1, new Integer(2));
             rs = ps.executeQuery();
@@ -279,18 +284,16 @@ public class QueryTest
                 assertEquals("Y,abc", rs.getString(1));
             }
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             // if the error message is "out of memory",
             // it probably means no database file is found
             System.err.println(e.getMessage());
-        }
-        finally {
+        } finally {
             try {
-                if (conn != null)
+                if (conn != null) {
                     conn.close();
-            }
-            catch (SQLException e) {
+                }
+            } catch (SQLException e) {
                 // connection close failed.
                 System.err.println(e);
             }
@@ -314,27 +317,23 @@ public class QueryTest
                     try {
                         clob.getSubString(0, length);
                         fail("SQLException expected because position is less than 1");
-                    }
-                    catch (SQLException ignore) {
+                    } catch (SQLException ignore) {
                     }
                     try {
                         clob.getSubString(1, -1);
                         fail("SQLException expected because length is less than 0");
-                    }
-                    catch (SQLException ignore) {
+                    } catch (SQLException ignore) {
                     }
                     assertEquals("", clob.getSubString(1, 0));
                     assertEquals(content, clob.getSubString(1, length));
                     assertEquals(content.substring(2, content.length() - 1), clob.getSubString(3, content.length() - 3));
-                }
-                finally {
+                } finally {
                     if (rs != null) rs.close();
                 }
             } finally {
                 if (stmt != null) stmt.close();
             }
-        }
-        finally {
+        } finally {
             if (conn != null) conn.close();
         }
     }

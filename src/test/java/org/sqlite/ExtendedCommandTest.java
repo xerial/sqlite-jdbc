@@ -9,36 +9,28 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.*;
-
-import java.sql.SQLException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sqlite.ExtendedCommand.BackupCommand;
 import org.sqlite.ExtendedCommand.RestoreCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
 
-public class ExtendedCommandTest
-{
+import java.sql.SQLException;
 
-    @Before
-    public void setUp() throws Exception {}
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @After
-    public void tearDown() throws Exception {}
+public class ExtendedCommandTest {
 
     public static BackupCommand parseBackupCommand(String sql) throws SQLException {
         SQLExtension e = ExtendedCommand.parse(sql);
-        assertTrue(BackupCommand.class.isInstance(e));
-        return BackupCommand.class.cast(e);
+        assertTrue(e instanceof BackupCommand);
+        return (BackupCommand) e;
     }
 
     public static RestoreCommand parseRestoreCommand(String sql) throws SQLException {
         SQLExtension e = ExtendedCommand.parse(sql);
-        assertTrue(RestoreCommand.class.isInstance(e));
-        return RestoreCommand.class.cast(e);
+        assertTrue(e instanceof RestoreCommand);
+        return (RestoreCommand) e;
     }
 
     @Test

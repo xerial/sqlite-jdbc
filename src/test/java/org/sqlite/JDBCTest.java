@@ -9,25 +9,22 @@
 //--------------------------------------
 package org.sqlite;
 
+import org.junit.jupiter.api.Test;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Properties;
 
-import junit.framework.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class JDBCTest
-{
+public class JDBCTest {
     @Test
     public void enableLoadExtensionTest() throws Exception {
         Properties prop = new Properties();
         prop.setProperty("enable_load_extension", "true");
 
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection("jdbc:sqlite:", prop);
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:", prop)) {
             Statement stat = conn.createStatement();
 
             // How to build shared lib in Windows
@@ -40,10 +37,6 @@ public class JDBCTest
             //            System.out.println(rs.getDouble(1));
 
         }
-        finally {
-            if (conn != null)
-                conn.close();
-        }
     }
 
     @Test
@@ -54,7 +47,7 @@ public class JDBCTest
 
     @Test
     public void shouldReturnNullIfProtocolUnhandled() throws Exception {
-        Assert.assertNull(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null));
+        assertNull(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null));
     }
 
 }

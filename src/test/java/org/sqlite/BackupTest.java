@@ -9,7 +9,7 @@
 //--------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +19,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BackupTest
-{
+public class BackupTest {
 
     @Test
     public void backupAndRestore() throws SQLException, IOException {
@@ -59,14 +57,16 @@ public class BackupTest
     @Test
     public void memoryToDisk() throws Exception {
 
-        if (!SQLiteJDBCLoader.isNativeMode())
+        if (!SQLiteJDBCLoader.isNativeMode()) {
             return; // skip this test in pure-java mode
+        }
 
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id integer primary key autoincrement, name)");
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < 10000; i++) {
             stmt.executeUpdate("insert into sample(name) values(\"leo\")");
+        }
 
         File tmpFile = File.createTempFile("backup-test2", ".sqlite");
         tmpFile.deleteOnExit();

@@ -1,17 +1,16 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SQLiteConfigTest {
 
     @Test
-    public void toProperites() throws SQLException
-    {
+    public void toProperites() throws SQLException {
         SQLiteConfig config = new SQLiteConfig();
 
         config.setReadOnly(true);

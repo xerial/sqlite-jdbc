@@ -1,9 +1,13 @@
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -14,46 +18,44 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.StringTokenizer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/** These tests are designed to stress PreparedStatements on memory dbs. */
-public class PrepStmtTest
-{
-    static byte[]      b1    = new byte[] { 1, 2, 7, 4, 2, 6, 2, 8, 5, 2, 3, 1, 5, 3, 6, 3, 3, 6, 2, 5 };
-    static byte[]      b2    = getUtf8Bytes("To be or not to be.");
-    static byte[]      b3    = getUtf8Bytes("Question!#$%");
-    static String      utf01 = "\uD840\uDC40";
-    static String      utf02 = "\uD840\uDC47 ";
-    static String      utf03 = " \uD840\uDC43";
-    static String      utf04 = " \uD840\uDC42 ";
-    static String      utf05 = "\uD840\uDC40\uD840\uDC44";
-    static String      utf06 = "Hello World, \uD840\uDC40 \uD880\uDC99";
-    static String      utf07 = "\uD840\uDC41 testing \uD880\uDC99";
-    static String      utf08 = "\uD840\uDC40\uD840\uDC44 testing";
+/**
+ * These tests are designed to stress PreparedStatements on memory dbs.
+ */
+public class PrepStmtTest {
+    static byte[] b1 = new byte[] {1, 2, 7, 4, 2, 6, 2, 8, 5, 2, 3, 1, 5, 3, 6, 3, 3, 6, 2, 5};
+    static byte[] b2 = getUtf8Bytes("To be or not to be.");
+    static byte[] b3 = getUtf8Bytes("Question!#$%");
+    static String utf01 = "\uD840\uDC40";
+    static String utf02 = "\uD840\uDC47 ";
+    static String utf03 = " \uD840\uDC43";
+    static String utf04 = " \uD840\uDC42 ";
+    static String utf05 = "\uD840\uDC40\uD840\uDC44";
+    static String utf06 = "Hello World, \uD840\uDC40 \uD880\uDC99";
+    static String utf07 = "\uD840\uDC41 testing \uD880\uDC99";
+    static String utf08 = "\uD840\uDC40\uD840\uDC44 testing";
 
     private Connection conn;
-    private Statement  stat;
+    private Statement stat;
 
     private static byte[] getUtf8Bytes(String str) {
-        try {
-            return str.getBytes("UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
-            fail(e.getMessage());
-            return null;
-        }
+        return str.getBytes(StandardCharsets.UTF_8);
     }
-    
-    @Before
+
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         stat.close();
         conn.close();
@@ -151,7 +153,7 @@ public class PrepStmtTest
     }
 
     @Test
-    public void set() throws SQLException, UnsupportedEncodingException {
+    public void set() throws SQLException {
         ResultSet rs;
         PreparedStatement prep = conn.prepareStatement("select ?, ?, ?;");
 
@@ -200,7 +202,7 @@ public class PrepStmtTest
         assertArrayEq(rs.getBytes(3), b3);
         assertFalse(rs.next());
         rs.close();
-        
+
         // null date, time and timestamp (fix #363)
         prep.setDate(1, null);
         prep.setTime(2, null);
@@ -216,15 +218,15 @@ public class PrepStmtTest
         prep.setBinaryStream(1, inByte, b1.length);
         ByteArrayInputStream inAscii = new ByteArrayInputStream(b2);
         prep.setAsciiStream(2, inAscii, b2.length);
-        byte[] b3 = utf08.getBytes("UTF-8");
+        byte[] b3 = utf08.getBytes(StandardCharsets.UTF_8);
         ByteArrayInputStream inUnicode = new ByteArrayInputStream(b3);
         prep.setUnicodeStream(3, inUnicode, b3.length);
 
         rs = prep.executeQuery();
         assertTrue(rs.next());
         assertArrayEq(b1, rs.getBytes(1));
-        assertEquals(new String(b2, "UTF-8"), rs.getString(2));
-        assertEquals(new String(b3, "UTF-8"), rs.getString(3));
+        assertEquals(new String(b2, StandardCharsets.UTF_8), rs.getString(2));
+        assertEquals(new String(b3, StandardCharsets.UTF_8), rs.getString(3));
         assertFalse(rs.next());
         rs.close();
     }
@@ -325,7 +327,7 @@ public class PrepStmtTest
     @Test
     public void utf() throws SQLException {
         ResultSet rs = stat.executeQuery("select '" + utf01 + "','" + utf02 + "','" + utf03 + "','" + utf04 + "','"
-                + utf05 + "','" + utf06 + "','" + utf07 + "','" + utf08 + "';");
+            + utf05 + "','" + utf06 + "','" + utf07 + "','" + utf08 + "';");
         assertArrayEq(rs.getBytes(1), getUtf8Bytes(utf01));
         assertArrayEq(rs.getBytes(2), getUtf8Bytes(utf02));
         assertArrayEq(rs.getBytes(3), getUtf8Bytes(utf03));
@@ -387,7 +389,7 @@ public class PrepStmtTest
             prep.setDouble(4, Double.MAX_VALUE + i);
             prep.addBatch();
         }
-        assertArrayEq(prep.executeBatch(), new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
+        assertArrayEq(prep.executeBatch(), new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
         prep.close();
 
         rs = stat.executeQuery("select * from test;");
@@ -449,7 +451,7 @@ public class PrepStmtTest
             prep.setInt(1, Integer.MIN_VALUE + i);
             prep.addBatch();
         }
-        assertArrayEq(new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, prep.executeBatch());
+        assertArrayEq(new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, prep.executeBatch());
         prep.close();
         ResultSet rs = stat.executeQuery("select count(*) from test;");
         assertTrue(rs.next());
@@ -464,7 +466,7 @@ public class PrepStmtTest
         for (int i = 0; i < 10; i++) {
             prep.addBatch();
         }
-        assertArrayEq(new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, prep.executeBatch());
+        assertArrayEq(new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, prep.executeBatch());
         prep.close();
         ResultSet rs = stat.executeQuery("select count(*) from test;");
         assertTrue(rs.next());
@@ -490,7 +492,9 @@ public class PrepStmtTest
         assertEquals(meta.getColumnType(2), Types.INTEGER);
         assertEquals(meta.getColumnType(3), Types.INTEGER);*/
 
-        prep.setInt(1, 2);prep.setInt(2, 3);prep.setInt(3, -1);
+        prep.setInt(1, 2);
+        prep.setInt(2, 3);
+        prep.setInt(3, -1);
         meta = prep.executeQuery().getMetaData();
         assertEquals(meta.getColumnCount(), 3);
         prep.close();
@@ -630,23 +634,21 @@ public class PrepStmtTest
         prep.addBatch();
     }
 
-    @Test(expected = SQLException.class)
-    public void noSuchTable() throws SQLException {
-        PreparedStatement prep = conn.prepareStatement("select * from doesnotexist;");
-        prep.executeQuery();
+    @Test
+    public void noSuchTable() {
+        assertThrows(SQLException.class, () -> conn.prepareStatement("select * from doesnotexist;"));
     }
 
-    @Test(expected = SQLException.class)
+    @Test
     public void noSuchCol() throws SQLException {
-        PreparedStatement prep = conn.prepareStatement("select notacol from (select 1);");
-        prep.executeQuery();
+        assertThrows(SQLException.class, () ->  conn.prepareStatement("select notacol from (select 1);"));
     }
 
-    @Test(expected = SQLException.class)
+    @Test
     public void noSuchColName() throws SQLException {
         ResultSet rs = conn.prepareStatement("select 1;").executeQuery();
         assertTrue(rs.next());
-        rs.getInt("noSuchColName");
+        assertThrows(SQLException.class, () -> rs.getInt("noSuchColName"));
     }
 
     @Test
@@ -701,15 +703,17 @@ public class PrepStmtTest
         assertNotNull(a);
         assertNotNull(b);
         assertEquals(a.length, b.length);
-        for (int i = 0; i < a.length; i++)
+        for (int i = 0; i < a.length; i++) {
             assertEquals(a[i], b[i]);
+        }
     }
 
     private void assertArrayEq(int[] a, int[] b) {
         assertNotNull(a);
         assertNotNull(b);
         assertEquals(a.length, b.length);
-        for (int i = 0; i < a.length; i++)
+        for (int i = 0; i < a.length; i++) {
             assertEquals(a[i], b[i]);
+        }
     }
 }

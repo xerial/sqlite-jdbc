@@ -1,8 +1,9 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.sql.Connection;
@@ -14,32 +15,30 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * These tests assume that Statements and PreparedStatements are working as per
  * normal and test the interactions of commit(), setSavepoint(), setSavepoint(String),
  * rollback(Savepoint), and release(Savepoint).
  */
-public class SavepointTest
-{
+public class SavepointTest {
     private Connection conn1, conn2;
-    private Statement  stat1, stat2;
+    private Statement stat1, stat2;
 
-    boolean            done = false;
+    boolean done = false;
 
-    @BeforeClass
+    @BeforeAll
     public static void forName() throws Exception {
         System.out.println("running in " + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java") + " mode");
     }
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         File tmpFile = File.createTempFile("test-trans", ".db");
-	// tmpFile.deleteOnExit();
+        // tmpFile.deleteOnExit();
 
         Properties prop = new Properties();
         prop.setProperty("shared_cache", "false");
@@ -51,7 +50,7 @@ public class SavepointTest
         stat2 = conn2.createStatement();
     }
 
-    @After
+    @AfterEach
     public void close() throws Exception {
         stat1.close();
         stat2.close();

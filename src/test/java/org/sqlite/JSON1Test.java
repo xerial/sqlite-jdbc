@@ -1,13 +1,15 @@
 package org.sqlite;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the JSON1 extension using the examples listed in the documentation.
@@ -509,8 +511,8 @@ public class JSON1Test {
         conn.createStatement().execute("insert into user values('harry', json_array('504-200-0000','304-200-0000'))");
 
         String q = "SELECT DISTINCT user.name"
-                + " FROM user, json_each(user.phone)"
-                + " where json_each.value LIKE '704-%'";
+            + " FROM user, json_each(user.phone)"
+            + " where json_each.value LIKE '704-%'";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
         assertTrue(rs.next());
@@ -532,11 +534,11 @@ public class JSON1Test {
         conn.createStatement().execute("insert into user values('harry', json_array('504-200-0000','304-200-0000'))");
 
         String q = "SELECT name FROM user WHERE phone LIKE '705-%'"
-                + " UNION"
-                + " SELECT user.name"
-                + " FROM user, json_each(user.phone)"
-                + " WHERE json_valid(user.phone)"
-                + " AND json_each.value LIKE '704-%'";
+            + " UNION"
+            + " SELECT user.name"
+            + " FROM user, json_each(user.phone)"
+            + " WHERE json_valid(user.phone)"
+            + " AND json_each.value LIKE '704-%'";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
         assertTrue(rs.next());
@@ -553,8 +555,8 @@ public class JSON1Test {
         conn.createStatement().execute("insert into big values(json_object('a',2,'c',4))");
 
         String q = "SELECT big.rowid, fullkey, value"
-                + " FROM big, json_tree(big.json)"
-                + " WHERE json_tree.type NOT IN ('object', 'array')";
+            + " FROM big, json_tree(big.json)"
+            + " WHERE json_tree.type NOT IN ('object', 'array')";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
         assertTrue(rs.next());
@@ -579,8 +581,8 @@ public class JSON1Test {
         conn.createStatement().execute("insert into big values(json_object('a',2,'c',4))");
 
         String q = "SELECT big.rowid, fullkey, atom"
-                + " FROM big, json_tree(big.json)"
-                + " WHERE atom IS NOT NULL";
+            + " FROM big, json_tree(big.json)"
+            + " WHERE atom IS NOT NULL";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
         assertTrue(rs.next());
