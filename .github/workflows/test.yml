@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - master
+      - ci-native
     paths:
       - '**.java'
       - '**.xml'

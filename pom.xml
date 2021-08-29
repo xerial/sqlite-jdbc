@@ -279,8 +279,6 @@
                 <exclude>**/UDFCustomErrorTest.java</exclude>
                 <!--  ${project.name} not properly replaced on Windows and MacOS in CI  -->
                 <exclude>**/DBMetaDataVersionTest.java</exclude>
-                <!--  from.renameTo(to) fails on Windows  -->
-                <exclude>**/ErrorMessageWithFileMoveTest.java</exclude>
               </excludes>
             </configuration>
           </plugin>
