@@ -29,9 +29,13 @@ jobs:
         java: [8, 11, 16]
         exclude:
           - os: windows-latest
-            java: [8, 11]
+            java: 11
+          - os: windows-latest
+            java: 8
           - os: macos-latest
-            java: [8, 11]
+            java: 11
+          - os: macos-latest
+            java: 8
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
