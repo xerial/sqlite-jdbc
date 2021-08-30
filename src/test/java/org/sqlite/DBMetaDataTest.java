@@ -1,11 +1,11 @@
 package org.sqlite;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -22,6 +22,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -128,7 +129,7 @@ public class DBMetaDataTest {
         assertEquals(rs.getString("TABLE_NAME"), "test");
         assertEquals(rs.getString("COLUMN_NAME"), "id");
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
         assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertFalse(rs.next());
@@ -146,7 +147,7 @@ public class DBMetaDataTest {
         assertTrue(rs.next());
         assertEquals(rs.getString("COLUMN_NAME"), "sn");
         assertEquals(rs.getString("IS_NULLABLE"), "NO");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertFalse(rs.next());
 
         rs = meta.getColumns(null, null, "test", "%");
@@ -914,7 +915,7 @@ public class DBMetaDataTest {
         assertEquals(rs.getString("COLUMN_NAME"), "col1");
         assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "tabcols1");
@@ -928,7 +929,7 @@ public class DBMetaDataTest {
         assertEquals(rs.getString("COLUMN_NAME"), "Col1");
         assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "TabCols2");
@@ -942,7 +943,7 @@ public class DBMetaDataTest {
         assertEquals(rs.getString("COLUMN_NAME"), "Col1");
         assertEquals(rs.getInt("DATA_TYPE"), Types.VARCHAR);
         assertEquals(rs.getString("IS_NULLABLE"), "YES");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "TabCols3");
@@ -969,7 +970,7 @@ public class DBMetaDataTest {
         assertEquals(rs.getString("COLUMN_NAME"), "COL1");
         assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
         assertEquals(rs.getString("IS_NULLABLE"), "NO");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "TAB1");
@@ -983,7 +984,7 @@ public class DBMetaDataTest {
         assertEquals(rs.getString("COLUMN_NAME"), "COL1");
         assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
         assertEquals(rs.getString("IS_NULLABLE"), "NO");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertEquals(rs.getString("IS_AUTOINCREMENT"), "NO");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "TAB2");
@@ -997,7 +998,7 @@ public class DBMetaDataTest {
         assertEquals(rs.getString("COLUMN_NAME"), "COL1");
         assertEquals(rs.getInt("DATA_TYPE"), Types.INTEGER);
         assertEquals(rs.getString("IS_NULLABLE"), "NO");
-        assertEquals(rs.getString("COLUMN_DEF"), null);
+        assertNull(rs.getString("COLUMN_DEF"));
         assertEquals(rs.getString("IS_AUTOINCREMENT"), "YES");
         assertTrue(rs.next());
         assertEquals(rs.getString("TABLE_NAME"), "TAB3");
@@ -1074,8 +1075,8 @@ public class DBMetaDataTest {
         final ResultSet rs = meta.getPrimaryKeys(null, null, tableName);
         assertTrue(rs.next());
         for (int i = 0; i < pkColumns.length; i++) {
-            assertEquals(null, rs.getString("TABLE_CAT"), "DatabaseMetaData.getPrimaryKeys: TABLE_CAT");
-            assertEquals(null, rs.getString("TABLE_SCHEM"), "DatabaseMetaData.getPrimaryKeys: TABLE_SCHEM");
+            assertNull(rs.getString("TABLE_CAT"), "DatabaseMetaData.getPrimaryKeys: TABLE_CAT");
+            assertNull(rs.getString("TABLE_SCHEM"), "DatabaseMetaData.getPrimaryKeys: TABLE_SCHEM");
             assertEquals(tableName, rs.getString("TABLE_NAME"), "DatabaseMetaData.getPrimaryKeys: TABLE_NAME");
             assertEquals(pkColumns[i], rs.getString("COLUMN_NAME"), "DatabaseMetaData.getPrimaryKeys: COLUMN_NAME");
             assertEquals(pkName, rs.getString("PK_NAME"), "DatabaseMetaData.getPrimaryKeys: PK_NAME");
@@ -1108,7 +1109,7 @@ public class DBMetaDataTest {
         importedKeys.close();
 
         importedKeys = meta.getImportedKeys(null, null, "person");
-        assertTrue(!importedKeys.next());
+        assertFalse(importedKeys.next());
         importedKeys.close();
     }
 
@@ -1231,9 +1232,12 @@ public class DBMetaDataTest {
 
     @Test
     public void version() throws Exception {
-        File versionFile = new File("./VERSION");
-        Properties version = new Properties();
-        version.load(new FileReader(versionFile));
+        Properties version;
+        try (InputStream resourceAsStream = DBMetaDataTest.class.getResourceAsStream("/META-INF/maven/org.xerial/sqlite-jdbc/VERSION")) {
+            version = new Properties();
+            Assumptions.assumeTrue(resourceAsStream != null);
+            version.load(resourceAsStream);
+        }
         String versionString = version.getProperty("version");
         int majorVersion = Integer.parseInt(versionString.split("\\.")[0]);
         int minorVersion = Integer.parseInt(versionString.split("\\.")[1]);
@@ -1247,7 +1251,7 @@ public class DBMetaDataTest {
         assertEquals(versionString, meta.getDatabaseProductVersion(), "db version");
         assertEquals(majorVersion, meta.getDatabaseMajorVersion(), "db major version");
         assertEquals(minorVersion, meta.getDatabaseMinorVersion(), "db minor version");
-        assertEquals(null, meta.getUserName(), "user name");
+        assertNull(meta.getUserName(), "user name");
     }
 
 }

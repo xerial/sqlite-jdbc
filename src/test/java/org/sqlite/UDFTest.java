@@ -15,7 +15,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -239,17 +238,6 @@ public class UDFTest {
         assertTrue(rs.next());
         assertEquals(rs.getString(1), "Hello");
         prep.close();
-    }
-
-    @Test
-    public void customErr() throws SQLException {
-        Function.create(conn, "f9", new Function() {
-            @Override
-            public void xFunc() throws SQLException {
-                throw new SQLException("myErr");
-            }
-        });
-        assertThrows(SQLException.class, () -> stat.executeQuery("select f9();"));
     }
 
     @Test
