@@ -1,7 +1,7 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.sql.DriverManager;
@@ -9,9 +9,8 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ListenerTest {
 
@@ -22,26 +21,32 @@ public class ListenerTest {
         File tmpFile = File.createTempFile("test-listeners", ".db");
         tmpFile.deleteOnExit();
 
-        connectionOne = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:" + tmpFile.getAbsolutePath());
-        connectionTwo = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:" + tmpFile.getAbsolutePath());
+        connectionOne =
+                (SQLiteConnection)
+                        DriverManager.getConnection("jdbc:sqlite:" + tmpFile.getAbsolutePath());
+        connectionTwo =
+                (SQLiteConnection)
+                        DriverManager.getConnection("jdbc:sqlite:" + tmpFile.getAbsolutePath());
 
         Statement create = connectionOne.createStatement();
-        create.execute("CREATE TABLE IF NOT EXISTS sample (id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT);");
+        create.execute(
+                "CREATE TABLE IF NOT EXISTS sample (id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT);");
     }
 
     @Test
     public void testSetAndRemoveUpdateHook() throws Exception {
         final List<Update> updates = new LinkedList<Update>();
 
-        SQLiteUpdateListener listener = new SQLiteUpdateListener() {
-            @Override
-            public void onUpdate(Type type, String database, String table, long rowId) {
-                synchronized (updates) {
-                    updates.add(new Update(type, database, table, rowId));
-                    updates.notifyAll();
-                }
-            }
-        };
+        SQLiteUpdateListener listener =
+                new SQLiteUpdateListener() {
+                    @Override
+                    public void onUpdate(Type type, String database, String table, long rowId) {
+                        synchronized (updates) {
+                            updates.add(new Update(type, database, table, rowId));
+                            updates.notifyAll();
+                        }
+                    }
+                };
 
         connectionOne.addUpdateListener(listener);
 
@@ -81,15 +86,16 @@ public class ListenerTest {
     public void testMultiConnectionHook() throws Exception {
         final List<Update> updates = new LinkedList<Update>();
 
-        SQLiteUpdateListener listener = new SQLiteUpdateListener() {
-            @Override
-            public void onUpdate(Type type, String database, String table, long rowId) {
-                synchronized (updates) {
-                    updates.add(new Update(type, database, table, rowId));
-                    updates.notifyAll();
-                }
-            }
-        };
+        SQLiteUpdateListener listener =
+                new SQLiteUpdateListener() {
+                    @Override
+                    public void onUpdate(Type type, String database, String table, long rowId) {
+                        synchronized (updates) {
+                            updates.add(new Update(type, database, table, rowId));
+                            updates.notifyAll();
+                        }
+                    }
+                };
 
         connectionOne.addUpdateListener(listener);
 
@@ -130,29 +136,31 @@ public class ListenerTest {
         final List<Update> updates = new LinkedList<Update>();
         final AtomicBoolean committed = new AtomicBoolean(false);
 
-        SQLiteUpdateListener updateListener = new SQLiteUpdateListener() {
-            @Override
-            public void onUpdate(Type type, String database, String table, long rowId) {
-                synchronized (updates) {
-                    updates.add(new Update(type, database, table, rowId));
-                    updates.notifyAll();
-                }
-            }
-        };
+        SQLiteUpdateListener updateListener =
+                new SQLiteUpdateListener() {
+                    @Override
+                    public void onUpdate(Type type, String database, String table, long rowId) {
+                        synchronized (updates) {
+                            updates.add(new Update(type, database, table, rowId));
+                            updates.notifyAll();
+                        }
+                    }
+                };
 
-        SQLiteCommitListener commitListener = new SQLiteCommitListener() {
-            @Override
-            public void onCommit() {
-                synchronized (committed) {
-                    committed.set(true);
-                }
-            }
+        SQLiteCommitListener commitListener =
+                new SQLiteCommitListener() {
+                    @Override
+                    public void onCommit() {
+                        synchronized (committed) {
+                            committed.set(true);
+                        }
+                    }
 
-            @Override
-            public void onRollback() {
-                throw new AssertionError("rollback?");
-            }
-        };
+                    @Override
+                    public void onRollback() {
+                        throw new AssertionError("rollback?");
+                    }
+                };
 
         connectionOne.addUpdateListener(updateListener);
         connectionOne.addCommitListener(commitListener);
@@ -184,7 +192,6 @@ public class ListenerTest {
         connectionOne.removeUpdateListener(updateListener);
         connectionOne.removeCommitListener(commitListener);
     }
-
 
     private static class Update {
         private final SQLiteUpdateListener.Type type;

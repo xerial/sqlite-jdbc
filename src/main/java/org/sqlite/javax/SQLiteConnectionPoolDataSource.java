@@ -12,38 +12,37 @@
  *  limitations under the License.
  *--------------------------------------------------------------------------*/
 package org.sqlite.javax;
+
 import java.sql.SQLException;
 import javax.sql.PooledConnection;
-
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 
-public class SQLiteConnectionPoolDataSource extends SQLiteDataSource implements javax.sql.ConnectionPoolDataSource {
+public class SQLiteConnectionPoolDataSource extends SQLiteDataSource
+        implements javax.sql.ConnectionPoolDataSource {
 
-    /**
-     * Default constructor.
-     */
-    public SQLiteConnectionPoolDataSource () {
+    /** Default constructor. */
+    public SQLiteConnectionPoolDataSource() {
         super();
     }
 
     /**
      * Creates a data source based on the provided configuration.
+     *
      * @param config The configuration for the data source.
      */
     public SQLiteConnectionPoolDataSource(SQLiteConfig config) {
         super(config);
     }
 
-    /**
-     * @see javax.sql.ConnectionPoolDataSource#getPooledConnection()
-     */
+    /** @see javax.sql.ConnectionPoolDataSource#getPooledConnection() */
     public PooledConnection getPooledConnection() throws SQLException {
         return getPooledConnection(null, null);
     }
 
     /**
-     * @see javax.sql.ConnectionPoolDataSource#getPooledConnection(java.lang.String, java.lang.String)
+     * @see javax.sql.ConnectionPoolDataSource#getPooledConnection(java.lang.String,
+     *     java.lang.String)
      */
     public PooledConnection getPooledConnection(String user, String password) throws SQLException {
         return new SQLitePooledConnection(getConnection(user, password));

@@ -1,12 +1,14 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
@@ -17,18 +19,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.StringTokenizer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-/**
- * These tests are designed to stress PreparedStatements on memory dbs.
- */
+/** These tests are designed to stress PreparedStatements on memory dbs. */
 public class PrepStmtTest {
     static byte[] b1 = new byte[] {1, 2, 7, 4, 2, 6, 2, 8, 5, 2, 3, 1, 5, 3, 6, 3, 3, 6, 2, 5};
     static byte[] b2 = getUtf8Bytes("To be or not to be.");
@@ -267,8 +262,11 @@ public class PrepStmtTest {
 
     @Test
     public void getObject() throws SQLException {
-        stat.executeUpdate("create table testobj (" + "c1 integer, c2 float, c3, c4 varchar, c5 bit, c6, c7);");
-        PreparedStatement prep = conn.prepareStatement("insert into testobj values (?,?,?,?,?,?,?);");
+        stat.executeUpdate(
+                "create table testobj ("
+                        + "c1 integer, c2 float, c3, c4 varchar, c5 bit, c6, c7);");
+        PreparedStatement prep =
+                conn.prepareStatement("insert into testobj values (?,?,?,?,?,?,?);");
 
         prep.setInt(1, Integer.MAX_VALUE);
         prep.setFloat(2, Float.MAX_VALUE);
@@ -326,8 +324,25 @@ public class PrepStmtTest {
 
     @Test
     public void utf() throws SQLException {
-        ResultSet rs = stat.executeQuery("select '" + utf01 + "','" + utf02 + "','" + utf03 + "','" + utf04 + "','"
-            + utf05 + "','" + utf06 + "','" + utf07 + "','" + utf08 + "';");
+        ResultSet rs =
+                stat.executeQuery(
+                        "select '"
+                                + utf01
+                                + "','"
+                                + utf02
+                                + "','"
+                                + utf03
+                                + "','"
+                                + utf04
+                                + "','"
+                                + utf05
+                                + "','"
+                                + utf06
+                                + "','"
+                                + utf07
+                                + "','"
+                                + utf08
+                                + "';");
         assertArrayEq(rs.getBytes(1), getUtf8Bytes(utf01));
         assertArrayEq(rs.getBytes(2), getUtf8Bytes(utf02));
         assertArrayEq(rs.getBytes(3), getUtf8Bytes(utf03));
@@ -431,7 +446,6 @@ public class PrepStmtTest {
         stat.executeUpdate("insert into test values (1);");
         conn.prepareStatement("select * from test;").executeQuery().close();
         stat.executeUpdate("drop table test;");
-
     }
 
     @Test
@@ -520,7 +534,8 @@ public class PrepStmtTest {
     public void date2() throws SQLException {
         Date d1 = new Date(1092941466000L);
         stat.execute("create table t (c1);");
-        PreparedStatement prep = conn.prepareStatement("insert into t values (datetime(?/1000, 'unixepoch'));");
+        PreparedStatement prep =
+                conn.prepareStatement("insert into t values (datetime(?/1000, 'unixepoch'));");
         prep.setDate(1, d1);
         prep.executeUpdate();
 
@@ -545,7 +560,8 @@ public class PrepStmtTest {
     //    public void multipleStatements() throws SQLException
     //    {
     //        PreparedStatement prep = conn
-    //                .prepareStatement("create table person (id integer, name string); insert into person values(1, 'leo'); insert into person values(2, 'yui');");
+    //                .prepareStatement("create table person (id integer, name string); insert into
+    // person values(1, 'leo'); insert into person values(2, 'yui');");
     //        prep.executeUpdate();
     //
     //        ResultSet rs = conn.createStatement().executeQuery("select * from person");
@@ -580,7 +596,8 @@ public class PrepStmtTest {
 
     @Test
     public void clearParameters() throws SQLException {
-        stat.executeUpdate("create table tbl (colid integer primary key AUTOINCREMENT, col varchar)");
+        stat.executeUpdate(
+                "create table tbl (colid integer primary key AUTOINCREMENT, col varchar)");
         stat.executeUpdate("insert into tbl(col) values (\"foo\")");
         stat.executeUpdate("insert into tbl(col) values (?)");
 
@@ -600,7 +617,8 @@ public class PrepStmtTest {
         prep.execute();
 
         // should not throw
-        PreparedStatement nullPrep = conn.prepareStatement("select colid from tbl where col is null");
+        PreparedStatement nullPrep =
+                conn.prepareStatement("select colid from tbl where col is null");
         rs = nullPrep.executeQuery();
         rs.next();
 
@@ -636,12 +654,14 @@ public class PrepStmtTest {
 
     @Test
     public void noSuchTable() {
-        assertThrows(SQLException.class, () -> conn.prepareStatement("select * from doesnotexist;"));
+        assertThrows(
+                SQLException.class, () -> conn.prepareStatement("select * from doesnotexist;"));
     }
 
     @Test
     public void noSuchCol() throws SQLException {
-        assertThrows(SQLException.class, () ->  conn.prepareStatement("select notacol from (select 1);"));
+        assertThrows(
+                SQLException.class, () -> conn.prepareStatement("select notacol from (select 1);"));
     }
 
     @Test
@@ -653,7 +673,9 @@ public class PrepStmtTest {
 
     @Test
     public void constraintErrorCodeExecute() throws SQLException {
-        assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
+        assertEquals(
+                0,
+                stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
         assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
         // try to insert a row with duplicate id
         try {
@@ -668,7 +690,9 @@ public class PrepStmtTest {
 
     @Test
     public void constraintErrorCodeExecuteUpdate() throws SQLException {
-        assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
+        assertEquals(
+                0,
+                stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
         assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
         // try to insert a row with duplicate id
         try {
@@ -683,7 +707,9 @@ public class PrepStmtTest {
 
     @Test
     public void constraintExtendedResultCodeExecute() throws SQLException {
-        assertEquals(0, stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
+        assertEquals(
+                0,
+                stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
         assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
         // try to insert a row with duplicate id
         try {
@@ -695,7 +721,9 @@ public class PrepStmtTest {
             assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
 
             // Extended error code should be preserved in SQLiteException#resultCode
-            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE, ((SQLiteException) e).getResultCode());
+            assertEquals(
+                    SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE,
+                    ((SQLiteException) e).getResultCode());
         }
     }
 

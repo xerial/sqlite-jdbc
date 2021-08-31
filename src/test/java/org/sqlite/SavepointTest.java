@@ -1,9 +1,8 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.sql.Connection;
@@ -14,15 +13,15 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
- * These tests assume that Statements and PreparedStatements are working as per
- * normal and test the interactions of commit(), setSavepoint(), setSavepoint(String),
- * rollback(Savepoint), and release(Savepoint).
+ * These tests assume that Statements and PreparedStatements are working as per normal and test the
+ * interactions of commit(), setSavepoint(), setSavepoint(String), rollback(Savepoint), and
+ * release(Savepoint).
  */
 public class SavepointTest {
     private Connection conn1, conn2;
@@ -32,7 +31,10 @@ public class SavepointTest {
 
     @BeforeAll
     public static void forName() throws Exception {
-        System.out.println("running in " + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java") + " mode");
+        System.out.println(
+                "running in "
+                        + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java")
+                        + " mode");
     }
 
     @BeforeEach

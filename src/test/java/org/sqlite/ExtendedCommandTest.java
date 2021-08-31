@@ -1,23 +1,22 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // ExtendedCommandTest.java
 // Since: Mar 12, 2010
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.SQLException;
 import org.junit.jupiter.api.Test;
 import org.sqlite.ExtendedCommand.BackupCommand;
 import org.sqlite.ExtendedCommand.RestoreCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
-
-import java.sql.SQLException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ExtendedCommandTest {
 
@@ -54,7 +53,8 @@ public class ExtendedCommandTest {
 
     @Test
     public void parseRestoreCmd() throws SQLException {
-        RestoreCommand b = parseRestoreCommand("restore mydb from somewhere/backupfolder/mydb.sqlite");
+        RestoreCommand b =
+                parseRestoreCommand("restore mydb from somewhere/backupfolder/mydb.sqlite");
         assertEquals("mydb", b.targetDB);
         assertEquals("somewhere/backupfolder/mydb.sqlite", b.srcFile);
 
@@ -70,5 +70,4 @@ public class ExtendedCommandTest {
         assertEquals("main", b.targetDB);
         assertEquals("target/sample.db", b.srcFile);
     }
-
 }

@@ -1,8 +1,8 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -12,14 +12,11 @@ import java.sql.Statement;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-/**
- * Tests User Defined Collations.
- */
+/** Tests User Defined Collations. */
 public class CollationTest {
     private Connection conn;
     private Statement stat;
@@ -42,14 +39,17 @@ public class CollationTest {
     @Test
     public void reverseCollation() throws SQLException {
         ArrayList<String> received = new ArrayList<>();
-        Collation.create(conn, "REVERSE", new Collation() {
-            @Override
-            protected int xCompare(String str1, String str2) {
-                received.add(str1);
-                received.add(str2);
-                return str1.compareTo(str2) * -1;
-            }
-        });
+        Collation.create(
+                conn,
+                "REVERSE",
+                new Collation() {
+                    @Override
+                    protected int xCompare(String str1, String str2) {
+                        received.add(str1);
+                        received.add(str2);
+                        return str1.compareTo(str2) * -1;
+                    }
+                });
         stat.executeUpdate("create table t (c1);");
         stat.executeUpdate("insert into t values ('aaa');");
         stat.executeUpdate("insert into t values ('aba');");
@@ -64,27 +64,29 @@ public class CollationTest {
 
         String[] expected = {"aba", "aca", "aaa"};
         assertArrayEquals(
-            Arrays.stream(expected).distinct().sorted().toArray(),
-            received.stream().distinct().sorted().toArray()
-        );
+                Arrays.stream(expected).distinct().sorted().toArray(),
+                received.stream().distinct().sorted().toArray());
     }
 
     @Test
     public void unicodeCollation() throws SQLException {
         ArrayList<String> received = new ArrayList<>();
-        Collation.create(conn, "UNICODE", new Collation() {
-            @Override
-            protected int xCompare(String str1, String str2) {
-                received.add(str1);
-                received.add(str2);
+        Collation.create(
+                conn,
+                "UNICODE",
+                new Collation() {
+                    @Override
+                    protected int xCompare(String str1, String str2) {
+                        received.add(str1);
+                        received.add(str2);
 
-                Collator collator = Collator.getInstance();
-                collator.setDecomposition(Collator.TERTIARY);
-                collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+                        Collator collator = Collator.getInstance();
+                        collator.setDecomposition(Collator.TERTIARY);
+                        collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
 
-                return collator.compare(str1, str2);
-            }
-        });
+                        return collator.compare(str1, str2);
+                    }
+                });
         stat.executeUpdate("create table t (c1);");
         stat.executeUpdate("insert into t values ('aec');");
         stat.executeUpdate("insert into t values ('aea');");
@@ -99,25 +101,30 @@ public class CollationTest {
 
         String[] expected = {"aea", "aéb", "aec"};
         assertArrayEquals(
-            Arrays.stream(expected).distinct().sorted().toArray(),
-            received.stream().distinct().sorted().toArray()
-        );
+                Arrays.stream(expected).distinct().sorted().toArray(),
+                received.stream().distinct().sorted().toArray());
     }
 
     @Test
     public void twoCollationsNoConflict() throws SQLException {
-        Collation.create(conn, "REVERSE", new Collation() {
-            @Override
-            protected int xCompare(String str1, String str2) {
-                return str1.compareTo(str2) * -1;
-            }
-        });
-        Collation.create(conn, "NORMAL", new Collation() {
-            @Override
-            protected int xCompare(String str1, String str2) {
-                return str1.compareTo(str2);
-            }
-        });
+        Collation.create(
+                conn,
+                "REVERSE",
+                new Collation() {
+                    @Override
+                    protected int xCompare(String str1, String str2) {
+                        return str1.compareTo(str2) * -1;
+                    }
+                });
+        Collation.create(
+                conn,
+                "NORMAL",
+                new Collation() {
+                    @Override
+                    protected int xCompare(String str1, String str2) {
+                        return str1.compareTo(str2);
+                    }
+                });
 
         stat.executeUpdate("create table t (c1);");
         stat.executeUpdate("insert into t values ('a');");
@@ -152,19 +159,22 @@ public class CollationTest {
     @Test
     public void validateSpecialCharactersAreCorrectlyPassedToJava() throws SQLException {
         ArrayList<String> received = new ArrayList<>();
-        Collation.create(conn, "UNICODE", new Collation() {
-            @Override
-            protected int xCompare(String str1, String str2) {
-                received.add(str1);
-                received.add(str2);
+        Collation.create(
+                conn,
+                "UNICODE",
+                new Collation() {
+                    @Override
+                    protected int xCompare(String str1, String str2) {
+                        received.add(str1);
+                        received.add(str2);
 
-                Collator collator = Collator.getInstance();
-                collator.setDecomposition(Collator.TERTIARY);
-                collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+                        Collator collator = Collator.getInstance();
+                        collator.setDecomposition(Collator.TERTIARY);
+                        collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
 
-                return collator.compare(str1, str2);
-            }
-        });
+                        return collator.compare(str1, str2);
+                    }
+                });
         stat.executeUpdate("create table t (c1);");
         stat.executeUpdate("insert into t values ('😀');");
         stat.executeUpdate("insert into t values ('おはよう');");
@@ -175,21 +185,23 @@ public class CollationTest {
         String[] expected = {"😀", "おはよう", "你好", "안녕하세요"};
 
         assertArrayEquals(
-            Arrays.stream(expected).distinct().sorted().toArray(),
-            received.stream().distinct().sorted().toArray()
-        );
+                Arrays.stream(expected).distinct().sorted().toArray(),
+                received.stream().distinct().sorted().toArray());
     }
 
     @Test
     public void destroy() throws SQLException {
-        Collation.create(conn, "c1", new Collation() {
-            @Override
-            protected int xCompare(String str1, String str2) {
-                valStr1 = str1;
-                valStr2 = str2;
-                return str1.compareTo(str2) * -1;
-            }
-        });
+        Collation.create(
+                conn,
+                "c1",
+                new Collation() {
+                    @Override
+                    protected int xCompare(String str1, String str2) {
+                        valStr1 = str1;
+                        valStr2 = str2;
+                        return str1.compareTo(str2) * -1;
+                    }
+                });
         stat.executeUpdate("create table t (c1);");
         stat.executeUpdate("insert into t values ('a');");
         stat.executeUpdate("insert into t values ('b');");

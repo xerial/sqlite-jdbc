@@ -23,102 +23,97 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * <p>DatePrinter is the "missing" interface for the format methods of 
- * {@link java.text.DateFormat}.</p>
- * 
+ * DatePrinter is the "missing" interface for the format methods of {@link java.text.DateFormat}.
+ *
  * @since 3.2
  */
 public interface DatePrinter {
 
     /**
-     * <p>Formats a millisecond {@code long} value.</p>
+     * Formats a millisecond {@code long} value.
      *
-     * @param millis  the millisecond value to format
+     * @param millis the millisecond value to format
      * @return the formatted string
      * @since 2.1
      */
     String format(long millis);
 
     /**
-     * <p>Formats a {@code Date} object using a {@code GregorianCalendar}.</p>
+     * Formats a {@code Date} object using a {@code GregorianCalendar}.
      *
-     * @param date  the date to format
+     * @param date the date to format
      * @return the formatted string
      */
     String format(Date date);
 
     /**
-     * <p>Formats a {@code Calendar} object.</p>
+     * Formats a {@code Calendar} object.
      *
-     * @param calendar  the calendar to format
+     * @param calendar the calendar to format
      * @return the formatted string
      */
     String format(Calendar calendar);
 
     /**
-     * <p>Formats a milliseond {@code long} value into the
-     * supplied {@code StringBuffer}.</p>
+     * Formats a milliseond {@code long} value into the supplied {@code StringBuffer}.
      *
-     * @param millis  the millisecond value to format
-     * @param buf  the buffer to format into
+     * @param millis the millisecond value to format
+     * @param buf the buffer to format into
      * @return the specified string buffer
      */
     StringBuffer format(long millis, StringBuffer buf);
 
     /**
-     * <p>Formats a {@code Date} object into the
-     * supplied {@code StringBuffer} using a {@code GregorianCalendar}.</p>
+     * Formats a {@code Date} object into the supplied {@code StringBuffer} using a {@code
+     * GregorianCalendar}.
      *
-     * @param date  the date to format
-     * @param buf  the buffer to format into
+     * @param date the date to format
+     * @param buf the buffer to format into
      * @return the specified string buffer
      */
     StringBuffer format(Date date, StringBuffer buf);
 
     /**
-     * <p>Formats a {@code Calendar} object into the
-     * supplied {@code StringBuffer}.</p>
+     * Formats a {@code Calendar} object into the supplied {@code StringBuffer}.
      *
-     * @param calendar  the calendar to format
-     * @param buf  the buffer to format into
+     * @param calendar the calendar to format
+     * @param buf the buffer to format into
      * @return the specified string buffer
      */
     StringBuffer format(Calendar calendar, StringBuffer buf);
 
     // Accessors
-    //-----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
     /**
-     * <p>Gets the pattern used by this printer.</p>
+     * Gets the pattern used by this printer.
      *
      * @return the pattern, {@link java.text.SimpleDateFormat} compatible
      */
     String getPattern();
 
     /**
-     * <p>Gets the time zone used by this printer.</p>
+     * Gets the time zone used by this printer.
      *
-     * <p>This zone is always used for {@code Date} printing. </p>
+     * <p>This zone is always used for {@code Date} printing.
      *
      * @return the time zone
      */
     TimeZone getTimeZone();
 
     /**
-     * <p>Gets the locale used by this printer.</p>
+     * Gets the locale used by this printer.
      *
      * @return the locale
      */
     Locale getLocale();
 
     /**
-     * <p>Formats a {@code Date}, {@code Calendar} or
-     * {@code Long} (milliseconds) object.</p>
-     * 
-     * See {@link java.text.DateFormat#format(Object, StringBuffer, FieldPosition)}
-     * 
-     * @param obj  the object to format
-     * @param toAppendTo  the buffer to append to
-     * @param pos  the position - ignored
+     * Formats a {@code Date}, {@code Calendar} or {@code Long} (milliseconds) object. See {@link
+     * java.text.DateFormat#format(Object, StringBuffer, FieldPosition)}
+     *
+     * @param obj the object to format
+     * @param toAppendTo the buffer to append to
+     * @param pos the position - ignored
      * @return the buffer passed in
      */
     StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos);

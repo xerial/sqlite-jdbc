@@ -1,25 +1,24 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // ReadCommitedTest.java
 // Since: Jan 19, 2009
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ReadUncommittedTest {
     private Connection conn;
@@ -63,19 +62,25 @@ public class ReadUncommittedTest {
         prop.setProperty("shared_cache", "true");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals(stat.executeQuery("PRAGMA read_uncommitted;").getString(1), "0",
-            "Fail to set pragma read_uncommitted");
+        assertEquals(
+                stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
+                "0",
+                "Fail to set pragma read_uncommitted");
 
         prop.setProperty("read_uncommitted", "true");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals("1", stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
-            "Fail to set pragma read_uncommitted");
+        assertEquals(
+                "1",
+                stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
+                "Fail to set pragma read_uncommitted");
 
         prop.setProperty("read_uncommitted", "false");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals("0", stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
-            "Fail to set pragma read_uncommitted");
+        assertEquals(
+                "0",
+                stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
+                "Fail to set pragma read_uncommitted");
     }
 }

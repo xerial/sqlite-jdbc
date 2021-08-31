@@ -1,26 +1,16 @@
 package org.sqlite;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-/**
- * Tests User Defined Functions.
- */
+/** Tests User Defined Functions. */
 public class UDFCustomErrorTest {
     private Connection conn;
     private Statement stat;
@@ -39,12 +29,15 @@ public class UDFCustomErrorTest {
 
     @Test
     public void customErr() throws SQLException {
-        Function.create(conn, "f9", new Function() {
-            @Override
-            public void xFunc() throws SQLException {
-                throw new SQLException("myErr");
-            }
-        });
+        Function.create(
+                conn,
+                "f9",
+                new Function() {
+                    @Override
+                    public void xFunc() throws SQLException {
+                        throw new SQLException("myErr");
+                    }
+                });
         assertThrows(SQLException.class, () -> stat.executeQuery("select f9();"));
     }
 }

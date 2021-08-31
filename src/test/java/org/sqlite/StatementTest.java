@@ -1,11 +1,12 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.sqlite.jdbc3.JDBC3Statement;
-import org.sqlite.jdbc4.JDBC4Statement;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -17,18 +18,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.sqlite.jdbc3.JDBC3Statement;
+import org.sqlite.jdbc4.JDBC4Statement;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-/**
- * These tests are designed to stress Statements on memory databases.
- */
+/** These tests are designed to stress Statements on memory databases. */
 public class StatementTest {
     private Connection conn;
     private Statement stat;
@@ -57,19 +54,20 @@ public class StatementTest {
 
         // multiple SQL statements
         assertEquals(
-            stat.executeUpdate("insert into s1 values (11);" +
-                "insert into s1 values (12)"),
-            2);
+                stat.executeUpdate("insert into s1 values (11);" + "insert into s1 values (12)"),
+                2);
         assertEquals(
-            stat.executeUpdate("update s1 set c1 = 21 where c1 = 11;" +
-                "update s1 set c1 = 22 where c1 = 12;" +
-                "update s1 set c1 = 23 where c1 = 13"),
-            2); // c1 = 13 does not exist
+                stat.executeUpdate(
+                        "update s1 set c1 = 21 where c1 = 11;"
+                                + "update s1 set c1 = 22 where c1 = 12;"
+                                + "update s1 set c1 = 23 where c1 = 13"),
+                2); // c1 = 13 does not exist
         assertEquals(
-            stat.executeUpdate("delete from s1 where c1 = 21;" +
-                "delete from s1 where c1 = 22;" +
-                "delete from s1 where c1 = 23"),
-            2); // c1 = 23 does not exist
+                stat.executeUpdate(
+                        "delete from s1 where c1 = 21;"
+                                + "delete from s1 where c1 = 22;"
+                                + "delete from s1 where c1 = 23"),
+                2); // c1 = 23 does not exist
 
         assertEquals(stat.executeUpdate("drop table s1;"), 0);
     }
@@ -367,7 +365,8 @@ public class StatementTest {
 
     @Test
     public void noSuchCol() {
-        assertThrows(SQLException.class, () -> stat.executeQuery("select notacol from (select 1);"));
+        assertThrows(
+                SQLException.class, () -> stat.executeQuery("select notacol from (select 1);"));
     }
 
     @Test
@@ -380,8 +379,9 @@ public class StatementTest {
     @Test
     public void multipleStatements() throws SQLException {
         // ; insert into person values(1,'leo')
-        stat.executeUpdate("create table person (id integer, name string); " +
-            "insert into person values(1, 'leo'); insert into person values(2, 'yui');");
+        stat.executeUpdate(
+                "create table person (id integer, name string); "
+                        + "insert into person values(1, 'leo'); insert into person values(2, 'yui');");
         ResultSet rs = stat.executeQuery("select * from person");
         assertTrue(rs.next());
         assertTrue(rs.next());
@@ -432,8 +432,10 @@ public class StatementTest {
 
     @Test
     public void defaultDateTimeTest() throws SQLException {
-        stat.executeUpdate("create table daywithdefaultdatetime (id integer, datetime datatime default current_timestamp)");
-        PreparedStatement prep = conn.prepareStatement("insert into daywithdefaultdatetime (id) values (?)");
+        stat.executeUpdate(
+                "create table daywithdefaultdatetime (id integer, datetime datatime default current_timestamp)");
+        PreparedStatement prep =
+                conn.prepareStatement("insert into daywithdefaultdatetime (id) values (?)");
         prep.setInt(1, 1);
         prep.executeUpdate();
         ResultSet rs = stat.executeQuery("select * from daywithdefaultdatetime");

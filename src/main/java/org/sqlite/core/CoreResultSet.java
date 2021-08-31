@@ -15,35 +15,32 @@
  */
 package org.sqlite.core;
 
-import org.sqlite.SQLiteConnectionConfig;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import org.sqlite.SQLiteConnectionConfig;
 
-/**
- * Implements a JDBC ResultSet.
- */
-public abstract class CoreResultSet implements Codes
-{
+/** Implements a JDBC ResultSet. */
+public abstract class CoreResultSet implements Codes {
     protected final CoreStatement stmt;
 
-    public boolean            open     = false; // true means have results and can iterate them
-    public int                maxRows;         // max. number of rows as set by a Statement
-    public String[]           cols     = null; // if null, the RS is closed()
-    public String[]           colsMeta = null; // same as cols, but used by Meta interface
-    protected boolean[][]        meta     = null;
+    public boolean open = false; // true means have results and can iterate them
+    public int maxRows; // max. number of rows as set by a Statement
+    public String[] cols = null; // if null, the RS is closed()
+    public String[] colsMeta = null; // same as cols, but used by Meta interface
+    protected boolean[][] meta = null;
 
-    protected int        limitRows;       // 0 means no limit, must check against maxRows
-    protected int        row      = 0;    // number of current row, starts at 1 (0 is for before loading data)
-    protected int        lastCol;         // last column accessed, for wasNull(). -1 if none
+    protected int limitRows; // 0 means no limit, must check against maxRows
+    protected int row = 0; // number of current row, starts at 1 (0 is for before loading data)
+    protected int lastCol; // last column accessed, for wasNull(). -1 if none
 
     public boolean closeStmt;
     protected Map<String, Integer> columnNameToIndex = null;
 
     /**
      * Default constructor for a given statement.
+     *
      * @param stmt The statement.
      */
     protected CoreResultSet(CoreStatement stmt) {
@@ -62,15 +59,14 @@ public abstract class CoreResultSet implements Codes
 
     /**
      * Checks the status of the result set.
+     *
      * @return True if has results and can iterate them; false otherwise.
      */
     public boolean isOpen() {
         return open;
     }
 
-    /**
-     * @throws SQLException if ResultSet is not open.
-     */
+    /** @throws SQLException if ResultSet is not open. */
     protected void checkOpen() throws SQLException {
         if (!open) {
             throw new SQLException("ResultSet closed");
@@ -79,6 +75,7 @@ public abstract class CoreResultSet implements Codes
 
     /**
      * Takes col in [1,x] form, returns in [0,x-1] form
+     *
      * @param col
      * @return
      * @throws SQLException
@@ -95,6 +92,7 @@ public abstract class CoreResultSet implements Codes
 
     /**
      * Takes col in [1,x] form, marks it as last accessed and returns [0,x-1]
+     *
      * @param col
      * @return
      * @throws SQLException
@@ -106,9 +104,7 @@ public abstract class CoreResultSet implements Codes
         return --col;
     }
 
-    /**
-     * @throws SQLException
-     */
+    /** @throws SQLException */
     public void checkMeta() throws SQLException {
         checkCol(1);
         if (meta == null) {
@@ -136,7 +132,7 @@ public abstract class CoreResultSet implements Codes
 
                 if (closeStmt) {
                     closeStmt = false; // break recursive call
-                    ((Statement)stmt).close();
+                    ((Statement) stmt).close();
                 }
             }
         }

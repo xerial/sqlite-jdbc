@@ -13,19 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *--------------------------------------------------------------------------*/
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // SQLiteException.java
 // Since: Jun 28, 2016
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
 import java.sql.SQLException;
-import org.sqlite.SQLiteErrorCode;
 
 public class SQLiteException extends SQLException {
     private SQLiteErrorCode resultCode;

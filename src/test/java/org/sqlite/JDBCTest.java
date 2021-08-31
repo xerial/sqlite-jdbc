@@ -1,22 +1,21 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // JDBCTest.java
 // Since: Apr 8, 2009
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.jupiter.api.Test;
 
 public class JDBCTest {
     @Test
@@ -49,5 +48,4 @@ public class JDBCTest {
     public void shouldReturnNullIfProtocolUnhandled() throws Exception {
         assertNull(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null));
     }
-
 }

@@ -1,11 +1,10 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.Test;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 public class TypeMapTest {
 
@@ -31,5 +30,4 @@ public class TypeMapTest {
 
         conn.close();
     }
-
 }
