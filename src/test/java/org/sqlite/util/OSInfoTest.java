@@ -1,21 +1,20 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // OSInfoTest.java
 // Since: May 20, 2008
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite.util;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Logger;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class OSInfoTest {
     private static final Logger logger = Logger.getLogger(OSInfoTest.class.getName());
@@ -71,7 +70,6 @@ public class OSInfoTest {
             // reset STDOUT
             System.setOut(out);
         }
-
     }
 
     @Test
@@ -97,5 +95,4 @@ public class OSInfoTest {
         String hardware = OSInfo.getHardwareName();
         logger.info("Hardware name: " + hardware);
     }
-
 }

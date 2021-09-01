@@ -1,11 +1,10 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.SQLException;
 import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class SQLiteConfigTest {
 
@@ -20,11 +19,14 @@ public class SQLiteConfigTest {
 
         Properties properties = config.toProperties();
 
-        assertEquals("yyyy/mm/dd",
-            properties.getProperty(SQLiteConfig.Pragma.DATE_STRING_FORMAT.getPragmaName()));
-        assertEquals(SQLiteConfig.DatePrecision.SECONDS.name(),
-            properties.getProperty(SQLiteConfig.Pragma.DATE_PRECISION.getPragmaName()));
-        assertEquals(SQLiteConfig.DateClass.REAL.name(),
-            properties.getProperty(SQLiteConfig.Pragma.DATE_CLASS.getPragmaName()));
+        assertEquals(
+                "yyyy/mm/dd",
+                properties.getProperty(SQLiteConfig.Pragma.DATE_STRING_FORMAT.getPragmaName()));
+        assertEquals(
+                SQLiteConfig.DatePrecision.SECONDS.name(),
+                properties.getProperty(SQLiteConfig.Pragma.DATE_PRECISION.getPragmaName()));
+        assertEquals(
+                SQLiteConfig.DateClass.REAL.name(),
+                properties.getProperty(SQLiteConfig.Pragma.DATE_CLASS.getPragmaName()));
     }
 }

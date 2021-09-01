@@ -13,20 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *--------------------------------------------------------------------------*/
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // SQLiteJDBCLoaderTest.java
 // Since: Oct 15, 2007
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -37,10 +37,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SQLiteJDBCLoaderTest {
 
@@ -85,16 +84,19 @@ public class SQLiteJDBCLoaderTest {
 
     @Test
     public void function() throws SQLException {
-        Function.create(connection, "total", new Function() {
-            @Override
-            protected void xFunc() throws SQLException {
-                int sum = 0;
-                for (int i = 0; i < args(); i++) {
-                    sum += value_int(i);
-                }
-                result(sum);
-            }
-        });
+        Function.create(
+                connection,
+                "total",
+                new Function() {
+                    @Override
+                    protected void xFunc() throws SQLException {
+                        int sum = 0;
+                        for (int i = 0; i < args(); i++) {
+                            sum += value_int(i);
+                        }
+                        result(sum);
+                    }
+                });
 
         ResultSet rs = connection.createStatement().executeQuery("select total(1, 2, 3, 4, 5)");
         assertTrue(rs.next());
@@ -113,24 +115,25 @@ public class SQLiteJDBCLoaderTest {
         for (int i = 0; i < 32; i++) {
             final String connStr = "jdbc:sqlite:target/sample-" + i + ".db";
             final int sleepMillis = i;
-            pool.execute(new Runnable() {
-                public void run() {
-                    try {
-                        Thread.sleep(sleepMillis * 10);
-                    } catch (InterruptedException e) {
-                    }
-                    try {
-                        // Uncomment the synchronized block and everything works.
-                        //synchronized (TestSqlite.class) {
-                        Connection conn = DriverManager.getConnection(connStr);
-                        //}
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        fail(e.getLocalizedMessage());
-                    }
-                    completedThreads.incrementAndGet();
-                }
-            });
+            pool.execute(
+                    new Runnable() {
+                        public void run() {
+                            try {
+                                Thread.sleep(sleepMillis * 10);
+                            } catch (InterruptedException e) {
+                            }
+                            try {
+                                // Uncomment the synchronized block and everything works.
+                                // synchronized (TestSqlite.class) {
+                                Connection conn = DriverManager.getConnection(connStr);
+                                // }
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                                fail(e.getLocalizedMessage());
+                            }
+                            completedThreads.incrementAndGet();
+                        }
+                    });
         }
         pool.shutdown();
         pool.awaitTermination(3, TimeUnit.SECONDS);

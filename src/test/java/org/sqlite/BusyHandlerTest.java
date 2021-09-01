@@ -1,17 +1,16 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class BusyHandlerTest {
     private Connection conn;
@@ -37,18 +36,21 @@ public class BusyHandlerTest {
 
         public BusyWork() throws Exception {
             conn = DriverManager.getConnection("jdbc:sqlite:target/test.db");
-            Function.create(conn, "wait_for_latch", new Function() {
-                @Override
-                protected void xFunc() throws SQLException {
-                    lockedLatch.countDown();
-                    try {
-                        completeLatch.await();
-                    } catch (InterruptedException e) {
-                        throw new SQLException("Interrupted");
-                    }
-                    result(100);
-                }
-            });
+            Function.create(
+                    conn,
+                    "wait_for_latch",
+                    new Function() {
+                        @Override
+                        protected void xFunc() throws SQLException {
+                            lockedLatch.countDown();
+                            try {
+                                completeLatch.await();
+                            } catch (InterruptedException e) {
+                                throw new SQLException("Interrupted");
+                            }
+                            result(100);
+                        }
+                    });
             stat = conn.createStatement();
             stat.setQueryTimeout(1);
         }
@@ -78,19 +80,21 @@ public class BusyHandlerTest {
     @Test
     public void basicBusyHandler() throws Exception {
         final int[] calls = {0};
-        BusyHandler.setHandler(conn, new BusyHandler() {
-            @Override
-            protected int callback(int nbPrevInvok) throws SQLException {
-                assertEquals(nbPrevInvok, calls[0]);
-                calls[0]++;
+        BusyHandler.setHandler(
+                conn,
+                new BusyHandler() {
+                    @Override
+                    protected int callback(int nbPrevInvok) throws SQLException {
+                        assertEquals(nbPrevInvok, calls[0]);
+                        calls[0]++;
 
-                if (nbPrevInvok <= 1) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
+                        if (nbPrevInvok <= 1) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                });
 
         BusyWork busyWork = new BusyWork();
         busyWork.start();
@@ -113,19 +117,21 @@ public class BusyHandlerTest {
     @Test
     public void testUnregister() throws Exception {
         final int[] calls = {0};
-        BusyHandler.setHandler(conn, new BusyHandler() {
-            @Override
-            protected int callback(int nbPrevInvok) throws SQLException {
-                assertEquals(nbPrevInvok, calls[0]);
-                calls[0]++;
+        BusyHandler.setHandler(
+                conn,
+                new BusyHandler() {
+                    @Override
+                    protected int callback(int nbPrevInvok) throws SQLException {
+                        assertEquals(nbPrevInvok, calls[0]);
+                        calls[0]++;
 
-                if (nbPrevInvok <= 1) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
+                        if (nbPrevInvok <= 1) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                });
 
         BusyWork busyWork = new BusyWork();
         busyWork.start();

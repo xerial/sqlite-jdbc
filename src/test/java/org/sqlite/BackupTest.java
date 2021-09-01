@@ -1,15 +1,15 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // BackupTest.java
 // Since: Feb 18, 2009
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +18,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class BackupTest {
 
@@ -51,7 +50,6 @@ public class BackupTest {
 
         assertEquals(2, count);
         rs.close();
-
     }
 
     @Test
@@ -70,11 +68,10 @@ public class BackupTest {
 
         File tmpFile = File.createTempFile("backup-test2", ".sqlite");
         tmpFile.deleteOnExit();
-        //System.err.println("backup start");
+        // System.err.println("backup start");
         stmt.executeUpdate("backup to " + tmpFile.getAbsolutePath());
         stmt.close();
-        //System.err.println("backup done.");
+        // System.err.println("backup done.");
 
     }
-
 }

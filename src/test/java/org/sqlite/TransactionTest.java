@@ -1,10 +1,9 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.sqlite.SQLiteConfig.TransactionMode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.sql.Connection;
@@ -17,16 +16,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.sqlite.SQLiteConfig.TransactionMode;
 
 /**
- * These tests assume that Statements and PreparedStatements are working as per
- * normal and test the interactions of commit(), rollback() and
- * setAutoCommit(boolean) with multiple connections to the same db.
+ * These tests assume that Statements and PreparedStatements are working as per normal and test the
+ * interactions of commit(), rollback() and setAutoCommit(boolean) with multiple connections to the
+ * same db.
  */
 public class TransactionTest {
     private Connection conn1, conn2, conn3;
@@ -36,7 +35,10 @@ public class TransactionTest {
 
     @BeforeAll
     public static void forName() throws Exception {
-        System.out.println("running in " + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java") + " mode");
+        System.out.println(
+                "running in "
+                        + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java")
+                        + " mode");
     }
 
     @BeforeEach
@@ -80,7 +82,8 @@ public class TransactionTest {
         conn1.setAutoCommit(false);
         stat1.execute("insert into test values (2);");
 
-        final PreparedStatement pstat2 = prepared ? conn2.prepareStatement("insert into test values (3);") : null;
+        final PreparedStatement pstat2 =
+                prepared ? conn2.prepareStatement("insert into test values (3);") : null;
 
         // Second transaction starts and tries to complete but fails because first is still running
         boolean gotException = false;
@@ -88,7 +91,8 @@ public class TransactionTest {
             ((SQLiteConnection) conn2).setBusyTimeout(10);
             conn2.setAutoCommit(false);
             if (pstat2 != null) {
-                // The prepared case would fail regardless of whether this was "execute" or "executeUpdate"
+                // The prepared case would fail regardless of whether this was "execute" or
+                // "executeUpdate"
                 pstat2.execute();
             } else {
                 // If you changed this to "executeUpdate" instead of "execute", the test would pass
@@ -103,7 +107,8 @@ public class TransactionTest {
         }
         assertTrue(gotException);
         conn2.rollback();
-        // The test would fail here: the trivial "transaction" created in between the rollback we just
+        // The test would fail here: the trivial "transaction" created in between the rollback we
+        // just
         // did and this point would fail to commit because "SQL statements in progress"
         conn2.setAutoCommit(true);
 
@@ -316,7 +321,9 @@ public class TransactionTest {
         assertTrue(rs.next());
 
         ((SQLiteConnection) conn2).setBusyTimeout(10);
-        assertThrows(SQLException.class, () -> stat2.executeUpdate("insert into t values (3);")); // can't be done
+        assertThrows(
+                SQLException.class,
+                () -> stat2.executeUpdate("insert into t values (3);")); // can't be done
     }
 
     //    @Test(expected= SQLException.class)

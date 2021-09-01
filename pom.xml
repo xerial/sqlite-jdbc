@@ -166,8 +166,22 @@
           </instructions>
         </configuration>
       </plugin>
-    </plugins>
 
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.12.3</version>
+        <configuration>
+          <java>
+            <toggleOffOn />
+            <googleJavaFormat>
+              <version>1.11.0</version>
+              <style>AOSP</style>
+            </googleJavaFormat>
+          </java>
+        </configuration>
+      </plugin>
+    </plugins>
 
     <pluginManagement>
       <plugins>

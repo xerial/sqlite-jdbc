@@ -1,16 +1,19 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // QueryTest.java
 // Since: Apr 8, 2009
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import org.junit.jupiter.api.Test;
-import org.sqlite.date.FastDateFormat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Clob;
 import java.sql.Connection;
@@ -23,12 +26,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+import org.sqlite.date.FastDateFormat;
 
 public class QueryTest {
     public Connection getConnection() throws SQLException {
@@ -51,7 +50,9 @@ public class QueryTest {
     public void createTable() throws Exception {
         Connection conn = getConnection();
         Statement stmt = conn.createStatement();
-        stmt.execute("CREATE TABLE IF NOT EXISTS sample " + "(id INTEGER PRIMARY KEY, descr VARCHAR(40))");
+        stmt.execute(
+                "CREATE TABLE IF NOT EXISTS sample "
+                        + "(id INTEGER PRIMARY KEY, descr VARCHAR(40))");
         stmt.close();
 
         stmt = conn.createStatement();
@@ -63,7 +64,6 @@ public class QueryTest {
         }
 
         conn.close();
-
     }
 
     @Test
@@ -82,7 +82,6 @@ public class QueryTest {
         assertTrue(rs.next());
         float f2 = rs.getFloat(1);
         assertEquals(f, f2, 0.0000001);
-
     }
 
     @Test
@@ -92,7 +91,8 @@ public class QueryTest {
         conn.createStatement().execute("create table sample (start_time datetime)");
 
         Date now = new Date();
-        String date = FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT).format(now);
+        String date =
+                FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT).format(now);
 
         conn.createStatement().execute("insert into sample values(" + now.getTime() + ")");
         conn.createStatement().execute("insert into sample values('" + date + "')");
@@ -127,9 +127,12 @@ public class QueryTest {
         Calendar customCalendar = Calendar.getInstance(customTimeZone);
 
         java.sql.Date now = new java.sql.Date(new Date().getTime());
-        FastDateFormat customFormat = FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, customTimeZone);
-        FastDateFormat utcFormat = FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, utcTimeZone);
-        java.sql.Date nowLikeCustomZoneIsUtc = new java.sql.Date(utcFormat.parse(customFormat.format(now)).getTime());
+        FastDateFormat customFormat =
+                FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, customTimeZone);
+        FastDateFormat utcFormat =
+                FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, utcTimeZone);
+        java.sql.Date nowLikeCustomZoneIsUtc =
+                new java.sql.Date(utcFormat.parse(customFormat.format(now)).getTime());
 
         PreparedStatement preparedStatement = null;
         try {
@@ -199,7 +202,6 @@ public class QueryTest {
         assertTrue(rs.wasNull());
     }
 
-
     @Test
     public void viewTest() throws Exception {
         Connection conn = getConnection();
@@ -212,7 +214,6 @@ public class QueryTest {
         Statement st2 = conn.createStatement();
         st2.execute("DROP VIEW IF EXISTS " + tableName);
         st2.close();
-
     }
 
     @Test
@@ -236,7 +237,8 @@ public class QueryTest {
             statement.setQueryTimeout(30); // set timeout to 30 sec.
 
             statement.executeUpdate("drop table if exists person");
-            statement.executeUpdate("create table person (id integer, name string, shortname string)");
+            statement.executeUpdate(
+                    "create table person (id integer, name string, shortname string)");
             statement.executeUpdate("insert into person values(1, 'leo','L')");
             statement.executeUpdate("insert into person values(2, 'yui','Y')");
             statement.executeUpdate("insert into person values(3, 'abc', null)");
@@ -254,21 +256,24 @@ public class QueryTest {
             statement.executeUpdate("insert into mxp values(2,2,'T')");
             statement.executeUpdate("insert into mxp values(3,2,'T')");
 
-            ResultSet rs = statement
-                .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=2 and mxp.pid=person.id and mxp.type='T'");
+            ResultSet rs =
+                    statement.executeQuery(
+                            "select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=2 and mxp.pid=person.id and mxp.type='T'");
             while (rs.next()) {
                 // read the result set
                 assertEquals("Y,abc", rs.getString(1));
             }
-            rs = statement
-                .executeQuery("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=1 and mxp.pid=person.id and mxp.type='T'");
+            rs =
+                    statement.executeQuery(
+                            "select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=1 and mxp.pid=person.id and mxp.type='T'");
             while (rs.next()) {
                 // read the result set
                 assertEquals("Y", rs.getString(1));
             }
 
-            PreparedStatement ps = conn
-                .prepareStatement("select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=? and mxp.pid=person.id and mxp.type='T'");
+            PreparedStatement ps =
+                    conn.prepareStatement(
+                            "select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=? and mxp.pid=person.id and mxp.type='T'");
             ps.clearParameters();
             ps.setInt(1, new Integer(2));
             rs = ps.executeQuery();
@@ -298,7 +303,6 @@ public class QueryTest {
                 System.err.println(e);
             }
         }
-
     }
 
     @Test
@@ -326,7 +330,9 @@ public class QueryTest {
                     }
                     assertEquals("", clob.getSubString(1, 0));
                     assertEquals(content, clob.getSubString(1, length));
-                    assertEquals(content.substring(2, content.length() - 1), clob.getSubString(3, content.length() - 3));
+                    assertEquals(
+                            content.substring(2, content.length() - 1),
+                            clob.getSubString(3, content.length() - 3));
                 } finally {
                     if (rs != null) rs.close();
                 }

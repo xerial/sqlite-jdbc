@@ -1,8 +1,9 @@
 package org.sqlite;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +11,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.junit.jupiter.api.Test;
 
 public class ErrorMessageTest {
     static class VendorCodeMatcher extends BaseMatcher<Object> {
@@ -35,11 +34,11 @@ public class ErrorMessageTest {
 
         public void describeTo(Description description) {
             description
-                .appendText("SQLException with error code ")
-                .appendText(expected.name())
-                .appendText(" (")
-                .appendValue(expected.code)
-                .appendText(")");
+                    .appendText("SQLException with error code ")
+                    .appendText(expected.name())
+                    .appendText(" (")
+                    .appendValue(expected.code)
+                    .appendText(")");
         }
     }
 
@@ -60,11 +59,11 @@ public class ErrorMessageTest {
 
         public void describeTo(Description description) {
             description
-                .appendText("SQLiteException with error code ")
-                .appendText(expected.name())
-                .appendText(" (")
-                .appendValue(expected.code)
-                .appendText(")");
+                    .appendText("SQLiteException with error code ")
+                    .appendText(expected.name())
+                    .appendText(" (")
+                    .appendValue(expected.code)
+                    .appendText(")");
         }
     }
 
@@ -82,7 +81,10 @@ public class ErrorMessageTest {
         assumeTrue(to.delete());
         assumeTrue(from.renameTo(to));
 
-        Exception exception = assertThrows(SQLException.class, () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
+        Exception exception =
+                assertThrows(
+                        SQLException.class,
+                        () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
         assertTrue(exception.getMessage().contains("[SQLITE_READONLY_DBMOVED]"));
 
         stmt.close();
@@ -106,7 +108,10 @@ public class ErrorMessageTest {
         conn = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
         stmt = conn.createStatement();
         Statement finalStmt = stmt;
-        Exception exception = assertThrows(SQLException.class, () -> finalStmt.executeUpdate("insert into sample values(2, \"bar\")"));
+        Exception exception =
+                assertThrows(
+                        SQLException.class,
+                        () -> finalStmt.executeUpdate("insert into sample values(2, \"bar\")"));
         assertTrue(exception.getMessage().contains("[SQLITE_READONLY]"));
         stmt.close();
         conn.close();
@@ -119,13 +124,18 @@ public class ErrorMessageTest {
         assumeTrue(dir.mkdir());
         dir.deleteOnExit();
 
-        Exception exception = assertThrows(SQLException.class, () -> DriverManager.getConnection("jdbc:sqlite:" + dir.getAbsolutePath()));
-        assertTrue(exception.getMessage().contains("[SQLITE_CANTOPEN]")
-            || exception.getMessage().contains("[SQLITE_CANTOPEN_ISDIR]"));
+        Exception exception =
+                assertThrows(
+                        SQLException.class,
+                        () -> DriverManager.getConnection("jdbc:sqlite:" + dir.getAbsolutePath()));
+        assertTrue(
+                exception.getMessage().contains("[SQLITE_CANTOPEN]")
+                        || exception.getMessage().contains("[SQLITE_CANTOPEN_ISDIR]"));
     }
 
     @Test
-    public void shouldUsePlainErrorCodeAsVendorCodeAndExtendedAsResultCode() throws SQLException, IOException {
+    public void shouldUsePlainErrorCodeAsVendorCodeAndExtendedAsResultCode()
+            throws SQLException, IOException {
         File from = File.createTempFile("error-message-test-plain-1", ".sqlite");
         from.deleteOnExit();
 
@@ -138,11 +148,13 @@ public class ErrorMessageTest {
         assumeTrue(to.delete());
         assumeTrue(from.renameTo(to));
 
-        Exception exception = assertThrows(SQLException.class, () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
+        Exception exception =
+                assertThrows(
+                        SQLException.class,
+                        () -> stmt.executeUpdate("insert into sample values(2, \"bar\")"));
         assertTrue(exception.getMessage().contains("[SQLITE_READONLY_DBMOVED]"));
         assertThat(exception, new VendorCodeMatcher(SQLiteErrorCode.SQLITE_READONLY));
         assertThat(exception, new ResultCodeMatcher(SQLiteErrorCode.SQLITE_READONLY_DBMOVED));
-
 
         stmt.close();
         conn.close();

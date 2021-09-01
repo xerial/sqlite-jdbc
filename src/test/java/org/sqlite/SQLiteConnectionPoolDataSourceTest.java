@@ -13,26 +13,24 @@
  *--------------------------------------------------------------------------*/
 package org.sqlite;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.sqlite.javax.SQLiteConnectionPoolDataSource;
-
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.PooledConnection;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.sqlite.javax.SQLiteConnectionPoolDataSource;
+
 public class SQLiteConnectionPoolDataSourceTest {
 
     @Test
-    public void connectionTest()
-        throws SQLException {
+    public void connectionTest() throws SQLException {
         ConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
 
         PooledConnection pooledConn = ds.getPooledConnection();
@@ -62,8 +60,7 @@ public class SQLiteConnectionPoolDataSourceTest {
 
     @Disabled
     @Test
-    public void proxyConnectionCloseTest()
-        throws SQLException {
+    public void proxyConnectionCloseTest() throws SQLException {
         ConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
         PooledConnection pooledConn = ds.getPooledConnection();
         System.out.println("pooledConn: " + pooledConn.getClass());
