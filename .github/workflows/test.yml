@@ -26,9 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
-          java-version: '11'
+          distribution: 'adopt'
+          java-version: 11
+          java-package: jdk
+          cache: 'maven'
       - name: spotless:check
         run: mvn spotless:check
 
@@ -50,14 +53,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: 'adopt'
           java-version: ${{ matrix.java }}
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache
-          key: ${{ runner.os }}-jdk${{ matrix.java }}-${{ hashFiles('**/*.sbt') }}
-          restore-keys: ${{ runner.os }}-jdk${{ matrix.java }}-
+          java-package: jdk
+          cache: 'maven'
       - name: Test
         run: mvn test
 
