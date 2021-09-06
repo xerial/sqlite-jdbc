@@ -13,26 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *--------------------------------------------------------------------------*/
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // SQLiteErrorCode.java
 // Since: Apr 21, 2009
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
 /**
  * SQLite3 error code
- * 
+ *
  * @author leo
- * @see <a href="http://www.sqlite.org/c3ref/c_abort.html">http://www.sqlite.org/c3ref/c_abort.html</a>
- * 
+ * @see <a
+ *     href="http://www.sqlite.org/c3ref/c_abort.html">http://www.sqlite.org/c3ref/c_abort.html</a>
  */
 public enum SQLiteErrorCode {
-
     UNKNOWN_ERROR(-1, "unknown error"),
     SQLITE_OK(0, "Successful result"),
     /* beginning-of-error-codes */
@@ -65,32 +64,44 @@ public enum SQLiteErrorCode {
     SQLITE_ROW(100, " sqlite3_step() has another row ready"),
     SQLITE_DONE(101, " sqlite3_step() has finished executing"),
     /* Beginning of extended error codes */
-    SQLITE_BUSY_RECOVERY(261, " Another process is busy recovering a WAL mode database file following a crash"),
-    SQLITE_LOCKED_SHAREDCACHE(262, " Contention with a different database connection that shares the cache"),
+    SQLITE_BUSY_RECOVERY(
+            261, " Another process is busy recovering a WAL mode database file following a crash"),
+    SQLITE_LOCKED_SHAREDCACHE(
+            262, " Contention with a different database connection that shares the cache"),
     SQLITE_READONLY_RECOVERY(264, " The database file needs to be recovered"),
     SQLITE_IOERR_READ(266, " I/O error in the VFS layer while trying to read from a file on disk"),
     SQLITE_CORRUPT_VTAB(267, " Content in the virtual table is corrupt"),
     SQLITE_CONSTRAINT_CHECK(275, " A CHECK constraint failed"),
-    SQLITE_ABORT_ROLLBACK(516, " The transaction that was active when the SQL statement first started was rolled back"),
+    SQLITE_ABORT_ROLLBACK(
+            516,
+            " The transaction that was active when the SQL statement first started was rolled back"),
     SQLITE_BUSY_SNAPSHOT(517, " Another database connection has already written to the database"),
-    SQLITE_READONLY_CANTLOCK(520, " The shared-memory file associated with that database is read-only"),
-    SQLITE_IOERR_SHORT_READ(522, " The VFS layer was unable to obtain as many bytes as was requested"),
+    SQLITE_READONLY_CANTLOCK(
+            520, " The shared-memory file associated with that database is read-only"),
+    SQLITE_IOERR_SHORT_READ(
+            522, " The VFS layer was unable to obtain as many bytes as was requested"),
     SQLITE_CANTOPEN_ISDIR(526, " The file is really a directory"),
     SQLITE_CONSTRAINT_COMMITHOOK(531, " A commit hook callback returned non-zero"),
     SQLITE_READONLY_ROLLBACK(776, "  Hot journal needs to be rolled back"),
     SQLITE_IOERR_WRITE(778, " I/O error in the VFS layer while trying to write to a file on disk"),
-    SQLITE_CANTOPEN_FULLPATH(782, " The operating system was unable to convert the filename into a full pathname"),
+    SQLITE_CANTOPEN_FULLPATH(
+            782, " The operating system was unable to convert the filename into a full pathname"),
     SQLITE_CONSTRAINT_FOREIGNKEY(787, " A foreign key constraint failed"),
     SQLITE_READONLY_DBMOVED(1032, " The database file has been moved since it was opened"),
-    SQLITE_IOERR_FSYNC(1034, " I/O error in the VFS layer while trying to flush previously written content"),
-    SQLITE_CANTOPEN_CONVPATH(1038, " cygwin_conv_path() system call failed while trying to open a file"),
+    SQLITE_IOERR_FSYNC(
+            1034, " I/O error in the VFS layer while trying to flush previously written content"),
+    SQLITE_CANTOPEN_CONVPATH(
+            1038, " cygwin_conv_path() system call failed while trying to open a file"),
     SQLITE_CONSTRAINT_FUNCTION(1043, " Error reported by extension function"),
-    SQLITE_IOERR_DIR_FSYNC(1290, " I/O error in the VFS layer while trying to invoke fsync() on a directory"),
+    SQLITE_IOERR_DIR_FSYNC(
+            1290, " I/O error in the VFS layer while trying to invoke fsync() on a directory"),
     SQLITE_CONSTRAINT_NOTNULL(1299, " A NOT NULL constraint failed"),
-    SQLITE_IOERR_TRUNCATE(1546, " I/O error in the VFS layer while trying to truncate a file to a smaller size"),
+    SQLITE_IOERR_TRUNCATE(
+            1546, " I/O error in the VFS layer while trying to truncate a file to a smaller size"),
     SQLITE_CONSTRAINT_PRIMARYKEY(1555, " A PRIMARY KEY constraint failed"),
     SQLITE_IOERR_FSTAT(1802, " I/O error in the VFS layer while trying to invoke fstat()"),
-    SQLITE_CONSTRAINT_TRIGGER(1811, " A RAISE function within a trigger fired, causing the SQL statement to abort"),
+    SQLITE_CONSTRAINT_TRIGGER(
+            1811, " A RAISE function within a trigger fired, causing the SQL statement to abort"),
     SQLITE_IOERR_UNLOCK(2058, " I/O error within xUnlock"),
     SQLITE_CONSTRAINT_UNIQUE(2067, " A UNIQUE constraint failed"),
     SQLITE_IOERR_RDLOCK(2314, " I/O error within xLock"),
@@ -102,13 +113,18 @@ public enum SQLiteErrorCode {
     SQLITE_IOERR_CHECKRESERVEDLOCK(3594, " I/O error within xCheckReservedLock"),
     SQLITE_IOERR_LOCK(3850, " I/O error in the advisory file locking logic"),
     SQLITE_IOERR_CLOSE(4106, " I/O error within xClose"),
-    SQLITE_IOERR_SHMOPEN(4618, " I/O error within xShmMap while trying to open a new shared memory segment"),
-    SQLITE_IOERR_SHMSIZE(4874, " I/O error within xShmMap while trying to resize an existing shared memory segment"),
-    SQLITE_IOERR_SHMMAP(5386, " I/O error within xShmMap while trying to map a shared memory segment"),
+    SQLITE_IOERR_SHMOPEN(
+            4618, " I/O error within xShmMap while trying to open a new shared memory segment"),
+    SQLITE_IOERR_SHMSIZE(
+            4874,
+            " I/O error within xShmMap while trying to resize an existing shared memory segment"),
+    SQLITE_IOERR_SHMMAP(
+            5386, " I/O error within xShmMap while trying to map a shared memory segment"),
     SQLITE_IOERR_SEEK(5642, " I/O error while trying to seek a file descriptor"),
     SQLITE_IOERR_DELETE_NOENT(5898, " The file being deleted does not exist"),
     SQLITE_IOERR_MMAP(6154, " I/O error while trying to map or unmap part of the database file"),
-    SQLITE_IOERR_GETTEMPPATH(6410, " Unable to determine a suitable directory in which to place temporary files"),
+    SQLITE_IOERR_GETTEMPPATH(
+            6410, " Unable to determine a suitable directory in which to place temporary files"),
     SQLITE_IOERR_CONVPATH(6666, " cygwin_conv_path() system call failed");
 
     public final int code;
@@ -116,11 +132,11 @@ public enum SQLiteErrorCode {
 
     /**
      * Constructor that applies error code and message.
+     *
      * @param code Error code.
      * @param message Message for the error.
      */
-    private SQLiteErrorCode(int code, String message)
-    {
+    private SQLiteErrorCode(int code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -129,22 +145,16 @@ public enum SQLiteErrorCode {
      * @param errorCode Error code.
      * @return Error message.
      */
-    public static SQLiteErrorCode getErrorCode(int errorCode)
-    {
-        for (SQLiteErrorCode each : SQLiteErrorCode.values())
-        {
-            if (errorCode == each.code)
-                return each;
+    public static SQLiteErrorCode getErrorCode(int errorCode) {
+        for (SQLiteErrorCode each : SQLiteErrorCode.values()) {
+            if (errorCode == each.code) return each;
         }
         return UNKNOWN_ERROR;
     }
 
-    /**
-     * @see java.lang.Enum#toString()
-     */
+    /** @see java.lang.Enum#toString() */
     @Override
-    public String toString()
-    {
+    public String toString() {
         return String.format("[%s] %s", this.name(), message);
     }
 }

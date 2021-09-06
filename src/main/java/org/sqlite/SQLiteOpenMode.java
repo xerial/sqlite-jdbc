@@ -13,24 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *--------------------------------------------------------------------------*/
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // SQLiteOpenMode.java
 // Since: Dec 8, 2009
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
 /**
  * Database file open modes of SQLite.
- * 
- * See also http://sqlite.org/c3ref/open.html
- * 
+ *
+ * <p>See also http://sqlite.org/c3ref/open.html
+ *
  * @author leo
- * 
  */
 public enum SQLiteOpenMode {
     READONLY(0x00000001), /* Ok for int SQLITE3_open_v2() */
@@ -50,8 +49,7 @@ public enum SQLiteOpenMode {
     NOMUTEX(0x00008000), /* Ok for int SQLITE3_open_v2() */
     FULLMUTEX(0x00010000), /* Ok for int SQLITE3_open_v2() */
     SHAREDCACHE(0x00020000), /* Ok for int SQLITE3_open_v2() */
-    PRIVATECACHE(0x00040000) /* Ok for sqlite3_open_v2() */
-    ;
+    PRIVATECACHE(0x00040000) /* Ok for sqlite3_open_v2() */;
 
     public final int flag;
 

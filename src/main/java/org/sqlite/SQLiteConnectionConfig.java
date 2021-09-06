@@ -1,21 +1,18 @@
 package org.sqlite;
 
-import org.sqlite.date.FastDateFormat;
+import static org.sqlite.SQLiteConfig.DEFAULT_DATE_STRING_FORMAT;
 
 import java.sql.Connection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Properties;
+import org.sqlite.date.FastDateFormat;
 
-import static org.sqlite.SQLiteConfig.DEFAULT_DATE_STRING_FORMAT;
-
-/**
- * Connection local configurations
- */
-public class SQLiteConnectionConfig implements Cloneable
-{
+/** Connection local configurations */
+public class SQLiteConnectionConfig implements Cloneable {
     private SQLiteConfig.DateClass dateClass = SQLiteConfig.DateClass.INTEGER;
-    private SQLiteConfig.DatePrecision datePrecision = SQLiteConfig.DatePrecision.MILLISECONDS; //Calendar.SECOND or Calendar.MILLISECOND
+    private SQLiteConfig.DatePrecision datePrecision =
+            SQLiteConfig.DatePrecision.MILLISECONDS; // Calendar.SECOND or Calendar.MILLISECOND
     private String dateStringFormat = DEFAULT_DATE_STRING_FORMAT;
     private FastDateFormat dateFormat = FastDateFormat.getInstance(dateStringFormat);
 
@@ -25,12 +22,22 @@ public class SQLiteConnectionConfig implements Cloneable
 
     public static SQLiteConnectionConfig fromPragmaTable(Properties pragmaTable) {
         return new SQLiteConnectionConfig(
-                SQLiteConfig.DateClass.getDateClass(pragmaTable.getProperty(SQLiteConfig.Pragma.DATE_CLASS.pragmaName, SQLiteConfig.DateClass.INTEGER.name())),
-                SQLiteConfig.DatePrecision.getPrecision(pragmaTable.getProperty(SQLiteConfig.Pragma.DATE_PRECISION.pragmaName, SQLiteConfig.DatePrecision.MILLISECONDS.name())),
-                pragmaTable.getProperty(SQLiteConfig.Pragma.DATE_STRING_FORMAT.pragmaName, DEFAULT_DATE_STRING_FORMAT),
+                SQLiteConfig.DateClass.getDateClass(
+                        pragmaTable.getProperty(
+                                SQLiteConfig.Pragma.DATE_CLASS.pragmaName,
+                                SQLiteConfig.DateClass.INTEGER.name())),
+                SQLiteConfig.DatePrecision.getPrecision(
+                        pragmaTable.getProperty(
+                                SQLiteConfig.Pragma.DATE_PRECISION.pragmaName,
+                                SQLiteConfig.DatePrecision.MILLISECONDS.name())),
+                pragmaTable.getProperty(
+                        SQLiteConfig.Pragma.DATE_STRING_FORMAT.pragmaName,
+                        DEFAULT_DATE_STRING_FORMAT),
                 Connection.TRANSACTION_SERIALIZABLE,
                 SQLiteConfig.TransactionMode.getMode(
-                        pragmaTable.getProperty(SQLiteConfig.Pragma.TRANSACTION_MODE.pragmaName, SQLiteConfig.TransactionMode.DEFERRED.name())),
+                        pragmaTable.getProperty(
+                                SQLiteConfig.Pragma.TRANSACTION_MODE.pragmaName,
+                                SQLiteConfig.TransactionMode.DEFERRED.name())),
                 true);
     }
 
@@ -40,9 +47,7 @@ public class SQLiteConnectionConfig implements Cloneable
             String dateStringFormat,
             int transactionIsolation,
             SQLiteConfig.TransactionMode transactionMode,
-            boolean autoCommit
-    )
-    {
+            boolean autoCommit) {
         setDateClass(dateClass);
         setDatePrecision(datePrecision);
         setDateStringFormat(dateStringFormat);
@@ -58,89 +63,72 @@ public class SQLiteConnectionConfig implements Cloneable
                 dateStringFormat,
                 transactionIsolation,
                 transactionMode,
-                autoCommit
-        );
+                autoCommit);
     }
 
-    public long getDateMultiplier()
-    {
+    public long getDateMultiplier() {
         return (datePrecision == SQLiteConfig.DatePrecision.MILLISECONDS) ? 1L : 1000L;
     }
 
-    public SQLiteConfig.DateClass getDateClass()
-    {
+    public SQLiteConfig.DateClass getDateClass() {
         return dateClass;
     }
 
-    public void setDateClass(SQLiteConfig.DateClass dateClass)
-    {
+    public void setDateClass(SQLiteConfig.DateClass dateClass) {
         this.dateClass = dateClass;
     }
 
-    public SQLiteConfig.DatePrecision getDatePrecision()
-    {
+    public SQLiteConfig.DatePrecision getDatePrecision() {
         return datePrecision;
     }
 
-    public void setDatePrecision(SQLiteConfig.DatePrecision datePrecision)
-    {
+    public void setDatePrecision(SQLiteConfig.DatePrecision datePrecision) {
         this.datePrecision = datePrecision;
     }
 
-    public String getDateStringFormat()
-    {
+    public String getDateStringFormat() {
         return dateStringFormat;
     }
 
-    public void setDateStringFormat(String dateStringFormat)
-    {
+    public void setDateStringFormat(String dateStringFormat) {
         this.dateStringFormat = dateStringFormat;
         this.dateFormat = FastDateFormat.getInstance(dateStringFormat);
     }
 
-    public FastDateFormat getDateFormat()
-    {
+    public FastDateFormat getDateFormat() {
         return dateFormat;
     }
 
-    public boolean isAutoCommit()
-    {
+    public boolean isAutoCommit() {
         return autoCommit;
     }
 
-    public void setAutoCommit(boolean autoCommit)
-    {
+    public void setAutoCommit(boolean autoCommit) {
         this.autoCommit = autoCommit;
     }
 
-    public int getTransactionIsolation()
-    {
+    public int getTransactionIsolation() {
         return transactionIsolation;
     }
 
-    public void setTransactionIsolation(int transactionIsolation)
-    {
+    public void setTransactionIsolation(int transactionIsolation) {
         this.transactionIsolation = transactionIsolation;
     }
 
-    public SQLiteConfig.TransactionMode getTransactionMode()
-    {
+    public SQLiteConfig.TransactionMode getTransactionMode() {
         return transactionMode;
     }
 
     @SuppressWarnings("deprecation")
-    public void setTransactionMode(SQLiteConfig.TransactionMode transactionMode)
-    {
+    public void setTransactionMode(SQLiteConfig.TransactionMode transactionMode) {
         if (transactionMode == SQLiteConfig.TransactionMode.DEFFERED) {
             transactionMode = SQLiteConfig.TransactionMode.DEFERRED;
         }
         this.transactionMode = transactionMode;
     }
 
-
-    private final static Map<SQLiteConfig.TransactionMode, String> beginCommandMap =
+    private static final Map<SQLiteConfig.TransactionMode, String> beginCommandMap =
             new EnumMap<SQLiteConfig.TransactionMode, String>(SQLiteConfig.TransactionMode.class);
-
 
     static {
         beginCommandMap.put(SQLiteConfig.TransactionMode.DEFERRED, "begin;");

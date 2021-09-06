@@ -1,44 +1,35 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // ExtendedCommandTest.java
 // Since: Mar 12, 2010
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.sqlite.ExtendedCommand.BackupCommand;
 import org.sqlite.ExtendedCommand.RestoreCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
 
-public class ExtendedCommandTest
-{
-
-    @Before
-    public void setUp() throws Exception {}
-
-    @After
-    public void tearDown() throws Exception {}
+public class ExtendedCommandTest {
 
     public static BackupCommand parseBackupCommand(String sql) throws SQLException {
         SQLExtension e = ExtendedCommand.parse(sql);
-        assertTrue(BackupCommand.class.isInstance(e));
-        return BackupCommand.class.cast(e);
+        assertTrue(e instanceof BackupCommand);
+        return (BackupCommand) e;
     }
 
     public static RestoreCommand parseRestoreCommand(String sql) throws SQLException {
         SQLExtension e = ExtendedCommand.parse(sql);
-        assertTrue(RestoreCommand.class.isInstance(e));
-        return RestoreCommand.class.cast(e);
+        assertTrue(e instanceof RestoreCommand);
+        return (RestoreCommand) e;
     }
 
     @Test
@@ -62,7 +53,8 @@ public class ExtendedCommandTest
 
     @Test
     public void parseRestoreCmd() throws SQLException {
-        RestoreCommand b = parseRestoreCommand("restore mydb from somewhere/backupfolder/mydb.sqlite");
+        RestoreCommand b =
+                parseRestoreCommand("restore mydb from somewhere/backupfolder/mydb.sqlite");
         assertEquals("mydb", b.targetDB);
         assertEquals("somewhere/backupfolder/mydb.sqlite", b.srcFile);
 
@@ -78,5 +70,4 @@ public class ExtendedCommandTest
         assertEquals("main", b.targetDB);
         assertEquals("target/sample.db", b.srcFile);
     }
-
 }

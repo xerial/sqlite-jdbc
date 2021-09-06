@@ -1,34 +1,32 @@
 package org.sqlite;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ProgressHandlerTest {
     private Connection conn;
     private Statement stat;
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         stat.close();
         conn.close();
     }
-
 
     private void workWork() throws SQLException {
         // Generate some work for the sqlite vm
@@ -43,13 +41,16 @@ public class ProgressHandlerTest {
     @Test
     public void basicProgressHandler() throws Exception {
         final int[] calls = {0};
-        ProgressHandler.setHandler(conn, 1, new ProgressHandler() {
-            @Override
-            protected int progress() throws SQLException {
-                calls[0]++;
-                return 0;
-            }
-        });
+        ProgressHandler.setHandler(
+                conn,
+                1,
+                new ProgressHandler() {
+                    @Override
+                    protected int progress() throws SQLException {
+                        calls[0]++;
+                        return 0;
+                    }
+                });
         workWork();
         assertTrue(calls[0] > 0);
     }
@@ -57,13 +58,16 @@ public class ProgressHandlerTest {
     @Test
     public void testUnregister() throws Exception {
         final int[] calls = {0};
-        ProgressHandler.setHandler(conn, 1, new ProgressHandler() {
-            @Override
-            protected int progress() throws SQLException {
-                calls[0]++;
-                return 0;
-            }
-        });
+        ProgressHandler.setHandler(
+                conn,
+                1,
+                new ProgressHandler() {
+                    @Override
+                    protected int progress() throws SQLException {
+                        calls[0]++;
+                        return 0;
+                    }
+                });
         workWork();
         assertTrue(calls[0] > 0);
         int totalCalls = calls[0];
@@ -76,12 +80,15 @@ public class ProgressHandlerTest {
     public void testInterrupt() throws Exception {
 
         try {
-            ProgressHandler.setHandler(conn, 1, new ProgressHandler() {
-                @Override
-                protected int progress() throws SQLException {
-                    return 1;
-                }
-            });
+            ProgressHandler.setHandler(
+                    conn,
+                    1,
+                    new ProgressHandler() {
+                        @Override
+                        protected int progress() throws SQLException {
+                            return 1;
+                        }
+                    });
             workWork();
         } catch (SQLException ex) {
             // Expected error

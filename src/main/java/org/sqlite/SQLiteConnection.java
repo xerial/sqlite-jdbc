@@ -1,10 +1,5 @@
 package org.sqlite;
 
-import org.sqlite.core.CoreDatabaseMetaData;
-import org.sqlite.core.DB;
-import org.sqlite.core.NativeDB;
-import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,13 +13,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import org.sqlite.core.CoreDatabaseMetaData;
+import org.sqlite.core.DB;
+import org.sqlite.core.NativeDB;
+import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
 
-/**
- *
- */
-public abstract class SQLiteConnection
-        implements Connection
-{
+/** */
+public abstract class SQLiteConnection implements Connection {
     private static final String RESOURCE_NAME_PREFIX = ":resource:";
     private final DB db;
     private CoreDatabaseMetaData meta = null;
@@ -32,6 +27,7 @@ public abstract class SQLiteConnection
 
     /**
      * Connection constructor for reusing an existing DB handle
+     *
      * @param db
      */
     public SQLiteConnection(DB db) {
@@ -41,6 +37,7 @@ public abstract class SQLiteConnection
 
     /**
      * Constructor to create a connection to a database at the given location.
+     *
      * @param url The location of the database.
      * @param fileName The database.
      * @throws SQLException
@@ -50,8 +47,8 @@ public abstract class SQLiteConnection
     }
 
     /**
-     * Constructor to create a pre-configured connection to a database at the
-     * given location.
+     * Constructor to create a pre-configured connection to a database at the given location.
+     *
      * @param url The location of the database file.
      * @param fileName The database.
      * @param prop The configurations to apply.
@@ -80,9 +77,7 @@ public abstract class SQLiteConnection
     }
 
     @Override
-    public DatabaseMetaData getMetaData()
-            throws SQLException
-    {
+    public DatabaseMetaData getMetaData() throws SQLException {
         return (DatabaseMetaData) getSQLiteDatabaseMetaData();
     }
 
@@ -98,24 +93,30 @@ public abstract class SQLiteConnection
         // TODO
         return null;
     }
+
     public void abort(Executor executor) throws SQLException {
         // TODO
     }
+
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
         // TODO
     }
+
     public int getNetworkTimeout() throws SQLException {
         // TODO
         return 0;
     }
 
     /**
-     * Checks whether the type, concurrency, and holdability settings for a
-     * {@link ResultSet} are supported by the SQLite interface. Supported
-     * settings are:<ul>
-     *  <li>type: {@link ResultSet#TYPE_FORWARD_ONLY}</li>
-     *  <li>concurrency: {@link ResultSet#CONCUR_READ_ONLY})</li>
-     *  <li>holdability: {@link ResultSet#CLOSE_CURSORS_AT_COMMIT}</li></ul>
+     * Checks whether the type, concurrency, and holdability settings for a {@link ResultSet} are
+     * supported by the SQLite interface. Supported settings are:
+     *
+     * <ul>
+     *   <li>type: {@link ResultSet#TYPE_FORWARD_ONLY}
+     *   <li>concurrency: {@link ResultSet#CONCUR_READ_ONLY})
+     *   <li>holdability: {@link ResultSet#CLOSE_CURSORS_AT_COMMIT}
+     * </ul>
+     *
      * @param rst the type setting.
      * @param rsc the concurrency setting.
      * @param rsh the holdability setting.
@@ -132,24 +133,22 @@ public abstract class SQLiteConnection
 
     /**
      * Sets the mode that will be used to start transactions on this connection.
+     *
      * @param mode One of {@link SQLiteConfig.TransactionMode}
-     * @see <a href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     * @see <a
+     *     href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
      */
     protected void setTransactionMode(SQLiteConfig.TransactionMode mode) {
         connectionConfig.setTransactionMode(mode);
     }
 
-    /**
-     * @see java.sql.Connection#getTransactionIsolation()
-     */
+    /** @see java.sql.Connection#getTransactionIsolation() */
     @Override
     public int getTransactionIsolation() {
         return connectionConfig.getTransactionIsolation();
     }
 
-    /**
-     * @see java.sql.Connection#setTransactionIsolation(int)
-     */
+    /** @see java.sql.Connection#setTransactionIsolation(int) */
     public void setTransactionIsolation(int level) throws SQLException {
         checkOpen();
 
@@ -164,17 +163,21 @@ public abstract class SQLiteConnection
                 getDatabase().exec("PRAGMA read_uncommitted = true;", getAutoCommit());
                 break;
             default:
-                throw new SQLException("Unsupported transaction isolation level: " + level + ". " +
-                        "Must be one of TRANSACTION_READ_UNCOMMITTED, TRANSACTION_READ_COMMITTED, " +
-                        "TRANSACTION_REPEATABLE_READ, or TRANSACTION_SERIALIZABLE in java.sql.Connection");
+                throw new SQLException(
+                        "Unsupported transaction isolation level: "
+                                + level
+                                + ". "
+                                + "Must be one of TRANSACTION_READ_UNCOMMITTED, TRANSACTION_READ_COMMITTED, "
+                                + "TRANSACTION_REPEATABLE_READ, or TRANSACTION_SERIALIZABLE in java.sql.Connection");
         }
         connectionConfig.setTransactionIsolation(level);
     }
 
     /**
-     * Opens a connection to the database using an SQLite library.
-     *      * @throws SQLException
-     * @see <a href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
+     * Opens a connection to the database using an SQLite library. * @throws SQLException
+     *
+     * @see <a
+     *     href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
     private static DB open(String url, String origFileName, Properties props) throws SQLException {
         // Create a copy of the given properties
@@ -186,7 +189,10 @@ public abstract class SQLiteConnection
         SQLiteConfig config = new SQLiteConfig(newProps);
 
         // check the path to the file exists
-        if (!fileName.isEmpty() && !":memory:".equals(fileName) && !fileName.startsWith("file:") && !fileName.contains("mode=memory")) {
+        if (!fileName.isEmpty()
+                && !":memory:".equals(fileName)
+                && !fileName.startsWith("file:")
+                && !fileName.contains("mode=memory")) {
             if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
                 String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
 
@@ -196,38 +202,35 @@ public abstract class SQLiteConnection
                 if (resourceAddr == null) {
                     try {
                         resourceAddr = new URL(resourceName);
-                    }
-                    catch (MalformedURLException e) {
-                        throw new SQLException(String.format("resource %s not found: %s", resourceName, e));
+                    } catch (MalformedURLException e) {
+                        throw new SQLException(
+                                String.format("resource %s not found: %s", resourceName, e));
                     }
                 }
 
                 try {
                     fileName = extractResource(resourceAddr).getAbsolutePath();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     throw new SQLException(String.format("failed to load %s: %s", resourceName, e));
                 }
-            }
-            else {
+            } else {
                 File file = new File(fileName).getAbsoluteFile();
                 File parent = file.getParentFile();
                 if (parent != null && !parent.exists()) {
-                    for (File up = parent; up != null && !up.exists();) {
+                    for (File up = parent; up != null && !up.exists(); ) {
                         parent = up;
                         up = up.getParentFile();
                     }
-                    throw new SQLException("path to '" + fileName + "': '" + parent + "' does not exist");
+                    throw new SQLException(
+                            "path to '" + fileName + "': '" + parent + "' does not exist");
                 }
 
                 // check write access if file does not exist
                 try {
                     // The extra check to exists() is necessary as createNewFile()
                     // does not follow the JavaDoc when used on read-only shares.
-                    if (!file.exists() && file.createNewFile())
-                        file.delete();
-                }
-                catch (Exception e) {
+                    if (!file.exists() && file.createNewFile()) file.delete();
+                } catch (Exception e) {
                     throw new SQLException("opening db: '" + fileName + "': " + e.getMessage());
                 }
                 fileName = file.getAbsolutePath();
@@ -239,8 +242,7 @@ public abstract class SQLiteConnection
         try {
             NativeDB.load();
             db = new NativeDB(url, fileName, config);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             SQLException err = new SQLException("Error opening connection");
             err.initCause(e);
             throw err;
@@ -251,6 +253,7 @@ public abstract class SQLiteConnection
 
     /**
      * Returns a file name from the given resource address.
+     *
      * @param resourceAddr The resource address.
      * @return The extracted file name.
      * @throws IOException
@@ -259,8 +262,7 @@ public abstract class SQLiteConnection
         if (resourceAddr.getProtocol().equals("file")) {
             try {
                 return new File(resourceAddr.toURI());
-            }
-            catch (URISyntaxException e) {
+            } catch (URISyntaxException e) {
                 throw new IOException(e.getMessage());
             }
         }
@@ -274,12 +276,12 @@ public abstract class SQLiteConnection
             long tmpFileLastModified = dbFile.lastModified();
             if (resourceLastModified < tmpFileLastModified) {
                 return dbFile;
-            }
-            else {
+            } else {
                 // remove the old DB file
                 boolean deletionSucceeded = dbFile.delete();
                 if (!deletionSucceeded) {
-                    throw new IOException("failed to remove existing DB file: " + dbFile.getAbsolutePath());
+                    throw new IOException(
+                            "failed to remove existing DB file: " + dbFile.getAbsolutePath());
                 }
             }
 
@@ -302,21 +304,17 @@ public abstract class SQLiteConnection
                 writer.write(buffer, 0, bytesRead);
             }
             return dbFile;
-        }
-        finally {
+        } finally {
             writer.close();
             reader.close();
         }
-
     }
 
     public DB getDatabase() {
         return db;
     }
 
-    /**
-     * @see java.sql.Connection#getAutoCommit()
-     */
+    /** @see java.sql.Connection#getAutoCommit() */
     @Override
     public boolean getAutoCommit() throws SQLException {
         checkOpen();
@@ -324,37 +322,37 @@ public abstract class SQLiteConnection
         return connectionConfig.isAutoCommit();
     }
 
-    /**
-     * @see java.sql.Connection#setAutoCommit(boolean)
-     */
+    /** @see java.sql.Connection#setAutoCommit(boolean) */
     @Override
     public void setAutoCommit(boolean ac) throws SQLException {
         checkOpen();
-        if (connectionConfig.isAutoCommit() == ac)
-            return;
+        if (connectionConfig.isAutoCommit() == ac) return;
 
         connectionConfig.setAutoCommit(ac);
-        db.exec(connectionConfig.isAutoCommit() ? "commit;" : connectionConfig.transactionPrefix(), ac);
+        db.exec(
+                connectionConfig.isAutoCommit() ? "commit;" : connectionConfig.transactionPrefix(),
+                ac);
     }
 
     /**
      * @return The busy timeout value for the connection.
-     * @see <a href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
+     * @see <a
+     *     href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
      */
     public int getBusyTimeout() {
         return db.getConfig().getBusyTimeout();
     }
 
     /**
-     * Sets the timeout value for the connection.
-     * A timeout value less than or equal to zero turns off all busy handlers.
-     * @see <a href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
+     * Sets the timeout value for the connection. A timeout value less than or equal to zero turns
+     * off all busy handlers.
+     *
+     * @see <a
+     *     href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
      * @param timeoutMillis The timeout value in milliseconds.
      * @throws SQLException
      */
-    public void setBusyTimeout(int timeoutMillis)
-            throws SQLException
-    {
+    public void setBusyTimeout(int timeoutMillis) throws SQLException {
         db.getConfig().setBusyTimeout(timeoutMillis);
         db.busy_timeout(timeoutMillis);
     }
@@ -372,37 +370,33 @@ public abstract class SQLiteConnection
     }
 
     @Override
-    public boolean isClosed() throws SQLException
-    {
+    public boolean isClosed() throws SQLException {
         return db.isClosed();
     }
 
-    /**
-     * @see java.sql.Connection#close()
-     */
+    /** @see java.sql.Connection#close() */
     @Override
     public void close() throws SQLException {
-        if (isClosed())
-            return;
-        if (meta != null)
-            meta.close();
+        if (isClosed()) return;
+        if (meta != null) meta.close();
 
         db.close();
     }
 
     /**
      * Whether an SQLite library interface to the database has been established.
+     *
      * @throws SQLException
      */
     protected void checkOpen() throws SQLException {
-        if (isClosed())
-            throw new SQLException("database connection closed");
+        if (isClosed()) throw new SQLException("database connection closed");
     }
 
     /**
      * @return Compile-time library version numbers.
      * @throws SQLException
-     * @see <a href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
+     * @see <a
+     *     href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
      */
     public String libversion() throws SQLException {
         checkOpen();
@@ -410,26 +404,20 @@ public abstract class SQLiteConnection
         return db.libversion();
     }
 
-    /**
-     * @see java.sql.Connection#commit()
-     */
+    /** @see java.sql.Connection#commit() */
     @Override
     public void commit() throws SQLException {
         checkOpen();
-        if (connectionConfig.isAutoCommit())
-            throw new SQLException("database in auto-commit mode");
+        if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("commit;", getAutoCommit());
         db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
     }
 
-    /**
-     * @see java.sql.Connection#rollback()
-     */
+    /** @see java.sql.Connection#rollback() */
     @Override
     public void rollback() throws SQLException {
         checkOpen();
-        if (connectionConfig.isAutoCommit())
-            throw new SQLException("database in auto-commit mode");
+        if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("rollback;", getAutoCommit());
         db.exec(connectionConfig.transactionPrefix(), getAutoCommit());
     }
@@ -452,9 +440,9 @@ public abstract class SQLiteConnection
         db.removeUpdateListener(listener);
     }
 
-
     /**
-     * Add a listener for DB commit/rollback events, see https://www.sqlite.org/c3ref/commit_hook.html
+     * Add a listener for DB commit/rollback events, see
+     * https://www.sqlite.org/c3ref/commit_hook.html
      *
      * @param listener The listener to receive commit events
      */
@@ -472,16 +460,16 @@ public abstract class SQLiteConnection
     }
 
     /**
-     * Extracts PRAGMA values from the filename and sets them into the Properties
-     * object which will be used to build the SQLConfig.  The sanitized filename
-     * is returned.
+     * Extracts PRAGMA values from the filename and sets them into the Properties object which will
+     * be used to build the SQLConfig. The sanitized filename is returned.
      *
      * @param filename
      * @param prop
      * @return a PRAGMA-sanitized filename
      * @throws SQLException
      */
-    protected static String extractPragmasFromFilename(String url, String filename, Properties prop) throws SQLException {
+    protected static String extractPragmasFromFilename(String url, String filename, Properties prop)
+            throws SQLException {
         int parameterDelimiter = filename.indexOf('?');
         if (parameterDelimiter == -1) {
             // nothing to extract
@@ -492,7 +480,7 @@ public abstract class SQLiteConnection
         sb.append(filename.substring(0, parameterDelimiter));
 
         int nonPragmaCount = 0;
-        String [] parameters = filename.substring(parameterDelimiter + 1).split("&");
+        String[] parameters = filename.substring(parameterDelimiter + 1).split("&");
         for (int i = 0; i < parameters.length; i++) {
             // process parameters in reverse-order, last specified pragma value wins
             String parameter = parameters[parameters.length - 1 - i].trim();
@@ -502,11 +490,13 @@ public abstract class SQLiteConnection
                 continue;
             }
 
-            String [] kvp = parameter.split("=");
+            String[] kvp = parameter.split("=");
             String key = kvp[0].trim().toLowerCase();
             if (SQLiteConfig.pragmaSet.contains(key)) {
                 if (kvp.length == 1) {
-                    throw new SQLException(String.format("Please specify a value for PRAGMA %s in URL %s", key, url));
+                    throw new SQLException(
+                            String.format(
+                                    "Please specify a value for PRAGMA %s in URL %s", key, url));
                 }
                 String value = kvp[1].trim();
                 if (!value.isEmpty()) {
@@ -520,7 +510,7 @@ public abstract class SQLiteConnection
                         // It also ignores duplicate pragma keys in the URL. The reversed
                         // processing order ensures the last-supplied pragma value is used.
                     } else {
-                        prop.setProperty(key,  value);
+                        prop.setProperty(key, value);
                     }
                 }
             } else {
@@ -534,5 +524,4 @@ public abstract class SQLiteConnection
         final String newFilename = sb.toString();
         return newFilename;
     }
-
 }

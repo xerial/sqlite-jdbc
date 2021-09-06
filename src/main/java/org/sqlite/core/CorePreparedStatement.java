@@ -16,23 +16,22 @@
 
 package org.sqlite.core;
 
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.date.FastDateFormat;
 import org.sqlite.jdbc4.JDBC4Statement;
 
-import java.sql.Date;
-import java.sql.SQLException;
-import java.util.Calendar;
-
-public abstract class CorePreparedStatement extends JDBC4Statement
-{
+public abstract class CorePreparedStatement extends JDBC4Statement {
     protected int columnCount;
     protected int paramCount;
     protected int batchQueryCount;
 
     /**
      * Constructs a prepared statement on a provided connection.
+     *
      * @param conn Connection on which to create the prepared statement.
      * @param sql The SQL script to prepare.
      * @throws SQLException
@@ -51,9 +50,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         batchPos = 0;
     }
 
-    /**
-     * @see org.sqlite.jdbc3.JDBC3Statement#executeBatch()
-     */
+    /** @see org.sqlite.jdbc3.JDBC3Statement#executeBatch() */
     @Override
     public int[] executeBatch() throws SQLException {
         if (batchQueryCount == 0) {
@@ -61,25 +58,21 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         }
 
         try {
-            return conn.getDatabase().executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
-        }
-        finally {
+            return conn.getDatabase()
+                    .executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
+        } finally {
             clearBatch();
         }
     }
 
-    /**
-     * @see org.sqlite.jdbc3.JDBC3Statement#clearBatch() ()
-     */
+    /** @see org.sqlite.jdbc3.JDBC3Statement#clearBatch() () */
     @Override
     public void clearBatch() throws SQLException {
         super.clearBatch();
         batchQueryCount = 0;
     }
 
-    /**
-     * @see org.sqlite.jdbc3.JDBC3Statement#getUpdateCount()
-     */
+    /** @see org.sqlite.jdbc3.JDBC3Statement#getUpdateCount() */
     @Override
     public int getUpdateCount() throws SQLException {
         if (pointer == 0 || resultsWaiting || rs.isOpen()) {
@@ -92,8 +85,8 @@ public abstract class CorePreparedStatement extends JDBC4Statement
     // PARAMETER FUNCTIONS //////////////////////////////////////////
 
     /**
-     * Assigns the object value to the element at the specific position of array
-     * batch.
+     * Assigns the object value to the element at the specific position of array batch.
+     *
      * @param pos
      * @param value
      * @throws SQLException
@@ -106,26 +99,26 @@ public abstract class CorePreparedStatement extends JDBC4Statement
         batch[batchPos + pos - 1] = value;
     }
 
+    /** Store the date in the user's preferred format (text, int, or real) */
+    protected void setDateByMilliseconds(int pos, Long value, Calendar calendar)
+            throws SQLException {
+        SQLiteConnectionConfig config = conn.getConnectionConfig();
+        switch (config.getDateClass()) {
+            case TEXT:
+                batch(
+                        pos,
+                        FastDateFormat.getInstance(
+                                        config.getDateStringFormat(), calendar.getTimeZone())
+                                .format(new Date(value)));
+                break;
 
-    /**
-    * Store the date in the user's preferred format (text, int, or real)
-    */
-   protected void setDateByMilliseconds(int pos, Long value, Calendar calendar) throws SQLException {
-       SQLiteConnectionConfig config = conn.getConnectionConfig();
-       switch(config.getDateClass()) {
-           case TEXT:
-               batch(pos, FastDateFormat.getInstance(config.getDateStringFormat(), calendar.getTimeZone()).format(new Date(value)));
-               break;
+            case REAL:
+                // long to Julian date
+                batch(pos, new Double((value / 86400000.0) + 2440587.5));
+                break;
 
-           case REAL:
-               // long to Julian date
-               batch(pos, new Double((value/86400000.0) + 2440587.5));
-               break;
-
-           default: //INTEGER:
-               batch(pos, new Long(value / config.getDateMultiplier()));
-       }
-   }
-
-
+            default: // INTEGER:
+                batch(pos, new Long(value / config.getDateMultiplier()));
+        }
+    }
 }

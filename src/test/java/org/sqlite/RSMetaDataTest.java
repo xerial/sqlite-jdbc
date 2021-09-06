@@ -1,8 +1,9 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,45 +12,41 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-public class RSMetaDataTest
-{
+public class RSMetaDataTest {
     private Connection conn;
     private Statement stat;
     private ResultSetMetaData meta;
 
-    @Before
-    public void connect() throws Exception
-    {
+    @BeforeEach
+    public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
-        stat.executeUpdate("create table People (pid integer primary key autoincrement, "
-                + " firstname string(255), surname string(25,5), dob date);");
-        stat.executeUpdate("insert into people values (null, 'Mohandas', 'Gandhi', " + " '1869-10-02');");
+        stat.executeUpdate(
+                "create table People (pid integer primary key autoincrement, "
+                        + " firstname string(255), surname string(25,5), dob date);");
+        stat.executeUpdate(
+                "insert into people values (null, 'Mohandas', 'Gandhi', " + " '1869-10-02');");
         meta = stat.executeQuery("select pid, firstname, surname from people;").getMetaData();
     }
 
-    @After
-    public void close() throws SQLException
-    {
+    @AfterEach
+    public void close() throws SQLException {
         stat.executeUpdate("drop table people;");
         stat.close();
         conn.close();
     }
 
     @Test
-    public void catalogName() throws SQLException
-    {
+    public void catalogName() throws SQLException {
         assertEquals(meta.getCatalogName(1), "People");
     }
 
     @Test
-    public void columns() throws SQLException
-    {
+    public void columns() throws SQLException {
         assertEquals(meta.getColumnCount(), 3);
         assertEquals(meta.getColumnName(1), "pid");
         assertEquals(meta.getColumnName(2), "firstname");
@@ -66,31 +63,30 @@ public class RSMetaDataTest
     }
 
     @Test
-    public void columnTypes() throws SQLException
-    {
+    public void columnTypes() throws SQLException {
         stat.executeUpdate(
-            "create table tbl (col1 INT, col2 INTEGER, col3 TINYINT, " +
-            "col4 SMALLINT, col5 MEDIUMINT, col6 BIGINT, col7 UNSIGNED BIG INT, " +
-            "col8 INT2, col9 INT8, col10 CHARACTER(20), col11 VARCHAR(255), " +
-            "col12 VARYING CHARACTER(255), col13 NCHAR(55), " +
-            "col14 NATIVE CHARACTER(70), col15 NVARCHAR(100), col16 TEXT, " +
-            "col17 CLOB, col18 BLOB, col19 REAL, col20 DOUBLE, " +
-            "col21 DOUBLE PRECISION, col22 FLOAT, col23 NUMERIC, " +
-            "col24 DECIMAL(10,5), col25 BOOLEAN, col26 DATE, col27 DATETIME, " +
-            "col28 TIMESTAMP, col29 CHAR(70), col30 TEXT)"
-        );
+                "create table tbl (col1 INT, col2 INTEGER, col3 TINYINT, "
+                        + "col4 SMALLINT, col5 MEDIUMINT, col6 BIGINT, col7 UNSIGNED BIG INT, "
+                        + "col8 INT2, col9 INT8, col10 CHARACTER(20), col11 VARCHAR(255), "
+                        + "col12 VARYING CHARACTER(255), col13 NCHAR(55), "
+                        + "col14 NATIVE CHARACTER(70), col15 NVARCHAR(100), col16 TEXT, "
+                        + "col17 CLOB, col18 BLOB, col19 REAL, col20 DOUBLE, "
+                        + "col21 DOUBLE PRECISION, col22 FLOAT, col23 NUMERIC, "
+                        + "col24 DECIMAL(10,5), col25 BOOLEAN, col26 DATE, col27 DATETIME, "
+                        + "col28 TIMESTAMP, col29 CHAR(70), col30 TEXT)");
         // insert empty data into table otherwise getColumnType returns null
         stat.executeUpdate(
-            "insert into tbl values (1, 2, 3, 4, 5, 6, 7, 8, 9," +
-            "'c', 'varchar', 'varying', 'n', 'n','nvarchar', 'text', 'clob'," +
-            "null, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 0, 12345, 123456, 0, 'char', 'some text')");
-        meta = stat.executeQuery(
-            "select col1, col2, col3, col4, col5, col6, col7, col8, col9, " +
-            "col10, col11, col12, col13, col14, col15, col16, col17, col18, " +
-            "col19, col20, col21, col22, col23, col24, col25, col26, col27, " +
-            "col28, col29, col30, " +
-            "cast(col1 as boolean) from tbl"
-        ).getMetaData();
+                "insert into tbl values (1, 2, 3, 4, 5, 6, 7, 8, 9,"
+                        + "'c', 'varchar', 'varying', 'n', 'n','nvarchar', 'text', 'clob',"
+                        + "null, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 0, 12345, 123456, 0, 'char', 'some text')");
+        meta =
+                stat.executeQuery(
+                                "select col1, col2, col3, col4, col5, col6, col7, col8, col9, "
+                                        + "col10, col11, col12, col13, col14, col15, col16, col17, col18, "
+                                        + "col19, col20, col21, col22, col23, col24, col25, col26, col27, "
+                                        + "col28, col29, col30, "
+                                        + "cast(col1 as boolean) from tbl")
+                        .getMetaData();
 
         assertEquals(Types.INTEGER, meta.getColumnType(1));
         assertEquals(Types.INTEGER, meta.getColumnType(2));
@@ -126,7 +122,7 @@ public class RSMetaDataTest
 
         assertEquals(Types.TIMESTAMP, meta.getColumnType(28));
         assertEquals(Types.CHAR, meta.getColumnType(29));
-        
+
         assertEquals(Types.VARCHAR, meta.getColumnType(30));
 
         assertEquals(Types.BOOLEAN, meta.getColumnType(31));
@@ -136,8 +132,7 @@ public class RSMetaDataTest
     }
 
     @Test
-    public void differentRS() throws SQLException
-    {
+    public void differentRS() throws SQLException {
         meta = stat.executeQuery("select * from people;").getMetaData();
         assertEquals(meta.getColumnCount(), 4);
         assertEquals(meta.getColumnName(1), "pid");
@@ -147,37 +142,32 @@ public class RSMetaDataTest
     }
 
     @Test
-    public void nullable() throws SQLException
-    {
+    public void nullable() throws SQLException {
         meta = stat.executeQuery("select null;").getMetaData();
         assertEquals(meta.isNullable(1), ResultSetMetaData.columnNullable);
     }
 
-    @Test(expected = SQLException.class)
-    public void badCatalogIndex() throws SQLException
-    {
-        meta.getCatalogName(4);
-    }
-
-    @Test(expected = SQLException.class)
-    public void badColumnIndex() throws SQLException
-    {
-        meta.getColumnName(4);
+    @Test
+    public void badCatalogIndex() {
+        assertThrows(SQLException.class, () -> meta.getCatalogName(4));
     }
 
     @Test
-    public void scale() throws SQLException 
-    {
+    public void badColumnIndex() {
+        assertThrows(SQLException.class, () -> meta.getColumnName(4));
+    }
+
+    @Test
+    public void scale() throws SQLException {
         assertEquals(0, meta.getScale(2));
         assertEquals(5, meta.getScale(3));
     }
-	
-	@Test
-	public void tableName() throws SQLException
-	{
-		final ResultSet rs = stat.executeQuery( "SELECT pid, time(dob) as some_time from people");
-		assertEquals( "People", rs.getMetaData().getTableName( 1));
-		assertEquals( "", rs.getMetaData().getTableName( 2));
-		rs.close();
-	}
+
+    @Test
+    public void tableName() throws SQLException {
+        final ResultSet rs = stat.executeQuery("SELECT pid, time(dob) as some_time from people");
+        assertEquals("People", rs.getMetaData().getTableName(1));
+        assertEquals("", rs.getMetaData().getTableName(2));
+        rs.close();
+    }
 }

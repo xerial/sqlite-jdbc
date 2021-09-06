@@ -1,24 +1,23 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // OSInfoTest.java
 // Since: May 20, 2008
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite.util;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Logger;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class OSInfoTest {
-    private static Logger logger = Logger.getLogger(OSInfoTest.class.getName());
+    private static final Logger logger = Logger.getLogger(OSInfoTest.class.getName());
 
     @Test
     public void osName() {
@@ -65,14 +64,12 @@ public class OSInfoTest {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             PrintStream tmpOut = new PrintStream(buf);
             System.setOut(tmpOut);
-            OSInfo.main(new String[]{"--os"});
+            OSInfo.main(new String[] {"--os"});
             assertEquals(OSInfo.getOSName(), buf.toString());
-        }
-        finally {
+        } finally {
             // reset STDOUT
             System.setOut(out);
         }
-
     }
 
     @Test
@@ -85,10 +82,9 @@ public class OSInfoTest {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             PrintStream tmpOut = new PrintStream(buf);
             System.setOut(tmpOut);
-            OSInfo.main(new String[]{"--arch"});
+            OSInfo.main(new String[] {"--arch"});
             assertEquals(OSInfo.getArchName(), buf.toString());
-        }
-        finally {
+        } finally {
             // reset STDOUT
             System.setOut(out);
         }
@@ -99,5 +95,4 @@ public class OSInfoTest {
         String hardware = OSInfo.getHardwareName();
         logger.info("Hardware name: " + hardware);
     }
-
 }

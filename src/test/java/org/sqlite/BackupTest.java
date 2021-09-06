@@ -1,15 +1,15 @@
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // BackupTest.java
 // Since: Feb 18, 2009
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,12 +18,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.junit.jupiter.api.Test;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-public class BackupTest
-{
+public class BackupTest {
 
     @Test
     public void backupAndRestore() throws SQLException, IOException {
@@ -53,28 +50,28 @@ public class BackupTest
 
         assertEquals(2, count);
         rs.close();
-
     }
 
     @Test
     public void memoryToDisk() throws Exception {
 
-        if (!SQLiteJDBCLoader.isNativeMode())
+        if (!SQLiteJDBCLoader.isNativeMode()) {
             return; // skip this test in pure-java mode
+        }
 
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("create table sample(id integer primary key autoincrement, name)");
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < 10000; i++) {
             stmt.executeUpdate("insert into sample(name) values(\"leo\")");
+        }
 
         File tmpFile = File.createTempFile("backup-test2", ".sqlite");
         tmpFile.deleteOnExit();
-        //System.err.println("backup start");
+        // System.err.println("backup start");
         stmt.executeUpdate("backup to " + tmpFile.getAbsolutePath());
         stmt.close();
-        //System.err.println("backup done.");
+        // System.err.println("backup done.");
 
     }
-
 }

@@ -1,8 +1,9 @@
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,104 +11,95 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ResultSetTest {
 
     private Connection conn;
     private Statement stat;
 
-    @Before
+    @BeforeEach
     public void connect() throws Exception {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
-        stat.executeUpdate("create table test (id int primary key, DESCRIPTION varchar(40), fOo varchar(3));");
+        stat.executeUpdate(
+                "create table test (id int primary key, DESCRIPTION varchar(40), fOo varchar(3));");
         stat.executeUpdate("insert into test values (1, 'description', 'bar')");
     }
 
-    @After
+    @AfterEach
     public void close() throws SQLException {
         stat.close();
         conn.close();
     }
 
     @Test
-    public void testTableColumnLowerNowFindLowerCaseColumn()
-            throws SQLException {
+    public void testTableColumnLowerNowFindLowerCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("id"));
     }
 
     @Test
-    public void testTableColumnLowerNowFindUpperCaseColumn()
-            throws SQLException {
+    public void testTableColumnLowerNowFindUpperCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("ID"));
     }
 
     @Test
-    public void testTableColumnLowerNowFindMixedCaseColumn()
-            throws SQLException {
+    public void testTableColumnLowerNowFindMixedCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("Id"));
     }
 
     @Test
-    public void testTableColumnUpperNowFindLowerCaseColumn()
-            throws SQLException {
+    public void testTableColumnUpperNowFindLowerCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(2, resultSet.findColumn("description"));
     }
 
     @Test
-    public void testTableColumnUpperNowFindUpperCaseColumn()
-            throws SQLException {
+    public void testTableColumnUpperNowFindUpperCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(2, resultSet.findColumn("DESCRIPTION"));
     }
 
     @Test
-    public void testTableColumnUpperNowFindMixedCaseColumn()
-            throws SQLException {
+    public void testTableColumnUpperNowFindMixedCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(2, resultSet.findColumn("Description"));
     }
 
     @Test
-    public void testTableColumnMixedNowFindLowerCaseColumn()
-            throws SQLException {
+    public void testTableColumnMixedNowFindLowerCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(3, resultSet.findColumn("foo"));
     }
 
     @Test
-    public void testTableColumnMixedNowFindUpperCaseColumn()
-            throws SQLException {
+    public void testTableColumnMixedNowFindUpperCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(3, resultSet.findColumn("FOO"));
     }
 
     @Test
-    public void testTableColumnMixedNowFindMixedCaseColumn()
-            throws SQLException {
+    public void testTableColumnMixedNowFindMixedCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertTrue(resultSet.next());
         assertEquals(3, resultSet.findColumn("fOo"));
     }
 
     @Test
-    public void testSelectWithTableNameAliasNowFindWithoutTableNameAlias()
-            throws SQLException {
+    public void testSelectWithTableNameAliasNowFindWithoutTableNameAlias() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select t.id from test as t");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("id"));
@@ -115,36 +107,32 @@ public class ResultSetTest {
 
     /**
      * Can't produce a case where column name contains table name
-     * https://www.sqlite.org/c3ref/column_name.html :
-     * "If there is no AS clause then the name of the column is unspecified"
+     * https://www.sqlite.org/c3ref/column_name.html : "If there is no AS clause then the name of
+     * the column is unspecified"
      */
-    @Test(expected = SQLException.class)
-    public void testSelectWithTableNameAliasNowNotFindWithTableNameAlias()
-            throws SQLException {
+    @Test
+    public void testSelectWithTableNameAliasNowNotFindWithTableNameAlias() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select t.id from test as t");
         assertTrue(resultSet.next());
-        resultSet.findColumn("t.id");
+        assertThrows(SQLException.class, () -> resultSet.findColumn("t.id"));
     }
 
     @Test
-    public void testSelectWithTableNameNowFindWithoutTableName()
-            throws SQLException {
+    public void testSelectWithTableNameNowFindWithoutTableName() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
         assertTrue(resultSet.next());
         assertEquals(1, resultSet.findColumn("id"));
     }
 
-    @Test(expected = SQLException.class)
-    public void testSelectWithTableNameNowNotFindWithTableName()
-            throws SQLException {
+    @Test
+    public void testSelectWithTableNameNowNotFindWithTableName() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
         assertTrue(resultSet.next());
-        resultSet.findColumn("test.id");
+        assertThrows(SQLException.class, () -> resultSet.findColumn("test.id"));
     }
 
     @Test
-    public void testCloseStatement()
-        throws SQLException {
+    public void testCloseStatement() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
 
         stat.close();
@@ -158,8 +146,7 @@ public class ResultSetTest {
     }
 
     @Test
-    public void testReturnsNonAsciiCodepoints()
-        throws SQLException {
+    public void testReturnsNonAsciiCodepoints() throws SQLException {
         String nonAsciiString = "국정의 중요한 사항에 관한";
         PreparedStatement pstat = conn.prepareStatement("select ?");
         pstat.setString(1, nonAsciiString);

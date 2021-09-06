@@ -2,7 +2,6 @@ package org.sqlite.jdbc4;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import org.sqlite.SQLiteConnection;
 import org.sqlite.jdbc3.JDBC3Statement;
 
@@ -53,5 +52,4 @@ public class JDBC4Statement extends JDBC3Statement implements Statement {
         // TODO Auto-generated method stub
         return false;
     }
-
 }
