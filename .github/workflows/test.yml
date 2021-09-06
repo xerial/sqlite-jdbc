@@ -12,7 +12,6 @@ on:
   push:
     branches:
       - master
-      - 'ci-multiarch'
     paths:
       - '**.java'
       - '**.xml'
@@ -45,23 +44,22 @@ jobs:
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
     strategy:
-      fail-fast: false
       matrix:
         # armv6 cannot install the JDK properly via apt-get on Debian
         arch: [ armv7, aarch64 ]
         # no point adding Alpine, as we only have x86_64 binaries for it
         distro: [ ubuntu20.04 ]
         # cannot add Java 16, maven installed by apt-get is 3.6.x and does not support Java 16
-        java: [ 8, 11 ]
+        # use only java 11, so we don't run too many CI jobs
+        java: [ 11 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: gotson/run-on-arch-action@cachetag
+      - uses: uraimo/run-on-arch-action@2.1.1
         name: Test
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
-          cacheTag: jdk${{ matrix.java }}
 
           # Not required, but speeds up builds
           githubToken: ${{ github.token }}
