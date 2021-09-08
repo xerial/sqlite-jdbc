@@ -39,8 +39,8 @@ jobs:
     name: test ${{ matrix.os }} jdk${{ matrix.java }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        java: [8, 11, 16]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        java: [ 8, 11, 16 ]
         exclude:
           - os: windows-latest
             java: 11
@@ -80,3 +80,47 @@ jobs:
           gu install native-image
       - name: Test
         run: mvn -Pnative test
+
+  test_multiarch:
+    name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
+    strategy:
+      matrix:
+        # armv6 cannot install the JDK properly via apt-get on Debian
+        arch: [ armv7, aarch64 ]
+        # no point adding Alpine, as we only have x86_64 binaries for it
+        distro: [ ubuntu20.04 ]
+        # cannot add Java 16, maven installed by apt-get is 3.6.x and does not support Java 16
+        # use only java 11, so we don't run too many CI jobs
+        java: [ 11 ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: uraimo/run-on-arch-action@v2.1.1
+        name: Test
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            apt-get update -q -y
+            apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
+
+          # We use the Github Action user, 1001:121, so that maven can access
+          # the /work directory and create target/classes
+          dockerRunArgs: |
+            --volume "${PWD}:/work"
+            --user 1001:121
+
+          run: |
+            echo "Architecture: `uname -a`"
+            mvn --version
+            cd /work && mvn test
