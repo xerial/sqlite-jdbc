@@ -1,4 +1,4 @@
-SQLite JDBC Driver [![Build Status](https://travis-ci.org/xerial/sqlite-jdbc.svg?branch=master)](https://travis-ci.org/xerial/sqlite-jdbc) [![Join the chat at https://gitter.im/xerial/sqlite-jdbc](https://badges.gitter.im/xerial/sqlite-jdbc.svg)](https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+SQLite JDBC Driver [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/xerial/sqlite-jdbc/CI/master)](https://github.com/xerial/sqlite-jdbc/actions/workflows/test.yml?query=branch%3Amaster) [![Join the chat at https://gitter.im/xerial/sqlite-jdbc](https://badges.gitter.im/xerial/sqlite-jdbc.svg)](https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ==================
 
 SQLite JDBC is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
