@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @author leo
  */
 public class OSInfo {
-    private static HashMap<String, String> archMapping = new HashMap<String, String>();
+    private static final HashMap<String, String> archMapping = new HashMap<>();
 
     public static final String X86 = "x86";
     public static final String X86_64 = "x86_64";
@@ -115,19 +115,14 @@ public class OSInfo {
             Process p = Runtime.getRuntime().exec("cat /etc/os-release | grep ^ID");
             p.waitFor(300, TimeUnit.MILLISECONDS);
 
-            InputStream in = p.getInputStream();
-            try {
-                int readLen = 0;
+            try (InputStream in = p.getInputStream()) {
+                int readLen;
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 byte[] buf = new byte[32];
                 while ((readLen = in.read(buf, 0, buf.length)) >= 0) {
                     b.write(buf, 0, readLen);
                 }
                 return b.toString().toLowerCase().contains("alpine");
-            } finally {
-                if (in != null) {
-                    in.close();
-                }
             }
 
         } catch (Throwable e) {
@@ -140,19 +135,14 @@ public class OSInfo {
             Process p = Runtime.getRuntime().exec("uname -m");
             p.waitFor();
 
-            InputStream in = p.getInputStream();
-            try {
-                int readLen = 0;
+            try (InputStream in = p.getInputStream()) {
+                int readLen;
                 ByteArrayOutputStream b = new ByteArrayOutputStream();
                 byte[] buf = new byte[32];
                 while ((readLen = in.read(buf, 0, buf.length)) >= 0) {
                     b.write(buf, 0, readLen);
                 }
                 return b.toString();
-            } finally {
-                if (in != null) {
-                    in.close();
-                }
             }
         } catch (Throwable e) {
             System.err.println("Error while running uname -m: " + e.getMessage());
@@ -206,12 +196,9 @@ public class OSInfo {
                     }
                 } else {
                     System.err.println(
-                            "WARNING! readelf not found. Cannot check if running on an armhf system, "
-                                    + "armel architecture will be presumed.");
+                            "WARNING! readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed.");
                 }
-            } catch (IOException e) {
-                // ignored: fall back to "arm" arch (soft-float ABI)
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 // ignored: fall back to "arm" arch (soft-float ABI)
             }
         }
