@@ -24,9 +24,7 @@
 // --------------------------------------
 package org.sqlite.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @author leo
  */
 public class OSInfo {
+    protected static ProcessRunner processRunner = new ProcessRunner();
     private static final HashMap<String, String> archMapping = new HashMap<>();
 
     public static final String X86 = "x86";
@@ -112,19 +111,10 @@ public class OSInfo {
 
     public static boolean isAlpine() {
         try {
-            Process p = Runtime.getRuntime().exec("cat /etc/os-release | grep ^ID");
-            p.waitFor(300, TimeUnit.MILLISECONDS);
-
-            try (InputStream in = p.getInputStream()) {
-                int readLen;
-                ByteArrayOutputStream b = new ByteArrayOutputStream();
-                byte[] buf = new byte[32];
-                while ((readLen = in.read(buf, 0, buf.length)) >= 0) {
-                    b.write(buf, 0, readLen);
-                }
-                return b.toString().toLowerCase().contains("alpine");
-            }
-
+            String output =
+                    processRunner.runAndWaitFor(
+                            "cat /etc/os-release | grep ^ID", 300, TimeUnit.MILLISECONDS);
+            return output.toLowerCase().contains("alpine");
         } catch (Throwable e) {
             return false;
         }
@@ -132,18 +122,7 @@ public class OSInfo {
 
     static String getHardwareName() {
         try {
-            Process p = Runtime.getRuntime().exec("uname -m");
-            p.waitFor();
-
-            try (InputStream in = p.getInputStream()) {
-                int readLen;
-                ByteArrayOutputStream b = new ByteArrayOutputStream();
-                byte[] buf = new byte[32];
-                while ((readLen = in.read(buf, 0, buf.length)) >= 0) {
-                    b.write(buf, 0, readLen);
-                }
-                return b.toString();
-            }
+            return processRunner.runAndWaitFor("uname -m");
         } catch (Throwable e) {
             System.err.println("Error while running uname -m: " + e.getMessage());
             return "unknown";
@@ -156,8 +135,8 @@ public class OSInfo {
             // armType (uname -m) can be armv5t, armv5te, armv5tej, armv5tejl, armv6, armv7, armv7l,
             // aarch64, i686
 
-            // for Android we fold everything that is not aarch64 into arm
-            if(isAndroid()) {
+            // for Android, we fold everything that is not aarch64 into arm
+            if (isAndroid()) {
                 if (armType.startsWith("aarch64")) {
                     // Use arm64
                     return "aarch64";
