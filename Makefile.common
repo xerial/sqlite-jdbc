@@ -47,7 +47,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-android-arm Linux-ppc64 Mac-x86 Mac-x86_64 Mac-aarch64 DragonFly-x86_64 FreeBSD-x86 FreeBSD-x86_64 FreeBSD-aarch64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 Windows-armv7 Windows-aarch64 SunOS-sparcv9 HPUX-ia64_32
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64 Linux-ppc64 Mac-x86 Mac-x86_64 Mac-aarch64 DragonFly-x86_64 FreeBSD-x86 FreeBSD-x86_64 FreeBSD-aarch64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 Windows-armv7 Windows-aarch64 SunOS-sparcv9 HPUX-ia64_32
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -99,12 +99,33 @@ Linux-armv7_LINKFLAGS := -shared -static-libgcc
 Linux-armv7_LIBNAME   := libsqlitejdbc.so
 Linux-armv7_SQLITE_FLAGS  :=
 
-Linux-android-arm_CC        := $(CROSS_PREFIX)gcc
-Linux-android-arm_STRIP     := /usr/arm-linux-androideabi/bin/llvm-strip
-Linux-android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I/usr/arm-linux-androideabi/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
-Linux-android-arm_LINKFLAGS := -shared -static-libgcc
-Linux-android-arm_LIBNAME   := libsqlitejdbc.so
-Linux-android-arm_SQLITE_FLAGS  :=
+Linux-Android-arm_CC        := $(CROSS_PREFIX)clang
+Linux-Android-arm_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
+Linux-Android-arm_LINKFLAGS := -shared -static-libgcc
+Linux-Android-arm_LIBNAME   := libsqlitejdbc.so
+Linux-Android-arm_SQLITE_FLAGS  :=
+
+Linux-Android-aarch64_CC        := $(CROSS_PREFIX)clang
+Linux-Android-aarch64_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-aarch64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
+Linux-Android-aarch64_LINKFLAGS := -shared -static-libgcc
+Linux-Android-aarch64_LIBNAME   := libsqlitejdbc.so
+Linux-Android-aarch64_SQLITE_FLAGS  :=
+
+Linux-Android-x86_CC        := $(CROSS_PREFIX)clang
+Linux-Android-x86_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-x86_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
+Linux-Android-x86_LINKFLAGS := -shared -static-libgcc
+Linux-Android-x86_LIBNAME   := libsqlitejdbc.so
+Linux-Android-x86_SQLITE_FLAGS  :=
+
+Linux-Android-x86_64_CC        := $(CROSS_PREFIX)clang
+Linux-Android-x86_64_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
+Linux-Android-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
+Linux-Android-x86_64_LINKFLAGS := -shared -static-libgcc
+Linux-Android-x86_64_LIBNAME   := libsqlitejdbc.so
+Linux-Android-x86_64_SQLITE_FLAGS  :=
 
 Linux-ppc64_CC        := $(CROSS_PREFIX)gcc
 Linux-ppc64_STRIP     := $(CROSS_PREFIX)strip
