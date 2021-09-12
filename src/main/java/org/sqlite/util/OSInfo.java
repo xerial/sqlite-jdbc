@@ -155,6 +155,17 @@ public class OSInfo {
             String armType = getHardwareName();
             // armType (uname -m) can be armv5t, armv5te, armv5tej, armv5tejl, armv6, armv7, armv7l,
             // aarch64, i686
+
+            // for Android we fold everything that is not aarch64 into arm
+            if(isAndroid()) {
+                if (armType.startsWith("aarch64")) {
+                    // Use arm64
+                    return "aarch64";
+                } else {
+                    return "arm";
+                }
+            }
+
             if (armType.startsWith("armv6")) {
                 // Raspberry PI
                 return "armv6";
@@ -208,10 +219,6 @@ public class OSInfo {
 
     public static String getArchName() {
         String osArch = System.getProperty("os.arch");
-        // For Android
-        if (isAndroid()) {
-            return "android-arm";
-        }
 
         if (osArch.startsWith("arm")) {
             osArch = resolveArmArchType();
@@ -229,6 +236,8 @@ public class OSInfo {
             return "Mac";
         } else if (isAlpine()) {
             return "Linux-Alpine";
+        } else if (isAndroid()) {
+            return "Linux-Android";
         } else if (osName.contains("Linux")) {
             return "Linux";
         } else if (osName.contains("AIX")) {
