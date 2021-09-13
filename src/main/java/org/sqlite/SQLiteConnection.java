@@ -55,11 +55,22 @@ public abstract class SQLiteConnection implements Connection {
      * @throws SQLException
      */
     public SQLiteConnection(String url, String fileName, Properties prop) throws SQLException {
-        this.db = open(url, fileName, prop);
-        SQLiteConfig config = db.getConfig();
-        this.connectionConfig = db.getConfig().newConnectionConfig();
-
-        config.apply(this);
+        DB newDB = null;
+        try {
+            this.db = newDB = open(url, fileName, prop);
+            SQLiteConfig config = this.db.getConfig();
+            this.connectionConfig = this.db.getConfig().newConnectionConfig();
+            config.apply(this);
+        } catch (Throwable t) {
+            try {
+                if (newDB != null) {
+                    newDB.close();
+                }
+            } catch (Exception e) {
+                t.addSuppressed(e);
+            }
+            throw t;
+        }
     }
 
     public SQLiteConnectionConfig getConnectionConfig() {
