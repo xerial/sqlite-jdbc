@@ -10,11 +10,18 @@
 package org.sqlite.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.logging.Logger;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
 public class OSInfoTest {
     private static final Logger logger = Logger.getLogger(OSInfoTest.class.getName());
@@ -94,5 +101,49 @@ public class OSInfoTest {
     public void testGetHardwareName() throws Exception {
         String hardware = OSInfo.getHardwareName();
         logger.info("Hardware name: " + hardware);
+    }
+
+    // it's unlikely we run tests on an Android device
+    @Test
+    void testIsNotAndroid() {
+        assertFalse(OSInfo.isAndroid());
+    }
+
+    @Nested
+    @SetSystemProperty(key = "java.runtime.name", value = "Java for Android")
+    @SetSystemProperty(key = "os.name", value = "Linux for Android")
+    class Android {
+        @Test
+        public void testIsAndroid() {
+            assertTrue(OSInfo.isAndroid());
+        }
+
+        @Test
+        @SetSystemProperty(key = "os.arch", value = "arm")
+        public void testArmvNativePath() throws IOException, InterruptedException {
+            try {
+                ProcessRunner mockRunner = mock(ProcessRunner.class);
+                OSInfo.processRunner = mockRunner;
+                when(mockRunner.runAndWaitFor("uname -m")).thenReturn("armv7l");
+
+                assertEquals("Linux-Android/arm", OSInfo.getNativeLibFolderPathForCurrentOS());
+            } finally {
+                OSInfo.processRunner = new ProcessRunner();
+            }
+        }
+
+        @Test
+        @SetSystemProperty(key = "os.arch", value = "arm64")
+        public void testArm64NativePath() throws IOException, InterruptedException {
+            try {
+                ProcessRunner mockRunner = mock(ProcessRunner.class);
+                OSInfo.processRunner = mockRunner;
+                when(mockRunner.runAndWaitFor("uname -m")).thenReturn("aarch64");
+
+                assertEquals("Linux-Android/aarch64", OSInfo.getNativeLibFolderPathForCurrentOS());
+            } finally {
+                OSInfo.processRunner = new ProcessRunner();
+            }
+        }
     }
 }
