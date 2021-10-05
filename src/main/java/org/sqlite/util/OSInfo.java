@@ -117,13 +117,17 @@ public class OSInfo {
     public static boolean isMusl() {
         Path mapFilesDir = Paths.get("/proc/self/map_files");
         try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
-            List<String> mapFilesNames = dirStream.map(path -> {
-                try {
-                    return path.toRealPath().toString();
-                } catch (IOException e) {
-                    return "";
-                }
-            }).collect(Collectors.toList());
+            List<String> mapFilesNames =
+                    dirStream
+                            .map(
+                                    path -> {
+                                        try {
+                                            return path.toRealPath().toString();
+                                        } catch (IOException e) {
+                                            return "";
+                                        }
+                                    })
+                            .collect(Collectors.toList());
             if (mapFilesNames.stream().anyMatch(s -> s.toLowerCase().contains("musl"))) {
                 return true;
             }
@@ -188,9 +192,9 @@ public class OSInfo {
                         "/bin/sh",
                         "-c",
                         "find '"
-                            + javaHome
-                            + "' -name 'libjvm.so' | head -1 | xargs readelf -A | "
-                            + "grep 'Tag_ABI_VFP_args: VFP registers'"
+                                + javaHome
+                                + "' -name 'libjvm.so' | head -1 | xargs readelf -A | "
+                                + "grep 'Tag_ABI_VFP_args: VFP registers'"
                     };
                     exitCode = Runtime.getRuntime().exec(cmdarray).waitFor();
                     if (exitCode == 0) {
@@ -198,7 +202,7 @@ public class OSInfo {
                     }
                 } else {
                     System.err.println(
-                        "WARNING! readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed.");
+                            "WARNING! readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed.");
                 }
             } catch (IOException | InterruptedException e) {
                 // ignored: fall back to "arm" arch (soft-float ABI)
