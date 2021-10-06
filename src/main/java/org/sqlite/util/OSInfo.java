@@ -25,9 +25,12 @@
 package org.sqlite.util;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Provides OS name and architecture name.
@@ -109,15 +112,22 @@ public class OSInfo {
         return System.getProperty("java.runtime.name", "").toLowerCase().contains("android");
     }
 
-    public static boolean isAlpine() {
-        try {
-            String output =
-                    processRunner.runAndWaitFor(
-                            "cat /etc/os-release | grep ^ID", 300, TimeUnit.MILLISECONDS);
-            return output.toLowerCase().contains("alpine");
-        } catch (Throwable e) {
-            return false;
+    public static boolean isMusl() {
+        Path mapFilesDir = Paths.get("/proc/self/map_files");
+        try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
+            return dirStream
+                    .map(
+                            path -> {
+                                try {
+                                    return path.toRealPath().toString();
+                                } catch (IOException e) {
+                                    return "";
+                                }
+                            })
+                    .anyMatch(s -> s.toLowerCase().contains("musl"));
+        } catch (IOException ignored) {
         }
+        return false;
     }
 
     static String getHardwareName() {
@@ -213,8 +223,8 @@ public class OSInfo {
             return "Windows";
         } else if (osName.contains("Mac") || osName.contains("Darwin")) {
             return "Mac";
-        } else if (isAlpine()) {
-            return "Linux-Alpine";
+        } else if (isMusl()) {
+            return "Linux-Musl";
         } else if (isAndroid()) {
             return "Linux-Android";
         } else if (osName.contains("Linux")) {
