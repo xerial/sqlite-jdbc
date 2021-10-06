@@ -29,9 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -118,15 +116,15 @@ public class OSInfo {
         Path mapFilesDir = Paths.get("/proc/self/map_files");
         try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
             return dirStream
-                            .map(
-                                    path -> {
-                                        try {
-                                            return path.toRealPath().toString();
-                                        } catch (IOException e) {
-                                            return "";
-                                        }
-                                    })
-                            .anyMatch(s -> s.toLowerCase().contains("musl")));
+                    .map(
+                            path -> {
+                                try {
+                                    return path.toRealPath().toString();
+                                } catch (IOException e) {
+                                    return "";
+                                }
+                            })
+                    .anyMatch(s -> s.toLowerCase().contains("musl"));
         } catch (IOException ignored) {
         }
         return false;
