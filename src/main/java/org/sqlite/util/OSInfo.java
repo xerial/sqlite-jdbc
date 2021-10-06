@@ -117,8 +117,7 @@ public class OSInfo {
     public static boolean isMusl() {
         Path mapFilesDir = Paths.get("/proc/self/map_files");
         try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
-            List<String> mapFilesNames =
-                    dirStream
+            return dirStream
                             .map(
                                     path -> {
                                         try {
@@ -127,10 +126,7 @@ public class OSInfo {
                                             return "";
                                         }
                                     })
-                            .collect(Collectors.toList());
-            if (mapFilesNames.stream().anyMatch(s -> s.toLowerCase().contains("musl"))) {
-                return true;
-            }
+                            .anyMatch(s -> s.toLowerCase().contains("musl")));
         } catch (IOException ignored) {
         }
         return false;
