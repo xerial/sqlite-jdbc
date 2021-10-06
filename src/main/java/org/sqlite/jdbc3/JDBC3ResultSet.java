@@ -153,14 +153,28 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getBigDecimal(int) */
     public BigDecimal getBigDecimal(int col) throws SQLException {
-        final String stringValue = getString(col);
-        if (stringValue == null) {
-            return null;
+        final int columnType = getColumnType(col);
+
+        if (columnType == Types.INTEGER) {
+            long decimal = getLong(col);
+            return BigDecimal.valueOf(decimal);
+        } else if (columnType == Types.FLOAT || columnType == Types.DOUBLE) {
+            final double decimal = getDouble(col);
+            if (Double.isNaN(decimal)) {
+                throw new SQLException("Bad value for type BigDecimal : Not a Number");
+            } else {
+                return BigDecimal.valueOf(decimal);
+            }
         } else {
-            try {
-                return new BigDecimal(stringValue);
-            } catch (NumberFormatException e) {
-                throw new SQLException("Bad value for type BigDecimal : " + stringValue);
+            final String stringValue = getString(col);
+            if (stringValue == null) {
+                return null;
+            } else {
+                try {
+                    return new BigDecimal(stringValue);
+                } catch (NumberFormatException e) {
+                    throw new SQLException("Bad value for type BigDecimal : " + stringValue);
+                }
             }
         }
     }
