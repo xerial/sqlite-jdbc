@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - master
+      - deploy
     paths:
       - '**.java'
       - '**.xml'
