@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Properties;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class JDBCTest {
@@ -39,6 +41,7 @@ public class JDBCTest {
     }
 
     @Test
+    @Disabled
     public void majorVersion() throws Exception {
         int major = DriverManager.getDriver("jdbc:sqlite:").getMajorVersion();
         int minor = DriverManager.getDriver("jdbc:sqlite:").getMinorVersion();
