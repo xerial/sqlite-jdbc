@@ -128,7 +128,7 @@ jobs:
 
   release:
     name: Release
-    needs: [lint, test, test_graalvm, test_multiarch]
+#    needs: [lint, test, test_graalvm, test_multiarch]
 #    if: github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
