@@ -124,3 +124,34 @@ jobs:
             echo "Architecture: `uname -a`"
             mvn --version
             cd /work && mvn test
+
+  release:
+    name: Release
+    needs: [lint, test, test_graalvm, test_multiarch]
+    if: github.ref == 'refs/heads/deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          java-package: jdk
+          cache: 'maven'
+      - name: Set up Apache Maven Central
+        uses: actions/setup-java@v2
+        with: # running setup-java again overwrites the settings.xml
+          distribution: 'temurin'
+          java-version: '8'
+          java-package: jdk
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: SONATYPE_USERNAME # env variable for username in deploy
+          server-password: SONATYPE_PASSWORD # env variable for token in deploy
+          gpg-private-key: ${{ secrets.GPG_KEY }} # Value of the GPG private key to import
+          gpg-passphrase: GPG_PASSPHRASE # env variable for GPG private key passphrase
+      - name: Publish to Apache Maven Central
+        run: mvn deploy -P release -P ossrh -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
