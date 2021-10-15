@@ -128,17 +128,17 @@ jobs:
 
   release:
     name: Release
-#    needs: [lint, test, test_graalvm, test_multiarch]
-    if: github.ref == 'refs/heads/deploy'
+    needs: [lint, test, test_graalvm, test_multiarch]
+#    if: github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'temurin'
-          java-version: '8'
-          java-package: jdk
-          cache: 'maven'
+#      - uses: actions/setup-java@v2
+#        with:
+#          distribution: 'temurin'
+#          java-version: '8'
+#          java-package: jdk
+#          cache: 'maven'
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v2
         with: # running setup-java again overwrites the settings.xml
