@@ -126,8 +126,8 @@ jobs:
             cd /work && mvn test
 
   release:
-    name: Release
-    needs: [lint, test, test_graalvm, test_multiarch]
+    name: Deploy
+    needs: [ lint, test, test_graalvm, test_multiarch ]
     if: github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
@@ -143,7 +143,11 @@ jobs:
           server-password: MAVEN_CENTRAL_PASSWORD # env variable for token in deploy (2)
           gpg-private-key: ${{ secrets.GPG_KEY }} # Value of the GPG private key to import
           gpg-passphrase: MAVEN_CENTRAL_GPG_PASSPHRASE # env variable for GPG private key passphrase (3)
+      - name: Get Project Version
+        run: |
+          echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
       - name: Publish to Apache Maven Central
+        if: ${{ endsWith(env.PROJECT_VERSION, '-SNAPSHOT') }}
         run: mvn deploy -P release -DskipTests
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.SONATYPE_USERNAME }} # must be the same env variable name as (1)
