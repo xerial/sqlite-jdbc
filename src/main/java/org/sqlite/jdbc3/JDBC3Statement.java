@@ -1,17 +1,16 @@
 package org.sqlite.jdbc3;
 
+import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.core.DB;
 import org.sqlite.core.DB.ProgressObserver;
-
-import java.sql.BatchUpdateException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 
 public abstract class JDBC3Statement extends CoreStatement {
     // PUBLIC INTERFACE /////////////////////////////////////////////
@@ -109,7 +108,7 @@ public abstract class JDBC3Statement extends CoreStatement {
         }
         DB db = conn.getDatabase();
 
-        if(pointer.safeRunInt(db::column_count)== 0) {
+        if (pointer.safeRunInt(db::column_count) == 0) {
             return null;
         }
 
@@ -132,8 +131,10 @@ public abstract class JDBC3Statement extends CoreStatement {
      */
     public int getUpdateCount() throws SQLException {
         DB db = conn.getDatabase();
-        if (!pointer.isClosed() && !rs.isOpen() && !resultsWaiting && pointer.safeRunInt(db::column_count) == 0)
-            return db.changes();
+        if (!pointer.isClosed()
+                && !rs.isOpen()
+                && !resultsWaiting
+                && pointer.safeRunInt(db::column_count) == 0) return db.changes();
         return -1;
     }
 
@@ -173,8 +174,7 @@ public abstract class JDBC3Statement extends CoreStatement {
                         throw new BatchUpdateException(
                                 "batch entry " + i + ": " + e.getMessage(), changes);
                     } finally {
-                        if (pointer != null)
-                            pointer.close();
+                        if (pointer != null) pointer.close();
                     }
                 }
             } finally {

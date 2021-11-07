@@ -15,12 +15,11 @@
  */
 package org.sqlite.core;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc4.JDBC4ResultSet;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public abstract class CoreStatement implements Codes {
     public final SQLiteConnection conn;
@@ -46,9 +45,7 @@ public abstract class CoreStatement implements Codes {
         return conn.getConnectionConfig();
     }
 
-    /**
-     * @throws SQLException If the database is not opened.
-     */
+    /** @throws SQLException If the database is not opened. */
     protected final void checkOpen() throws SQLException {
         if (pointer.isClosed()) throw new SQLException("statement is not executing");
     }

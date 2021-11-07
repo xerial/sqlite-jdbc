@@ -1,8 +1,5 @@
 package org.sqlite.jdbc3;
 
-import org.sqlite.SQLiteConnection;
-import org.sqlite.core.CorePreparedStatement;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -23,6 +20,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
+import org.sqlite.SQLiteConnection;
+import org.sqlite.core.CorePreparedStatement;
 
 public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
@@ -53,8 +52,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             success = true;
             return columnCount;
         } finally {
-            if (!success && !pointer.isClosed())
-                conn.getDatabase().reset(ptr);
+            if (!success && !pointer.isClosed()) conn.getDatabase().reset(ptr);
         }
     }
 
@@ -74,7 +72,8 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             resultsWaiting = conn.getDatabase().execute(this, batch);
             success = true;
         } finally {
-            if (!success && !pointer.isClosed()) pointer.safeRunInt(ptr -> conn.getDatabase().reset(ptr));
+            if (!success && !pointer.isClosed())
+                pointer.safeRunInt(ptr -> conn.getDatabase().reset(ptr));
         }
         return getResultSet();
     }

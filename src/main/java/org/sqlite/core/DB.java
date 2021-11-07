@@ -15,6 +15,12 @@
  */
 package org.sqlite.core;
 
+import java.sql.BatchUpdateException;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
 import org.sqlite.Function;
@@ -24,13 +30,6 @@ import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
 import org.sqlite.SQLiteUpdateListener;
-
-import java.sql.BatchUpdateException;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  * This class is the interface to SQLite. It provides some helper functions
@@ -243,10 +242,8 @@ public abstract class DB implements Codes {
         free_functions();
 
         // clean up commit object
-        if (begin != null)
-            begin.close();
-        if (commit != null)
-            commit.close();
+        if (begin != null) begin.close();
+        if (commit != null) commit.close();
 
         closed.set(true);
         _close();
@@ -880,8 +877,8 @@ public abstract class DB implements Codes {
      *     commands execute successfully;
      * @throws SQLException if statement is not open or is being used elsewhere
      */
-    final synchronized int[] executeBatch(SafePtrWrapper stmt, int count, Object[] vals, boolean autoCommit)
-            throws SQLException {
+    final synchronized int[] executeBatch(
+            SafePtrWrapper stmt, int count, Object[] vals, boolean autoCommit) throws SQLException {
         return stmt.safeRun(ptr -> this.executeBatch(ptr, count, vals, autoCommit));
     }
 
@@ -954,8 +951,7 @@ public abstract class DB implements Codes {
         }
     }
 
-    private synchronized int execute(long ptr, Object[] vals)
-            throws SQLException {
+    private synchronized int execute(long ptr, Object[] vals) throws SQLException {
         if (vals != null) {
             final int params = bind_parameter_count(ptr);
             if (params > vals.length) {
@@ -976,8 +972,7 @@ public abstract class DB implements Codes {
         }
 
         int statusCode = step(ptr);
-        if ((statusCode & 0xFF) == SQLITE_DONE)
-            reset(ptr);
+        if ((statusCode & 0xFF) == SQLITE_DONE) reset(ptr);
         return statusCode;
     }
 
@@ -1183,9 +1178,10 @@ public abstract class DB implements Codes {
 
         ensureBeginAndCommit();
 
-        begin.safeRunConsume(beginPtr -> {
-            commit.safeRunConsume(commitPtr -> ensureAutocommit(beginPtr, commitPtr));
-        });
+        begin.safeRunConsume(
+                beginPtr -> {
+                    commit.safeRunConsume(commitPtr -> ensureAutocommit(beginPtr, commitPtr));
+                });
     }
 
     private void ensureBeginAndCommit() throws SQLException {

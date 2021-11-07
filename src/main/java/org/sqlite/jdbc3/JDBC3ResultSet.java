@@ -1,10 +1,5 @@
 package org.sqlite.jdbc3;
 
-import org.sqlite.core.CoreResultSet;
-import org.sqlite.core.CoreStatement;
-import org.sqlite.core.DB;
-import org.sqlite.date.FastDateFormat;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Reader;
@@ -24,6 +19,10 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.sqlite.core.CoreResultSet;
+import org.sqlite.core.CoreStatement;
+import org.sqlite.core.DB;
+import org.sqlite.date.FastDateFormat;
 
 public abstract class JDBC3ResultSet extends CoreResultSet {
     // ResultSet Functions //////////////////////////////////////////
@@ -147,7 +146,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#wasNull() */
     public boolean wasNull() throws SQLException {
-        return stmt.pointer.safeRunInt(ptr -> getDatabase().column_type(ptr, markCol(lastCol))) == SQLITE_NULL;
+        return stmt.pointer.safeRunInt(ptr -> getDatabase().column_type(ptr, markCol(lastCol)))
+                == SQLITE_NULL;
     }
 
     // DATA ACCESS FUNCTIONS ////////////////////////////////////////
@@ -463,8 +463,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                             FastDateFormat.getInstance(
                                     getConnectionConfig().getDateStringFormat(), cal.getTimeZone());
 
-                    return new Time(
-                            dateFormat.parse(db.column_text(ptr, markCol(col))).getTime());
+                    return new Time(dateFormat.parse(db.column_text(ptr, markCol(col))).getTime());
                 } catch (Exception e) {
                     SQLException error = new SQLException("Error parsing time");
                     error.initCause(e);
@@ -534,7 +533,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar) */
     public Timestamp getTimestamp(int col, Calendar cal) throws SQLException {
-        return stmt.pointer.safeRun(ptr->getTimestamp(ptr, col, cal));
+        return stmt.pointer.safeRun(ptr -> getTimestamp(ptr, col, cal));
     }
 
     private Timestamp getTimestamp(long ptr, int col, Calendar cal) throws SQLException {
@@ -588,8 +587,9 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getObject(int) */
     public Object getObject(int col) throws SQLException {
-        return stmt.pointer.safeRun(ptr->getObject(ptr, col));
+        return stmt.pointer.safeRun(ptr -> getObject(ptr, col));
     }
+
     public Object getObject(long ptr, int col) throws SQLException {
         switch (getDatabase().column_type(ptr, markCol(col))) {
             case SQLITE_INTEGER:
@@ -691,7 +691,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     /** @see java.sql.ResultSetMetaData#getColumnType(int) */
     public int getColumnType(int col) throws SQLException {
         String typeName = getColumnTypeName(col);
-        int valueType = stmt.pointer.safeRunInt(ptr->getDatabase().column_type(ptr, checkCol(col)));
+        int valueType =
+                stmt.pointer.safeRunInt(ptr -> getDatabase().column_type(ptr, checkCol(col)));
 
         if (valueType == SQLITE_INTEGER || valueType == SQLITE_NULL) {
             if ("BOOLEAN".equals(typeName)) {
@@ -877,7 +878,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSetMetaData#getTableName(int) */
     public String getTableName(int col) throws SQLException {
-        final String tableName = stmt.pointer.safeRun(ptr -> getDatabase().column_table_name(ptr, checkCol(col)));
+        final String tableName =
+                stmt.pointer.safeRun(ptr -> getDatabase().column_table_name(ptr, checkCol(col)));
         if (tableName == null) {
             // JDBC specifies an empty string instead of null
             return "";

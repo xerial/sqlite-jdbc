@@ -5,7 +5,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * A class for safely wrapping calls to a native pointer, ensuring no other thread has access to the pointer while it is run
+ * A class for safely wrapping calls to a native pointer, ensuring no other thread has access to the
+ * pointer while it is run
  */
 public class SafePtrWrapper {
     private final String ptrName;
@@ -15,16 +16,17 @@ public class SafePtrWrapper {
     private volatile boolean closed = false;
     // to return on subsequent calls to close after this ptr has been closed
     private int closedRC;
-    // to throw on subsequent calls to close after this ptr has been close if the close function threw an exception
+    // to throw on subsequent calls to close after this ptr has been close if the close function
+    // threw an exception
     private SQLException closeException;
 
     /**
      * Construct a new Safe Pointer Wrapper to ensure a pointer is properly handled
      *
-     * @param ptrName       the name of the pointer, only used for better exception messages
-     * @param ptr           the raw pointer
+     * @param ptrName the name of the pointer, only used for better exception messages
+     * @param ptr the raw pointer
      * @param closeCallback the callback function to free this native pointer when it is closed.
-     *                      This is guaranteed to be called at most once
+     *     This is guaranteed to be called at most once
      */
     public SafePtrWrapper(String ptrName, long ptr, SafePtrCloseFunction closeCallback) {
         this.ptrName = ptrName;
@@ -45,15 +47,15 @@ public class SafePtrWrapper {
      * Close this pointer
      *
      * @return the return code of the close callback function
-     * @throws SQLException if the close callback throws an SQLException, or the pointer is locked elsewhere
+     * @throws SQLException if the close callback throws an SQLException, or the pointer is locked
+     *     elsewhere
      */
     public int close() throws SQLException {
         lock.lock();
         try {
             // if this is already closed, return or throw the previous result
             if (closed) {
-                if (closeException != null)
-                    throw closeException;
+                if (closeException != null) throw closeException;
                 return closedRC;
             }
             closedRC = closeCallback.run(this, ptr);
@@ -68,7 +70,8 @@ public class SafePtrWrapper {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is being used elsewhere
+     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
+     * being used elsewhere
      *
      * @param run the function to run
      * @return the return code of the function
@@ -84,7 +87,8 @@ public class SafePtrWrapper {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is being used elsewhere
+     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
+     * being used elsewhere
      *
      * @param run the function to run
      * @return the return code of the function
@@ -100,12 +104,14 @@ public class SafePtrWrapper {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is being used elsewhere
+     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
+     * being used elsewhere
      *
      * @param run the function to run
      * @throws SQLException if the pointer is utilized elsewhere
      */
-    public <E extends Throwable> void safeRunConsume(SafePtrConsumer<E> run) throws SQLException, E {
+    public <E extends Throwable> void safeRunConsume(SafePtrConsumer<E> run)
+            throws SQLException, E {
         this.safeTryLock();
         try {
             run.run(ptr);
@@ -114,9 +120,9 @@ public class SafePtrWrapper {
         }
     }
 
-
     /**
-     * Lock this pointer so no other thread can lock it. Useful if several atomic calls must be made in a row.
+     * Lock this pointer so no other thread can lock it. Useful if several atomic calls must be made
+     * in a row.
      *
      * @throws SQLException if another thread is using this
      */
