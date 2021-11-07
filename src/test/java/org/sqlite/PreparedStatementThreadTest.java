@@ -46,8 +46,13 @@ public class PreparedStatementThreadTest {
     @Test
     public void multipleThreadCloseSegmentationFault() throws SQLException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        for (int i = 0; i < 100; i++)
-            testRace(executorService);
+        try {
+            for (int i = 0; i < 100; i++) {
+                testRace(executorService);
+            }
+        } finally {
+            executorService.shutdownNow();
+        }
     }
 
     private void testRace(ExecutorService executorService) throws SQLException {
