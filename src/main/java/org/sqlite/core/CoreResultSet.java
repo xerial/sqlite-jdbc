@@ -15,11 +15,12 @@
  */
 package org.sqlite.core;
 
+import org.sqlite.SQLiteConnectionConfig;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import org.sqlite.SQLiteConnectionConfig;
 
 /** Implements a JDBC ResultSet. */
 public abstract class CoreResultSet implements Codes {
@@ -50,7 +51,7 @@ public abstract class CoreResultSet implements Codes {
     // INTERNAL FUNCTIONS ///////////////////////////////////////////
 
     protected DB getDatabase() {
-        return stmt.getDatbase();
+        return stmt.getDatabase();
     }
 
     protected SQLiteConnectionConfig getConnectionConfig() {
@@ -108,7 +109,7 @@ public abstract class CoreResultSet implements Codes {
     public void checkMeta() throws SQLException {
         checkCol(1);
         if (meta == null) {
-            meta = stmt.getDatbase().column_metadata(stmt.pointer);
+            meta = stmt.pointer.safeRun(ptr -> stmt.getDatabase().column_metadata(ptr));
         }
     }
 
@@ -125,10 +126,10 @@ public abstract class CoreResultSet implements Codes {
             return;
         }
 
-        DB db = stmt.getDatbase();
+        DB db = stmt.getDatabase();
         synchronized (db) {
-            if (stmt.pointer != 0) {
-                db.reset(stmt.pointer);
+            if (!stmt.pointer.isClosed()) {
+                stmt.pointer.safeRunInt(db::reset);
 
                 if (closeStmt) {
                     closeStmt = false; // break recursive call

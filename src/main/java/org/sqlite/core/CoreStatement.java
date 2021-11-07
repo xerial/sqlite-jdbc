@@ -15,17 +15,18 @@
  */
 package org.sqlite.core;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc4.JDBC4ResultSet;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public abstract class CoreStatement implements Codes {
     public final SQLiteConnection conn;
     protected final CoreResultSet rs;
 
-    public long pointer;
+    public SafePtrWrapper pointer;
     protected String sql = null;
 
     protected int batchPos;
@@ -37,7 +38,7 @@ public abstract class CoreStatement implements Codes {
         rs = new JDBC4ResultSet(this);
     }
 
-    public DB getDatbase() {
+    public DB getDatabase() {
         return conn.getDatabase();
     }
 
@@ -45,9 +46,11 @@ public abstract class CoreStatement implements Codes {
         return conn.getConnectionConfig();
     }
 
-    /** @throws SQLException If the database is not opened. */
+    /**
+     * @throws SQLException If the database is not opened.
+     */
     protected final void checkOpen() throws SQLException {
-        if (pointer == 0) throw new SQLException("statement is not executing");
+        if (pointer.isClosed()) throw new SQLException("statement is not executing");
     }
 
     /**
@@ -55,7 +58,7 @@ public abstract class CoreStatement implements Codes {
      * @throws SQLException
      */
     boolean isOpen() throws SQLException {
-        return (pointer != 0);
+        return pointer.isClosed();
     }
 
     /**
@@ -75,10 +78,12 @@ public abstract class CoreStatement implements Codes {
             success = true;
         } finally {
             resultsWaiting = rc;
-            if (!success) conn.getDatabase().finalize(this);
+            if (!success) {
+                this.pointer.close();
+            }
         }
 
-        return conn.getDatabase().column_count(pointer) != 0;
+        return pointer.safeRunInt(ptr -> conn.getDatabase().column_count(ptr)) != 0;
     }
 
     /**
@@ -100,23 +105,28 @@ public abstract class CoreStatement implements Codes {
             success = true;
         } finally {
             resultsWaiting = rc;
-            if (!success) conn.getDatabase().finalize(this);
+            if (!success && pointer != null) {
+                pointer.close();
+            }
         }
 
-        return conn.getDatabase().column_count(pointer) != 0;
+        return pointer.safeRunInt(ptr -> conn.getDatabase().column_count(ptr)) != 0;
     }
 
     protected void internalClose() throws SQLException {
-        if (pointer == 0) return;
-        if (conn.isClosed()) throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
+        if (this.pointer != null && !this.pointer.isClosed()) {
+            if (conn.isClosed()) throw DB.newSQLException(SQLITE_ERROR, "Connection is closed");
 
-        rs.close();
+            rs.close();
 
-        batch = null;
-        batchPos = 0;
-        int resp = conn.getDatabase().finalize(this);
+            batch = null;
+            batchPos = 0;
+            if (this.pointer != null) {
+                int resp = this.pointer.close();
 
-        if (resp != SQLITE_OK && resp != SQLITE_MISUSE) conn.getDatabase().throwex(resp);
+                if (resp != SQLITE_OK && resp != SQLITE_MISUSE) conn.getDatabase().throwex(resp);
+            }
+        }
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;

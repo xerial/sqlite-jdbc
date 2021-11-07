@@ -1,5 +1,8 @@
 package org.sqlite.jdbc3;
 
+import org.sqlite.SQLiteConnection;
+import org.sqlite.core.CorePreparedStatement;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -20,8 +23,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
-import org.sqlite.SQLiteConnection;
-import org.sqlite.core.CorePreparedStatement;
 
 public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
@@ -32,23 +33,28 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     /** @see java.sql.PreparedStatement#clearParameters() */
     public void clearParameters() throws SQLException {
         checkOpen();
-        conn.getDatabase().clear_bindings(pointer);
+        pointer.safeRunConsume(ptr -> conn.getDatabase().clear_bindings(ptr));
         if (batch != null) for (int i = batchPos; i < batchPos + paramCount; i++) batch[i] = null;
     }
 
     /** @see java.sql.PreparedStatement#execute() */
     public boolean execute() throws SQLException {
+        return 0 != pointer.safeRunInt(this::execute);
+    }
+
+    private int execute(long ptr) throws SQLException {
         checkOpen();
         rs.close();
-        conn.getDatabase().reset(pointer);
+        conn.getDatabase().reset(ptr);
 
         boolean success = false;
         try {
             resultsWaiting = conn.getDatabase().execute(this, batch);
             success = true;
-            return columnCount != 0;
+            return columnCount;
         } finally {
-            if (!success && pointer != 0) conn.getDatabase().reset(pointer);
+            if (!success && !pointer.isClosed())
+                conn.getDatabase().reset(ptr);
         }
     }
 
@@ -61,14 +67,14 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
 
         rs.close();
-        conn.getDatabase().reset(pointer);
+        pointer.safeRunConsume(ptr -> conn.getDatabase().reset(ptr));
 
         boolean success = false;
         try {
             resultsWaiting = conn.getDatabase().execute(this, batch);
             success = true;
         } finally {
-            if (!success && pointer != 0) conn.getDatabase().reset(pointer);
+            if (!success && !pointer.isClosed()) pointer.safeRunInt(ptr -> conn.getDatabase().reset(ptr));
         }
         return getResultSet();
     }
@@ -82,7 +88,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
 
         rs.close();
-        conn.getDatabase().reset(pointer);
+        pointer.safeRunConsume(ptr -> conn.getDatabase().reset(ptr));
 
         return conn.getDatabase().executeUpdate(this, batch);
     }

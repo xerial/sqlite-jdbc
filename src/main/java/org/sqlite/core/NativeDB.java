@@ -16,10 +16,16 @@
 
 package org.sqlite.core;
 
+import org.sqlite.BusyHandler;
+import org.sqlite.Collation;
+import org.sqlite.Function;
+import org.sqlite.ProgressHandler;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteJDBCLoader;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import org.sqlite.*;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 public final class NativeDB extends DB {
@@ -108,8 +114,8 @@ public final class NativeDB extends DB {
 
     /** @see org.sqlite.core.DB#prepare(java.lang.String) */
     @Override
-    protected synchronized long prepare(String sql) throws SQLException {
-        return prepare_utf8(stringToUtf8ByteArray(sql));
+    protected synchronized SafePtrWrapper prepare(String sql) throws SQLException {
+        return new SafePtrWrapper("statement", prepare_utf8(stringToUtf8ByteArray(sql)), this::finalize);
     }
 
     synchronized native long prepare_utf8(byte[] sqlUtf8) throws SQLException;

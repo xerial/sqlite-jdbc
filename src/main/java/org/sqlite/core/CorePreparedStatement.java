@@ -16,13 +16,14 @@
 
 package org.sqlite.core;
 
-import java.sql.Date;
-import java.sql.SQLException;
-import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.date.FastDateFormat;
 import org.sqlite.jdbc4.JDBC4Statement;
+
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.Calendar;
 
 public abstract class CorePreparedStatement extends JDBC4Statement {
     protected int columnCount;
@@ -42,9 +43,11 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
         this.sql = sql;
         DB db = conn.getDatabase();
         db.prepare(this);
-        rs.colsMeta = db.column_names(pointer);
-        columnCount = db.column_count(pointer);
-        paramCount = db.bind_parameter_count(pointer);
+        pointer.safeRunConsume(ptr -> {
+            rs.colsMeta = db.column_names(ptr);
+            columnCount = db.column_count(ptr);
+            paramCount = db.bind_parameter_count(ptr);
+        });
         batchQueryCount = 0;
         batch = null;
         batchPos = 0;
@@ -75,7 +78,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
     /** @see org.sqlite.jdbc3.JDBC3Statement#getUpdateCount() */
     @Override
     public int getUpdateCount() throws SQLException {
-        if (pointer == 0 || resultsWaiting || rs.isOpen()) {
+        if (pointer.isClosed() || resultsWaiting || rs.isOpen()) {
             return -1;
         }
 
