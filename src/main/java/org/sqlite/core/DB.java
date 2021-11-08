@@ -50,12 +50,12 @@ public abstract class DB implements Codes {
     private final AtomicBoolean closed = new AtomicBoolean(true);
 
     /** The "begin;"and "commit;" statement handles. */
-    volatile SafePtrWrapper begin;
+    volatile SafeStmtPtr begin;
 
-    volatile SafePtrWrapper commit;
+    volatile SafeStmtPtr commit;
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
-    private final Set<SafePtrWrapper> stmts = ConcurrentHashMap.newKeySet();
+    private final Set<SafeStmtPtr> stmts = ConcurrentHashMap.newKeySet();
 
     private final Set<SQLiteUpdateListener> updateListeners = new HashSet<SQLiteUpdateListener>();
     private final Set<SQLiteCommitListener> commitListeners = new HashSet<SQLiteCommitListener>();
@@ -185,9 +185,9 @@ public abstract class DB implements Codes {
      *     href="http://www.sqlite.org/c3ref/exec.html">http://www.sqlite.org/c3ref/exec.html</a>
      */
     public final synchronized void exec(String sql, boolean autoCommit) throws SQLException {
-        SafePtrWrapper pointer = prepare(sql);
+        SafeStmtPtr pointer = prepare(sql);
         try {
-            int rc = pointer.safeRunInt(this, this::step);
+            int rc = pointer.safeRunInt(DB::step);
             switch (rc) {
                 case SQLITE_DONE:
                     ensureAutoCommit(autoCommit);
@@ -234,7 +234,7 @@ public abstract class DB implements Codes {
      */
     public final synchronized void close() throws SQLException {
         // finalize any remaining statements before closing db
-        for (SafePtrWrapper element : stmts) {
+        for (SafeStmtPtr element : stmts) {
             element.close();
         }
 
@@ -281,7 +281,7 @@ public abstract class DB implements Codes {
      * @see <a
      *     href="http://www.sqlite.org/c3ref/finalize.html">http://www.sqlite.org/c3ref/finalize.html</a>
      */
-    public synchronized int finalize(SafePtrWrapper safePtr, long ptr) throws SQLException {
+    public synchronized int finalize(SafeStmtPtr safePtr, long ptr) throws SQLException {
         try {
             return finalize(ptr);
         } finally {
@@ -330,7 +330,7 @@ public abstract class DB implements Codes {
      * @see <a
      *     href="http://www.sqlite.org/c3ref/prepare.html">http://www.sqlite.org/c3ref/prepare.html</a>
      */
-    protected abstract SafePtrWrapper prepare(String sql) throws SQLException;
+    protected abstract SafeStmtPtr prepare(String sql) throws SQLException;
 
     /**
      * Destroys a prepared statement.
@@ -878,8 +878,8 @@ public abstract class DB implements Codes {
      * @throws SQLException if statement is not open or is being used elsewhere
      */
     final synchronized int[] executeBatch(
-            SafePtrWrapper stmt, int count, Object[] vals, boolean autoCommit) throws SQLException {
-        return stmt.safeRun(ptr -> this.executeBatch(ptr, count, vals, autoCommit));
+            SafeStmtPtr stmt, int count, Object[] vals, boolean autoCommit) throws SQLException {
+        return stmt.safeRun((db, ptr) -> this.executeBatch(ptr, count, vals, autoCommit));
     }
 
     private synchronized int[] executeBatch(long stmt, int count, Object[] vals, boolean autoCommit)
@@ -933,7 +933,7 @@ public abstract class DB implements Codes {
      */
     public final synchronized boolean execute(CoreStatement stmt, Object[] vals)
             throws SQLException {
-        int statusCode = stmt.pointer.safeRun(ptr -> execute(ptr, vals));
+        int statusCode = stmt.pointer.safeRunInt((db, ptr) -> execute(ptr, vals));
         switch (statusCode & 0xFF) {
             case SQLITE_DONE:
                 ensureAutoCommit(stmt.conn.getAutoCommit());
@@ -1018,7 +1018,7 @@ public abstract class DB implements Codes {
             }
         } finally {
             if (!stmt.pointer.isClosed()) {
-                stmt.pointer.safeRunInt(this, this::reset);
+                stmt.pointer.safeRunInt(DB::reset);
             }
         }
         return changes();
@@ -1179,9 +1179,9 @@ public abstract class DB implements Codes {
         ensureBeginAndCommit();
 
         begin.safeRunConsume(
-                this,
-                beginPtr -> {
-                    commit.safeRunConsume(commitPtr -> ensureAutocommit(beginPtr, commitPtr));
+                (db, beginPtr) -> {
+                    commit.safeRunConsume(
+                            (db2, commitPtr) -> ensureAutocommit(beginPtr, commitPtr));
                 });
     }
 
@@ -1205,7 +1205,7 @@ public abstract class DB implements Codes {
     private void ensureAutocommit(long beginPtr, long commitPtr) throws SQLException {
         try {
             if (step(beginPtr) != SQLITE_DONE) {
-                return;
+                return; // assume we are in a transaction
             }
             int rc = step(commitPtr);
             if (rc != SQLITE_DONE) {

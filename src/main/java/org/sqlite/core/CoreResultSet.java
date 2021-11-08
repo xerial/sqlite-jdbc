@@ -108,8 +108,7 @@ public abstract class CoreResultSet implements Codes {
     public void checkMeta() throws SQLException {
         checkCol(1);
         if (meta == null) {
-            DB db = stmt.getDatabase();
-            meta = stmt.pointer.safeRun(db, db::column_metadata);
+            meta = stmt.pointer.safeRun(DB::column_metadata);
         }
     }
 
@@ -129,7 +128,7 @@ public abstract class CoreResultSet implements Codes {
         DB db = stmt.getDatabase();
         synchronized (db) {
             if (!stmt.pointer.isClosed()) {
-                stmt.pointer.safeRunInt(db, db::reset);
+                stmt.pointer.safeRunInt(DB::reset);
 
                 if (closeStmt) {
                     closeStmt = false; // break recursive call

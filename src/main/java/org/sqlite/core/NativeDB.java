@@ -113,21 +113,8 @@ public final class NativeDB extends DB {
 
     /** @see org.sqlite.core.DB#prepare(java.lang.String) */
     @Override
-    protected synchronized SafePtrWrapper prepare(String sql) throws SQLException {
-        return new SafePtrWrapper(
-                "statement",
-                prepare_utf8(stringToUtf8ByteArray(sql)),
-                new SafePtrWrapper.SafePtrCloseFunction() {
-                    @Override
-                    public int free(SafePtrWrapper safePtr, long ptr) throws SQLException {
-                        return NativeDB.this.finalize(safePtr, ptr);
-                    }
-
-                    @Override
-                    public Object lockObject() {
-                        return NativeDB.this;
-                    }
-                });
+    protected synchronized SafeStmtPtr prepare(String sql) throws SQLException {
+        return new SafeStmtPtr(this, prepare_utf8(stringToUtf8ByteArray(sql)));
     }
 
     synchronized native long prepare_utf8(byte[] sqlUtf8) throws SQLException;

@@ -69,7 +69,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         }
 
         // do the real work
-        int statusCode = stmt.pointer.safeRunInt(getDatabase(), ptr -> getDatabase().step(ptr));
+        int statusCode = stmt.pointer.safeRunInt(DB::step);
         switch (statusCode) {
             case SQLITE_DONE:
                 close(); // agressive closing to avoid writer starvation
@@ -221,8 +221,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getBytes(int) */
     public byte[] getBytes(int col) throws SQLException {
-        return stmt.pointer.safeRun(
-                getDatabase(), ptr -> getDatabase().column_blob(ptr, markCol(col)));
+        return stmt.pointer.safeRun((db, ptr) -> db.column_blob(ptr, markCol(col)));
     }
 
     /** @see java.sql.ResultSet#getBytes(java.lang.String) */
@@ -244,7 +243,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     /** @see java.sql.ResultSet#getDate(int) */
     public Date getDate(int col) throws SQLException {
         DB db = getDatabase();
-        switch (stmt.pointer.safeRun(db, ptr -> db.column_type(ptr, markCol(col)))) {
+        switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
@@ -275,7 +274,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         checkCalendar(cal);
 
         DB db = getDatabase();
-        switch (stmt.pointer.safeRun(db, ptr -> db.column_type(ptr, markCol(col)))) {
+        switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
@@ -285,8 +284,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                             FastDateFormat.getInstance(
                                     getConnectionConfig().getDateStringFormat(), cal.getTimeZone());
 
-                    String dateStr = safeGetColumnText(col);
-                    return new java.sql.Date(dateFormat.parse(dateStr).getTime());
+                    return new java.sql.Date(dateFormat.parse(safeGetColumnText(col)).getTime());
                 } catch (Exception e) {
                     SQLException error = new SQLException("Error parsing time stamp");
                     error.initCause(e);
@@ -295,12 +293,11 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                 }
 
             case SQLITE_FLOAT:
-                double dateDouble = safeGetDoubleCol(col);
-                return new Date(julianDateToCalendar(dateDouble, cal).getTimeInMillis());
+                return new Date(julianDateToCalendar(safeGetDoubleCol(col), cal).getTimeInMillis());
 
             default: // SQLITE_INTEGER:
-                long dateLong = safeGetLongCol(col);
-                cal.setTimeInMillis(dateLong * getConnectionConfig().getDateMultiplier());
+                cal.setTimeInMillis(
+                        safeGetLongCol(col) * getConnectionConfig().getDateMultiplier());
                 return new Date(cal.getTime().getTime());
         }
     }
@@ -338,26 +335,6 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         return (float) safeGetDoubleCol(col);
     }
 
-    private int safeGetColumnType(int i) throws SQLException {
-        DB db = getDatabase();
-        return stmt.pointer.safeRunInt(db, ptr -> db.column_type(ptr, i));
-    }
-
-    private long safeGetLongCol(int col) throws SQLException {
-        DB db = getDatabase();
-        return stmt.pointer.safeRun(db, ptr -> db.column_long(ptr, markCol(col)));
-    }
-
-    private double safeGetDoubleCol(int col) throws SQLException {
-        DB db = getDatabase();
-        return stmt.pointer.safeRun(db, ptr -> db.column_double(ptr, markCol(col)));
-    }
-
-    private String safeGetColumnText(int col) throws SQLException {
-        DB db = getDatabase();
-        return stmt.pointer.safeRun(db, ptr -> db.column_text(ptr, markCol(col)));
-    }
-
     /** @see java.sql.ResultSet#getFloat(java.lang.String) */
     public float getFloat(String col) throws SQLException {
         return getFloat(findColumn(col));
@@ -365,8 +342,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getInt(int) */
     public int getInt(int col) throws SQLException {
-        DB db = getDatabase();
-        return stmt.pointer.safeRunInt(db, ptr -> db.column_int(ptr, markCol(col)));
+        return stmt.pointer.safeRunInt((db, ptr) -> db.column_int(ptr, markCol(col)));
     }
 
     /** @see java.sql.ResultSet#getInt(java.lang.String) */
@@ -619,8 +595,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSetMetaData#getCatalogName(int) */
     public String getCatalogName(int col) throws SQLException {
-        return stmt.pointer.safeRun(
-                getDatabase(), ptr -> getDatabase().column_table_name(ptr, checkCol(col)));
+        return safeGetColumnTableName(col);
     }
 
     /** @see java.sql.ResultSetMetaData#getColumnClassName(int) */
@@ -647,8 +622,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSetMetaData#getColumnName(int) */
     public String getColumnName(int col) throws SQLException {
-        return stmt.pointer.safeRun(
-                getDatabase(), ptr -> getDatabase().column_name(ptr, checkCol(col)));
+        return safeGetColumnName(col);
     }
 
     /** @see java.sql.ResultSetMetaData#getColumnType(int) */
@@ -766,18 +740,16 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
             return matcher.group(1).toUpperCase(Locale.ENGLISH);
         }
 
-        switch (stmt.pointer.safeRun(
-                getDatabase(), ptr -> getDatabase().column_type(ptr, checkCol(col)))) {
+        switch (safeGetColumnType(checkCol(col))) {
             case SQLITE_INTEGER:
                 return "INTEGER";
             case SQLITE_FLOAT:
                 return "FLOAT";
             case SQLITE_BLOB:
                 return "BLOB";
-            case SQLITE_NULL:
-                return "NUMERIC";
             case SQLITE_TEXT:
                 return "TEXT";
+            case SQLITE_NULL:
             default:
                 return "NUMERIC";
         }
@@ -797,13 +769,10 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     private String getColumnDeclType(int col) throws SQLException {
-        DB db = getDatabase();
-        String declType = stmt.pointer.safeRun(db, ptr -> db.column_decltype(ptr, checkCol(col)));
+        String declType = stmt.pointer.safeRun((db, ptr) -> db.column_decltype(ptr, checkCol(col)));
 
         if (declType == null) {
-            Matcher matcher =
-                    COLUMN_TYPECAST.matcher(
-                            stmt.pointer.safeRun(db, ptr -> db.column_name(ptr, checkCol(col))));
+            Matcher matcher = COLUMN_TYPECAST.matcher(safeGetColumnName(col));
             declType = matcher.find() ? matcher.group(1) : null;
         }
 
@@ -835,9 +804,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSetMetaData#getTableName(int) */
     public String getTableName(int col) throws SQLException {
-        final String tableName =
-                stmt.pointer.safeRun(
-                        getDatabase(), ptr -> getDatabase().column_table_name(ptr, checkCol(col)));
+        final String tableName = safeGetColumnTableName(col);
         if (tableName == null) {
             // JDBC specifies an empty string instead of null
             return "";
@@ -993,5 +960,29 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         e.initCause(new NullPointerException());
 
         throw e;
+    }
+
+    private int safeGetColumnType(int col) throws SQLException {
+        return stmt.pointer.safeRunInt((db, ptr) -> db.column_type(ptr, col));
+    }
+
+    private long safeGetLongCol(int col) throws SQLException {
+        return stmt.pointer.safeRunLong((db, ptr) -> db.column_long(ptr, markCol(col)));
+    }
+
+    private double safeGetDoubleCol(int col) throws SQLException {
+        return stmt.pointer.safeRunDouble((db, ptr) -> db.column_double(ptr, markCol(col)));
+    }
+
+    private String safeGetColumnText(int col) throws SQLException {
+        return stmt.pointer.safeRun((db, ptr) -> db.column_text(ptr, markCol(col)));
+    }
+
+    private String safeGetColumnTableName(int col) throws SQLException {
+        return stmt.pointer.safeRun((db, ptr) -> db.column_table_name(ptr, checkCol(col)));
+    }
+
+    private String safeGetColumnName(int col) throws SQLException {
+        return stmt.pointer.safeRun((db, ptr) -> db.column_name(ptr, checkCol(col)));
     }
 }

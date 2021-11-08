@@ -25,7 +25,7 @@ public abstract class CoreStatement implements Codes {
     public final SQLiteConnection conn;
     protected final CoreResultSet rs;
 
-    public SafePtrWrapper pointer;
+    public SafeStmtPtr pointer;
     protected String sql = null;
 
     protected int batchPos;
@@ -55,7 +55,7 @@ public abstract class CoreStatement implements Codes {
      * @throws SQLException
      */
     boolean isOpen() throws SQLException {
-        return pointer.isClosed();
+        return !pointer.isClosed();
     }
 
     /**
@@ -80,8 +80,7 @@ public abstract class CoreStatement implements Codes {
             }
         }
 
-        return pointer.safeRunInt(conn.getDatabase(), ptr -> conn.getDatabase().column_count(ptr))
-                != 0;
+        return pointer.safeRunInt(DB::column_count) != 0;
     }
 
     /**
@@ -108,8 +107,7 @@ public abstract class CoreStatement implements Codes {
             }
         }
 
-        return pointer.safeRunInt(conn.getDatabase(), ptr -> conn.getDatabase().column_count(ptr))
-                != 0;
+        return pointer.safeRunInt(DB::column_count) != 0;
     }
 
     protected void internalClose() throws SQLException {
@@ -120,11 +118,9 @@ public abstract class CoreStatement implements Codes {
 
             batch = null;
             batchPos = 0;
-            if (this.pointer != null) {
-                int resp = this.pointer.close();
+            int resp = this.pointer.close();
 
-                if (resp != SQLITE_OK && resp != SQLITE_MISUSE) conn.getDatabase().throwex(resp);
-            }
+            if (resp != SQLITE_OK && resp != SQLITE_MISUSE) conn.getDatabase().throwex(resp);
         }
     }
 

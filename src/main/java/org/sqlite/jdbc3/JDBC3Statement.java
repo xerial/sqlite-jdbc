@@ -106,14 +106,13 @@ public abstract class JDBC3Statement extends CoreStatement {
         if (rs.isOpen()) {
             throw new SQLException("ResultSet already requested");
         }
-        DB db = conn.getDatabase();
 
-        if (pointer.safeRunInt(db, db::column_count) == 0) {
+        if (pointer.safeRunInt(DB::column_count) == 0) {
             return null;
         }
 
         if (rs.colsMeta == null) {
-            rs.colsMeta = pointer.safeRun(db, db::column_names);
+            rs.colsMeta = pointer.safeRun(DB::column_names);
         }
 
         rs.cols = rs.colsMeta;
@@ -134,7 +133,7 @@ public abstract class JDBC3Statement extends CoreStatement {
         if (!pointer.isClosed()
                 && !rs.isOpen()
                 && !resultsWaiting
-                && pointer.safeRunInt(db, db::column_count) == 0) return db.changes();
+                && pointer.safeRunInt(DB::column_count) == 0) return db.changes();
         return -1;
     }
 
