@@ -187,7 +187,7 @@ public abstract class DB implements Codes {
     public final synchronized void exec(String sql, boolean autoCommit) throws SQLException {
         SafePtrWrapper pointer = prepare(sql);
         try {
-            int rc = pointer.safeRunInt(this::step);
+            int rc = pointer.safeRunInt(this, this::step);
             switch (rc) {
                 case SQLITE_DONE:
                     ensureAutoCommit(autoCommit);
@@ -1018,7 +1018,7 @@ public abstract class DB implements Codes {
             }
         } finally {
             if (!stmt.pointer.isClosed()) {
-                stmt.pointer.safeRunInt(this::reset);
+                stmt.pointer.safeRunInt(this, this::reset);
             }
         }
         return changes();
@@ -1179,6 +1179,7 @@ public abstract class DB implements Codes {
         ensureBeginAndCommit();
 
         begin.safeRunConsume(
+                this,
                 beginPtr -> {
                     commit.safeRunConsume(commitPtr -> ensureAutocommit(beginPtr, commitPtr));
                 });

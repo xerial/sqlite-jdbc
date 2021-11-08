@@ -115,7 +115,19 @@ public final class NativeDB extends DB {
     @Override
     protected synchronized SafePtrWrapper prepare(String sql) throws SQLException {
         return new SafePtrWrapper(
-                "statement", prepare_utf8(stringToUtf8ByteArray(sql)), this::finalize);
+                "statement",
+                prepare_utf8(stringToUtf8ByteArray(sql)),
+                new SafePtrWrapper.SafePtrCloseFunction() {
+                    @Override
+                    public int free(SafePtrWrapper safePtr, long ptr) throws SQLException {
+                        return NativeDB.this.finalize(safePtr, ptr);
+                    }
+
+                    @Override
+                    public Object lockObject() {
+                        return NativeDB.this;
+                    }
+                });
     }
 
     synchronized native long prepare_utf8(byte[] sqlUtf8) throws SQLException;

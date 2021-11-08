@@ -108,12 +108,12 @@ public abstract class JDBC3Statement extends CoreStatement {
         }
         DB db = conn.getDatabase();
 
-        if (pointer.safeRunInt(db::column_count) == 0) {
+        if (pointer.safeRunInt(db, db::column_count) == 0) {
             return null;
         }
 
         if (rs.colsMeta == null) {
-            rs.colsMeta = pointer.safeRun(db::column_names);
+            rs.colsMeta = pointer.safeRun(db, db::column_names);
         }
 
         rs.cols = rs.colsMeta;
@@ -134,7 +134,7 @@ public abstract class JDBC3Statement extends CoreStatement {
         if (!pointer.isClosed()
                 && !rs.isOpen()
                 && !resultsWaiting
-                && pointer.safeRunInt(db::column_count) == 0) return db.changes();
+                && pointer.safeRunInt(db, db::column_count) == 0) return db.changes();
         return -1;
     }
 

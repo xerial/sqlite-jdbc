@@ -32,13 +32,13 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     /** @see java.sql.PreparedStatement#clearParameters() */
     public void clearParameters() throws SQLException {
         checkOpen();
-        pointer.safeRunConsume(ptr -> conn.getDatabase().clear_bindings(ptr));
+        pointer.safeRunConsume(this, ptr -> conn.getDatabase().clear_bindings(ptr));
         if (batch != null) for (int i = batchPos; i < batchPos + paramCount; i++) batch[i] = null;
     }
 
     /** @see java.sql.PreparedStatement#execute() */
     public boolean execute() throws SQLException {
-        return 0 != pointer.safeRunInt(this::execute);
+        return 0 != pointer.safeRunInt(getDatabase(), this::execute);
     }
 
     private int execute(long ptr) throws SQLException {
@@ -65,7 +65,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
 
         rs.close();
-        pointer.safeRunConsume(ptr -> conn.getDatabase().reset(ptr));
+        pointer.safeRunConsume(conn.getDatabase(), ptr -> conn.getDatabase().reset(ptr));
 
         boolean success = false;
         try {
@@ -73,7 +73,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
             success = true;
         } finally {
             if (!success && !pointer.isClosed())
-                pointer.safeRunInt(ptr -> conn.getDatabase().reset(ptr));
+                pointer.safeRunInt(getDatabase(), ptr -> getDatabase().reset(ptr));
         }
         return getResultSet();
     }
@@ -87,7 +87,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
 
         rs.close();
-        pointer.safeRunConsume(ptr -> conn.getDatabase().reset(ptr));
+        pointer.safeRunConsume(conn.getDatabase(), ptr -> conn.getDatabase().reset(ptr));
 
         return conn.getDatabase().executeUpdate(this, batch);
     }

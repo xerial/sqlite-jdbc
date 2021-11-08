@@ -80,7 +80,8 @@ public abstract class CoreStatement implements Codes {
             }
         }
 
-        return pointer.safeRunInt(ptr -> conn.getDatabase().column_count(ptr)) != 0;
+        return pointer.safeRunInt(conn.getDatabase(), ptr -> conn.getDatabase().column_count(ptr))
+                != 0;
     }
 
     /**
@@ -107,7 +108,8 @@ public abstract class CoreStatement implements Codes {
             }
         }
 
-        return pointer.safeRunInt(ptr -> conn.getDatabase().column_count(ptr)) != 0;
+        return pointer.safeRunInt(conn.getDatabase(), ptr -> conn.getDatabase().column_count(ptr))
+                != 0;
     }
 
     protected void internalClose() throws SQLException {

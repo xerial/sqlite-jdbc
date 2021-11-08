@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,8 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -24,19 +22,18 @@ import org.junit.jupiter.api.Test;
  * segmentation fault
  */
 public class PreparedStatementThreadTest {
+    private static ExecutorService executorService;
     private Connection conn;
     private Statement stat;
 
-    @BeforeEach
-    public void connect() throws Exception {
-        conn = DriverManager.getConnection("jdbc:sqlite:");
-        stat = conn.createStatement();
+    @BeforeAll
+    static void beforeAll() {
+        executorService = Executors.newFixedThreadPool(2);
     }
 
-    @AfterEach
-    public void close() throws SQLException {
-        stat.close();
-        conn.close();
+    @AfterAll
+    static void afterAll() {
+        executorService.shutdownNow();
     }
 
     /**
@@ -45,18 +42,43 @@ public class PreparedStatementThreadTest {
      * behavior
      */
     @Test
-    public void multipleThreadCloseSegmentationFault() throws SQLException {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+    public void testPreparedStmtConcurrentCloseSegFault() throws SQLException {
+        connect();
         try {
             for (int i = 0; i < 100; i++) {
-                testRace(executorService);
+                testRace(executorService, stat::close);
             }
         } finally {
-            executorService.shutdownNow();
+            close();
         }
     }
 
-    private void testRace(ExecutorService executorService) throws SQLException {
+    /**
+     * Tests to make sure that if one thread is uses a PreparedStatement which another thread closes
+     * the underlying connection to, the application throws an exception rather than crashing due to
+     * undefined C behavior
+     */
+    @Test
+    public void testPreparedStmtConcurrentCloseConnSegFault() throws SQLException {
+        for (int i = 0; i < 100; i++) {
+            connect();
+            testRace(executorService, conn::close);
+            close();
+        }
+    }
+
+    public void connect() throws SQLException {
+        conn = DriverManager.getConnection("jdbc:sqlite:");
+        stat = conn.createStatement();
+    }
+
+    public void close() throws SQLException {
+        stat.close();
+        conn.close();
+    }
+
+    private void testRace(ExecutorService executorService, CloseCallback closeCallback)
+            throws SQLException {
         AtomicInteger countdown = new AtomicInteger();
         PreparedStatement prep = conn.prepareStatement("select 1,2,3,4,5");
 
@@ -75,7 +97,7 @@ public class PreparedStatementThreadTest {
                 executorService.submit(
                         () -> {
                             waitFor(countdown);
-                            prep.close();
+                            closeCallback.close();
                             return true;
                         });
         try {
@@ -93,5 +115,10 @@ public class PreparedStatementThreadTest {
         countdown.decrementAndGet();
         while (0 < countdown.get())
             ;
+    }
+
+    @FunctionalInterface
+    interface CloseCallback {
+        void close() throws SQLException;
     }
 }

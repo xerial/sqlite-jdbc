@@ -51,6 +51,16 @@ public class SafePtrWrapper {
      *     elsewhere
      */
     public int close() throws SQLException {
+        Object lock = closeCallback.lockObject();
+        if (null == lock) {
+            return internalClose();
+        }
+        synchronized (lock) {
+            return internalClose();
+        }
+    }
+
+    private int internalClose() throws SQLException {
         lock.lock();
         try {
             // if this is already closed, return or throw the previous result
@@ -58,7 +68,7 @@ public class SafePtrWrapper {
                 if (closeException != null) throw closeException;
                 return closedRC;
             }
-            closedRC = closeCallback.run(this, ptr);
+            closedRC = closeCallback.free(this, ptr);
             return closedRC;
         } catch (SQLException ex) {
             this.closeException = ex;
@@ -77,6 +87,13 @@ public class SafePtrWrapper {
      * @return the return code of the function
      * @throws SQLException if the pointer is utilized elsewhere
      */
+    public <E extends Throwable> int safeRunInt(Object lock, SafePtrIntFunction<E> run)
+            throws SQLException, E {
+        synchronized (lock) {
+            return safeRunInt(run);
+        }
+    }
+
     public <E extends Throwable> int safeRunInt(SafePtrIntFunction<E> run) throws SQLException, E {
         this.safeTryLock();
         try {
@@ -94,6 +111,13 @@ public class SafePtrWrapper {
      * @return the return code of the function
      * @throws SQLException if the pointer is utilized elsewhere
      */
+    public <T, E extends Throwable> T safeRun(Object lock, SafePtrFunction<T, E> run)
+            throws SQLException, E {
+        synchronized (lock) {
+            return safeRun(run);
+        }
+    }
+
     public <T, E extends Throwable> T safeRun(SafePtrFunction<T, E> run) throws SQLException, E {
         this.safeTryLock();
         try {
@@ -110,6 +134,13 @@ public class SafePtrWrapper {
      * @param run the function to run
      * @throws SQLException if the pointer is utilized elsewhere
      */
+    public <E extends Throwable> void safeRunConsume(Object lock, SafePtrConsumer<E> run)
+            throws SQLException, E {
+        synchronized (lock) {
+            safeRunConsume(run);
+        }
+    }
+
     public <E extends Throwable> void safeRunConsume(SafePtrConsumer<E> run)
             throws SQLException, E {
         this.safeTryLock();
@@ -152,14 +183,24 @@ public class SafePtrWrapper {
         return Long.hashCode(ptr);
     }
 
-    @FunctionalInterface
-    public interface SafePtrIntFunction<E extends Throwable> {
-        int run(long ptr) throws E;
+    public interface SafePtrCloseFunction {
+        /**
+         * Free any memory allocated by the ptr, and any structures referencing it
+         *
+         * @param safePtr the safe ptr
+         * @param ptr the raw ptr
+         * @return a return code
+         * @throws SQLException on failure
+         */
+        int free(SafePtrWrapper safePtr, long ptr) throws SQLException;
+
+        /** Return an object to lock before the safe pointer lock is acquired to avoid deadlock */
+        Object lockObject();
     }
 
     @FunctionalInterface
-    public interface SafePtrCloseFunction {
-        int run(SafePtrWrapper safePtr, long ptr) throws SQLException;
+    public interface SafePtrIntFunction<E extends Throwable> {
+        int run(long ptr) throws E;
     }
 
     @FunctionalInterface
