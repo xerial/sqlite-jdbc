@@ -14,9 +14,9 @@ public class SafeStmtPtr {
     private final long ptr;
 
     private volatile boolean closed = false;
-    // to return on subsequent calls to close after this ptr has been closed
+    // to return on subsequent calls to close() after this ptr has been closed
     private int closedRC;
-    // to throw on subsequent calls to close after this ptr has been close if the close function
+    // to throw on subsequent calls to close after this ptr has been closed, if the close function
     // threw an exception
     private SQLException closeException;
 
@@ -72,8 +72,7 @@ public class SafeStmtPtr {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
-     * being used elsewhere
+     * Run a callback with the wrapped pointer safely.
      *
      * @param run the function to run
      * @return the return of the passed in function
@@ -87,8 +86,7 @@ public class SafeStmtPtr {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
-     * being used elsewhere
+     * Run a callback with the wrapped pointer safely.
      *
      * @param run the function to run
      * @return the return of the passed in function
@@ -103,8 +101,7 @@ public class SafeStmtPtr {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
-     * being used elsewhere
+     * Run a callback with the wrapped pointer safely.
      *
      * @param run the function to run
      * @return the return of the passed in function
@@ -119,8 +116,7 @@ public class SafeStmtPtr {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
-     * being used elsewhere
+     * Run a callback with the wrapped pointer safely.
      *
      * @param run the function to run
      * @return the return code of the function
@@ -134,8 +130,7 @@ public class SafeStmtPtr {
     }
 
     /**
-     * Run a callback with the wrapped pointer safely. Note: this call will fail if the pointer is
-     * being used elsewhere
+     * Run a callback with the wrapped pointer safely.
      *
      * @param run the function to run
      * @throws SQLException if the pointer is utilized elsewhere
