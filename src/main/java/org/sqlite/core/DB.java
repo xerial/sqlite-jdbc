@@ -1133,7 +1133,13 @@ public abstract class DB implements Codes {
      */
     public static SQLiteException newSQLException(int errorCode, String errorMessage) {
         SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
-        SQLiteException e = new SQLiteException(String.format("%s (%s)", code, errorMessage), code);
+        String msg;
+        if (code == SQLiteErrorCode.UNKNOWN_ERROR) {
+            msg = String.format("0x%x (%s)", errorCode, errorMessage);
+        } else {
+            msg = String.format("%s (%s)", code, errorMessage);
+        }
+        SQLiteException e = new SQLiteException(msg, code);
         return e;
     }
 
