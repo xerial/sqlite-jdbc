@@ -9,13 +9,12 @@ JAVAC := "$$JAVA_HOME/bin/javac"
 JAVAH := "$$JAVA_HOME/bin/javah"
 
 TARGET := target
-OSINFO_CLASS := org.sqlite.OSInfo
-OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
+OSINFO_CLASS := org.sqlite.util.OSInfo
+SRC_PREFIX := src/main/java
 
 ## building OSInfo.java 
-#$(info compiling OSInfo.java)
-#$(shell mkdir -p lib)
-#$(shell $(JAVAC) src/main/java/org/sqlite/util/OSInfo.java -d lib)
+$(info compiling OSInfo.java)
+$(shell $(JAVAC) -cp $(SRC_PREFIX) -d lib $(SRC_PREFIX)/$(OSINFO_CLASS).java)
 
 ifndef OS_NAME
 OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
