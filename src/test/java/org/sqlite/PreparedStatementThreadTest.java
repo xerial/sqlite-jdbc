@@ -7,7 +7,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,7 +23,7 @@ import org.junit.jupiter.api.Test;
 public class PreparedStatementThreadTest {
     private static ExecutorService executorService;
     private Connection conn;
-    private Statement stat;
+    private PreparedStatement stat;
 
     @BeforeAll
     static void beforeAll() {
@@ -46,7 +45,7 @@ public class PreparedStatementThreadTest {
         connect();
         try {
             for (int i = 0; i < 100; i++) {
-                testRace(executorService, stat::close);
+                testRace(executorService, () -> stat.close());
             }
         } finally {
             close();
@@ -69,25 +68,23 @@ public class PreparedStatementThreadTest {
 
     public void connect() throws SQLException {
         conn = DriverManager.getConnection("jdbc:sqlite:");
-        stat = conn.createStatement();
     }
 
     public void close() throws SQLException {
-        stat.close();
         conn.close();
     }
 
     private void testRace(ExecutorService executorService, CloseCallback closeCallback)
             throws SQLException {
-        AtomicInteger countdown = new AtomicInteger();
-        PreparedStatement prep = conn.prepareStatement("select 1,2,3,4,5");
+        AtomicInteger countdown = new AtomicInteger(2);
+        stat = conn.prepareStatement("select 1,2,3,4,5");
 
         Future<Boolean> queryThread =
                 executorService.submit(
                         () -> {
                             waitFor(countdown);
                             for (int i = 0; i < 100; i++) {
-                                ResultSet set = prep.executeQuery();
+                                ResultSet set = stat.executeQuery();
                                 assertTrue(set.next());
                                 for (int j = 1; j <= 5; j++) assertEquals(j, set.getInt(j));
                             }
