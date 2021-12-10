@@ -119,7 +119,7 @@ public class SQLiteJDBCLoaderTest {
                     new Runnable() {
                         public void run() {
                             try {
-                                Thread.sleep(sleepMillis * 10L );
+                                Thread.sleep(sleepMillis * 10L);
                             } catch (InterruptedException e) {
                             }
                             try {
