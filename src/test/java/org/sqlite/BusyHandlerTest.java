@@ -8,8 +8,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class BusyHandlerTest {
@@ -78,7 +80,7 @@ public class BusyHandlerTest {
     }
 
     @Test
-    @Ignore("This test is very flaky; disabling it for now")
+    @Disabled("This test is very flaky; disabling it for now")
     public void basicBusyHandler() throws Exception {
         final int[] calls = {0};
         BusyHandler.setHandler(
@@ -116,7 +118,7 @@ public class BusyHandlerTest {
     }
 
     @Test
-    @Ignore("This test is very flaky; disabling it for now")
+    @Disabled("This test is very flaky; disabling it for now")
     public void testUnregister() throws Exception {
         final int[] calls = {0};
         BusyHandler.setHandler(

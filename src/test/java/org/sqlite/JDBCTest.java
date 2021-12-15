@@ -10,7 +10,6 @@
 package org.sqlite;
 
 import java.io.PrintWriter;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import java.io.File;
 
 import java.sql.*;
@@ -19,6 +18,8 @@ import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class JDBCTest {
