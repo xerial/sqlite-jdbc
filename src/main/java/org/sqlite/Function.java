@@ -118,14 +118,14 @@ public abstract class Function {
      *
      * @param conn The connection to remove the function from.
      * @param name The name of the function.
-     * @param nArgs The number of args for the function.
+     * @param nArgs Ignored.
      * @throws SQLException
      */
     public static void destroy(Connection conn, String name, int nArgs) throws SQLException {
         if (!(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
-        ((SQLiteConnection) conn).getDatabase().destroy_function(name, nArgs);
+        ((SQLiteConnection) conn).getDatabase().destroy_function(name);
     }
 
     /**

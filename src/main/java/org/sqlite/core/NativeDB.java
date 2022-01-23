@@ -29,7 +29,7 @@ import org.sqlite.SQLiteJDBCLoader;
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 public final class NativeDB extends DB {
     /** SQLite connection handle. */
-    long pointer = 0;
+    private long pointer = 0;
 
     private static boolean isLoaded;
     private static boolean loadSucceeded;
@@ -59,18 +59,12 @@ public final class NativeDB extends DB {
         if (isLoaded) return loadSucceeded;
 
         try {
-        loadSucceeded = SQLiteJDBCLoader.initialize();
+            loadSucceeded = SQLiteJDBCLoader.initialize();
         } finally {
-        isLoaded = true;
+            isLoaded = true;
         }
         return loadSucceeded;
     }
-
-    /** linked list of all instanced UDFDatas */
-    private final long udfdatalist = 0;
-
-    /** linked list of all instanced CollationData */
-    private final long colldatalist = 0;
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
@@ -109,6 +103,9 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#busy_timeout(int) */
     @Override
     public synchronized native void busy_timeout(int ms);
+
+    /** busy handler pointer to JNI global busyhandler reference. */
+    private long busyHandler = 0;
 
     /** @see org.sqlite.core.DB#busy_handler(BusyHandler) */
     @Override
@@ -324,13 +321,13 @@ public final class NativeDB extends DB {
     synchronized native int create_function_utf8(
             byte[] nameUtf8, Function func, int nArgs, int flags);
 
-    /** @see org.sqlite.core.DB#destroy_function(java.lang.String, int) */
+    /** @see org.sqlite.core.DB#destroy_function(java.lang.String) */
     @Override
-    public synchronized int destroy_function(String name, int nArgs) throws SQLException {
-        return destroy_function_utf8(nameToUtf8ByteArray("function", name), nArgs);
+    public synchronized int destroy_function(String name) throws SQLException {
+        return destroy_function_utf8(nameToUtf8ByteArray("function", name));
     }
 
-    synchronized native int destroy_function_utf8(byte[] nameUtf8, int nArgs);
+    synchronized native int destroy_function_utf8(byte[] nameUtf8);
 
     /** @see org.sqlite.core.DB#create_collation(String, Collation) */
     @Override
@@ -347,10 +344,6 @@ public final class NativeDB extends DB {
     }
 
     synchronized native int destroy_collation_utf8(byte[] nameUtf8);
-
-    /** @see org.sqlite.core.DB#free_functions() */
-    @Override
-    synchronized native void free_functions();
 
     @Override
     public synchronized native int limit(int id, int value) throws SQLException;
@@ -407,8 +400,14 @@ public final class NativeDB extends DB {
     @Override
     synchronized native boolean[][] column_metadata(long stmt);
 
+    // pointer to commit listener structure, if enabled.
+    private long commitListener = 0;
+
     @Override
     synchronized native void set_commit_listener(boolean enabled);
+
+    // pointer to update listener structure, if enabled.
+    private long updateListener = 0;
 
     @Override
     synchronized native void set_update_listener(boolean enabled);
@@ -439,8 +438,47 @@ public final class NativeDB extends DB {
         return new String(buff, StandardCharsets.UTF_8);
     }
 
+    /** handler pointer to JNI global progressHandler reference. */
+    private long progressHandler;
+
     public synchronized native void register_progress_handler(
             int vmCalls, ProgressHandler progressHandler) throws SQLException;
 
     public synchronized native void clear_progress_handler() throws SQLException;
+
+    /**
+     * Getter for native pointer to validate memory is properly cleaned up in unit tests
+     *
+     * @return a native pointer to validate memory is properly cleaned up in unit tests
+     */
+    long getBusyHandler() {
+        return busyHandler;
+    }
+
+    /**
+     * Getter for native pointer to validate memory is properly cleaned up in unit tests
+     *
+     * @return a native pointer to validate memory is properly cleaned up in unit tests
+     */
+    long getCommitListener() {
+        return commitListener;
+    }
+
+    /**
+     * Getter for native pointer to validate memory is properly cleaned up in unit tests
+     *
+     * @return a native pointer to validate memory is properly cleaned up in unit tests
+     */
+    long getUpdateListener() {
+        return updateListener;
+    }
+
+    /**
+     * Getter for native pointer to validate memory is properly cleaned up in unit tests
+     *
+     * @return a native pointer to validate memory is properly cleaned up in unit tests
+     */
+    long getProgressHandler() {
+        return progressHandler;
+    }
 }
