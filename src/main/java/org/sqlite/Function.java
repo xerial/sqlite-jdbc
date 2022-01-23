@@ -108,10 +108,6 @@ public abstract class Function {
             throw new SQLException("invalid args provided: " + nArgs);
         }
 
-        if (name == null || name.length() > 255) {
-            throw new SQLException("invalid function name: '" + name + "'");
-        }
-
         if (f.db.create_function(name, f, nArgs, flags) != Codes.SQLITE_OK) {
             throw new SQLException("error creating function");
         }

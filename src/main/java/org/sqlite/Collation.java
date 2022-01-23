@@ -62,10 +62,6 @@ public abstract class Collation {
         f.conn = (SQLiteConnection) conn;
         f.db = f.conn.getDatabase();
 
-        if (name == null || name.length() > 255) {
-            throw new SQLException("invalid collation name: '" + name + "'");
-        }
-
         if (f.db.create_collation(name, f) != Codes.SQLITE_OK) {
             throw new SQLException("error creating collation");
         }

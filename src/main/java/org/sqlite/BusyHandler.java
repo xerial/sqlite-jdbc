@@ -16,7 +16,7 @@ public abstract class BusyHandler {
     private static void commitHandler(Connection conn, BusyHandler busyHandler)
             throws SQLException {
 
-        if (conn == null || !(conn instanceof SQLiteConnection)) {
+        if (!(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
 
