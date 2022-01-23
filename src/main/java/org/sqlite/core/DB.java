@@ -238,9 +238,6 @@ public abstract class DB implements Codes {
             element.close();
         }
 
-        // remove memory used by user-defined functions
-        free_functions();
-
         // clean up commit object
         if (begin != null) begin.close();
         if (commit != null) commit.close();
@@ -732,7 +729,7 @@ public abstract class DB implements Codes {
      * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
      * @throws SQLException
      */
-    public abstract int destroy_function(String name, int nArgs) throws SQLException;
+    public abstract int destroy_function(String name) throws SQLException;
 
     /**
      * Create a user defined collation with given collation name and the collation object.
@@ -754,13 +751,6 @@ public abstract class DB implements Codes {
      * @throws SQLException
      */
     public abstract int destroy_collation(String name) throws SQLException;
-
-    /**
-     * Unused as we use the user_data pointer to store a single word.
-     *
-     * @throws SQLException
-     */
-    abstract void free_functions() throws SQLException;
 
     /**
      * @param dbName Database name to be backed up.

@@ -1,6 +1,7 @@
 package org.sqlite;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -11,6 +12,8 @@ import java.sql.Statement;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.sqlite.core.DB;
+import org.sqlite.core.NativeDBHelper;
 
 public class ProgressHandlerTest {
     private Connection conn;
@@ -96,5 +99,45 @@ public class ProgressHandlerTest {
         }
         // Progress function throws, not reached
         fail();
+    }
+
+    /**
+     * Tests that clear progress helper is implemented as expected. Ensures that memory is free'd
+     * and free'd pointers are set to null (0)
+     *
+     * @throws Exception on test failure
+     */
+    @Test
+    public void testClearProgressHelper() throws Exception {
+        SQLiteConnection sqliteConnection = (SQLiteConnection) conn;
+        final DB database = sqliteConnection.getDatabase();
+        setDummyHandler();
+        assertNotEquals(0, NativeDBHelper.getProgressHandler(database));
+        ProgressHandler.clearHandler(conn);
+        assertEquals(0, NativeDBHelper.getProgressHandler(database));
+        ProgressHandler.clearHandler(conn);
+
+        setDummyHandler();
+        assertNotEquals(0, NativeDBHelper.getProgressHandler(database));
+        ProgressHandler.setHandler(conn, 1, null);
+        assertEquals(0, NativeDBHelper.getProgressHandler(database));
+        ProgressHandler.setHandler(conn, 1, null);
+
+        setDummyHandler();
+        assertNotEquals(0, NativeDBHelper.getProgressHandler(database));
+        conn.close();
+        assertEquals(0, NativeDBHelper.getProgressHandler(database));
+    }
+
+    private void setDummyHandler() throws SQLException {
+        ProgressHandler.setHandler(
+                conn,
+                1,
+                new ProgressHandler() {
+                    @Override
+                    protected int progress() throws SQLException {
+                        return 0;
+                    }
+                });
     }
 }
