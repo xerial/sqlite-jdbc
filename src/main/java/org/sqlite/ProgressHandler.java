@@ -16,7 +16,7 @@ public abstract class ProgressHandler {
      */
     public static final void setHandler(
             Connection conn, int vmCalls, ProgressHandler progressHandler) throws SQLException {
-        if (conn == null || !(conn instanceof SQLiteConnection)) {
+        if (!(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
         if (conn.isClosed()) {

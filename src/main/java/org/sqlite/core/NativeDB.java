@@ -56,10 +56,13 @@ public final class NativeDB extends DB {
      * @return True if the SQLite JDBC driver is successfully loaded; false otherwise.
      */
     public static boolean load() throws Exception {
-        if (isLoaded) return loadSucceeded == true;
+        if (isLoaded) return loadSucceeded;
 
+        try {
         loadSucceeded = SQLiteJDBCLoader.initialize();
+        } finally {
         isLoaded = true;
+        }
         return loadSucceeded;
     }
 
@@ -313,8 +316,9 @@ public final class NativeDB extends DB {
 
     /** @see org.sqlite.core.DB#create_function(java.lang.String, org.sqlite.Function, int, int) */
     @Override
-    public synchronized int create_function(String name, Function func, int nArgs, int flags) {
-        return create_function_utf8(stringToUtf8ByteArray(name), func, nArgs, flags);
+    public synchronized int create_function(String name, Function func, int nArgs, int flags)
+            throws SQLException {
+        return create_function_utf8(nameToUtf8ByteArray("function", name), func, nArgs, flags);
     }
 
     synchronized native int create_function_utf8(
@@ -322,24 +326,24 @@ public final class NativeDB extends DB {
 
     /** @see org.sqlite.core.DB#destroy_function(java.lang.String, int) */
     @Override
-    public synchronized int destroy_function(String name, int nArgs) {
-        return destroy_function_utf8(stringToUtf8ByteArray(name), nArgs);
+    public synchronized int destroy_function(String name, int nArgs) throws SQLException {
+        return destroy_function_utf8(nameToUtf8ByteArray("function", name), nArgs);
     }
 
     synchronized native int destroy_function_utf8(byte[] nameUtf8, int nArgs);
 
     /** @see org.sqlite.core.DB#create_collation(String, Collation) */
     @Override
-    public synchronized int create_collation(String name, Collation coll) {
-        return create_collation_utf8(stringToUtf8ByteArray(name), coll);
+    public synchronized int create_collation(String name, Collation coll) throws SQLException {
+        return create_collation_utf8(nameToUtf8ByteArray("collation", name), coll);
     }
 
     synchronized native int create_collation_utf8(byte[] nameUtf8, Collation coll);
 
     /** @see org.sqlite.core.DB#destroy_collation(String) */
     @Override
-    public synchronized int destroy_collation(String name) {
-        return destroy_collation_utf8(stringToUtf8ByteArray(name));
+    public synchronized int destroy_collation(String name) throws SQLException {
+        return destroy_collation_utf8(nameToUtf8ByteArray("collation", name));
     }
 
     synchronized native int destroy_collation_utf8(byte[] nameUtf8);
@@ -350,6 +354,14 @@ public final class NativeDB extends DB {
 
     @Override
     public synchronized native int limit(int id, int value) throws SQLException;
+
+    private byte[] nameToUtf8ByteArray(String nameType, String name) throws SQLException {
+        final byte[] nameUtf8 = stringToUtf8ByteArray(name);
+        if (name == null || "".equals(name) || nameUtf8.length > 255) {
+            throw new SQLException("invalid " + nameType + " name: '" + name + "'");
+        }
+        return nameUtf8;
+    }
 
     /**
      * @see org.sqlite.core.DB#backup(java.lang.String, java.lang.String,
@@ -402,10 +414,10 @@ public final class NativeDB extends DB {
     synchronized native void set_update_listener(boolean enabled);
 
     /**
-     * Throws an SQLException
+     * Throws an SQLException. Called from native code
      *
      * @param msg Message for the SQLException.
-     * @throws SQLException
+     * @throws SQLException the generated SQLException
      */
     static void throwex(String msg) throws SQLException {
         throw new SQLException(msg);
