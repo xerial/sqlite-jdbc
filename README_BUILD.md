@@ -95,3 +95,12 @@ How to deploy to the maven repository
     mvn deploy -Psourceforge  
 (for uploading Sourceforge.jp repository, which are synchronized with the Maven
  central repository)
+
+
+How to add the SQLite Compressed and Encrypted Read-Only Database (CEROD) Extension
+===================================================================================
+
+* Put cerod.c in the src/main/ext folder which already exists.
+* Add your Cerod key to the EXTENTION_ENV file as CEROD_EXT_KEY := <YourCerodKey>
+
+Then follow directions for a normal build

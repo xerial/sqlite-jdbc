@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.sqlite.SQLiteConfig.JournalMode;
 import org.sqlite.SQLiteConfig.Pragma;
 import org.sqlite.SQLiteConfig.SynchronousMode;
@@ -32,6 +33,7 @@ import org.sqlite.SQLiteConfig.SynchronousMode;
 /**
  * These tests check whether access to files is woring correctly and some Connection.close() cases.
  */
+
 public class ConnectionTest {
 
     @Test
@@ -226,6 +228,18 @@ public class ConnectionTest {
         Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB));
         conn.close();
     }
+
+    @Test
+    @SqliteExtention("src/main/ext/cerod.c") // active only if cerod.c extention is provided.
+    public void openCerodFile() throws Exception { //todo: make conditional test only if cerod.c exists
+        File cerodDB = copyToTemp("cerod.db");
+        assertTrue(cerodDB.exists());
+        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite::cerod::%s",cerodDB));
+        assertTrue(conn.isValid(0));
+        conn.close();
+        assertFalse(conn.isValid(0));
+    }
+
 
     @Test
     public void concurrentClose() throws SQLException, InterruptedException, ExecutionException {
@@ -444,4 +458,7 @@ public class ConnectionTest {
         stat.close();
         conn.close();
     }
+
+
+
 }

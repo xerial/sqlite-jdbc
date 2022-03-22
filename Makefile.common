@@ -1,4 +1,5 @@
 include VERSION
+include EXTENTION_ENV
 
 ifndef JAVA_HOME
 $(warning Set JAVA_HOME environment variable)
@@ -7,6 +8,18 @@ endif
 JAVA  := "$$JAVA_HOME/bin/java"
 JAVAC := "$$JAVA_HOME/bin/javac" 
 JAVAH := "$$JAVA_HOME/bin/javah"
+# set environment when cerod.c extention is available in source tree
+CEROD_SRC=./src/main/ext/cerod.c
+ifeq ($(shell test -e $(CEROD_SRC) && echo -n true),true)
+     CEROD_EXT = -DSQLITE_ENABLE_CEROD_TINFL -DSQLITE_ENABLE_CEROD=2
+     ifndef CEROD_EXT_KEY
+     	$(error CEROD_EXT_KEY is undefined.  create EXTENTION_ENV file with the CEROD_EXT_KEY=<YourLicenseKey> defined.)
+     endif
+     EXT_FLAGS := -DCEROD_EXT_KEY=$(CEROD_EXT_KEY)
+else
+     CEROD_EXT =
+     EXT_FLAGS =
+endif
 
 TARGET := target
 OSINFO_CLASS := org.sqlite.OSInfo
@@ -256,4 +269,5 @@ endif
 ifneq ($(jni_md_include),)
 CCFLAGS := $(CCFLAGS) -I"$(jni_md_include)"
 endif
+
 

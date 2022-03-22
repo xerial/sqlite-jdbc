@@ -550,12 +550,24 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1open_1utf8(
     int ret;
     char *file_bytes;
 
+
     db = gethandle(env, this);
     if (db) {
         throwex_msg(env, "DB already open");
         sqlite3_close(db);
         return;
     }
+#if defined(CEROD_EXT_KEY)
+#define WRAP2(X) #X
+#define WRAP1(X) WRAP2(X)
+#define WRAP(X) WRAP1(X)
+#define CEROD WRAP(CEROD_EXT_KEY)
+  /* Conditionally initialize the CEROD extension.
+  */
+    {
+    sqlite3_activate_cerod(CEROD);
+    }
+#endif
 
     utf8JavaByteArrayToUtf8Bytes(env, file, &file_bytes, NULL);
     if (!file_bytes) return;

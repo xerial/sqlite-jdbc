@@ -203,7 +203,8 @@ public abstract class SQLiteConnection implements Connection {
         if (!fileName.isEmpty()
                 && !":memory:".equals(fileName)
                 && !fileName.startsWith("file:")
-                && !fileName.contains("mode=memory")) {
+                && !fileName.contains("mode=memory")
+                && !fileName.contains("cerod:")) {
             if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
                 String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
 
