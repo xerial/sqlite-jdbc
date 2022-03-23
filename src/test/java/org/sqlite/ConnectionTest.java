@@ -231,7 +231,7 @@ public class ConnectionTest {
 
     @Test
     @SqliteExtention("src/main/ext/cerod.c") // active only if cerod.c extention is provided.
-    public void openCerodFile() throws Exception { //todo: make conditional test only if cerod.c exists
+    public void openCerodFile() throws Exception {
         File cerodDB = copyToTemp("cerod.db");
         assertTrue(cerodDB.exists());
         Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite::cerod::%s",cerodDB));

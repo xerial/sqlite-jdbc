@@ -103,4 +103,14 @@ How to add the SQLite Compressed and Encrypted Read-Only Database (CEROD) Extens
 * Put cerod.c in the src/main/ext folder which already exists.
 * Add your Cerod key to the EXTENTION_ENV file as CEROD_EXT_KEY := <YourCerodKey>
 
-Then follow directions for a normal build
+Then follow directions for a normal build. 
+
+How to use CEROD encoded DB:
+=====================================
+
+To open up a CEROD encoded SQlite file, use the following:
+  
+* For compressed only DB with no password:
+    * Connection conn = DriverManager.getConnection("jdbc:sqlite::cerod::cerod.db");
+* For compressed DB protected by password, for example if the password is abc123
+    * Connection conn = DriverManager.getConnection("jdbc:sqlite::cerod:abc123:cerod.db");
