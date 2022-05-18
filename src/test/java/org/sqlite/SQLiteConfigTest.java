@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.SQLException;
 import java.util.Properties;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class SQLiteConfigTest {
@@ -28,5 +30,18 @@ public class SQLiteConfigTest {
         assertEquals(
                 SQLiteConfig.DateClass.REAL.name(),
                 properties.getProperty(SQLiteConfig.Pragma.DATE_CLASS.getPragmaName()));
+    }
+
+    @Test
+    public void testParsePatternAndSelectNumberRule() throws SQLException {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> {
+                    SQLiteConfig config = new SQLiteConfig();
+                    config.setReadOnly(true);
+                    config.setDateStringFormat("yyyy/mUm/dd");
+                    config.setDatePrecision("seconds");
+                    config.setDateClass("real");
+                    Properties properties = config.toProperties();
+                });
     }
 }
