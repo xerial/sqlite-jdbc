@@ -11,7 +11,7 @@ on:
       - '.github/workflows/*.yml'
   push:
     branches:
-      - master
+      - *
     paths:
       - '**.java'
       - '**.xml'
@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        java: [ 8, 11, 16 ]
+        java: [ 8, 11, 17 ]
         exclude:
           - os: windows-latest
             java: 11
