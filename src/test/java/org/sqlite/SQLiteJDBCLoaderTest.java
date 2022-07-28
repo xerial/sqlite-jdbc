@@ -13,20 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *--------------------------------------------------------------------------*/
-//--------------------------------------
+// --------------------------------------
 // sqlite-jdbc Project
 //
 // SQLiteJDBCLoaderTest.java
 // Since: Oct 15, 2007
 //
-// $URL$ 
+// $URL$
 // $Author$
-//--------------------------------------
+// --------------------------------------
 package org.sqlite;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -36,37 +36,32 @@ import java.sql.Statement;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-public class SQLiteJDBCLoaderTest
-{
+public class SQLiteJDBCLoaderTest {
 
     private Connection connection = null;
 
-    @Before
-    public void setUp() throws Exception
-    {
+    @BeforeEach
+    public void setUp() throws Exception {
         connection = null;
         // create a database connection
         connection = DriverManager.getConnection("jdbc:sqlite::memory:");
     }
 
-    @After
-    public void tearDown() throws Exception
-    {
-        if (connection != null)
+    @AfterEach
+    public void tearDown() throws Exception {
+        if (connection != null) {
             connection.close();
+        }
     }
 
     @Test
-    public void query() throws ClassNotFoundException
-    {
-        try
-        {
+    public void query() throws ClassNotFoundException {
+        try {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30); // set timeout to 30 sec.
 
@@ -75,15 +70,12 @@ public class SQLiteJDBCLoaderTest
             statement.executeUpdate("insert into person values(2, 'yui')");
 
             ResultSet rs = statement.executeQuery("select * from person order by id");
-            while (rs.next())
-            {
+            while (rs.next()) {
                 // read the result set
                 rs.getInt(1);
                 rs.getString(2);
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             // if e.getMessage() is "out of memory", it probably means no
             // database file is found
             fail(e.getMessage());
@@ -91,18 +83,20 @@ public class SQLiteJDBCLoaderTest
     }
 
     @Test
-    public void function() throws SQLException
-    {
-        Function.create(connection, "total", new Function() {
-            @Override
-            protected void xFunc() throws SQLException
-            {
-                int sum = 0;
-                for (int i = 0; i < args(); i++)
-                    sum += value_int(i);
-                result(sum);
-            }
-        });
+    public void function() throws SQLException {
+        Function.create(
+                connection,
+                "total",
+                new Function() {
+                    @Override
+                    protected void xFunc() throws SQLException {
+                        int sum = 0;
+                        for (int i = 0; i < args(); i++) {
+                            sum += value_int(i);
+                        }
+                        result(sum);
+                    }
+                });
 
         ResultSet rs = connection.createStatement().executeQuery("select total(1, 2, 3, 4, 5)");
         assertTrue(rs.next());
@@ -110,35 +104,39 @@ public class SQLiteJDBCLoaderTest
     }
 
     @Test
-    public void version()
-    {
-    // System.out.println(SQLiteJDBCLoader.getVersion());
+    public void version() {
+        // System.out.println(SQLiteJDBCLoader.getVersion());
     }
 
     @Test
     public void test() throws Throwable {
+        final AtomicInteger completedThreads = new AtomicInteger(0);
         ExecutorService pool = Executors.newFixedThreadPool(32);
         for (int i = 0; i < 32; i++) {
             final String connStr = "jdbc:sqlite:target/sample-" + i + ".db";
             final int sleepMillis = i;
-            pool.execute(new Runnable() {
-                public void run() {
-                    try {
-                        Thread.sleep(sleepMillis * 10);
-                    } catch (InterruptedException e) {
-                    }
-                    try {
-                        // Uncomment the synchronized block and everything works.
-                        //synchronized (TestSqlite.class) {
-                        Connection conn = DriverManager.getConnection(connStr);
-                        //}
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        Assert.fail(e.getLocalizedMessage());
-                    }
-                }
-            });
+            pool.execute(
+                    new Runnable() {
+                        public void run() {
+                            try {
+                                Thread.sleep(sleepMillis * 10);
+                            } catch (InterruptedException e) {
+                            }
+                            try {
+                                // Uncomment the synchronized block and everything works.
+                                // synchronized (TestSqlite.class) {
+                                Connection conn = DriverManager.getConnection(connStr);
+                                // }
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                                fail(e.getLocalizedMessage());
+                            }
+                            completedThreads.incrementAndGet();
+                        }
+                    });
         }
+        pool.shutdown();
         pool.awaitTermination(3, TimeUnit.SECONDS);
+        assertEquals(32, completedThreads.get());
     }
 }

@@ -1,49 +1,26 @@
-SQLite JDBC Driver [![Build Status](https://travis-ci.org/xerial/sqlite-jdbc.svg?branch=master)](https://travis-ci.org/xerial/sqlite-jdbc) [![Join the chat at https://gitter.im/xerial/sqlite-jdbc](https://badges.gitter.im/xerial/sqlite-jdbc.svg)](https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+SQLite JDBC Driver [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/xerial/sqlite-jdbc/CI/master)](https://github.com/xerial/sqlite-jdbc/actions/workflows/test.yml?query=branch%3Amaster) [![Join the chat at https://gitter.im/xerial/sqlite-jdbc](https://badges.gitter.im/xerial/sqlite-jdbc.svg)](https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ==================
 
-SQLite JDBC, developed by [Taro L. Saito](http://www.xerial.org/leo), is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
+SQLite JDBC is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
 
-Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
+Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, Mac OS X, Linux etc., are assembled into a single JAR (Java Archive) file. The usage is quite simple; [download](https://github.com/xerial/sqlite-jdbc/releases)
 our sqlite-jdbc library, then append the library (JAR file) to your class path.
 
 See [the sample code](#usage).
 
-What is different from Zentus' SQLite JDBC?
---------------------------------------------
-The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
-
-* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
-* Remove manual configurations
-
-In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments,
-e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc.
-This process was error-prone and bothersome to tell every user to set these variables.
-Our SQLiteJDBC library completely does away these inconveniences.
-
-Another difference is that we are keeping this SQLiteJDBC library up-to-date to
-the newest version of SQLite engine, because we are one of the hottest users of
-this library. For example, SQLite JDBC is a core component of
-[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
-is our utility to create personalized genome browsers.
-
-
-Public Discussion Forum
-=======================
-*  [Xerial Public Discussion Group](http://groups.google.com/group/xerial?hl=en)
-*  Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
-
-
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/org.xerial/sqlite-jdbc/badge.svg)](http://www.javadoc.io/doc/org.xerial/sqlite-jdbc)
+[![javadoc](https://javadoc.io/badge2/org.xerial/sqlite-jdbc/javadoc.svg)](https://javadoc.io/doc/org.xerial/sqlite-jdbc)
 
-* Release versions: https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
-* Latest snapshot (pre-releasse) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+* Release versions: [Download](https://github.com/xerial/sqlite-jdbc/releases) or Maven https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/
+* Latest snapshot (pre-release) versions are also available: https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/
+
+Post bug reports or feature requests to [Issue Tracker](https://github.com/xerial/sqlite-jdbc/issues)
 
 Usage
 ============
 SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
-1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://bitbucket.org/xerial/sqlite-jdbc/downloads) (or by using [Maven](#using-sqlitejdbc-with-maven2))
+1.  Download sqlite-jdbc-(VERSION).jar from the [download page](https://github.com/xerial/sqlite-jdbc/releases) (or by using [Maven](#using-sqlitejdbc-with-maven2))
 then append this jar file into your classpath.
 2.  Open a SQLite database connection from your code. (see the example below)
 
@@ -110,7 +87,7 @@ id = 2
           catch(SQLException e)
           {
             // connection close failed.
-            System.err.println(e);
+            System.err.println(e.getMessage());
           }
         }
       }
@@ -146,25 +123,89 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2021-08-30: sqlite-jdbc-3.36.0.3
+    * Fixes for GraalVM
+    * Internal update: Migrate to JUnit5. Add CI with GraalVM
+*   2021-08-25: sqlite-jdbc-3.36.0.2
+    * New Features:
+        * Support custom collation creation (#627)
+    * Newly Supported OS and Arch:
+        * Windows armv7 and arm64 (e.g., Surface Pro X) (#644)
+        * FreeBSD aarch64 (#642)
+        * Bring back Linux armv6 support (#628)
+        * FreeBSD x86 and x86_64 (#639)
+        * Dropped DragonFlyBSD support (#641)
+    * Other Intenal Fixes
+        * Add reflect-config, jni-config and native-image.properties to graalvm native image compilation (#631)
+        * Fix multipleClassLoader test when directory is renamed (#647)
+        * CI tests for Windows and MacOS (#645)
+    * Special thanks to @gotson for adding collation support and build configurations for more OS and CPU types!
+*   2021-06-30: sqlite-jdbc-3.36.0.1
+    * Fixed a date parsing issue #88
+    * Added CI for testing JDK16 compatibility. sqlite-jdbc works for JDK8 to JDK16
+*   2021-06-27: sqlite-jdbc-3.36.0
+    * Upgrade to SQLite 3.36.0
+*   2021-06-27: sqlite-jdbc-3.35.0.1
+    * Upgraded to SQLite 3.35.0
+    * Avoid using slower ByteBuffer decode() method (#575)
+    * Allow increasing SQLite limits (#568)
+    * Add Automatic-Module-Name for OSGi (#558)
+    * Avoid using shared resource streams between class loaders when extracting the native library. (#578)
+    * Accept `READ_COMMITTED` and `REPEATABLE_READ` isolation levels (not natively supported) by treating as `SERIALIZABLE`
+    * Accept (but ignore) fetch direction hint
+    * **Note**: Don't use 3.35.0 if you are Apple Silicon (M1) user. 3.35.0 failed to include M1 binary
+*   2020-12-10: sqlite-jdbc-3.34.0
+    * Improved the performance of reading String columns
+    * Support URI file names (file://...) in backup/restore commands https://sqlite.org/uri.html
+    * Show SQL strings in PreparedStatements.toString()
+*   2020-12-08: sqlite-jdbc-3.32.3.3
+    * Apple Silicon (M1) support
+*   2020-07-28: sqlite-jdbc-3.32.3.2
+    * Enable SQLITE_MAX_MMAP_SIZE compile option again.
+    * Fixes issues when using Arm Cortex A8, A9 (32-bit architecture)
+*   2020-07-15: sqlite-jdbc-3.32.3.1
+    * Remove SQLITE_MAX_MMAP_SIZE compile option, which might be causing performance issuess.
+*   2020-06-18: sqlite-jdbc-3.32.3
+    * Fix multiple CVE reported issues https://github.com/xerial/sqlite-jdbc/issues/501
+*   2020-05-04: sqlite-jdbc-3.31.1
+    * Upgrade to sqlite 3.31.1 
+    * Support update/commit/rollback event notifications #350 
+    * Remove sparse index checks #476 
+    * Support alpine linux (Linux-alpine)
+    * Enabled SQLITE_ENABLE_STAT4 flag 
+*   2019-12-23: sqlite-jdbc-3.30.1
+    * Upgrade to sqlite 3.30.1
+    * Various fixes
+*   2019-06-24: sqlite-jdbc-3.28.0
+    * Upgrade to sqlite 3.28.0
+*   2019-03-20: sqlite-jdbc-3.27.2.1
+    * Make smaller the jar size by using -Os compiler option
+    * Performance improvement for concurrent access.
+*   2019-03-18: sqlite-jdbc-3.27.2
+    * Upgrade to SQLite [3.27.2](https://www.sqlite.org/releaselog/3_27_2.html)
+*   2018-10-01: sqlite-jdbc-3.25.2
+    * Upgrade to SQLite [3.25.2](https://www.sqlite.org/releaselog/3_25_2.html)
+    * Fixes #74, #318, #349, #363, #365
+    * Upsert is supported since this version.
 *   2018-05-25: sqlite-jdbc-3.23.1
-    * Upgrade to SQLite 3.23.1
-    * Fixes #312, 321, #323, #328
+    * Upgrade to SQLite [3.23.1](https://www.sqlite.org/releaselog/3_23_1.html)
+    * Fixes #312, #321, #323, #328
     * Dropped linux armv6 support temporarily
 *   2017-12-07: sqlite-jdbc-3.21.0.1
     * Metadata query fixes
     * Fix for Android
 *   2017-11-14: sqlite-jdbc-3.21.0
-    * Upgrade to SQLite 3.21.0
+    * Upgrade to SQLite [3.21.0](https://www.sqlite.org/releaselog/3_21_0.html)
     * Various fixes for metadata queries
 *   2017-10-08: sqlite-jdbc-3.20.1
-    * Upgrade to SQLite 3.20.1
+    * Upgrade to SQLite [3.20.1](https://www.sqlite.org/releaselog/3_20_1.html)
     * Various bug fixes
 *   2017-08-04: sqlite-jdbc-3.20.0
     * Upgrade to SQLite [3.20.0](https://www.sqlite.org/releaselog/3_20_0.html)
     * Support Linux aarch64
     * Fix #239
 *   2017-06-22: sqlite-jdbc-3.19.3
-    * Upgrade to SQLite [3.19.0](https://www.sqlite.org/releaselog/3_19_3.html)
+    * Upgrade to SQLite [3.19.3](https://www.sqlite.org/releaselog/3_19_3.html)
 *   2017-05-18: sqlite-jdbc-3.18.0
     * Upgrade to SQLite [3.18.0](http://sqlite.org/releaselog/3_18_0.html)
 *   2017-01-10: sqlite-jdbc-3.16.1
@@ -175,7 +216,7 @@ News
 *   2016-11-04: sqlite-jdbc-3.15.1
     * Upgrade to SQLite [3.15.1](https://sqlite.org/releaselog/3_15_1.html)
 *   2016-11-04: sqlite-jdbc-3.15.0
-    * Upgrade to SQLite 3.15.0
+    * Upgrade to SQLite [3.15.0](https://sqlite.org/releaselog/3_15_0.html)
     * Cleanup extracted temp library files upon start
     * Fix various metadata problems
 
@@ -185,7 +226,7 @@ News
 *   2016 09-26: sqlite-jdbc-3.14.2
     * Updated binaries (Using docker for the ease of cross compiling)
     * Fixes native libraries for Raspberry-Pi
-    * Dropped support for Mac x86 (The last Mac OS X supporiting this archictture was Snow Leopard, 7-year ago!)
+    * Dropped support for Mac x86 (The last Mac OS X supporting this architecture was Snow Leopard, 7-year ago!)
     * Default support of JSON1 extension (#76, #127)
     * Implement query progress callback (#137)
     * Use extended error codes (#119)
@@ -233,7 +274,7 @@ News
 *   2009 June 4th: [sqlite-jdbc-3.6.14.2](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.2/) released.
 *   2009 May 19th: [sqlite-jdbc-3.6.14.1](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.1/) released.
     *   This version supports "jdbc:sqlite::resource:" syntax to access read-only
-    DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the <http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76 detailes>
+    DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the [details](http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76))
 
 
 *   2009 February 18th: sqlite-jdbc-3.6.11 released.
@@ -269,8 +310,7 @@ News
     and contains pure-java and native versions.
 *   2008 July 17th: sqlite-jdbc-3.6.0 released. Compatible with SQLite 3.6.0, and
     includes both pure-java and native versions.
-*   2008 July 3rd: [sqlite-jdbc-3.5.9-universal]
-    (http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.5.9-universal) released.
+*   2008 July 3rd: [sqlite-jdbc-3.5.9-universal](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.5.9-universal) released.
     This version contains both native and pure-java SQLite libraries, so it probably works in any OS environment.
 
 
@@ -289,7 +329,7 @@ News
 *   2008 Mar. 10th: sqlite-jdbc-v042 released.
     *   Corresponding to SQLite 3.5.6, which integrates FTS3 (full text search).
 *   2008 Jan. 31st: sqlite-jdbc-v038.4 released.
-    *   SQLiteJDBCLoder.initialize() is no longer requried.
+    *   SQLiteJDBCLoader.initialize() is no longer required.
 *   2008 Jan. 11th: The Jar files for Windows, Mac OS X and Linux are packed into
     a single Jar file! So, no longer need to use an OS-specific jar file.
 *   2007 Dec. 31th: Upgraded to sqlitejdbc-v038
@@ -305,7 +345,7 @@ Beta Release
 The early releases (beta) of sqlite-jdbc with some advanced features are available
 from [here](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
 
-*   The old releases are still available from [here](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
+*   The old releases are still available from [here](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
 
 Supported Operating Systems
 ===========================
@@ -363,7 +403,7 @@ See License FAQ <http://www.apache.org/foundation/licence-FAQ.html> for more det
 Using SQLiteJDBC with Maven2
 ============================
 If you are familiar with [Maven2](http://maven.apache.org), add the following XML
-fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
+fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
 
     <dependencies>
         <dependency>
@@ -411,3 +451,37 @@ and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
         <version>(version)</version>
         <scope>provided</scope>
     </dependency>
+
+What is different from Zentus' SQLite JDBC?
+--------------------------------------------
+The current sqlite-jdbc implementation is forked from [Zentus' SQLite JDBC driver](https://github.com/crawshaw/sqlitejdbc). We have improved it in two ways:
+
+* Support major operating systems by embedding native libraries of SQLite, compiled for each of them.
+* Remove manual configurations
+
+In the original version, in order to use the native version of sqlite-jdbc, users had to set a path to the native codes (dll, jnilib, so files, etc.) through the command-line arguments,
+e.g., `-Djava.library.path=(path to the dll, jnilib, etc.)`, or `-Dorg.sqlite.lib.path`, etc.
+This process was error-prone and bothersome to tell every user to set these variables.
+Our SQLiteJDBC library completely does away these inconveniences.
+
+Another difference is that we are keeping this SQLiteJDBC library up-to-date to
+the newest version of SQLite engine, because we are one of the hottest users of
+this library. For example, SQLite JDBC is a core component of
+[UTGB (University of Tokyo Genome Browser) Toolkit](http://utgenome.org/), which
+is our utility to create personalized genome browsers.
+
+## Buliding sqlite-jdbc
+
+Building native libraries:
+```
+# For the current platform
+$ make native
+
+# For all platforms (Requires docker for launching cross-compilers)
+$ make native-all
+
+# For Apple Silicon (M1). Need to install a jdk compiled for M1 https://github.com/microsoft/openjdk-aarch64
+$ JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-16+10/Contents/Home make native
+```
+
+

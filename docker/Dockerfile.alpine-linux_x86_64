@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.11
 MAINTAINER Taro L. Saito <leo@xerial.org>
 
 RUN apk --update add bash gcc make perl libc-dev

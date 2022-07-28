@@ -21,30 +21,34 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
-
 import org.sqlite.SQLiteConnection;
 
-public abstract class CoreDatabaseMetaData implements DatabaseMetaData
-{
+public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
     protected SQLiteConnection conn;
-    protected PreparedStatement
-            getTables             = null,   getTableTypes        = null,
-            getTypeInfo           = null,   getCatalogs          = null,
-            getSchemas            = null,   getUDTs              = null,
-            getColumnsTblName     = null,   getSuperTypes        = null,
-            getSuperTables        = null,   getTablePrivileges   = null,
-            getIndexInfo          = null,   getProcedures        = null,
-            getProcedureColumns   = null,   getAttributes        = null,
-            getBestRowIdentifier  = null,   getVersionColumns    = null,
-            getColumnPrivileges   = null;
+    protected PreparedStatement getTables = null,
+            getTableTypes = null,
+            getTypeInfo = null,
+            getCatalogs = null,
+            getSchemas = null,
+            getUDTs = null,
+            getColumnsTblName = null,
+            getSuperTypes = null,
+            getSuperTables = null,
+            getTablePrivileges = null,
+            getIndexInfo = null,
+            getProcedures = null,
+            getProcedureColumns = null,
+            getAttributes = null,
+            getBestRowIdentifier = null,
+            getVersionColumns = null,
+            getColumnPrivileges = null;
 
-    /**
-     * Used to save generating a new statement every call.
-     */
+    /** Used to save generating a new statement every call. */
     protected PreparedStatement getGeneratedKeys = null;
 
     /**
      * Constructor that applies the Connection object.
+     *
      * @param conn Connection object.
      */
     protected CoreDatabaseMetaData(SQLiteConnection conn) {
@@ -53,18 +57,14 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData
 
     public abstract ResultSet getGeneratedKeys() throws SQLException;
 
-    /**
-     * @throws SQLException
-     */
+    /** @throws SQLException */
     protected void checkOpen() throws SQLException {
         if (conn == null) {
             throw new SQLException("connection closed");
         }
     }
 
-    /**
-     * @throws SQLException
-     */
+    /** @throws SQLException */
     public synchronized void close() throws SQLException {
         if (conn == null) {
             return;
@@ -144,28 +144,28 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData
             getVersionColumns = null;
             getColumnPrivileges = null;
             getGeneratedKeys = null;
-        }
-        finally {
+        } finally {
             conn = null;
         }
     }
 
     /**
      * Adds SQL string quotes to the given string.
+     *
      * @param tableName The string to quote.
      * @return The quoted string.
      */
     protected static String quote(String tableName) {
         if (tableName == null) {
             return "null";
-        }
-        else {
+        } else {
             return String.format("'%s'", tableName);
         }
     }
 
     /**
      * Applies SQL escapes for special characters in a given string.
+     *
      * @param val The string to escape.
      * @return The SQL escaped string.
      */
@@ -186,23 +186,19 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData
 
     // inner classes
 
-    /**
-     * Pattern used to extract column order for an unnamed primary key.
-     */
-    protected final static Pattern PK_UNNAMED_PATTERN =
-        Pattern.compile(".*\\sPRIMARY\\s+KEY\\s+\\((.*?,+.*?)\\).*",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    /** Pattern used to extract column order for an unnamed primary key. */
+    protected static final Pattern PK_UNNAMED_PATTERN =
+            Pattern.compile(
+                    ".*\\sPRIMARY\\s+KEY\\s+\\((.*?,+.*?)\\).*",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    /**
-     * Pattern used to extract a named primary key.
-     */
-     protected final static Pattern PK_NAMED_PATTERN =
-         Pattern.compile(".*\\sCONSTRAINT\\s+(.*?)\\s+PRIMARY\\s+KEY\\s+\\((.*?)\\).*",
-             Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    /** Pattern used to extract a named primary key. */
+    protected static final Pattern PK_NAMED_PATTERN =
+            Pattern.compile(
+                    ".*\\sCONSTRAINT\\s+(.*?)\\s+PRIMARY\\s+KEY\\s+\\((.*?)\\).*",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    /**
-     * @see java.lang.Object#finalize()
-     */
+    /** @see java.lang.Object#finalize() */
     protected void finalize() throws Throwable {
         close();
     }

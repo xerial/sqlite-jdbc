@@ -13,29 +13,24 @@
  *--------------------------------------------------------------------------*/
 package org.sqlite;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.sqlite.javax.SQLiteConnectionPoolDataSource;
-
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.PooledConnection;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-public class SQLiteConnectionPoolDataSourceTest
-{
+public class SQLiteConnectionPoolDataSourceTest {
 
     @Test
-    public void connectionTest()
-            throws SQLException
-    {
+    public void connectionTest() throws SQLException {
         ConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
 
         PooledConnection pooledConn = ds.getPooledConnection();
@@ -49,8 +44,7 @@ public class SQLiteConnectionPoolDataSourceTest
         try {
             handle.createStatement().execute("select 1");
             fail();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             assertEquals("Connection is closed", e.getMessage());
         }
 
@@ -64,11 +58,9 @@ public class SQLiteConnectionPoolDataSourceTest
         assertTrue(handle.isClosed());
     }
 
-    @Ignore
+    @Disabled
     @Test
-    public void proxyConnectionCloseTest()
-            throws SQLException
-    {
+    public void proxyConnectionCloseTest() throws SQLException {
         ConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
         PooledConnection pooledConn = ds.getPooledConnection();
         System.out.println("pooledConn: " + pooledConn.getClass());

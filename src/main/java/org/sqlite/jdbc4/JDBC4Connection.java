@@ -1,7 +1,5 @@
 package org.sqlite.jdbc4;
 
-import org.sqlite.jdbc3.JDBC3Connection;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -13,11 +11,11 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
 import java.sql.Statement;
 import java.util.Properties;
+import org.sqlite.jdbc3.JDBC3Connection;
 
 public class JDBC4Connection extends JDBC3Connection {
 
-    public JDBC4Connection(String url, String fileName, Properties prop) throws SQLException
-    {
+    public JDBC4Connection(String url, String fileName, Properties prop) throws SQLException {
         super(url, fileName, prop);
     }
 
@@ -28,17 +26,16 @@ public class JDBC4Connection extends JDBC3Connection {
         return new JDBC4Statement(this);
     }
 
-    public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh) throws SQLException {
+    public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh)
+            throws SQLException {
         checkOpen();
         checkCursor(rst, rsc, rsh);
 
         return new JDBC4PreparedStatement(this, sql);
     }
 
-    //JDBC 4
-    /**
-     * @see java.sql.Connection#isClosed()
-     */
+    // JDBC 4
+    /** @see java.sql.Connection#isClosed() */
     public boolean isClosed() throws SQLException {
         return super.isClosed();
     }
@@ -84,14 +81,12 @@ public class JDBC4Connection extends JDBC3Connection {
         }
     }
 
-    public void setClientInfo(String name, String value)
-            throws SQLClientInfoException {
+    public void setClientInfo(String name, String value) throws SQLClientInfoException {
         // TODO Auto-generated method stub
 
     }
 
-    public void setClientInfo(Properties properties)
-            throws SQLClientInfoException {
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
         // TODO Auto-generated method stub
 
     }
@@ -106,8 +101,7 @@ public class JDBC4Connection extends JDBC3Connection {
         return null;
     }
 
-    public Array createArrayOf(String typeName, Object[] elements)
-            throws SQLException {
+    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }

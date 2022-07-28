@@ -3,20 +3,19 @@ package org.sqlite;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * https://sqlite.org/c3ref/progress_handler.html
- */
-public abstract class ProgressHandler
-{
+/** https://sqlite.org/c3ref/progress_handler.html */
+public abstract class ProgressHandler {
     /**
      * Sets a progress handler for the connection.
      *
      * @param conn the SQLite connection
-     * @param vmCalls the approximate number of virtual machine instructions that are evaluated between successive invocations of the progressHandler
+     * @param vmCalls the approximate number of virtual machine instructions that are evaluated
+     *     between successive invocations of the progressHandler
      * @param progressHandler the progressHandler
      * @throws SQLException
      */
-    public static final void setHandler(Connection conn, int vmCalls, ProgressHandler progressHandler) throws SQLException {
+    public static final void setHandler(
+            Connection conn, int vmCalls, ProgressHandler progressHandler) throws SQLException {
         if (conn == null || !(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
