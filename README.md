@@ -123,6 +123,37 @@ sqlite-jdbc extracts a native library for your OS to the directory specified by 
 
 News
 ====
+*   2021-08-30: sqlite-jdbc-3.36.0.3
+    * Fixes for GraalVM
+    * Internal update: Migrate to JUnit5. Add CI with GraalVM
+*   2021-08-25: sqlite-jdbc-3.36.0.2
+    * New Features:
+        * Support custom collation creation (#627)
+    * Newly Supported OS and Arch:
+        * Windows armv7 and arm64 (e.g., Surface Pro X) (#644)
+        * FreeBSD aarch64 (#642)
+        * Bring back Linux armv6 support (#628)
+        * FreeBSD x86 and x86_64 (#639)
+        * Dropped DragonFlyBSD support (#641)
+    * Other Intenal Fixes
+        * Add reflect-config, jni-config and native-image.properties to graalvm native image compilation (#631)
+        * Fix multipleClassLoader test when directory is renamed (#647)
+        * CI tests for Windows and MacOS (#645)
+    * Special thanks to @gotson for adding collation support and build configurations for more OS and CPU types!
+*   2021-06-30: sqlite-jdbc-3.36.0.1
+    * Fixed a date parsing issue #88
+    * Added CI for testing JDK16 compatibility. sqlite-jdbc works for JDK8 to JDK16
+*   2021-06-27: sqlite-jdbc-3.36.0
+    * Upgrade to SQLite 3.36.0
+*   2021-06-27: sqlite-jdbc-3.35.0.1
+    * Upgraded to SQLite 3.35.0
+    * Avoid using slower ByteBuffer decode() method (#575)
+    * Allow increasing SQLite limits (#568)
+    * Add Automatic-Module-Name for OSGi (#558)
+    * Avoid using shared resource streams between class loaders when extracting the native library. (#578)
+    * Accept `READ_COMMITTED` and `REPEATABLE_READ` isolation levels (not natively supported) by treating as `SERIALIZABLE`
+    * Accept (but ignore) fetch direction hint
+    * **Note**: Don't use 3.35.0 if you are Apple Silicon (M1) user. 3.35.0 failed to include M1 binary
 *   2020-12-10: sqlite-jdbc-3.34.0
     * Improved the performance of reading String columns
     * Support URI file names (file://...) in backup/restore commands https://sqlite.org/uri.html
