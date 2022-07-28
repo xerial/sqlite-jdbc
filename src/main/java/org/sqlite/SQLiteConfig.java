@@ -1049,11 +1049,8 @@ public class SQLiteConfig {
         }
     }
 
-    /**
-     * @param datePrecision One of SECONDS or MILLISECONDS
-     * @throws SQLException
-     */
-    public void setDatePrecision(String datePrecision) throws SQLException {
+    /** @param datePrecision One of SECONDS or MILLISECONDS */
+    public void setDatePrecision(String datePrecision) {
         this.defaultConnectionConfig.setDatePrecision(DatePrecision.getPrecision(datePrecision));
     }
 

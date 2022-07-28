@@ -41,20 +41,20 @@ command:update-image() {
 }
 
 help:update-image() {
-    echo Pull the latest $FINAL_IMAGE .
+    echo "Pull the latest $FINAL_IMAGE ."
 }
 
 command:update-script() {
     if cmp -s <( $OCI_EXE run --rm $FINAL_IMAGE ) $0; then
-        echo $0 is up to date
+        echo "$0 is up to date"
     else
-        echo -n Updating $0 '... '
+        echo -n "Updating $0 ... "
         $OCI_EXE run --rm $FINAL_IMAGE > $0 && echo ok
     fi
 }
 
 help:update-image() {
-    echo Update $0 from $FINAL_IMAGE .
+    echo "Update $0 from $FINAL_IMAGE ."
 }
 
 command:update() {
@@ -63,7 +63,7 @@ command:update() {
 }
 
 help:update() {
-    echo Pull the latest $FINAL_IMAGE, and then update $0 from that.
+    echo "Pull the latest $FINAL_IMAGE, and then update $0 from that."
 }
 
 command:help() {
