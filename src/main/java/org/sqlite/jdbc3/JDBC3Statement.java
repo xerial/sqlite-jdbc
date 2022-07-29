@@ -106,14 +106,13 @@ public abstract class JDBC3Statement extends CoreStatement {
         if (rs.isOpen()) {
             throw new SQLException("ResultSet already requested");
         }
-        DB db = conn.getDatabase();
 
-        if (db.column_count(pointer) == 0) {
+        if (pointer.safeRunInt(DB::column_count) == 0) {
             return null;
         }
 
         if (rs.colsMeta == null) {
-            rs.colsMeta = db.column_names(pointer);
+            rs.colsMeta = pointer.safeRun(DB::column_names);
         }
 
         rs.cols = rs.colsMeta;
@@ -131,8 +130,10 @@ public abstract class JDBC3Statement extends CoreStatement {
      */
     public int getUpdateCount() throws SQLException {
         DB db = conn.getDatabase();
-        if (pointer != 0 && !rs.isOpen() && !resultsWaiting && db.column_count(pointer) == 0)
-            return db.changes();
+        if (!pointer.isClosed()
+                && !rs.isOpen()
+                && !resultsWaiting
+                && pointer.safeRunInt(DB::column_count) == 0) return db.changes();
         return -1;
     }
 
@@ -172,7 +173,7 @@ public abstract class JDBC3Statement extends CoreStatement {
                         throw new BatchUpdateException(
                                 "batch entry " + i + ": " + e.getMessage(), changes);
                     } finally {
-                        db.finalize(this);
+                        if (pointer != null) pointer.close();
                     }
                 }
             } finally {

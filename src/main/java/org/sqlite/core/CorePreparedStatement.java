@@ -42,9 +42,9 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
         this.sql = sql;
         DB db = conn.getDatabase();
         db.prepare(this);
-        rs.colsMeta = db.column_names(pointer);
-        columnCount = db.column_count(pointer);
-        paramCount = db.bind_parameter_count(pointer);
+        rs.colsMeta = pointer.safeRun(DB::column_names);
+        columnCount = pointer.safeRunInt(DB::column_count);
+        paramCount = pointer.safeRunInt(DB::bind_parameter_count);
         batchQueryCount = 0;
         batch = null;
         batchPos = 0;
@@ -75,7 +75,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
     /** @see org.sqlite.jdbc3.JDBC3Statement#getUpdateCount() */
     @Override
     public int getUpdateCount() throws SQLException {
-        if (pointer == 0 || resultsWaiting || rs.isOpen()) {
+        if (pointer.isClosed() || resultsWaiting || rs.isOpen()) {
             return -1;
         }
 
