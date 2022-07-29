@@ -273,7 +273,7 @@ public class SQLiteJDBCLoader {
         }
         try {
             URLConnection connection = url.openConnection();
-            connection.setDefaultUseCaches(false);
+            connection.setUseCaches(false);
             return connection.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
