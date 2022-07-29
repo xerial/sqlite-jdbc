@@ -84,6 +84,8 @@ public class OSInfo {
         archMapping.put("powerpc64", PPC64);
         archMapping.put("power_pc64", PPC64);
         archMapping.put("power_rs64", PPC64);
+        archMapping.put("ppc64el", PPC64);
+        archMapping.put("ppc64le", PPC64);
     }
 
     public static void main(String[] args) {

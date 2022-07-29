@@ -17,13 +17,19 @@ package org.sqlite.core;
 
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.sqlite.*;
+import org.sqlite.BusyHandler;
+import org.sqlite.Collation;
+import org.sqlite.Function;
+import org.sqlite.ProgressHandler;
+import org.sqlite.SQLiteCommitListener;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteErrorCode;
+import org.sqlite.SQLiteException;
+import org.sqlite.SQLiteUpdateListener;
 
 /*
  * This class is the interface to SQLite. It provides some helper functions
@@ -44,12 +50,12 @@ public abstract class DB implements Codes {
     private final AtomicBoolean closed = new AtomicBoolean(true);
 
     /** The "begin;"and "commit;" statement handles. */
-    long begin = 0;
+    volatile SafeStmtPtr begin;
 
-    long commit = 0;
+    volatile SafeStmtPtr commit;
 
     /** Tracer for statements to avoid unfinalized statements on db close. */
-    private final Map<Long, CoreStatement> stmts = new HashMap<Long, CoreStatement>();
+    private final Set<SafeStmtPtr> stmts = ConcurrentHashMap.newKeySet();
 
     private final Set<SQLiteUpdateListener> updateListeners = new HashSet<SQLiteUpdateListener>();
     private final Set<SQLiteCommitListener> commitListeners = new HashSet<SQLiteCommitListener>();
@@ -179,10 +185,9 @@ public abstract class DB implements Codes {
      *     href="http://www.sqlite.org/c3ref/exec.html">http://www.sqlite.org/c3ref/exec.html</a>
      */
     public final synchronized void exec(String sql, boolean autoCommit) throws SQLException {
-        long pointer = 0;
+        SafeStmtPtr pointer = prepare(sql);
         try {
-            pointer = prepare(sql);
-            int rc = step(pointer);
+            int rc = pointer.safeRunInt(DB::step);
             switch (rc) {
                 case SQLITE_DONE:
                     ensureAutoCommit(autoCommit);
@@ -193,7 +198,7 @@ public abstract class DB implements Codes {
                     throwex(rc);
             }
         } finally {
-            finalize(pointer);
+            pointer.close();
         }
     }
 
@@ -229,31 +234,16 @@ public abstract class DB implements Codes {
      */
     public final synchronized void close() throws SQLException {
         // finalize any remaining statements before closing db
-        synchronized (stmts) {
-            Iterator<Map.Entry<Long, CoreStatement>> i = stmts.entrySet().iterator();
-            while (i.hasNext()) {
-                Map.Entry<Long, CoreStatement> entry = i.next();
-                CoreStatement stmt = entry.getValue();
-                finalize(entry.getKey().longValue());
-                if (stmt != null) {
-                    stmt.pointer = 0;
-                }
-                i.remove();
-            }
+        for (SafeStmtPtr element : stmts) {
+            element.close();
         }
 
         // remove memory used by user-defined functions
         free_functions();
 
         // clean up commit object
-        if (begin != 0) {
-            finalize(begin);
-            begin = 0;
-        }
-        if (commit != 0) {
-            finalize(commit);
-            commit = 0;
-        }
+        if (begin != null) begin.close();
+        if (commit != null) commit.close();
 
         closed.set(true);
         _close();
@@ -271,34 +261,32 @@ public abstract class DB implements Codes {
         if (stmt.sql == null) {
             throw new NullPointerException();
         }
-        if (stmt.pointer != 0) {
-            finalize(stmt);
+        if (stmt.pointer != null) {
+            stmt.pointer.close();
         }
         stmt.pointer = prepare(stmt.sql);
-        stmts.put(new Long(stmt.pointer), stmt);
+        final boolean added = stmts.add(stmt.pointer);
+        if (!added) {
+            throw new IllegalStateException("Already added pointer to statements set");
+        }
     }
 
     /**
      * Destroys a statement.
      *
-     * @param stmt The statement to destroy.
+     * @param safePtr the pointer wrapper to remove from internal structures
+     * @param ptr the raw pointer to free
      * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
-     * @throws SQLException
+     * @throws SQLException if finalization fails
      * @see <a
      *     href="http://www.sqlite.org/c3ref/finalize.html">http://www.sqlite.org/c3ref/finalize.html</a>
      */
-    public final synchronized int finalize(CoreStatement stmt) throws SQLException {
-        if (stmt.pointer == 0) {
-            return 0;
-        }
-        int rc = SQLITE_ERROR;
+    public synchronized int finalize(SafeStmtPtr safePtr, long ptr) throws SQLException {
         try {
-            rc = finalize(stmt.pointer);
+            return finalize(ptr);
         } finally {
-            stmts.remove(new Long(stmt.pointer));
-            stmt.pointer = 0;
+            stmts.remove(safePtr);
         }
-        return rc;
     }
 
     /**
@@ -342,7 +330,7 @@ public abstract class DB implements Codes {
      * @see <a
      *     href="http://www.sqlite.org/c3ref/prepare.html">http://www.sqlite.org/c3ref/prepare.html</a>
      */
-    protected abstract long prepare(String sql) throws SQLException;
+    protected abstract SafeStmtPtr prepare(String sql) throws SQLException;
 
     /**
      * Destroys a prepared statement.
@@ -887,9 +875,14 @@ public abstract class DB implements Codes {
      * @param vals Array of parameter values.
      * @return Array of the number of rows changed or inserted or deleted for each command if all
      *     commands execute successfully;
-     * @throws SQLException
+     * @throws SQLException if statement is not open or is being used elsewhere
      */
-    final synchronized int[] executeBatch(long stmt, int count, Object[] vals, boolean autoCommit)
+    final synchronized int[] executeBatch(
+            SafeStmtPtr stmt, int count, Object[] vals, boolean autoCommit) throws SQLException {
+        return stmt.safeRun((db, ptr) -> this.executeBatch(ptr, count, vals, autoCommit));
+    }
+
+    private synchronized int[] executeBatch(long stmt, int count, Object[] vals, boolean autoCommit)
             throws SQLException {
         if (count < 1) {
             throw new SQLException("count (" + count + ") < 1");
@@ -940,29 +933,9 @@ public abstract class DB implements Codes {
      */
     public final synchronized boolean execute(CoreStatement stmt, Object[] vals)
             throws SQLException {
-        if (vals != null) {
-            final int params = bind_parameter_count(stmt.pointer);
-            if (params > vals.length) {
-                throw new SQLException(
-                        "assertion failure: param count ("
-                                + params
-                                + ") > value count ("
-                                + vals.length
-                                + ")");
-            }
-
-            for (int i = 0; i < params; i++) {
-                int rc = sqlbind(stmt.pointer, i, vals[i]);
-                if (rc != SQLITE_OK) {
-                    throwex(rc);
-                }
-            }
-        }
-
-        int statusCode = step(stmt.pointer);
+        int statusCode = stmt.pointer.safeRunInt((db, ptr) -> execute(ptr, vals));
         switch (statusCode & 0xFF) {
             case SQLITE_DONE:
-                reset(stmt.pointer);
                 ensureAutoCommit(stmt.conn.getAutoCommit());
                 return false;
             case SQLITE_ROW:
@@ -973,9 +946,34 @@ public abstract class DB implements Codes {
             case SQLITE_CONSTRAINT:
                 throw newSQLException(statusCode);
             default:
-                finalize(stmt);
+                stmt.pointer.close();
                 throw newSQLException(statusCode);
         }
+    }
+
+    private synchronized int execute(long ptr, Object[] vals) throws SQLException {
+        if (vals != null) {
+            final int params = bind_parameter_count(ptr);
+            if (params > vals.length) {
+                throw new SQLException(
+                        "assertion failure: param count ("
+                                + params
+                                + ") > value count ("
+                                + vals.length
+                                + ")");
+            }
+
+            for (int i = 0; i < params; i++) {
+                int rc = sqlbind(ptr, i, vals[i]);
+                if (rc != SQLITE_OK) {
+                    throwex(rc);
+                }
+            }
+        }
+
+        int statusCode = step(ptr);
+        if ((statusCode & 0xFF) == SQLITE_DONE) reset(ptr);
+        return statusCode;
     }
 
     /**
@@ -1019,7 +1017,9 @@ public abstract class DB implements Codes {
                 throw new SQLException("query returns results");
             }
         } finally {
-            if (stmt.pointer != 0) reset(stmt.pointer);
+            if (!stmt.pointer.isClosed()) {
+                stmt.pointer.safeRunInt(DB::reset);
+            }
         }
         return changes();
     }
@@ -1176,26 +1176,46 @@ public abstract class DB implements Codes {
             return;
         }
 
-        if (begin == 0) {
-            begin = prepare("begin;");
-        }
-        if (commit == 0) {
-            commit = prepare("commit;");
-        }
+        ensureBeginAndCommit();
 
+        begin.safeRunConsume(
+                (db, beginPtr) -> {
+                    commit.safeRunConsume(
+                            (db2, commitPtr) -> ensureAutocommit(beginPtr, commitPtr));
+                });
+    }
+
+    private void ensureBeginAndCommit() throws SQLException {
+        if (begin == null) {
+            synchronized (this) {
+                if (begin == null) {
+                    begin = prepare("begin;");
+                }
+            }
+        }
+        if (commit == null) {
+            synchronized (this) {
+                if (commit == null) {
+                    commit = prepare("commit;");
+                }
+            }
+        }
+    }
+
+    private void ensureAutocommit(long beginPtr, long commitPtr) throws SQLException {
         try {
-            if (step(begin) != SQLITE_DONE) {
+            if (step(beginPtr) != SQLITE_DONE) {
                 return; // assume we are in a transaction
             }
-            int rc = step(commit);
+            int rc = step(commitPtr);
             if (rc != SQLITE_DONE) {
-                reset(commit);
+                reset(commitPtr);
                 throwex(rc);
             }
             // throw new SQLException("unable to auto-commit");
         } finally {
-            reset(begin);
-            reset(commit);
+            reset(beginPtr);
+            reset(commitPtr);
         }
     }
 }
