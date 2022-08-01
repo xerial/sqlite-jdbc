@@ -81,13 +81,22 @@ jobs:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
     strategy:
       matrix:
-        # armv6 cannot install the JDK properly via apt-get on Debian
-        arch: [ armv7, aarch64 ]
-        # no point adding Alpine, as we only have x86_64 binaries for it
-        distro: [ ubuntu20.04 ]
-        # cannot add Java 16, maven installed by apt-get is 3.6.x and does not support Java 16
-        # use only java 11, so we don't run too many CI jobs
-        java: [ 11 ]
+        include:
+          # ARM v7
+          - arch: armv7
+            distro: ubuntu_latest
+            java: 11 # apt-get maven is 3.6.x, doesn't support Java 17
+          # ARM 64
+          - arch: aarch64
+            distro: ubuntu_latest
+            java: 11 # apt-get maven is 3.6.x, doesn't support Java 17
+          - arch: aarch64
+            distro: alpine_latest
+            java: 11
+          # PPC64
+          - arch: ppc64le
+            distro: ubuntu_latest
+            java: 11 # apt-get maven is 3.6.x, doesn't support Java 17
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -107,14 +116,25 @@ jobs:
           # publicly in your project's package repository, so it is vital that
           # no secrets are present in the container state or logs.
           install: |
-            apt-get update -q -y
-            apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -q -y
+                apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
+                ;;
+              alpine*)
+                apk update
+                apk add maven openjdk${{ matrix.java }}
+                ;;
+            esac
 
           # We use the Github Action user, 1001:121, so that maven can access
           # the /work directory and create target/classes
           dockerRunArgs: |
             --volume "${PWD}:/work"
             --user 1001:121
+
+          env: |
+            SKIP_TEST_OSINFO: true
 
           run: |
             echo "Architecture: `uname -a`"
