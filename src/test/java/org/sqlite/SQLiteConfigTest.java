@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.SQLException;
 import java.util.Properties;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +33,8 @@ public class SQLiteConfigTest {
 
     @Test
     public void testParsePatternAndSelectNumberRule() throws SQLException {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
                 () -> {
                     SQLiteConfig config = new SQLiteConfig();
                     config.setReadOnly(true);
