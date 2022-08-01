@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
 public class OSInfoTest {
@@ -62,7 +63,7 @@ public class OSInfoTest {
     }
 
     @Test
-    public void testMainForOSName() throws Exception {
+    public void testMainForOSName() {
 
         // preserve the current System.out
         PrintStream out = System.out;
@@ -80,7 +81,7 @@ public class OSInfoTest {
     }
 
     @Test
-    public void testMainForArchName() throws Exception {
+    public void testMainForArchName() {
 
         // preserver the current System.out
         PrintStream out = System.out;
@@ -98,9 +99,10 @@ public class OSInfoTest {
     }
 
     @Test
-    public void testGetHardwareName() throws Exception {
-        String hardware = OSInfo.getHardwareName();
-        logger.info("Hardware name: " + hardware);
+    public void displayOSInfo() {
+        logger.info("Hardware name: " + OSInfo.getHardwareName());
+        logger.info("OS name: " + OSInfo.getOSName());
+        logger.info("Architecture name: " + OSInfo.getArchName());
     }
 
     // it's unlikely we run tests on an Android device
