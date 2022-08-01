@@ -33,7 +33,7 @@ jobs:
           java-package: jdk
           cache: 'maven'
       - name: spotless:check
-        run: mvn spotless:check
+        run: mvn --batch-mode --no-transfer-progress spotless:check
 
   test:
     name: test ${{ matrix.os }} jdk${{ matrix.java }}
@@ -60,7 +60,7 @@ jobs:
           java-package: jdk
           cache: 'maven'
       - name: Test
-        run: mvn test
+        run: mvn --batch-mode --no-transfer-progress test
 
   test_graalvm:
     name: test ubuntu-latest jdk11 GraalVM native-image
@@ -79,7 +79,7 @@ jobs:
         run: |
           gu install native-image
       - name: Test
-        run: mvn -Pnative test
+        run: mvn --batch-mode --no-transfer-progress -P native test
 
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
@@ -123,7 +123,7 @@ jobs:
           run: |
             echo "Architecture: `uname -a`"
             mvn --version
-            cd /work && mvn test
+            cd /work && mvn --batch-mode --no-transfer-progress test
 
   release:
     name: Deploy
@@ -148,7 +148,7 @@ jobs:
           echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
       - name: Publish to Apache Maven Central
         if: ${{ endsWith(env.PROJECT_VERSION, '-SNAPSHOT') }}
-        run: mvn deploy -P release -DskipTests
+        run: mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.SONATYPE_USERNAME }} # must be the same env variable name as (1)
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }} # must be the same env variable name as (2)
