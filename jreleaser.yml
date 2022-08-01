@@ -1,0 +1,24 @@
+project:
+  versionPattern: CUSTOM
+release:
+  github:
+    discussionCategoryName: Announcements
+    tagName: '{{projectVersion}}'
+    changelog:
+      links: true
+      formatted: ALWAYS
+      format: '- {{commitShortHash}} {{commitTitle}}'
+      preset: 'conventional-commits'
+      excludeLabels:
+        - 'chore'
+        - 'merge'
+      labelers:
+        - label: 'chore'
+          title: '[maven-release-plugin] prepare'
+          order: 1
+      categories:
+        - title: '🏎 Perf'
+          key: 'perf'
+          labels:
+            - 'perf'
+          order: 25
