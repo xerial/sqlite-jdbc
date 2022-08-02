@@ -28,7 +28,7 @@ then append this jar file into your classpath.
 * More usage examples are available at [Usage](Usage.md)
 * Usage Example (Assuming `sqlite-jdbc-(VERSION).jar` is placed in the current directory)
 
-```
+```shell
 > javac Sample.java
 > java -classpath ".;sqlite-jdbc-(VERSION).jar" Sample   # in Windows
 or
@@ -101,13 +101,15 @@ How to Specify Database Files
 
 Here is an example to select a file `C:\work\mydatabase.db` (in Windows)
 
-    Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/work/mydatabase.db");
-
+```java    
+Connection connection = DriverManager.getConnection("jdbc:sqlite:C:/work/mydatabase.db");
+```
 
 A UNIX (Linux, Mac OS X, etc) file `/home/leo/work/mydatabase.db`
 
-    Connection connection = DriverManager.getConnection("jdbc:sqlite:/home/leo/work/mydatabase.db");
-
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite:/home/leo/work/mydatabase.db");
+```
 
 
 How to Use Memory Databases
@@ -115,8 +117,9 @@ How to Use Memory Databases
 SQLite supports on-memory database management, which does not create any database files.
 To use a memory database in your Java code, get the database connection as follows:
 
-    Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
-
+```java
+Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:");
+```
 
 ## Configuration
 
@@ -260,13 +263,14 @@ News
 *   2009 December 10th: [sqlite-jdbc-3.6.20.1](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.20.1/) release.
     *   Read-only connection, recursive trigger, foreign key validation support etc. using SQLiteConfig class.
 
-            SQLiteConfig config = new SQLiteConfig();
-            // config.setReadOnly(true);
-            config.setSharedCache(true);
-            config.recursiveTriggers(true);
-            // ... other configuration can be set via SQLiteConfig object
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.toProperties());
-
+        ```java
+        SQLiteConfig config = new SQLiteConfig();
+        // config.setReadOnly(true);
+        config.setSharedCache(true);
+        config.recursiveTriggers(true);
+        // ... other configuration can be set via SQLiteConfig object
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.toProperties());
+        ```
 
 *   2009 November 12th: [sqlite-jdbc-3.6.19](http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.19/) released.
     *   added 64-bit OS support: 64-bit native SQLite binaries for Windows (x86\_64), Mac (x86\_64) and Linux (adm64) are available.
@@ -287,11 +291,13 @@ News
     sqlite version 3.6.10. <http://www.sqlite.org/releaselog/3_6_10.html>
     *   Added `READ_UNCOMMITTED` mode support for better query performance: (see also <http://www.sqlite.org/sharedcache.html> )
 
-            // READ_UNCOMMITTED mode works only in shared_cache mode.
-             Properties prop = new Properties();
-             prop.setProperty("shared_cache", "true");
-             Connection conn = DriverManager.getConnection("jdbc:sqlite:", prop);
-             conn.setTransactionIsolation(Conn.TRANSACTION_READ_UNCOMMITTED);
+        ```java
+        // READ_UNCOMMITTED mode works only in shared_cache mode.
+         Properties prop = new Properties();
+         prop.setProperty("shared_cache", "true");
+         Connection conn = DriverManager.getConnection("jdbc:sqlite:", prop);
+         conn.setTransactionIsolation(Conn.TRANSACTION_READ_UNCOMMITTED);
+        ```
 
 
 *   2008 December 17th: sqlite-jdbc-3.6.7 released.
@@ -406,13 +412,15 @@ Using SQLiteJDBC with Maven2
 If you are familiar with [Maven2](http://maven.apache.org), add the following XML
 fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [Maven's central repository](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/).
 
-    <dependencies>
-        <dependency>
-          <groupId>org.xerial</groupId>
-          <artifactId>sqlite-jdbc</artifactId>
-          <version>(version)</version>
-        </dependency>
-    </dependencies>
+```xml
+<dependencies>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>(version)</version>
+    </dependency>
+</dependencies>
+```
 
 To use snapshot/pre-release versions, add the following repository to your Maven settings:
 * Pre-release repository: <https://oss.sonatype.org/content/repositories/releases>
@@ -433,7 +441,7 @@ Using SQLiteJDBC with Tomcat6 Web Server
 
 (The following note is no longer necessary since sqlite-jdbc-3.8.7)
 
-Do not include sqlite-jdbc-(version).jar in WEB-INF/lib folder of your web application
+Do not include `sqlite-jdbc-(version).jar` in `WEB-INF/lib` folder of your web application
 package, since multiple web applications hosted by the same Tomcat server cannot
 load the sqlite-jdbc native library more than once. That is the specification of
 JNI (Java Native Interface). You will observe `UnsatisfiedLinkError` exception with
@@ -444,14 +452,16 @@ directory, in which multiple web applications can share the same native library
 file (.dll, .jnilib, .so) extracted from this sqlite-jdbc jar file.
 
 If you are using Maven for your web application, set the dependency scope as 'provided',
-and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
+and manually put the SQLite JDBC jar file into `(TOMCAT_HOME)/lib` folder.
 
-    <dependency>
-        <groupId>org.xerial</groupId>
-        <artifactId>sqlite-jdbc</artifactId>
-        <version>(version)</version>
-        <scope>provided</scope>
-    </dependency>
+```xml
+<dependency>
+    <groupId>org.xerial</groupId>
+    <artifactId>sqlite-jdbc</artifactId>
+    <version>(version)</version>
+    <scope>provided</scope>
+</dependency>
+```
 
 What is different from Zentus' SQLite JDBC?
 --------------------------------------------
@@ -474,7 +484,7 @@ is our utility to create personalized genome browsers.
 ## Buliding sqlite-jdbc
 
 Building native libraries:
-```
+```shell
 # For the current platform
 $ make native
 
