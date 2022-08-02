@@ -289,7 +289,7 @@ News
 
 *   2009 January 19th: sqlite-jdbc-3.6.10 released. This version is compatible with
     sqlite version 3.6.10. <http://www.sqlite.org/releaselog/3_6_10.html>
-    *   Added `READ_UNCOMMITTED` mode support for better query performance: (see also <http://www.sqlite.org/sharedcache.html> )
+    * Added `READ_UNCOMMITTED` mode support for better query performance: (see also <http://www.sqlite.org/sharedcache.html> )
 
         ```java
         // READ_UNCOMMITTED mode works only in shared_cache mode.
@@ -357,13 +357,19 @@ Supported Operating Systems
 Since sqlite-jdbc-3.6.19, the natively compiled SQLite engines will be used for
 the following operating systems:
 
-*   Windows (Windows, x86 architecture, x86_64)
-*   Mac OS X x86_64 (Support for SnowLeopard (i386) has been deprecated)
-*   Linux x86, x86_64, arm (v5, v6, v7 and for android), ppc64
+|              | x86 | x86_64 | armv5 | armv6 | armv7 | arm64 | ppc64 |
+|--------------|-----|--------|-------|-------|-------|-------|-------|
+| Windows      | ✔   | ✔      |       |       | ✔     | ✔     |       |
+| Mac OS       |     | ✔      |       |       |       | ✔     |       |
+| Linux (libc) | ✔   | ✔      | ✔     | ✔     | ✔     | ✔     | ✔     |
+| Linux (musl) |     | ✔      |       |       |       | ✔     |       |
+| Android      | ✔   | ✔      | ✔     |       |       | ✔     |       |
+| FreeBSD      | ✔   | ✔      |       |       |       | ✔     |       |
+
 
 In the other OSs not listed above, the pure-java SQLite is used. (Applies to versions before 3.7.15)
 
-If you want to use the native library for your OS, [build the source from scratch.
+If you want to use the native library for your OS, build the source from scratch.
 
 
 How does SQLiteJDBC work?
@@ -427,6 +433,7 @@ To use snapshot/pre-release versions, add the following repository to your Maven
 ### Hint for maven-shade-plugin
 
 You may need to add shade plugin transformer to solve `No suitable driver found for jdbc:sqlite:` issue.
+
 ```xml
 <transformer
 	implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
