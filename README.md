@@ -245,17 +245,17 @@ News
 *   2015 July 27th: sqlite-jdbc-3.8.10.2 release (Thread-safe date time)
 *   2015 May 11th: sqlite-jdbc-3.8.10.1 release
 *   2015 May 7th: sqlite-jdbc-3.8.9.1 release
-*   2014 October 20th: [sqlite-jdbc-3.8.7](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.7.jar) released.
+*   2014 October 20th: sqlite-jdbc-3.8.7 released.
     * Fixed the native code loading mechanism to allow loading sqlite-jdbc from multiple class loaders.
-*   2014 October 8th: [sqlite-jdbc-3.8.6](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.6.jar) released.
-*   2014 August 7th: [sqlite-jdbc-3.8.5-pre1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.5-pre1.jar) released.
-*   2014 January 5th: [sqlite-jdbc4-3.8.2-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.8.2-SNAPSHOT.jar) Introduced JDBC4 version of driver. (Requires at least Java 6).
-    *   Source code is on branch [feature/jdbc4](https://bitbucket.org/xerial/sqlite-jdbc/branch/feature/jdbc4)
+*   2014 October 8th: sqlite-jdbc-3.8.6 released.
+*   2014 August 7th: sqlite-jdbc-3.8.5-pre1 released.
+*   2014 January 5th: sqlite-jdbc-3.8.2-SNAPSHOT Introduced JDBC4 version of driver. (Requires at least Java 6).
+    *   Source code is on branch feature/jdbc4
 *   2013 August 27th: sqlite-jdbc-3.8.0 snapshot version is [available](https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/3.8.0-SNAPSHOT/)
-*   2013 August 19th: [sqlite-jdbc-3.7.15-M1](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-M1.jar)
-*   2013 March 24th : [sqlite-jdbc-3.7.15-SNAPSHOT-2](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT-2.jar)
+*   2013 August 19th: sqlite-jdbc-3.7.15-M1
+*   2013 March 24th : sqlite-jdbc-3.7.15-SNAPSHOT-2
 *   2013 January 22nd: The repositories and documentations were moved to the bitbucket.
-*   2012 December 15th: [sqlite-jdbc-3.7.15-SNAPSHOT](https://bitbucket.org/xerial/sqlite-jdbc/downloads/sqlite-jdbc-3.7.15-SNAPSHOT.jar)
+*   2012 December 15th: sqlite-jdbc-3.7.15-SNAPSHOT
     *   Removed pure-java.
 *   2010 August 27th: [sqlite-jdbc-3.7.2](http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/) released
 *   2010 April 3rd: [beta release of sqlite-jdbc-3.6.23.1-SNAPSHOT](http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/)
@@ -344,15 +344,13 @@ News
 
 Download
 ========
-Download the latest version of SQLiteJDBC from the [downloads page](https://bitbucket.org/xerial/sqlite-jdbc/downloads).
+Download the latest version of SQLiteJDBC from the [releases page](https://github.com/xerial/sqlite-jdbc/releases).
 
 
 Beta Release
 ------------
 The early releases (beta) of sqlite-jdbc with some advanced features are available
-from [here](https://bitbucket.org/xerial/sqlite-jdbc/downloads)
-
-*   The old releases are still available from [here](https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/), but the site might be closed in future.
+from [here](https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/)
 
 Supported Operating Systems
 ===========================
