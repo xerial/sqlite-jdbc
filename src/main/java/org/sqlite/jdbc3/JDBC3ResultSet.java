@@ -121,7 +121,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#isAfterLast() */
     public boolean isAfterLast() throws SQLException {
-        return !open;
+        return !open && !emptyResultSet;
     }
 
     /** @see java.sql.ResultSet#isBeforeFirst() */
