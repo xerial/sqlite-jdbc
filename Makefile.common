@@ -9,13 +9,14 @@ JAVAC := "$$JAVA_HOME/bin/javac"
 JAVAH := "$$JAVA_HOME/bin/javah"
 
 TARGET := target
-OSINFO_CLASS := org.sqlite.OSInfo
+OSINFO_CLASS := org.sqlite.util.OSInfo
 OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
 
-## building OSInfo.java 
-#$(info compiling OSInfo.java)
-#$(shell mkdir -p lib)
-#$(shell $(JAVAC) src/main/java/org/sqlite/util/OSInfo.java -d lib)
+## building OSInfo.java
+ifeq ("$(wildcard $(OSINFO_PROG))","")
+$(info Building OSInfo tool)
+$(shell $(JAVAC) -cp src/main/java -d lib src/main/java/org/sqlite/util/OSInfo.java)
+endif
 
 ifndef OS_NAME
 OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
@@ -53,6 +54,8 @@ target := $(OS_NAME)-$(OS_ARCH)
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
   target := Default
 endif
+
+$(info Will build using target: $(target) (detected os: $(OS_NAME) arch: $(OS_ARCH)))
 
 # cross-compilation toolchain prefix (e.g. "arm-linux-gnueabi-")
 CROSS_PREFIX :=
