@@ -57,8 +57,8 @@ public abstract class DB implements Codes {
     /** Tracer for statements to avoid unfinalized statements on db close. */
     private final Set<SafeStmtPtr> stmts = ConcurrentHashMap.newKeySet();
 
-    private final Set<SQLiteUpdateListener> updateListeners = new HashSet<SQLiteUpdateListener>();
-    private final Set<SQLiteCommitListener> commitListeners = new HashSet<SQLiteCommitListener>();
+    private final Set<SQLiteUpdateListener> updateListeners = new HashSet<>();
+    private final Set<SQLiteCommitListener> commitListeners = new HashSet<>();
 
     public DB(String url, String fileName, SQLiteConfig config) throws SQLException {
         this.url = url;
@@ -792,8 +792,8 @@ public abstract class DB implements Codes {
      */
     public abstract int limit(int id, int value) throws SQLException;
 
-    public static interface ProgressObserver {
-        public void progress(int remaining, int pageCount);
+    public interface ProgressObserver {
+        void progress(int remaining, int pageCount);
     }
 
     /** Progress handler */
@@ -848,15 +848,15 @@ public abstract class DB implements Codes {
         if (v == null) {
             return bind_null(stmt, pos);
         } else if (v instanceof Integer) {
-            return bind_int(stmt, pos, ((Integer) v).intValue());
+            return bind_int(stmt, pos, (Integer) v);
         } else if (v instanceof Short) {
             return bind_int(stmt, pos, ((Short) v).intValue());
         } else if (v instanceof Long) {
-            return bind_long(stmt, pos, ((Long) v).longValue());
+            return bind_long(stmt, pos, (Long) v);
         } else if (v instanceof Float) {
             return bind_double(stmt, pos, ((Float) v).doubleValue());
         } else if (v instanceof Double) {
-            return bind_double(stmt, pos, ((Double) v).doubleValue());
+            return bind_double(stmt, pos, (Double) v);
         } else if (v instanceof String) {
             return bind_text(stmt, pos, (String) v);
         } else if (v instanceof byte[]) {
@@ -1056,7 +1056,7 @@ public abstract class DB implements Codes {
         Set<SQLiteUpdateListener> listeners;
 
         synchronized (this) {
-            listeners = new HashSet<SQLiteUpdateListener>(updateListeners);
+            listeners = new HashSet<>(updateListeners);
         }
 
         for (SQLiteUpdateListener listener : listeners) {
@@ -1084,7 +1084,7 @@ public abstract class DB implements Codes {
         Set<SQLiteCommitListener> listeners;
 
         synchronized (this) {
-            listeners = new HashSet<SQLiteCommitListener>(commitListeners);
+            listeners = new HashSet<>(commitListeners);
         }
 
         for (SQLiteCommitListener listener : listeners) {
@@ -1106,7 +1106,7 @@ public abstract class DB implements Codes {
      * Throws SQLException with error code.
      *
      * @param errorCode Error code to be passed.
-     * @throws SQLException
+     * @throws SQLException Formatted SQLException with error code.
      */
     public final void throwex(int errorCode) throws SQLException {
         throw newSQLException(errorCode);
@@ -1117,24 +1117,28 @@ public abstract class DB implements Codes {
      *
      * @param errorCode Error code to be passed.
      * @param errorMessage Error message to be passed.
-     * @throws SQLException
+     * @throws SQLException Formatted SQLException with error code and message.
      */
-    static final void throwex(int errorCode, String errorMessage) throws SQLiteException {
+    static void throwex(int errorCode, String errorMessage) throws SQLException {
         throw newSQLException(errorCode, errorMessage);
     }
 
     /**
-     * Throws formated SQLException with error code and message.
+     * Throws formatted SQLException with error code and message.
      *
      * @param errorCode Error code to be passed.
      * @param errorMessage Error message to be passed.
-     * @return Formated SQLException with error code and message.
-     * @throws SQLException
+     * @return Formatted SQLException with error code and message.
      */
     public static SQLiteException newSQLException(int errorCode, String errorMessage) {
         SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
-        SQLiteException e = new SQLiteException(String.format("%s (%s)", code, errorMessage), code);
-        return e;
+        String msg;
+        if (code == SQLiteErrorCode.UNKNOWN_ERROR) {
+            msg = String.format("%s:%s (%s)", code, errorCode, errorMessage);
+        } else {
+            msg = String.format("%s (%s)", code, errorMessage);
+        }
+        return new SQLiteException(msg, code);
     }
 
     /**
@@ -1142,7 +1146,7 @@ public abstract class DB implements Codes {
      *
      * @param errorCode Error code to be passed.
      * @return SQLException with error code and message.
-     * @throws SQLException
+     * @throws SQLException Formatted SQLException with error code
      */
     private SQLiteException newSQLException(int errorCode) throws SQLException {
         return newSQLException(errorCode, errmsg());
