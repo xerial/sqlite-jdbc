@@ -1135,12 +1135,11 @@ public abstract class DB implements Codes {
         SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
         String msg;
         if (code == SQLiteErrorCode.UNKNOWN_ERROR) {
-            msg = String.format("0x%x (%s)", errorCode, errorMessage);
+            msg = String.format("%s:%s (%s)", code, errorCode, errorMessage);
         } else {
             msg = String.format("%s (%s)", code, errorMessage);
         }
-        SQLiteException e = new SQLiteException(msg, code);
-        return e;
+        return new SQLiteException(msg, code);
     }
 
     /**
