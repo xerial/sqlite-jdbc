@@ -136,7 +136,7 @@ public enum SQLiteErrorCode {
      * @param code Error code.
      * @param message Message for the error.
      */
-    private SQLiteErrorCode(int code, String message) {
+    SQLiteErrorCode(int code, String message) {
         this.code = code;
         this.message = message;
     }
