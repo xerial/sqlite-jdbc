@@ -14,6 +14,7 @@ import java.sql.Statement;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.jupiter.api.Test;
+import org.sqlite.core.DB;
 
 public class ErrorMessageTest {
     static class VendorCodeMatcher extends BaseMatcher<Object> {
@@ -118,7 +119,7 @@ public class ErrorMessageTest {
     }
 
     @Test
-    public void cantOpenDir() throws SQLException, IOException {
+    public void cantOpenDir() throws IOException {
         File dir = File.createTempFile("error-message-test-cant-open-dir", "");
         assumeTrue(dir.delete());
         assumeTrue(dir.mkdir());
@@ -158,5 +159,17 @@ public class ErrorMessageTest {
 
         stmt.close();
         conn.close();
+    }
+
+    @Test
+    public void unknownErrorExceptionMessageShouldContainOriginalErrorCode() {
+        int errorCode = 1234567890;
+        String errorMessage = "fictitious code";
+
+        SQLiteException exception = DB.newSQLException(errorCode, errorMessage);
+
+        assertTrue(exception.getMessage().contains(Integer.toString(errorCode)));
+        assertTrue(exception.getMessage().contains(errorMessage));
+        assertTrue(exception.getMessage().startsWith(SQLiteErrorCode.UNKNOWN_ERROR.toString()));
     }
 }
