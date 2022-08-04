@@ -7,6 +7,7 @@
     <version>3.39.2.0-SNAPSHOT</version>
     <name>SQLite JDBC</name>
     <description>SQLite JDBC library</description>
+    <url>https://github.com/xerial/sqlite-jdbc</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
