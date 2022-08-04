@@ -178,13 +178,6 @@ jobs:
         run: |
           mvn --no-transfer-progress versions:set -DremoveSnapshot -DgenerateBackupPoms=false
           echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
-      - name: Release commit and push
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: 'chore(release): ${{ env.RELEASE_VERSION }} [skip ci]'
-          tag: '${{ env.RELEASE_VERSION }}'
-          default_author: github_actions
       # The sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
       - name: Publish to Apache Maven Central
         run: mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests
@@ -192,6 +185,13 @@ jobs:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.SONATYPE_USERNAME }} # must be the same env variable name as (1)
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }} # must be the same env variable name as (2)
           MAVEN_CENTRAL_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }} # must be the same env variable name as (3)
+      - name: Release commit and push
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'chore(release): ${{ env.RELEASE_VERSION }} [skip ci]'
+          tag: '${{ env.RELEASE_VERSION }}'
+          default_author: github_actions
       - name: Create Github release with JReleaser
         if: ${{ github.event_name == 'workflow_dispatch' }}
         env:
