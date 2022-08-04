@@ -22,3 +22,6 @@ release:
           labels:
             - 'perf'
           order: 25
+files:
+  artifacts:
+    - path: 'target/{{projectName}}-{{projectVersion}}.jar'
