@@ -190,7 +190,7 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: 'chore(release): ${{ env.RELEASE_VERSION }} [skip ci]'
-          tag: '${{ env.RELEASE_VERSION }}'
+          tag: '${{ env.RELEASE_VERSION }} --force'
           default_author: github_actions
       - name: Create Github release with JReleaser
         if: ${{ github.event_name == 'workflow_dispatch' }}
