@@ -25,7 +25,7 @@ import org.sqlite.core.DB;
  *
  * <p>A subclass of <tt>org.sqlite.Function</tt> can be registered with <tt>Function.create()</tt>
  * and called by the name it was given. All functions must implement <tt>xFunc()</tt>, which is
- * called when SQLite runs the custom function. Eg.
+ * called when SQLite runs the custom function. E.g.
  *
  * <pre>
  *      Class.forName("org.sqlite.JDBC");
@@ -42,10 +42,8 @@ import org.sqlite.core.DB;
  *
  * <p>Arguments passed to a custom function can be accessed using the <tt>protected</tt> functions
  * provided. <tt>args()</tt> returns the number of arguments passed, while
- * <tt>value_&lt;type&gt;(int)</tt> returns the value of the specific argument. Similarly a function
- * can return a value using the <tt>result(&lt;type&gt;)</tt> function.
- *
- * <p>Aggregate functions are not yet supported, but coming soon.
+ * <tt>value_&lt;type&gt;(int)</tt> returns the value of the specific argument. Similarly, a
+ * function can return a value using the <tt>result(&lt;type&gt;)</tt> function.
  */
 public abstract class Function {
     /**
