@@ -25,6 +25,7 @@ import org.sqlite.SQLiteConnectionConfig;
 public abstract class CoreResultSet implements Codes {
     protected final CoreStatement stmt;
 
+    public boolean emptyResultSet = false; // false means we don't have results
     public boolean open = false; // true means have results and can iterate them
     public int maxRows; // max. number of rows as set by a Statement
     public String[] cols = null; // if null, the RS is closed()
@@ -120,8 +121,9 @@ public abstract class CoreResultSet implements Codes {
         row = 0;
         lastCol = -1;
         columnNameToIndex = null;
+        emptyResultSet = false;
 
-        if (!open) {
+        if (stmt.pointer.isClosed() || (!open && !closeStmt)) {
             return;
         }
 
