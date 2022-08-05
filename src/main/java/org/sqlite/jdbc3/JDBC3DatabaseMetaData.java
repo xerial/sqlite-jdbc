@@ -996,10 +996,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         }
                         colFound = true;
 
-						// default values
-						int iColumnSize = 2000000000;
-						int iDecimalDigits = 10;
-                        
+                        // default values
+                        int iColumnSize = 2000000000;
+                        int iDecimalDigits = 10;
+
                         /*
                          * improved column types
                          * ref http://www.sqlite.org/datatype3.html - 2.1 Determination Of Column Affinity
@@ -1027,43 +1027,50 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                             // catch-all
                             colJavaType = Types.VARCHAR;
                         }
-						// try to find an (optional) length/dimension of the column
-						int iStartOfDimension = colType.indexOf('(');
-						if (iStartOfDimension > 0) {
-							// find end of dimension
-							int iEndOfDimension = colType.indexOf(')', iStartOfDimension);
-							if (iEndOfDimension > 0) {
-								String sInteger, sDecimal;
-								// check for two values (integer part, fraction) divided by comma
-								int iDimensionSeparator = colType.indexOf(',', iStartOfDimension);
-								if (iDimensionSeparator > 0) {
-									sInteger = colType.substring(iStartOfDimension + 1, iDimensionSeparator);
-									sDecimal = colType.substring(iDimensionSeparator + 1, iEndOfDimension);
-								}
-								// only a single dimension
-								else {
-									sInteger = colType.substring(iStartOfDimension + 1, iEndOfDimension);
-									sDecimal = null;
-								}
-								// try to parse the values
-								try {
-									int iInteger = Integer.parseUnsignedInt(sInteger);
-									// parse decimals?
-									if (sDecimal != null) {
-										iDecimalDigits = Integer.parseUnsignedInt(sDecimal);
-										// columns size equals sum of integer and decimal part of dimension
-										iColumnSize = iInteger + iDecimalDigits;
-									} else {
-										// no decimals
-										iDecimalDigits = 0;
-										// columns size equals dimension
-										iColumnSize = iInteger;
-									}
-								} catch (NumberFormatException ex) {
-									// just ignore invalid dimension formats here
-								}
-							}
-						}
+                        // try to find an (optional) length/dimension of the column
+                        int iStartOfDimension = colType.indexOf('(');
+                        if (iStartOfDimension > 0) {
+                            // find end of dimension
+                            int iEndOfDimension = colType.indexOf(')', iStartOfDimension);
+                            if (iEndOfDimension > 0) {
+                                String sInteger, sDecimal;
+                                // check for two values (integer part, fraction) divided by comma
+                                int iDimensionSeparator = colType.indexOf(',', iStartOfDimension);
+                                if (iDimensionSeparator > 0) {
+                                    sInteger =
+                                            colType.substring(
+                                                    iStartOfDimension + 1, iDimensionSeparator);
+                                    sDecimal =
+                                            colType.substring(
+                                                    iDimensionSeparator + 1, iEndOfDimension);
+                                }
+                                // only a single dimension
+                                else {
+                                    sInteger =
+                                            colType.substring(
+                                                    iStartOfDimension + 1, iEndOfDimension);
+                                    sDecimal = null;
+                                }
+                                // try to parse the values
+                                try {
+                                    int iInteger = Integer.parseUnsignedInt(sInteger);
+                                    // parse decimals?
+                                    if (sDecimal != null) {
+                                        iDecimalDigits = Integer.parseUnsignedInt(sDecimal);
+                                        // columns size equals sum of integer and decimal part of
+                                        // dimension
+                                        iColumnSize = iInteger + iDecimalDigits;
+                                    } else {
+                                        // no decimals
+                                        iDecimalDigits = 0;
+                                        // columns size equals dimension
+                                        iColumnSize = iInteger;
+                                    }
+                                } catch (NumberFormatException ex) {
+                                    // just ignore invalid dimension formats here
+                                }
+                            }
+                        }
 
                         sql.append("select ")
                                 .append(i + 1)
