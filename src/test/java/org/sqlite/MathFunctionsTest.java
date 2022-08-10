@@ -173,27 +173,65 @@ public class MathFunctionsTest {
     }
 
     @Test
-    // this actually performs ln()
-    public void log() throws Exception {
-        Utils.assumeJdbcExtensionsOrMathFunctions(conn);
-        boolean isLogLn = Utils.getCompileOptions(conn).contains("JDBC_EXTENSIONS");
-
+    // with the old math extension functions, log would perform ln instead of log10
+    public void logAsLn() throws Exception {
+        Utils.assumeJdbcExtensionsWithoutMathFunctions(conn);
         ResultSet rs = stat.executeQuery("select log(2)");
         assertThat(rs.next()).isTrue();
+        assertThat(rs.getDouble(1)).isCloseTo(0.30102999566398114, offset(0.000000000000001));
+        rs.close();
+    }
 
-        double ln = 0.693147180559945;
-        double log = 0.30102999566398114;
+    @Test
+    public void ln() throws Exception {
+        Utils.assumeMathFunctions(conn);
+        ResultSet rs = stat.executeQuery("select ln(2)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDouble(1)).isCloseTo(0.693147180559945, offset(0.000000000000001));
+        rs.close();
+    }
 
-        assertThat(rs.getDouble(1)).isCloseTo(isLogLn ? ln : log, offset(0.000000000000001));
+    @Test
+    public void logBase() throws Exception {
+        Utils.assumeMathFunctions(conn);
+        ResultSet rs = stat.executeQuery("select log(3,3)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDouble(1)).isCloseTo(1, offset(0.000000000000001));
+        rs.close();
+    }
+
+    @Test
+    public void log2() throws Exception {
+        Utils.assumeMathFunctions(conn);
+        ResultSet rs = stat.executeQuery("select log2(2)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDouble(1)).isCloseTo(1, offset(0.000000000000001));
         rs.close();
     }
 
     @Test
     public void log10() throws Exception {
-        Utils.assumeJdbcExtensionsOrMathFunctions(conn);
-        ResultSet rs = stat.executeQuery("select log10(10)");
+        Utils.assumeMathFunctions(conn);
+        {
+            ResultSet rs = stat.executeQuery("select log10(10)");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getDouble(1)).isCloseTo(1, offset(0.000000000000001));
+            rs.close();
+        }
+        {
+            ResultSet rs = stat.executeQuery("select log(10)");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getDouble(1)).isCloseTo(1, offset(0.000000000000001));
+            rs.close();
+        }
+    }
+
+    @Test
+    public void mod() throws Exception {
+        Utils.assumeMathFunctions(conn);
+        ResultSet rs = stat.executeQuery("select mod(11,3.5)");
         assertThat(rs.next()).isTrue();
-        assertThat(rs.getDouble(1)).isCloseTo(1, offset(0.000000000000001));
+        assertThat(rs.getDouble(1)).isEqualTo(0.5);
         rs.close();
     }
 
@@ -212,10 +250,18 @@ public class MathFunctionsTest {
     @Test
     public void power() throws Exception {
         Utils.assumeJdbcExtensionsOrMathFunctions(conn);
-        ResultSet rs = stat.executeQuery("select power(10,2)");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getDouble(1)).isCloseTo(100, offset(0.000000000000001));
-        rs.close();
+        {
+            ResultSet rs = stat.executeQuery("select pow(10,2)");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getDouble(1)).isCloseTo(100, offset(0.000000000000001));
+            rs.close();
+        }
+        {
+            ResultSet rs = stat.executeQuery("select power(10,2)");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getDouble(1)).isCloseTo(100, offset(0.000000000000001));
+            rs.close();
+        }
     }
 
     @Test
@@ -279,5 +325,22 @@ public class MathFunctionsTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getDouble(1)).isCloseTo(0.46211715726001, offset(0.000000000000001));
         rs.close();
+    }
+
+    @Test
+    public void trunc() throws Exception {
+        Utils.assumeMathFunctions(conn);
+        {
+            ResultSet rs = stat.executeQuery("select trunc(1.5)");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getDouble(1)).isCloseTo(1, offset(0.000000000000001));
+            rs.close();
+        }
+        {
+            ResultSet rs = stat.executeQuery("select trunc(-1.5)");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getDouble(1)).isCloseTo(-1, offset(0.000000000000001));
+            rs.close();
+        }
     }
 }

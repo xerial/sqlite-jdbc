@@ -28,6 +28,12 @@ public class Utils {
                 .contains("JDBC_EXTENSIONS");
     }
 
+    public static void assumeMathFunctions(Connection conn) throws SQLException {
+        assumeThat(getCompileOptions(conn))
+                .as("SQLite has to be compiled with SQLITE_ENABLE_MATH_FUNCTIONS")
+                .contains("ENABLE_MATH_FUNCTIONS");
+    }
+
     public static void assumeJdbcExtensionsOrMathFunctions(Connection conn) throws SQLException {
         List<String> compileOptions = getCompileOptions(conn);
         boolean expected =
@@ -36,6 +42,18 @@ public class Utils {
         assumeThat(expected)
                 .as(
                         "SQLite has to be compiled with JDBC Extensions or SQLITE_ENABLE_MATH_FUNCTIONS")
+                .isTrue();
+    }
+
+    public static void assumeJdbcExtensionsWithoutMathFunctions(Connection conn)
+            throws SQLException {
+        List<String> compileOptions = getCompileOptions(conn);
+        boolean expected =
+                compileOptions.contains("JDBC_EXTENSIONS")
+                        && !compileOptions.contains("ENABLE_MATH_FUNCTIONS");
+        assumeThat(expected)
+                .as(
+                        "SQLite has to be compiled with JDBC Extensions and without SQLITE_ENABLE_MATH_FUNCTIONS")
                 .isTrue();
     }
 }
