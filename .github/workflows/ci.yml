@@ -143,7 +143,7 @@ jobs:
   release:
     name: Deploy
     needs: [ lint, test, test_graalvm, test_multiarch ]
-    if: github.ref == 'refs/heads/master' # only perform on latest master
+    if: github.repository_owner == 'xerial' && github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
