@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -20,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -1336,12 +1336,15 @@ public class DBMetaDataTest {
 
     @Test
     public void version() throws Exception {
+        assumeTrue(
+                Utils.getCompileOptions(conn).contains("JDBC_EXTENSIONS"),
+                "Can't check the version if not compiled by us");
         Properties version;
         try (InputStream resourceAsStream =
                 DBMetaDataTest.class.getResourceAsStream(
                         "/META-INF/maven/org.xerial/sqlite-jdbc/VERSION")) {
             version = new Properties();
-            Assumptions.assumeTrue(resourceAsStream != null);
+            assumeTrue(resourceAsStream != null);
             version.load(resourceAsStream);
         }
         String versionString = version.getProperty("version");
