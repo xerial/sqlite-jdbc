@@ -355,6 +355,7 @@ static void name(sqlite3_context *context, int argc, sqlite3_value **argv){\
 }\
 
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 /*
 ** Example of GEN_MATH_WRAP_DOUBLE_1 usage
 ** this creates function sqrtFunc to wrap the math.h standard function sqrt(x)=x^0.5
@@ -365,6 +366,7 @@ GEN_MATH_WRAP_DOUBLE_1(sqrtFunc, sqrt)
 GEN_MATH_WRAP_DOUBLE_1(acosFunc, acos)
 GEN_MATH_WRAP_DOUBLE_1(asinFunc, asin)
 GEN_MATH_WRAP_DOUBLE_1(atanFunc, atan)
+#endif
 
 /*
 ** Many of systems don't have inverse hyperbolic trig functions so this will emulate
@@ -378,7 +380,9 @@ static double acosh(double x){
 }
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(acoshFunc, acosh)
+#endif
 
 #ifndef HAVE_ASINH
 static double asinh(double x){
@@ -386,7 +390,9 @@ static double asinh(double x){
 }
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(asinhFunc, asinh)
+#endif
 
 #ifndef HAVE_ATANH
 static double atanh(double x){
@@ -394,7 +400,9 @@ static double atanh(double x){
 }
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(atanhFunc, atanh)
+#endif
 
 /*
 ** math.h doesn't require cot (cotangent) so it's defined here
@@ -403,9 +411,12 @@ static double cot(double x){
   return 1.0/tan(x);
 }
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(sinFunc, sin)
 GEN_MATH_WRAP_DOUBLE_1(cosFunc, cos)
 GEN_MATH_WRAP_DOUBLE_1(tanFunc, tan)
+#endif
+
 GEN_MATH_WRAP_DOUBLE_1(cotFunc, cot)
 
 static double coth(double x){
@@ -422,7 +433,9 @@ static double sinh(double x){
 }
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(sinhFunc, sinh)
+#endif
 
 #ifndef HAVE_COSH
 static double cosh(double x){
@@ -430,7 +443,9 @@ static double cosh(double x){
 }
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(coshFunc, cosh)
+#endif
 
 #ifndef HAVE_TANH
 static double tanh(double x){
@@ -438,7 +453,9 @@ static double tanh(double x){
 }
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(tanhFunc, tanh)
+#endif
 
 GEN_MATH_WRAP_DOUBLE_1(cothFunc, coth)
 
@@ -456,9 +473,11 @@ static double log10(double x){
 }
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 GEN_MATH_WRAP_DOUBLE_1(logFunc, log)
 GEN_MATH_WRAP_DOUBLE_1(log10Func, log10)
 GEN_MATH_WRAP_DOUBLE_1(expFunc, exp)
+#endif
 
 /*
 ** Fallback for systems where math.h doesn't define M_PI
@@ -472,6 +491,7 @@ GEN_MATH_WRAP_DOUBLE_1(expFunc, exp)
 #define M_PI 3.14159265358979323846
 #endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 /* Convert Degrees into Radians */
 static double deg2rad(double x){
   return x*M_PI/180.0;
@@ -484,11 +504,14 @@ static double rad2deg(double x){
 
 GEN_MATH_WRAP_DOUBLE_1(rad2degFunc, rad2deg)
 GEN_MATH_WRAP_DOUBLE_1(deg2radFunc, deg2rad)
+#endif
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 /* constant function that returns the value of PI=3.1415... */
 static void piFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
   sqlite3_result_double(context, M_PI);
 }
+#endif
 
 /*
 ** Implements the sqrt function, it has the peculiarity of returning an integer when the
@@ -517,6 +540,7 @@ static void squareFunc(sqlite3_context *context, int argc, sqlite3_value **argv)
   }
 }
 
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
 /*
 ** Wraps the pow math.h function
 ** When both the base and the exponent are integers the result should be integer
@@ -546,6 +570,7 @@ static void powerFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
     }  
   }
 }
+#endif
 
 /*
 ** atan2 wrapper
@@ -1703,45 +1728,51 @@ int RegisterExtensionFunctions(sqlite3 *db){
      u8 needCollSeq;
      void (*xFunc)(sqlite3_context*,int,sqlite3_value **);
   } aFuncs[] = {
+#ifndef SQLITE_ENABLE_MATH_FUNCTIONS
     /* math.h */
     { "acos",               1, 0, SQLITE_UTF8,    0, acosFunc  },
     { "asin",               1, 0, SQLITE_UTF8,    0, asinFunc  },
     { "atan",               1, 0, SQLITE_UTF8,    0, atanFunc  },
-    { "atn2",               2, 0, SQLITE_UTF8,    0, atn2Func  },
     /* XXX alias */
     { "atan2",              2, 0, SQLITE_UTF8,    0, atn2Func  },
     { "acosh",              1, 0, SQLITE_UTF8,    0, acoshFunc  },
     { "asinh",              1, 0, SQLITE_UTF8,    0, asinhFunc  },
     { "atanh",              1, 0, SQLITE_UTF8,    0, atanhFunc  },
 
-    { "difference",         2, 0, SQLITE_UTF8,    0, differenceFunc},
     { "degrees",            1, 0, SQLITE_UTF8,    0, rad2degFunc  },
     { "radians",            1, 0, SQLITE_UTF8,    0, deg2radFunc  },
 
     { "cos",                1, 0, SQLITE_UTF8,    0, cosFunc  },
     { "sin",                1, 0, SQLITE_UTF8,    0, sinFunc },
     { "tan",                1, 0, SQLITE_UTF8,    0, tanFunc },
-    { "cot",                1, 0, SQLITE_UTF8,    0, cotFunc },
+
     { "cosh",               1, 0, SQLITE_UTF8,    0, coshFunc  },
     { "sinh",               1, 0, SQLITE_UTF8,    0, sinhFunc },
     { "tanh",               1, 0, SQLITE_UTF8,    0, tanhFunc },
-    { "coth",               1, 0, SQLITE_UTF8,    0, cothFunc },
 
     { "exp",                1, 0, SQLITE_UTF8,    0, expFunc  },
     { "log",                1, 0, SQLITE_UTF8,    0, logFunc  },
     { "log10",              1, 0, SQLITE_UTF8,    0, log10Func  },
     { "power",              2, 0, SQLITE_UTF8,    0, powerFunc  },
-#if SQLITE_VERSION_NUMBER < 3035000
-    { "sign",               1, 0, SQLITE_UTF8,    0, signFunc },
-#endif
+
     { "sqrt",               1, 0, SQLITE_UTF8,    0, sqrtFunc },
-    { "square",             1, 0, SQLITE_UTF8,    0, squareFunc },
 
     { "ceil",               1, 0, SQLITE_UTF8,    0, ceilFunc },
     { "floor",              1, 0, SQLITE_UTF8,    0, floorFunc },
 
     { "pi",                 0, 0, SQLITE_UTF8,    1, piFunc },
+#endif
+    { "atn2",               2, 0, SQLITE_UTF8,    0, atn2Func  },
 
+    { "difference",         2, 0, SQLITE_UTF8,    0, differenceFunc},
+
+    { "cot",                1, 0, SQLITE_UTF8,    0, cotFunc },
+    { "coth",               1, 0, SQLITE_UTF8,    0, cothFunc },
+
+#if SQLITE_VERSION_NUMBER < 3035000
+    { "sign",               1, 0, SQLITE_UTF8,    0, signFunc },
+#endif
+    { "square",             1, 0, SQLITE_UTF8,    0, squareFunc },
 
     /* string */
     { "replicate",          2, 0, SQLITE_UTF8,    0, replicateFunc },
