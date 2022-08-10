@@ -917,9 +917,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         StringBuilder sql = new StringBuilder(700);
         sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, tblname as TABLE_NAME, ")
                 .append(
-                        "cn as COLUMN_NAME, ct as DATA_TYPE, tn as TYPE_NAME, 2000000000 as COLUMN_SIZE, ")
+                        "cn as COLUMN_NAME, ct as DATA_TYPE, tn as TYPE_NAME, colSize as COLUMN_SIZE, ")
                 .append(
-                        "2000000000 as BUFFER_LENGTH, 10   as DECIMAL_DIGITS, 10   as NUM_PREC_RADIX, ")
+                        "2000000000 as BUFFER_LENGTH, colDecimalDigits as DECIMAL_DIGITS, 10   as NUM_PREC_RADIX, ")
                 .append("colnullable as NULLABLE, null as REMARKS, colDefault as COLUMN_DEF, ")
                 .append(
                         "0    as SQL_DATA_TYPE, 0    as SQL_DATETIME_SUB, 2000000000 as CHAR_OCTET_LENGTH, ")
@@ -996,6 +996,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         }
                         colFound = true;
 
+                        // default values
+                        int iColumnSize = 2000000000;
+                        int iDecimalDigits = 10;
+
                         /*
                          * improved column types
                          * ref http://www.sqlite.org/datatype3.html - 2.1 Determination Of Column Affinity
@@ -1011,13 +1015,61 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         // rule #1 + boolean
                         if (TYPE_INTEGER.matcher(colType).find()) {
                             colJavaType = Types.INTEGER;
+                            // there are no decimal digits
+                            iDecimalDigits = 0;
                         } else if (TYPE_VARCHAR.matcher(colType).find()) {
                             colJavaType = Types.VARCHAR;
+                            // there are no decimal digits
+                            iDecimalDigits = 0;
                         } else if (TYPE_FLOAT.matcher(colType).find()) {
                             colJavaType = Types.FLOAT;
                         } else {
                             // catch-all
                             colJavaType = Types.VARCHAR;
+                        }
+                        // try to find an (optional) length/dimension of the column
+                        int iStartOfDimension = colType.indexOf('(');
+                        if (iStartOfDimension > 0) {
+                            // find end of dimension
+                            int iEndOfDimension = colType.indexOf(')', iStartOfDimension);
+                            if (iEndOfDimension > 0) {
+                                String sInteger, sDecimal;
+                                // check for two values (integer part, fraction) divided by comma
+                                int iDimensionSeparator = colType.indexOf(',', iStartOfDimension);
+                                if (iDimensionSeparator > 0) {
+                                    sInteger =
+                                            colType.substring(
+                                                    iStartOfDimension + 1, iDimensionSeparator);
+                                    sDecimal =
+                                            colType.substring(
+                                                    iDimensionSeparator + 1, iEndOfDimension);
+                                }
+                                // only a single dimension
+                                else {
+                                    sInteger =
+                                            colType.substring(
+                                                    iStartOfDimension + 1, iEndOfDimension);
+                                    sDecimal = null;
+                                }
+                                // try to parse the values
+                                try {
+                                    int iInteger = Integer.parseUnsignedInt(sInteger);
+                                    // parse decimals?
+                                    if (sDecimal != null) {
+                                        iDecimalDigits = Integer.parseUnsignedInt(sDecimal);
+                                        // columns size equals sum of integer and decimal part of
+                                        // dimension
+                                        iColumnSize = iInteger + iDecimalDigits;
+                                    } else {
+                                        // no decimals
+                                        iDecimalDigits = 0;
+                                        // columns size equals dimension
+                                        iColumnSize = iInteger;
+                                    }
+                                } catch (NumberFormatException ex) {
+                                    // just ignore invalid dimension formats here
+                                }
+                            }
                         }
 
                         sql.append("select ")
@@ -1028,6 +1080,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                 .append("'")
                                 .append(colJavaType)
                                 .append("' as ct, ")
+                                .append(iColumnSize)
+                                .append(" as colSize, ")
+                                .append(iDecimalDigits)
+                                .append(" as colDecimalDigits, ")
                                 .append("'")
                                 .append(tableName)
                                 .append("' as tblname, ")
@@ -1077,7 +1133,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
         } else {
             sql.append(
-                    "select null as ordpos, null as colnullable, null as ct, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement) limit 0;");
+                    "select null as ordpos, null as colnullable, null as ct, null as colsize, null as colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement) limit 0;");
         }
 
         Statement stat = conn.createStatement();
