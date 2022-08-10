@@ -11,8 +11,6 @@ on:
       - '**.dll'
       - '.github/workflows/*.yml'
   push:
-    branches:
-      - master
     paths:
       - '**.java'
       - '**.xml'
