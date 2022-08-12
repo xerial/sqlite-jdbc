@@ -1156,7 +1156,7 @@ public class DBMetaDataTest {
     private void assertPrimaryKey(
             DatabaseMetaData meta, String tableName, String pkName, String... pkColumns)
             throws Exception {
-        final Map<String, Integer> colSeq = new HashMap<String, Integer>();
+        final Map<String, Integer> colSeq = new HashMap<>();
         for (int i = 0; i < pkColumns.length; i++) {
             colSeq.put(pkColumns[i], i + 1);
         }
@@ -1261,7 +1261,7 @@ public class DBMetaDataTest {
 
         ResultSet cr = meta.getCrossReference(null, null, "person", null, null, "address");
         // assertTrue(cr.next());
-
+        // TODO: unfinished business
     }
 
     /* TODO
