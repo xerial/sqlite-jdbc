@@ -12,8 +12,8 @@ package org.sqlite;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Clob;
 import java.sql.Connection;
@@ -36,14 +36,11 @@ public class QueryTest {
 
     @Test
     public void nullQuery() throws Exception {
-        Connection conn = getConnection();
-        Statement stmt = conn.createStatement();
-        try {
-            stmt.execute(null);
-        } catch (NullPointerException e) {
+        try (Connection conn = getConnection()) {
+            try (Statement stmt = conn.createStatement()) {
+                assertThrows(NullPointerException.class, () -> stmt.execute(null));
+            }
         }
-        stmt.close();
-        conn.close();
     }
 
     @Test
@@ -113,12 +110,8 @@ public class QueryTest {
         properties.setProperty(SQLiteConfig.Pragma.DATE_CLASS.pragmaName, "text");
         Connection conn = DriverManager.getConnection("jdbc:sqlite:", properties);
 
-        Statement statement = null;
-        try {
-            statement = conn.createStatement();
+        try (Statement statement = conn.createStatement()) {
             statement.execute("create table sample (date_time datetime)");
-        } finally {
-            if (statement != null) statement.close();
         }
 
         TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
@@ -134,20 +127,15 @@ public class QueryTest {
         java.sql.Date nowLikeCustomZoneIsUtc =
                 new java.sql.Date(utcFormat.parse(customFormat.format(now)).getTime());
 
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = conn.prepareStatement("insert into sample (date_time) values(?)");
+        try (PreparedStatement preparedStatement =
+                conn.prepareStatement("insert into sample (date_time) values(?)")) {
             preparedStatement.setDate(1, now, customCalendar);
             preparedStatement.executeUpdate();
             preparedStatement.setDate(1, nowLikeCustomZoneIsUtc, utcCalendar);
             preparedStatement.executeUpdate();
-        } finally {
-            if (preparedStatement != null) preparedStatement.close();
         }
 
-        ResultSet resultSet = null;
-        try {
-            resultSet = conn.createStatement().executeQuery("select * from sample");
+        try (ResultSet resultSet = conn.createStatement().executeQuery("select * from sample")) {
             assertTrue(resultSet.next());
             assertEquals(now, resultSet.getDate(1, customCalendar));
             assertEquals(nowLikeCustomZoneIsUtc, resultSet.getDate(1, utcCalendar));
@@ -155,8 +143,6 @@ public class QueryTest {
             assertTrue(resultSet.next());
             assertEquals(now, resultSet.getDate(1, customCalendar));
             assertEquals(nowLikeCustomZoneIsUtc, resultSet.getDate(1, utcCalendar));
-        } finally {
-            if (resultSet != null) resultSet.close();
         }
     }
 
@@ -227,12 +213,9 @@ public class QueryTest {
     }
 
     @Test
-    public void concatTest() {
-
-        Connection conn = null;
-        try {
+    public void concatTest() throws SQLException {
+        try (Connection conn = getConnection()) {
             // create a database connection
-            conn = getConnection();
             Statement statement = conn.createStatement();
             statement.setQueryTimeout(30); // set timeout to 30 sec.
 
@@ -275,32 +258,18 @@ public class QueryTest {
                     conn.prepareStatement(
                             "select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=? and mxp.pid=person.id and mxp.type='T'");
             ps.clearParameters();
-            ps.setInt(1, new Integer(2));
+            ps.setInt(1, 2);
             rs = ps.executeQuery();
             while (rs.next()) {
                 // read the result set
                 assertEquals("Y,abc", rs.getString(1));
             }
             ps.clearParameters();
-            ps.setInt(1, new Integer(2));
+            ps.setInt(1, 2);
             rs = ps.executeQuery();
             while (rs.next()) {
                 // read the result set
                 assertEquals("Y,abc", rs.getString(1));
-            }
-
-        } catch (SQLException e) {
-            // if the error message is "out of memory",
-            // it probably means no database file is found
-            System.err.println(e.getMessage());
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                // connection close failed.
-                System.err.println(e);
             }
         }
     }
@@ -308,39 +277,22 @@ public class QueryTest {
     @Test
     public void clobTest() throws SQLException {
         String content = "test_clob";
-        Connection conn = getConnection();
-        try {
-            PreparedStatement stmt = conn.prepareStatement("select cast(? as clob)");
-            try {
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement("select cast(? as clob)")) {
                 stmt.setString(1, content);
-                ResultSet rs = stmt.executeQuery();
-                try {
+                try (ResultSet rs = stmt.executeQuery()) {
                     assertTrue(rs.next());
                     Clob clob = rs.getClob(1);
                     int length = (int) clob.length();
-                    try {
-                        clob.getSubString(0, length);
-                        fail("SQLException expected because position is less than 1");
-                    } catch (SQLException ignore) {
-                    }
-                    try {
-                        clob.getSubString(1, -1);
-                        fail("SQLException expected because length is less than 0");
-                    } catch (SQLException ignore) {
-                    }
+                    assertThrows(SQLException.class, () -> clob.getSubString(0, length));
+                    assertThrows(SQLException.class, () -> clob.getSubString(1, -1));
                     assertEquals("", clob.getSubString(1, 0));
                     assertEquals(content, clob.getSubString(1, length));
                     assertEquals(
                             content.substring(2, content.length() - 1),
                             clob.getSubString(3, content.length() - 3));
-                } finally {
-                    if (rs != null) rs.close();
                 }
-            } finally {
-                if (stmt != null) stmt.close();
             }
-        } finally {
-            if (conn != null) conn.close();
         }
     }
 
