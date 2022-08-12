@@ -262,6 +262,20 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getColumnsIncludingGenerated() throws SQLException {
+        stat.executeUpdate("create table gh_724 (i integer,j integer generated always as (i))");
+
+        ResultSet rs = meta.getColumns(null, null, "gh_724", "%");
+        assertTrue(rs.next());
+        assertEquals("i", rs.getString(4), "first column is named 'i'");
+        assertEquals("NO", rs.getString(24), "first column is not generated");
+        assertTrue(rs.next());
+        assertEquals("j", rs.getString(4), "second column is named 'j'");
+        assertEquals("YES", rs.getString(24), "second column is generated");
+        assertFalse(rs.next());
+    }
+
+    @Test
     public void numberOfgetImportedKeysCols() throws SQLException {
 
         stat.executeUpdate("create table parent (id1 integer, id2 integer, primary key(id1, id2))");

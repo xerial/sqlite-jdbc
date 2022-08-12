@@ -902,6 +902,11 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         //        NO --- if the column is not auto incremented
         //        empty string --- if it cannot be determined whether the column is auto incremented
         // parameter is unknown
+        //        IS_GENERATEDCOLUMN String => Indicates whether this column is auto incremented
+        //        YES --- if the column is generated
+        //        NO --- if the column is not generated
+        //        empty string --- if it cannot be determined whether the column is auto incremented
+        // parameter is unknown
         checkOpen();
 
         StringBuilder sql = new StringBuilder(700);
@@ -919,7 +924,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE, ")
                 .append(
                         "(case colautoincrement when 0 then 'NO' when 1 then 'YES' else '' end) as IS_AUTOINCREMENT, ")
-                .append("'' as IS_GENERATEDCOLUMN from (");
+                .append(
+                        "(case colgenerated when 0 then 'NO' when 1 then 'YES' else '' end) as IS_GENERATEDCOLUMN from (");
 
         boolean colFound = false;
 
@@ -963,7 +969,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 }
 
                 // For each table, get the column info and build into overall SQL
-                String pragmaStatement = "PRAGMA table_info('" + escape(tableName) + "')";
+                String pragmaStatement = "PRAGMA table_xinfo('" + escape(tableName) + "')";
                 try (Statement colstat = conn.createStatement();
                         ResultSet rscol = colstat.executeQuery(pragmaStatement)) {
 
@@ -973,6 +979,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         String colNotNull = rscol.getString(4);
                         String colDefault = rscol.getString(5);
                         boolean isPk = "1".equals(rscol.getString(6));
+                        String colHidden = rscol.getString(7);
 
                         int colNullable = 2;
                         if (colNotNull != null) {
@@ -1061,6 +1068,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                             }
                         }
 
+                        int colGenerated = "2".equals(colHidden) ? 1 : 0;
+
                         sql.append("select ")
                                 .append(i + 1)
                                 .append(" as ordpos, ")
@@ -1085,7 +1094,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                 .append(quote(colDefault == null ? null : escape(colDefault)))
                                 .append(" as colDefault,")
                                 .append(colAutoIncrement)
-                                .append(" as colautoincrement");
+                                .append(" as colautoincrement,")
+                                .append(colGenerated)
+                                .append(" as colgenerated");
 
                         if (colNamePattern != null) {
                             sql.append(" where upper(cn) like upper('")
@@ -1109,7 +1120,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
         } else {
             sql.append(
-                    "select null as ordpos, null as colnullable, null as ct, null as colsize, null as colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement) limit 0;");
+                    "select null as ordpos, null as colnullable, null as ct, null as colsize, null as colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement, null as colgenerated) limit 0;");
         }
 
         Statement stat = conn.createStatement();
