@@ -376,11 +376,13 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     }
 
     public Clob getClob(int col) throws SQLException {
-        return new SqliteClob(getString(col));
+        String clob = getString(col);
+        return clob == null ? null : new SqliteClob(clob);
     }
 
     public Clob getClob(String col) throws SQLException {
-        return new SqliteClob(getString(col));
+        String clob = getString(col);
+        return clob == null ? null : new SqliteClob(clob);
     }
 
     @SuppressWarnings("rawtypes")

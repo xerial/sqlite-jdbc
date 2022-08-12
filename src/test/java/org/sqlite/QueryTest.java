@@ -297,6 +297,20 @@ public class QueryTest {
     }
 
     @Test
+    public void nullClobTest() throws SQLException {
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement("select cast(? as clob)")) {
+                stmt.setString(1, null);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    assertTrue(rs.next());
+                    Clob clob = rs.getClob(1);
+                    assertNull(clob);
+                }
+            }
+        }
+    }
+
+    @Test
     public void github720_Incorrect_Update_Count_After_Deleting_Many_Rows() throws Exception {
         int size = 50000;
         Connection conn = getConnection();
