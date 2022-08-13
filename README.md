@@ -153,7 +153,6 @@ You may need to add shade plugin transformer to solve `No suitable driver found 
     <groupId>org.xerial</groupId>
     <artifactId>sqlite-jdbc</artifactId>
     <version>(version)</version>
-    <scope>provided</scope>
 </dependency>
 ```
 
