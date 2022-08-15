@@ -52,7 +52,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#next() */
     public boolean next() throws SQLException {
-        if (!open) {
+        if (!open || emptyResultSet) {
             return false; // finished ResultSet
         }
         lastCol = -1;
@@ -126,7 +126,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#isBeforeFirst() */
     public boolean isBeforeFirst() throws SQLException {
-        return open && row == 0;
+        return !emptyResultSet && open && row == 0;
     }
 
     /** @see java.sql.ResultSet#isFirst() */
