@@ -734,6 +734,26 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getImportedKeysWithIncorrectReference() throws SQLException {
+
+        stat.executeUpdate(
+                "create table child (id1 integer, id2 integer, foreign key(id1) references parent(id1))");
+
+        try (ResultSet importedKeys = meta.getImportedKeys(null, null, "child")) {
+            assertTrue(importedKeys.next());
+
+            assertEquals("parent", importedKeys.getString("PKTABLE_NAME"));
+            assertEquals("id1", importedKeys.getString("PKCOLUMN_NAME"));
+            assertNotNull(importedKeys.getString("PK_NAME"));
+            assertNotNull(importedKeys.getString("FK_NAME"));
+            assertEquals("child", importedKeys.getString("FKTABLE_NAME"));
+            assertEquals("id1", importedKeys.getString("FKCOLUMN_NAME"));
+
+            assertFalse(importedKeys.next());
+        }
+    }
+
+    @Test
     public void columnOrderOfgetTables() throws SQLException {
 
         stat.executeUpdate(

@@ -1430,10 +1430,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             String FKColName = rs.getString(4);
             String PKColName = rs.getString(5);
 
-            PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(PKTabName);
-            String pkName = pkFinder.getName();
-            if (PKColName == null) {
-                PKColName = pkFinder.getColumns()[0];
+            String pkName = null;
+            try {
+                PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(PKTabName);
+                pkName = pkFinder.getName();
+                if (PKColName == null) {
+                    PKColName = pkFinder.getColumns()[0];
+                }
+            } catch (SQLException ignored) {
             }
 
             String updateRule = rs.getString(6);
