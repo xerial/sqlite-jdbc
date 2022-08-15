@@ -53,6 +53,18 @@ On Windows it is recommended to use WSL2.
 
 You can check the `native-all` goal in `Makefile` for a list of available targets.
 
+## Build with an external amalgamation archive
+
+By default, sqlite-jdbc will download the [SQLite amalgamation](https://www.sqlite.org/amalgamation.html) in order to build the native libraries.
+
+You can use an existing installation of SQLite instead, by passing `SQLITE_OBJ=/path/to/libsqlite3.a` and `SQLITE_HEADER=/path/to/sqlite3.h`.
+
+Example:
+
+```shell
+make native SQLITE_OBJ=/usr/local/lib/libsqlite3.so SQLITE_HEADER=/usr/local/include/sqlite3.h
+```
+
 # Release process
 The project version can change by 2 means:
 1. By changing the bundled version of SQLite, in which case the project version changes to align with the SQLite version. This is a manual process for now.
