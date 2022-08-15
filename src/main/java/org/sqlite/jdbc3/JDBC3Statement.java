@@ -117,7 +117,7 @@ public abstract class JDBC3Statement extends CoreStatement {
 
         rs.cols = rs.colsMeta;
         rs.emptyResultSet = !resultsWaiting;
-        rs.open = resultsWaiting;
+        rs.open = true;
         resultsWaiting = false;
 
         return (ResultSet) rs;

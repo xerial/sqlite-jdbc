@@ -157,4 +157,11 @@ public class ResultSetTest {
         assertEquals(nonAsciiString, resultSet.getString(1));
         assertFalse(resultSet.next());
     }
+
+    @Test
+    public void testFindColumnOnEmptyResultSet() throws SQLException {
+        ResultSet resultSet = stat.executeQuery("select * from test where id = 0");
+        assertFalse(resultSet.next());
+        assertEquals(1, resultSet.findColumn("id"));
+    }
 }
