@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.Arrays;
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
 import org.sqlite.SQLiteConnection;
@@ -74,11 +75,16 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     /** @see java.sql.Statement#executeUpdate(java.lang.String) */
     public int executeUpdate(String sql) throws SQLException {
+        return (int) executeLargeUpdate(sql);
+    }
+
+    /** @see java.sql.Statement#executeLargeUpdate(java.lang.String) */
+    public long executeLargeUpdate(String sql) throws SQLException {
         internalClose();
         this.sql = sql;
         DB db = conn.getDatabase();
 
-        int changes = 0;
+        long changes = 0;
         SQLExtension ext = ExtendedCommand.parse(sql);
         if (ext != null) {
             // execute extended command
@@ -123,13 +129,23 @@ public abstract class JDBC3Statement extends CoreStatement {
         return (ResultSet) rs;
     }
 
-    /*
-     * This function has a complex behaviour best understood by carefully
-     * reading the JavaDoc for getMoreResults() and considering the test
-     * StatementTest.execute().
+    /**
+     * This function has a complex behaviour best understood by carefully reading the JavaDoc for
+     * getMoreResults() and considering the test StatementTest.execute().
+     *
      * @see java.sql.Statement#getUpdateCount()
      */
     public int getUpdateCount() throws SQLException {
+        return (int) getLargeUpdateCount();
+    }
+
+    /**
+     * This function has a complex behaviour best understood by carefully reading the JavaDoc for
+     * getMoreResults() and considering the test StatementTest.execute().
+     *
+     * @see java.sql.Statement#getLargeUpdateCount()
+     */
+    public long getLargeUpdateCount() throws SQLException {
         DB db = conn.getDatabase();
         if (!pointer.isClosed()
                 && !rs.isOpen()
@@ -157,11 +173,16 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     /** @see java.sql.Statement#executeBatch() */
     public int[] executeBatch() throws SQLException {
+        return Arrays.stream(executeLargeBatch()).mapToInt(l -> (int) l).toArray();
+    }
+
+    /** @see java.sql.Statement#executeLargeBatch() */
+    public long[] executeLargeBatch() throws SQLException {
         // TODO: optimize
         internalClose();
-        if (batch == null || batchPos == 0) return new int[] {};
+        if (batch == null || batchPos == 0) return new long[] {};
 
-        int[] changes = new int[batchPos];
+        long[] changes = new long[batchPos];
         DB db = conn.getDatabase();
         synchronized (db) {
             try {
@@ -172,7 +193,7 @@ public abstract class JDBC3Statement extends CoreStatement {
                         changes[i] = db.executeUpdate(this, null);
                     } catch (SQLException e) {
                         throw new BatchUpdateException(
-                                "batch entry " + i + ": " + e.getMessage(), changes);
+                                "batch entry " + i + ": " + e.getMessage(), null, 0, changes, e);
                     } finally {
                         if (pointer != null) pointer.close();
                     }
@@ -221,11 +242,22 @@ public abstract class JDBC3Statement extends CoreStatement {
     /** @see java.sql.Statement#getMaxRows() */
     public int getMaxRows() throws SQLException {
         // checkOpen();
+        return (int) rs.maxRows;
+    }
+
+    /** @see java.sql.Statement#getLargeMaxRows() */
+    public long getLargeMaxRows() throws SQLException {
+        // checkOpen();
         return rs.maxRows;
     }
 
     /** @see java.sql.Statement#setMaxRows(int) */
     public void setMaxRows(int max) throws SQLException {
+        setLargeMaxRows(max);
+    }
+
+    /** @see java.sql.Statement#setLargeMaxRows(long) */
+    public void setLargeMaxRows(long max) throws SQLException {
         // checkOpen();
         if (max < 0) throw new SQLException("max row count must be >= 0");
         rs.maxRows = max;

@@ -78,6 +78,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#executeUpdate() */
     public int executeUpdate() throws SQLException {
+        return (int) executeLargeUpdate();
+    }
+
+    /** @see java.sql.PreparedStatement#executeLargeUpdate() */
+    public long executeLargeUpdate() throws SQLException {
         checkOpen();
 
         if (columnCount != 0) {

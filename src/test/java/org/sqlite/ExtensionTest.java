@@ -77,8 +77,8 @@ public class ExtensionTest {
     @Test
     public void dbstat() throws Exception {
         assumeTrue(
-            Utils.getCompileOptions(conn).contains("ENABLE_DBSTAT_VTAB"),
-            "SQLite has to be compiled with ENABLE_DBSTAT_VTAB");
+                Utils.getCompileOptions(conn).contains("ENABLE_DBSTAT_VTAB"),
+                "SQLite has to be compiled with ENABLE_DBSTAT_VTAB");
 
         {
             boolean result = stat.execute("SELECT * FROM dbstat");
