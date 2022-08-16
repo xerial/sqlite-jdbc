@@ -30,7 +30,7 @@ public abstract class CoreResultSet implements Codes {
     /** If the result set is open. Doesn't mean it has results. */
     public boolean open = false;
     /** Maximum number of rows as set by a Statement */
-    public int maxRows;
+    public long maxRows;
     /** if null, the RS is closed() */
     public String[] cols = null;
     /** same as cols, but used by Meta interface */

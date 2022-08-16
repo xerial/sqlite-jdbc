@@ -721,7 +721,7 @@ JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_libversion_1utf8(
     return utf8BytesToDirectByteBuffer(env, version, strlen(version));
 }
 
-JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_changes(
+JNIEXPORT jlong JNICALL Java_org_sqlite_core_NativeDB_changes(
         JNIEnv *env, jobject this)
 {
     sqlite3 *db = gethandle(env, this);
@@ -731,10 +731,10 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_changes(
         return 0;
     }
 
-    return sqlite3_changes(db);
+    return sqlite3_changes64(db);
 }
 
-JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_total_1changes(
+JNIEXPORT jlong JNICALL Java_org_sqlite_core_NativeDB_total_1changes(
         JNIEnv *env, jobject this)
 {
     sqlite3 *db = gethandle(env, this);
@@ -744,7 +744,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_total_1changes(
         return 0;
     }
 
-    return sqlite3_total_changes(db);
+    return sqlite3_total_changes64(db);
 }
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_finalize(
