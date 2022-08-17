@@ -24,9 +24,9 @@
 // --------------------------------------
 package org.sqlite;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -60,26 +60,25 @@ public class SQLiteJDBCLoaderTest {
     }
 
     @Test
-    public void query() throws ClassNotFoundException {
-        try {
-            Statement statement = connection.createStatement();
-            statement.setQueryTimeout(30); // set timeout to 30 sec.
+    public void query() {
+        // if e.getMessage() is "out of memory", it probably means no
+        // database file is found
+        assertDoesNotThrow(
+                () -> {
+                    Statement statement = connection.createStatement();
+                    statement.setQueryTimeout(30); // set timeout to 30 sec.
 
-            statement.executeUpdate("create table person ( id integer, name string)");
-            statement.executeUpdate("insert into person values(1, 'leo')");
-            statement.executeUpdate("insert into person values(2, 'yui')");
+                    statement.executeUpdate("create table person ( id integer, name string)");
+                    statement.executeUpdate("insert into person values(1, 'leo')");
+                    statement.executeUpdate("insert into person values(2, 'yui')");
 
-            ResultSet rs = statement.executeQuery("select * from person order by id");
-            while (rs.next()) {
-                // read the result set
-                rs.getInt(1);
-                rs.getString(2);
-            }
-        } catch (SQLException e) {
-            // if e.getMessage() is "out of memory", it probably means no
-            // database file is found
-            fail(e.getMessage());
-        }
+                    ResultSet rs = statement.executeQuery("select * from person order by id");
+                    while (rs.next()) {
+                        // read the result set
+                        rs.getInt(1);
+                        rs.getString(2);
+                    }
+                });
     }
 
     @Test
@@ -116,23 +115,19 @@ public class SQLiteJDBCLoaderTest {
             final String connStr = "jdbc:sqlite:target/sample-" + i + ".db";
             final int sleepMillis = i;
             pool.execute(
-                    new Runnable() {
-                        public void run() {
-                            try {
-                                Thread.sleep(sleepMillis * 10);
-                            } catch (InterruptedException e) {
-                            }
-                            try {
-                                // Uncomment the synchronized block and everything works.
-                                // synchronized (TestSqlite.class) {
-                                Connection conn = DriverManager.getConnection(connStr);
-                                // }
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                                fail(e.getLocalizedMessage());
-                            }
-                            completedThreads.incrementAndGet();
+                    () -> {
+                        try {
+                            Thread.sleep(sleepMillis * 10);
+                        } catch (InterruptedException ignored) {
                         }
+                        assertDoesNotThrow(
+                                () -> {
+                                    // Uncomment the synchronized block and everything works.
+                                    // synchronized (TestSqlite.class) {
+                                    Connection conn = DriverManager.getConnection(connStr);
+                                    // }
+                                });
+                        completedThreads.incrementAndGet();
                     });
         }
         pool.shutdown();
