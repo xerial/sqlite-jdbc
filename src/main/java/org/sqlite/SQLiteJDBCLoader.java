@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.sqlite.util.OSInfo;
 import org.sqlite.util.StringUtils;
 
@@ -51,6 +52,7 @@ import org.sqlite.util.StringUtils;
  */
 public class SQLiteJDBCLoader {
 
+    private static final String LOCK_EXT = ".lck";
     private static boolean extracted = false;
 
     /**
@@ -76,29 +78,30 @@ public class SQLiteJDBCLoader {
      * Deleted old native libraries e.g. on Windows the DLL file is not removed on VM-Exit (bug #80)
      */
     static void cleanup() {
-        String tempFolder = getTempDir().getAbsolutePath();
-        File dir = new File(tempFolder);
+        String searchPattern = "sqlite-" + getVersion();
 
-        File[] nativeLibFiles =
-                dir.listFiles(
-                        new FilenameFilter() {
-                            private final String searchPattern = "sqlite-" + getVersion();
-
-                            public boolean accept(File dir, String name) {
-                                return name.startsWith(searchPattern) && !name.endsWith(".lck");
-                            }
-                        });
-        if (nativeLibFiles != null) {
-            for (File nativeLibFile : nativeLibFiles) {
-                File lckFile = new File(nativeLibFile.getAbsolutePath() + ".lck");
-                if (!lckFile.exists()) {
-                    try {
-                        nativeLibFile.delete();
-                    } catch (SecurityException e) {
-                        System.err.println("Failed to delete old native lib" + e.getMessage());
-                    }
-                }
-            }
+        try (Stream<Path> dirList = Files.list(getTempDir().toPath())) {
+            dirList.filter(
+                            path ->
+                                    !path.getFileName().toString().endsWith(LOCK_EXT)
+                                            && path.getFileName()
+                                                    .toString()
+                                                    .startsWith(searchPattern))
+                    .forEach(
+                            nativeLib -> {
+                                Path lckFile = Paths.get(nativeLib + LOCK_EXT);
+                                if (Files.notExists(lckFile)) {
+                                    try {
+                                        Files.delete(nativeLib);
+                                    } catch (Exception e) {
+                                        System.err.println(
+                                                "Failed to delete old native lib: "
+                                                        + e.getMessage());
+                                    }
+                                }
+                            });
+        } catch (IOException e) {
+            System.err.println("Failed to open directory: " + e.getMessage());
         }
     }
 
@@ -195,7 +198,7 @@ public class SQLiteJDBCLoader {
         String uuid = UUID.randomUUID().toString();
         String extractedLibFileName =
                 String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
-        String extractedLckFileName = extractedLibFileName + ".lck";
+        String extractedLckFileName = extractedLibFileName + LOCK_EXT;
 
         Path extractedLibFile = Paths.get(targetFolder, extractedLibFileName);
         Path extractedLckFile = Paths.get(targetFolder, extractedLckFileName);
