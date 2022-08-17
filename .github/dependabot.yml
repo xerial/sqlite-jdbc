@@ -1,0 +1,16 @@
+version: 2
+updates:
+
+  # Maintain dependencies for maven (pom.xml in root directory)
+  - package-ecosystem: "maven"
+    directory: "/"
+    # disable PRs, only security updates will create PRs
+    open-pull-requests-limit: 0
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
