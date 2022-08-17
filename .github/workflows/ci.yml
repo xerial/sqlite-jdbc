@@ -11,6 +11,8 @@ on:
       - '**.dll'
       - '.github/workflows/*.yml'
   push:
+    branches-ignore:
+      - 'dependabot/**'
     paths:
       - '**.java'
       - '**.xml'
