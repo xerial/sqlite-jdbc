@@ -2,6 +2,7 @@ package org.sqlite;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -70,6 +71,18 @@ public class ExtensionTest {
             assertTrue(rs.next());
             assertEquals("TGCA", rs.getString(1));
             rs.close();
+        }
+    }
+
+    @Test
+    public void dbstat() throws Exception {
+        assumeTrue(
+            Utils.getCompileOptions(conn).contains("ENABLE_DBSTAT_VTAB"),
+            "SQLite has to be compiled with ENABLE_DBSTAT_VTAB");
+
+        {
+            boolean result = stat.execute("SELECT * FROM dbstat");
+            assertTrue(result);
         }
     }
 }
