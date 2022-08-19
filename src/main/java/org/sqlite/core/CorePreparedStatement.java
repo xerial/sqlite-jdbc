@@ -62,16 +62,12 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
             ((JDBC3Connection)this.conn).checkTransactionMode();
         }
 
-        return this.withConnectionTimeout(new SQLCallable<int[]>() {
-
-            @Override
-            public int[] call() throws SQLException {
-                try {
-            return conn.getDatabase()
-                    .executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
-        } finally {
-                    clearBatch();
-                }
+        return this.withConnectionTimeout(() -> {
+            try {
+        return conn.getDatabase()
+                .executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
+    } finally {
+                clearBatch();
             }
         });
 

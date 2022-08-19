@@ -17,6 +17,7 @@ package org.sqlite.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc3.JDBC3Connection;
@@ -46,7 +47,9 @@ public abstract class CoreStatement implements Codes {
         return conn.getConnectionConfig();
     }
 
-    /** @throws SQLException If the database is not opened. */
+    /**
+     * @throws SQLException If the database is not opened.
+     */
     protected final void checkOpen() throws SQLException {
         if (pointer.isClosed()) throw new SQLException("statement is not executing");
     }
@@ -69,8 +72,8 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
-        if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).checkTransactionMode();
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).checkTransactionMode();
         }
 
         boolean success = false;
@@ -101,8 +104,8 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
-        if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).checkTransactionMode();
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).checkTransactionMode();
         }
 
         boolean rc = false;
@@ -137,9 +140,7 @@ public abstract class CoreStatement implements Codes {
     }
 
     protected void notifyFirstStatementExecuted() {
-        if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).setFirstStatementWasExecuted(true);
-        }
+        conn.setFirstStatementWasExecuted(true);
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;

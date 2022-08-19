@@ -40,21 +40,18 @@ public abstract class JDBC3Statement extends CoreStatement {
     public boolean execute(final String sql) throws SQLException {
         internalClose();
 
-        return this.withConnectionTimeout(new SQLCallable<Boolean>() {
-            @Override
-            public Boolean call() throws SQLException {
-        SQLExtension ext = ExtendedCommand.parse(sql);
-        if (ext != null) {
-            ext.execute(conn.getDatabase());
+        return this.withConnectionTimeout(() -> {
+    SQLExtension ext = ExtendedCommand.parse(sql);
+    if (ext != null) {
+        ext.execute(conn.getDatabase());
 
-                    return false;
-                }
-
-                JDBC3Statement.this.sql = sql;
-
-                conn.getDatabase().prepare(JDBC3Statement.this);
-                return exec();
+                return false;
             }
+
+            JDBC3Statement.this.sql = sql;
+
+            conn.getDatabase().prepare(JDBC3Statement.this);
+            return exec();
         });
     }
 
@@ -73,25 +70,22 @@ public abstract class JDBC3Statement extends CoreStatement {
         internalClose();
         this.sql = sql;
 
-        return this.withConnectionTimeout(new SQLCallable<ResultSet>() {
-            @Override
-            public ResultSet call() throws SQLException {
-                conn.getDatabase().prepare(JDBC3Statement.this);
+        return this.withConnectionTimeout(() -> {
+            conn.getDatabase().prepare(JDBC3Statement.this);
 
-                if (!exec()) {
-                    internalClose();
-                    throw new SQLException("query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
-                }
-
-                return getResultSet();
+            if (!exec()) {
+                internalClose();
+                throw new SQLException("query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
             }
+
+            return getResultSet();
         });
 
     }
 
     static class BackupObserver implements ProgressObserver {
         public void progress(int remaining, int pageCount) {
-            System.out.println(String.format("remaining:%d, page count:%d", remaining, pageCount));
+            System.out.printf("remaining:%d, page count:%d%n", remaining, pageCount);
         }
     }
 
@@ -100,30 +94,27 @@ public abstract class JDBC3Statement extends CoreStatement {
         internalClose();
         this.sql = sql;
 
-        return this.withConnectionTimeout(new SQLCallable<Integer>() {
-            @Override
-            public Integer call() throws SQLException {
-        DB db = conn.getDatabase();
-        int changes = 0;
-        SQLExtension ext = ExtendedCommand.parse(sql);
-        if (ext != null) {
-            // execute extended command 
-            ext.execute(db);
-        } else {
-                    try {
-                        changes = db.total_changes();
+        return this.withConnectionTimeout(() -> {
+    DB db = conn.getDatabase();
+    int changes = 0;
+    SQLExtension ext = ExtendedCommand.parse(sql);
+    if (ext != null) {
+        // execute extended command
+        ext.execute(db);
+    } else {
+                try {
+                    changes = db.total_changes();
 
-                        // directly invokes the exec API to support multiple SQL statements
-                        int statusCode = db._exec(sql);
-                if (statusCode != SQLITE_OK) throw DB.newSQLException(statusCode, "");
+                    // directly invokes the exec API to support multiple SQL statements
+                    int statusCode = db._exec(sql);
+            if (statusCode != SQLITE_OK) throw DB.newSQLException(statusCode, "");
 
-                        changes = db.total_changes() - changes;
-            } finally {
-                        internalClose();
-                    }
+                    changes = db.total_changes() - changes;
+        } finally {
+                    internalClose();
                 }
-                return changes;
             }
+            return changes;
         });
 
     }
@@ -399,8 +390,9 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     }
 
+    @FunctionalInterface
     protected interface SQLCallable<T> {
 
-        public T call() throws SQLException;
+        T call() throws SQLException;
     }
 }
