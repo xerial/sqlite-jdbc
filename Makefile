@@ -115,6 +115,7 @@ native-all: native win32 win64 win-armv7 win-arm64 mac64 linux32 linux64 freebsd
 
 native: $(NATIVE_DLL)
 
+
 $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	@mkdir -p $(@D)
 	cp $< $@
