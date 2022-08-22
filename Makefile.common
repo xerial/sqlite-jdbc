@@ -204,13 +204,12 @@ Mac-x86_64_LINKFLAGS := -dynamiclib
 Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
 Mac-x86_64_SQLITE_FLAGS  := 
 
-Mac-aarch64_CC        := gcc -arch arm64
-Mac-aarch64_STRIP     := strip -x
-MAC_SDK := /Developer/SDKs/MacOSX10.10.sdk
-ifeq ($(wildcard MAC_SDK),)
-	MAC_SDK := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk
-endif
-Mac-aarch64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.6 -fvisibility=hidden -Wno-implicit-function-declaration
+# Use a CROSS_PREFIX as the cross-triple clang is not available in crossbuild, see https://github.com/multiarch/crossbuild/blob/ad79cc84b6fb3fb1d09bc4a78719ef26f23bab85/Dockerfile#L134
+# When running on a M1 mac, CROSS_PREFIX will be empty, and 'make native' can still build
+Mac-aarch64_CC        := $(CROSS_PREFIX)clang
+Mac-aarch64_STRIP     := $(CROSS_PREFIX)strip -x
+MAC_SDK := /usr/osxcross/SDK/MacOSX11.3.sdk
+Mac-aarch64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.9 -fvisibility=hidden -Wno-implicit-function-declaration
 Mac-aarch64_LINKFLAGS  := -dynamiclib
 Mac-aarch64_LIBNAME    := libsqlitejdbc.jnilib
 Mac-aarch64_SQLITE_FLAGS := 
