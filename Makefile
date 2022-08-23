@@ -113,7 +113,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: native win32 win64 win-armv7 win-arm64 mac64 mac-arm64-signed linux32 linux64 freebsd32 freebsd64 freebsd-arm64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux-ppc64 alpine-linux64 linux-musl-arm64
+native-all: native win32 win64 win-armv7 win-arm64 mac64-signed mac-arm64-signed linux32 linux64 freebsd32 freebsd64 freebsd-arm64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux-ppc64 alpine-linux64 linux-musl-arm64
 
 native: $(NATIVE_DLL)
 
@@ -195,6 +195,9 @@ mac32: $(SQLITE_UNPACKED) jni-header
 
 sparcv9:
 	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
+
+mac64-signed: mac64
+	$(CODESIGN) src/main/resources/org/sqlite/native/Mac/x86_64/libsqlitejdbc.jnilib
 
 mac-arm64-signed: mac-arm64
 	$(CODESIGN) src/main/resources/org/sqlite/native/Mac/aarch64/libsqlitejdbc.jnilib
