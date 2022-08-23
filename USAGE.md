@@ -81,6 +81,13 @@ DB files will be extracted to a temporary folder specified in `System.getPropert
 ## Configure directory to extract native library
 sqlite-jdbc extracts a native library for your OS to the directory specified by `java.io.tmpdir` JVM property. To use another directory, set `org.sqlite.tmpdir` JVM property to your favorite path.
 
+## How to use a specific native library
+You can use a specific version of the native library by setting the following JVM properties:
+```
+-Dorg.sqlite.lib.path=/path/to/folder
+-Dorg.sqlite.lib.name=your-custom.dll
+```
+
 
 ## Configure Connections
 ```java
