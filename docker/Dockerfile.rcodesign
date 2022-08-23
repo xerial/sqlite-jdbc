@@ -1,0 +1,7 @@
+FROM rust:latest as build
+RUN cargo install --git https://github.com/indygreg/PyOxidizer --branch main --bin rcodesign apple-codesign
+
+FROM ubuntu:latest
+COPY --from=build /usr/local/cargo/bin/rcodesign /bin
+WORKDIR /workdir
+ENTRYPOINT ["/bin/rcodesign"]
