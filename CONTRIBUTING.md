@@ -38,9 +38,6 @@ Since August 2022 the commit messages follow the [Conventional Commits](https://
 ```shell
 # For the current platform
 $ make native
-
-# For Apple Silicon (M1). Need to install a jdk compiled for M1 https://github.com/microsoft/openjdk-aarch64
-$ JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-16+10/Contents/Home make native
 ```
 
 ## Build for all platforms
@@ -65,13 +62,21 @@ Example:
 make native SQLITE_OBJ=/usr/local/lib/libsqlite3.so SQLITE_HEADER=/usr/local/include/sqlite3.h
 ```
 
+## Build from CI
+
+The native libraries can all be built with Github Actions:
+- by running the **Build Native** workflow [manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
+- by commenting "/native" on a PR
+
+Once the build succeeds, a commit will be added to the branch or PR with the updated binaries.
+
 # Release process
 The project version can change by 2 means:
 1. By changing the bundled version of SQLite, in which case the project version changes to align with the SQLite version. This is a manual process for now.
 2. When triggering a release. This is done automatically through GitHub Actions.
 
 ## Trigger a release
-A release can be triggered from GitHub Actions by [manually running](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow) the CI workflow.
+A release can be triggered from GitHub Actions by [manually running](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow) the **CI** workflow.
 
 ## What happens when performing a release?
 
