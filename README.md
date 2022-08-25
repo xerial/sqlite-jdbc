@@ -105,7 +105,7 @@ the following operating systems:
 | Windows      | ✔   | ✔      |       |       | ✔     | ✔     |       |
 | macOS        |     | ✔      |       |       |       | ✔     |       |
 | Linux (libc) | ✔   | ✔      | ✔     | ✔     | ✔     | ✔     | ✔     |
-| Linux (musl) |     | ✔      |       |       |       | ✔     |       |
+| Linux (musl) | ✔   | ✔      |       |       |       | ✔     |       |
 | Android      | ✔   | ✔      | ✔     |       |       | ✔     |       |
 | FreeBSD      | ✔   | ✔      |       |       |       | ✔     |       |
 
