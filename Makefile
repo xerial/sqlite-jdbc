@@ -113,7 +113,7 @@ NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
-native-all: native win32 win64 win-armv7 win-arm64 mac64-signed mac-arm64-signed linux32 linux64 freebsd32 freebsd64 freebsd-arm64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux-ppc64 linux-musl64 linux-musl-arm64
+native-all: native win32 win64 win-armv7 win-arm64 mac64-signed mac-arm64-signed linux32 linux64 freebsd32 freebsd64 freebsd-arm64 linux-arm linux-armv6 linux-armv7 linux-arm64 linux-android-arm linux-android-arm64 linux-android-x86 linux-android-x64 linux-ppc64 linux-musl32 linux-musl64 linux-musl-arm64
 
 native: $(NATIVE_DLL)
 
@@ -149,6 +149,9 @@ freebsd64: $(SQLITE_UNPACKED) jni-header
 
 freebsd-arm64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir gotson/freebsd-cross-build:aarch64-11.4 sh -c 'make clean-native native OS_NAME=FreeBSD OS_ARCH=aarch64 CROSS_PREFIX=aarch64-unknown-freebsd11-'
+
+linux-musl32: $(SQLITE_UNPACKED) jni-header
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work gotson/alpine-linux-x86 bash -c 'make clean-native native OS_NAME=Linux-Musl OS_ARCH=x86'
 
 linux-musl64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux-Musl OS_ARCH=x86_64'
@@ -222,6 +225,9 @@ docker-linux64:
 
 docker-linux32:
 	docker build -f docker/Dockerfile.linux_x86 -t xerial/centos5-linux-x86 .
+
+docker-linux-musl32:
+	docker build -f docker/Dockerfile.alpine-linux_x86 -t gotson/alpine-linux-x86 .
 
 docker-linux-musl64:
 	docker build -f docker/Dockerfile.alpine-linux_x86_64 -t xerial/alpine-linux-x86_64 .
