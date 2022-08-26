@@ -78,8 +78,8 @@ public class RSMetaDataTest {
         stat.executeUpdate(
                 "insert into tbl values (1, 2, 3, 4, 5, 6, 7, 8, 9,"
                         + "'c', 'varchar', 'varying', 'n', 'n','nvarchar', 'text', 'clob',"
-                        + "null, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 0, 12345, 123456, 0, 'char', 'some text'," +
-                        "'2022-08-26 10:20:00.123')");
+                        + "null, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 0, 12345, 123456, 0, 'char', 'some text',"
+                        + "'2022-08-26 10:20:00.123')");
         meta =
                 stat.executeQuery(
                                 "select col1, col2, col3, col4, col5, col6, col7, col8, col9, "
@@ -132,6 +132,20 @@ public class RSMetaDataTest {
 
         assertEquals(10, meta.getPrecision(24));
         assertEquals(5, meta.getScale(24));
+    }
+
+    @Test
+    public void testGetColumnClassName() throws SQLException {
+        stat.executeUpdate(
+                "create table gh_541 (id int, DESCRIPTION varchar(40), price DOUBLE, data BLOB, bool BOOLEAN)");
+        stat.executeUpdate("insert into gh_541 values (1, 'description', 28.4, null, True);");
+        ResultSetMetaData meta = stat.executeQuery("select * from gh_541").getMetaData();
+
+        assertEquals("java.lang.Integer", meta.getColumnClassName(1));
+        assertEquals("java.lang.String", meta.getColumnClassName(2));
+        assertEquals("java.lang.Double", meta.getColumnClassName(3));
+        assertEquals("java.lang.Object", meta.getColumnClassName(4));
+        assertEquals("java.lang.Integer", meta.getColumnClassName(5));
     }
 
     @Test

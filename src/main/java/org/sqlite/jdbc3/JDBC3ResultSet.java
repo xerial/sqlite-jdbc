@@ -600,8 +600,23 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSetMetaData#getColumnClassName(int) */
     public String getColumnClassName(int col) throws SQLException {
-        checkCol(col);
-        return "java.lang.Object";
+        switch (safeGetColumnType(markCol(col))) {
+            case SQLITE_INTEGER:
+                long val = getLong(col);
+                if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
+                    return "java.lang.Long";
+                } else {
+                    return "java.lang.Integer";
+                }
+            case SQLITE_FLOAT:
+                return "java.lang.Double";
+            case SQLITE_BLOB:
+            case SQLITE_NULL:
+                return "java.lang.Object";
+            case SQLITE_TEXT:
+            default:
+                return "java.lang.String";
+        }
     }
 
     /** @see java.sql.ResultSetMetaData#getColumnCount() */
