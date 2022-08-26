@@ -26,7 +26,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
       - name: Get PR branch
         uses: xt0rted/pull-request-comment-branch@v1
-        if: steps.check.outputs.triggered
+        if: steps.check.outputs.triggered == 'true'
         id: comment-branch
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
