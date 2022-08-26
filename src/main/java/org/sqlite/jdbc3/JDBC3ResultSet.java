@@ -703,6 +703,10 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                 return Types.DATE;
             }
 
+            if ("TIMESTAMP".equals(typeName)) {
+                return Types.TIMESTAMP;
+            }
+
             if (valueType == SQLITE_TEXT
                     || "VARCHAR".equals(typeName)
                     || "VARYING CHARACTER".equals(typeName)
