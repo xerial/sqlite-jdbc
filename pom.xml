@@ -313,6 +313,7 @@
                                 <buildArg>--no-fallback</buildArg>
                                 <buildArg>--verbose</buildArg>
                                 <buildArg>--enable-url-protocols=jar</buildArg>
+                                <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
