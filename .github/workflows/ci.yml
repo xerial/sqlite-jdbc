@@ -142,9 +142,35 @@ jobs:
             mvn --version
             cd /work && mvn --batch-mode --no-transfer-progress test
 
+  # This will test the build process using an external amalgamation, as well as the
+  # Java tests with that native library, as some functions will not be available (extensions).
+  # Here we use the sqlite3 package installed by homebrew on Mac, which comes
+  # with the header file and library.
+  test_external_amalgamation:
+    name: test external amalgamation
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 18
+          java-package: jdk
+          cache: 'maven'
+      - run: brew install sqlite3
+      - name: Find SQLite directory
+        run: |
+          BREW_SQLITE_PREFIX=`brew --prefix sqlite3`
+          echo "SQLITE_DIR=$(dirname ${BREW_SQLITE_PREFIX})/$(readlink ${BREW_SQLITE_PREFIX})" | tee -a $GITHUB_ENV
+      - name: Make native lib
+        run: |
+          make native SQLITE_OBJ=${{ env.SQLITE_DIR }}/lib/libsqlite3.dylib SQLITE_HEADER=${{ env.SQLITE_DIR }}/include/sqlite3.h
+      - name: Test
+        run: mvn --batch-mode --no-transfer-progress test
+
   release:
     name: Deploy
-    needs: [ lint, test, test_graalvm, test_multiarch ]
+    needs: [ lint, test, test_graalvm, test_multiarch, test_external_amalgamation ]
     if: github.repository_owner == 'xerial' && github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
