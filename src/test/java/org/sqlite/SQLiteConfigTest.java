@@ -1,15 +1,14 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.sql.SQLException;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
 public class SQLiteConfigTest {
 
     @Test
-    public void toProperites() throws SQLException {
+    public void toProperties() {
         SQLiteConfig config = new SQLiteConfig();
 
         config.setReadOnly(true);
@@ -19,14 +18,11 @@ public class SQLiteConfigTest {
 
         Properties properties = config.toProperties();
 
-        assertEquals(
-                "yyyy/mm/dd",
-                properties.getProperty(SQLiteConfig.Pragma.DATE_STRING_FORMAT.getPragmaName()));
-        assertEquals(
-                SQLiteConfig.DatePrecision.SECONDS.name(),
-                properties.getProperty(SQLiteConfig.Pragma.DATE_PRECISION.getPragmaName()));
-        assertEquals(
-                SQLiteConfig.DateClass.REAL.name(),
-                properties.getProperty(SQLiteConfig.Pragma.DATE_CLASS.getPragmaName()));
+        assertThat(properties.getProperty(SQLiteConfig.Pragma.DATE_STRING_FORMAT.getPragmaName()))
+                .isEqualTo("yyyy/mm/dd");
+        assertThat(properties.getProperty(SQLiteConfig.Pragma.DATE_PRECISION.getPragmaName()))
+                .isEqualTo(SQLiteConfig.DatePrecision.SECONDS.name());
+        assertThat(properties.getProperty(SQLiteConfig.Pragma.DATE_CLASS.getPragmaName()))
+                .isEqualTo(SQLiteConfig.DateClass.REAL.name());
     }
 }

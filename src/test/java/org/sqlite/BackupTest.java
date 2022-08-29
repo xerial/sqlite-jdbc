@@ -9,7 +9,7 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +48,7 @@ public class BackupTest {
             count++;
         }
 
-        assertEquals(2, count);
+        assertThat(count).isEqualTo(2);
         rs.close();
     }
 

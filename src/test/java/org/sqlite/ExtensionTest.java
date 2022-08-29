@@ -1,7 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.sql.Connection;
@@ -43,8 +42,8 @@ public class ExtensionTest {
         ResultSet rs =
                 stat.executeQuery(
                         "select rowid, name, ingredients from recipe where ingredients match 'onions'");
-        assertTrue(rs.next());
-        assertEquals("pumpkin stew", rs.getString(2));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(2)).isEqualTo("pumpkin stew");
     }
 
     @Test
@@ -58,8 +57,8 @@ public class ExtensionTest {
         ResultSet rs =
                 stat.executeQuery(
                         "select rowid, name, ingredients from recipe where recipe match 'onions'");
-        assertTrue(rs.next());
-        assertEquals("pumpkin stew", rs.getString(2));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(2)).isEqualTo("pumpkin stew");
     }
 
     @Test
@@ -68,8 +67,8 @@ public class ExtensionTest {
 
         {
             ResultSet rs = stat.executeQuery("select reverse(\"ACGT\")");
-            assertTrue(rs.next());
-            assertEquals("TGCA", rs.getString(1));
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString(1)).isEqualTo("TGCA");
             rs.close();
         }
     }
@@ -82,7 +81,7 @@ public class ExtensionTest {
 
         {
             boolean result = stat.execute("SELECT * FROM dbstat");
-            assertTrue(result);
+            assertThat(result).isTrue();
         }
     }
 }

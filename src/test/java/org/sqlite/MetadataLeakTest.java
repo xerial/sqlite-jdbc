@@ -1,7 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -26,9 +25,9 @@ public class MetadataLeakTest {
             Statement statement;
             try (ResultSet tables = meta.getTables(null, null, null, null); ) {
                 statement = tables.getStatement();
-                assertFalse(statement.isClosed());
+                assertThat(statement.isClosed()).isFalse();
             }
-            assertTrue(statement.isClosed());
+            assertThat(statement.isClosed()).isTrue();
         }
     }
 }

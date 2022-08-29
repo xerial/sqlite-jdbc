@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -55,17 +53,16 @@ public class CollationTest {
         stat.executeUpdate("insert into t values ('aba');");
         stat.executeUpdate("insert into t values ('aca');");
         ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate REVERSE;");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "aca");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "aba");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "aaa");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("aca");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("aba");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("aaa");
 
         String[] expected = {"aba", "aca", "aaa"};
-        assertArrayEquals(
-                Arrays.stream(expected).distinct().sorted().toArray(),
-                received.stream().distinct().sorted().toArray());
+        assertThat(received.stream().distinct().sorted().toArray())
+                .isEqualTo(Arrays.stream(expected).distinct().sorted().toArray());
     }
 
     @Test
@@ -92,17 +89,16 @@ public class CollationTest {
         stat.executeUpdate("insert into t values ('aea');");
         stat.executeUpdate("insert into t values ('aéb');");
         ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate UNICODE;");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "aea");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "aéb");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "aec");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("aea");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("aéb");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("aec");
 
         String[] expected = {"aea", "aéb", "aec"};
-        assertArrayEquals(
-                Arrays.stream(expected).distinct().sorted().toArray(),
-                received.stream().distinct().sorted().toArray());
+        assertThat(received.stream().distinct().sorted().toArray())
+                .isEqualTo(Arrays.stream(expected).distinct().sorted().toArray());
     }
 
     @Test
@@ -132,28 +128,28 @@ public class CollationTest {
         stat.executeUpdate("insert into t values ('c');");
 
         ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate REVERSE;");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "c");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "b");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "a");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("c");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("b");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("a");
 
         ResultSet rs2 = stat.executeQuery("select c1 from t order by c1 collate NORMAL;");
-        assertTrue(rs2.next());
-        assertEquals(rs2.getString(1), "a");
-        assertTrue(rs2.next());
-        assertEquals(rs2.getString(1), "b");
-        assertTrue(rs2.next());
-        assertEquals(rs2.getString(1), "c");
+        assertThat(rs2.next()).isTrue();
+        assertThat(rs2.getString(1)).isEqualTo("a");
+        assertThat(rs2.next()).isTrue();
+        assertThat(rs2.getString(1)).isEqualTo("b");
+        assertThat(rs2.next()).isTrue();
+        assertThat(rs2.getString(1)).isEqualTo("c");
 
         ResultSet rs3 = stat.executeQuery("select c1 from t order by c1 collate REVERSE;");
-        assertTrue(rs3.next());
-        assertEquals(rs3.getString(1), "c");
-        assertTrue(rs3.next());
-        assertEquals(rs3.getString(1), "b");
-        assertTrue(rs3.next());
-        assertEquals(rs3.getString(1), "a");
+        assertThat(rs3.next()).isTrue();
+        assertThat(rs3.getString(1)).isEqualTo("c");
+        assertThat(rs3.next()).isTrue();
+        assertThat(rs3.getString(1)).isEqualTo("b");
+        assertThat(rs3.next()).isTrue();
+        assertThat(rs3.getString(1)).isEqualTo("a");
     }
 
     @Test
@@ -184,9 +180,8 @@ public class CollationTest {
 
         String[] expected = {"😀", "おはよう", "你好", "안녕하세요"};
 
-        assertArrayEquals(
-                Arrays.stream(expected).distinct().sorted().toArray(),
-                received.stream().distinct().sorted().toArray());
+        assertThat(received.stream().distinct().sorted().toArray())
+                .isEqualTo(Arrays.stream(expected).distinct().sorted().toArray());
     }
 
     @Test
@@ -207,8 +202,8 @@ public class CollationTest {
         stat.executeUpdate("insert into t values ('b');");
         stat.executeQuery("select c1 from t order by c1 collate c1;");
 
-        assertEquals(valStr1, "a");
-        assertEquals(valStr2, "b");
+        assertThat(valStr1).isEqualTo("a");
+        assertThat(valStr2).isEqualTo("b");
 
         Collation.destroy(conn, "c1");
         Collation.destroy(conn, "c1");

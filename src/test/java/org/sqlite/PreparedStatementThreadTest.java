@@ -1,6 +1,7 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -85,8 +86,8 @@ public class PreparedStatementThreadTest {
                             waitFor(countdown);
                             for (int i = 0; i < 100; i++) {
                                 ResultSet set = stat.executeQuery();
-                                assertTrue(set.next());
-                                for (int j = 1; j <= 5; j++) assertEquals(j, set.getInt(j));
+                                assertThat(set.next()).isTrue();
+                                for (int j = 1; j <= 5; j++) assertThat(set.getInt(j)).isEqualTo(j);
                             }
                             return true;
                         });
@@ -98,11 +99,11 @@ public class PreparedStatementThreadTest {
                             return true;
                         });
         try {
-            assertTrue(queryThread.get());
-            assertTrue(closeThread.get());
+            assertThat(queryThread.get()).isTrue();
+            assertThat(closeThread.get()).isTrue();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            fail(e);
+            fail("", e);
         } catch (ExecutionException e) {
             // this is OK, so long as we don't seg fault
         }

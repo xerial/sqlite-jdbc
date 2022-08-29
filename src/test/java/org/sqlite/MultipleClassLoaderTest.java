@@ -24,17 +24,16 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -118,12 +117,12 @@ public class MultipleClassLoaderTest {
         }
         pool.shutdown();
         pool.awaitTermination(3, TimeUnit.SECONDS);
-        assertEquals(4, completedThreads.get());
+        assertThat(completedThreads.get()).isEqualTo(4);
     }
 
     private static void createJar(File inputDir, String changeDir, File outputFile)
             throws IOException {
-        JarOutputStream target = new JarOutputStream(new FileOutputStream(outputFile));
+        JarOutputStream target = new JarOutputStream(Files.newOutputStream(outputFile.toPath()));
         addJarEntry(inputDir, changeDir, target);
         target.close();
     }
@@ -154,7 +153,7 @@ public class MultipleClassLoaderTest {
                             source.getPath().replace("\\", "/").substring(changeDir.length() + 1));
             entry.setTime(source.lastModified());
             target.putNextEntry(entry);
-            in = new BufferedInputStream(new FileInputStream(source));
+            in = new BufferedInputStream(Files.newInputStream(source.toPath()));
 
             byte[] buffer = new byte[8192];
             while (true) {

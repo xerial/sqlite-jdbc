@@ -1,6 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -23,9 +23,9 @@ public class Utils {
     }
 
     public static void assumeJdbcExtensions(Connection conn) throws SQLException {
-        assumeTrue(
-                getCompileOptions(conn).contains("JDBC_EXTENSIONS"),
-                "SQLite has to be compiled with JDBC Extensions");
+        assumeThat(getCompileOptions(conn))
+                .as("SQLite has to be compiled with JDBC Extensions")
+                .contains("JDBC_EXTENSIONS");
     }
 
     public static void assumeJdbcExtensionsOrMathFunctions(Connection conn) throws SQLException {
@@ -33,8 +33,9 @@ public class Utils {
         boolean expected =
                 compileOptions.contains("JDBC_EXTENSIONS")
                         || compileOptions.contains("ENABLE_MATH_FUNCTIONS");
-        assumeTrue(
-                expected,
-                "SQLite has to be compiled with JDBC Extensions or SQLITE_ENABLE_MATH_FUNCTIONS");
+        assumeThat(expected)
+                .as(
+                        "SQLite has to be compiled with JDBC Extensions or SQLITE_ENABLE_MATH_FUNCTIONS")
+                .isTrue();
     }
 }

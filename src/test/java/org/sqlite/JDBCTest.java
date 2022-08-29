@@ -9,7 +9,7 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -46,6 +46,6 @@ public class JDBCTest {
 
     @Test
     public void shouldReturnNullIfProtocolUnhandled() throws Exception {
-        assertNull(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null));
+        assertThat(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null)).isNull();
     }
 }
