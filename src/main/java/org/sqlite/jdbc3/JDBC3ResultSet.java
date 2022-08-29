@@ -676,7 +676,12 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                     || "INT".equals(typeName)
                     || "INTEGER".equals(typeName)
                     || "MEDIUMINT".equals(typeName)) {
-                return Types.INTEGER;
+                long val = getLong(col);
+                if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
+                    return Types.BIGINT;
+                } else {
+                    return Types.INTEGER;
+                }
             }
         }
 

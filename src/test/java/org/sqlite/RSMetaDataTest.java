@@ -135,6 +135,33 @@ public class RSMetaDataTest {
     }
 
     @Test
+    public void columTypeWithoutTable() throws SQLException {
+        ResultSet rs =
+                stat.executeQuery(
+                        "SELECT FALSE, 1, 3900000000, CAST(3900000000 AS BIGINT), CAST(3900000000 AS VARCHAR(50))");
+        ResultSetMetaData meta = rs.getMetaData();
+
+        assertTrue(rs.next());
+
+        assertEquals(Types.INTEGER, meta.getColumnType(1));
+        assertTrue(meta.isSigned(1));
+
+        assertEquals(Types.INTEGER, meta.getColumnType(2));
+        assertTrue(meta.isSigned(2));
+
+        assertEquals(Types.BIGINT, meta.getColumnType(3));
+        assertTrue(meta.isSigned(3));
+
+        assertEquals(Types.BIGINT, meta.getColumnType(4));
+        assertTrue(meta.isSigned(4));
+
+        assertEquals(Types.VARCHAR, meta.getColumnType(5));
+        assertFalse(meta.isSigned(5));
+
+        assertFalse(rs.next());
+    }
+
+    @Test
     public void testGetColumnClassName() throws SQLException {
         stat.executeUpdate(
                 "create table gh_541 (id int, DESCRIPTION varchar(40), price DOUBLE, data BLOB, bool BOOLEAN)");
