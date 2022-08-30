@@ -1,7 +1,7 @@
 package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -1368,15 +1368,15 @@ public class DBMetaDataTest {
 
     @Test
     public void version() throws Exception {
-        assumeTrue(
-                Utils.getCompileOptions(conn).contains("JDBC_EXTENSIONS"),
-                "Can't check the version if not compiled by us");
+        assumeThat(Utils.getCompileOptions(conn))
+                .as("Can't check the version if not compiled by us")
+                .contains("JDBC_EXTENSIONS");
         Properties version;
         try (InputStream resourceAsStream =
                 DBMetaDataTest.class.getResourceAsStream(
                         "/META-INF/maven/org.xerial/sqlite-jdbc/VERSION")) {
             version = new Properties();
-            assumeTrue(resourceAsStream != null);
+            assumeThat(resourceAsStream).isNotNull();
             version.load(resourceAsStream);
         }
         String versionString = version.getProperty("version");

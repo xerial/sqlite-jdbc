@@ -1,7 +1,7 @@
 package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -75,9 +75,9 @@ public class ExtensionTest {
 
     @Test
     public void dbstat() throws Exception {
-        assumeTrue(
-                Utils.getCompileOptions(conn).contains("ENABLE_DBSTAT_VTAB"),
-                "SQLite has to be compiled with ENABLE_DBSTAT_VTAB");
+        assumeThat(Utils.getCompileOptions(conn))
+                .as("SQLite has to be compiled with ENABLE_DBSTAT_VTAB")
+                .contains("ENABLE_DBSTAT_VTAB");
 
         {
             boolean result = stat.execute("SELECT * FROM dbstat");

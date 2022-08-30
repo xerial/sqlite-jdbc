@@ -2,7 +2,7 @@ package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,8 +25,8 @@ public class ErrorMessageTest {
         stmt.executeUpdate("insert into sample values(1, 'foo')");
 
         File to = File.createTempFile("error-message-test-moved-from", ".sqlite");
-        assumeTrue(to.delete());
-        assumeTrue(from.renameTo(to));
+        assumeThat(to.delete()).isTrue();
+        assumeThat(from.renameTo(to)).isTrue();
 
         assertThatThrownBy(() -> stmt.executeUpdate("insert into sample values(2, 'bar')"))
                 .isInstanceOf(SQLException.class)
@@ -48,7 +48,7 @@ public class ErrorMessageTest {
         stmt.close();
         conn.close();
 
-        assumeTrue(file.setReadOnly());
+        assumeThat(file.setReadOnly()).isTrue();
 
         conn = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
         stmt = conn.createStatement();
@@ -63,8 +63,8 @@ public class ErrorMessageTest {
     @Test
     public void cantOpenDir() throws IOException {
         File dir = File.createTempFile("error-message-test-cant-open-dir", "");
-        assumeTrue(dir.delete());
-        assumeTrue(dir.mkdir());
+        assumeThat(dir.delete()).isTrue();
+        assumeThat(dir.mkdir()).isTrue();
         dir.deleteOnExit();
 
         assertThatThrownBy(
@@ -85,8 +85,8 @@ public class ErrorMessageTest {
         stmt.executeUpdate("insert into sample values(1, 'foo')");
 
         File to = File.createTempFile("error-message-test-plain-2", ".sqlite");
-        assumeTrue(to.delete());
-        assumeTrue(from.renameTo(to));
+        assumeThat(to.delete()).isTrue();
+        assumeThat(from.renameTo(to)).isTrue();
 
         assertThatThrownBy(() -> stmt.executeUpdate("insert into sample values(2, 'bar')"))
                 .isInstanceOfSatisfying(
