@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -302,6 +303,25 @@ public class StatementTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getDate(1)).isNull();
         assertThat(rs.getTime(1)).isNull();
+        assertThat(rs.getTimestamp(1)).isNull();
+
+        assertThat(rs.getDate(1, Calendar.getInstance())).isNull();
+        assertThat(rs.getTime(1, Calendar.getInstance())).isNull();
+        assertThat(rs.getTimestamp(1, Calendar.getInstance())).isNull();
+        rs.close();
+    }
+
+    @Test
+    public void emptyDate() throws SQLException {
+        ResultSet rs = stat.executeQuery("select '';");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDate(1)).isNull();
+        assertThat(rs.getTime(1)).isNull();
+        assertThat(rs.getTimestamp(1)).isNull();
+
+        assertThat(rs.getDate(1, Calendar.getInstance())).isNull();
+        assertThat(rs.getTime(1, Calendar.getInstance())).isNull();
+        assertThat(rs.getTimestamp(1, Calendar.getInstance())).isNull();
         rs.close();
     }
 
@@ -411,7 +431,7 @@ public class StatementTest {
     public void dateTimeTest() throws SQLException {
         Date day = new Date(new java.util.Date().getTime());
 
-        stat.executeUpdate("create table day (time datatime)");
+        stat.executeUpdate("create table day (time datetime)");
         PreparedStatement prep = conn.prepareStatement("insert into day values(?)");
         prep.setDate(1, day);
         prep.executeUpdate();
@@ -458,7 +478,7 @@ public class StatementTest {
     }
 
     @Test
-    public void setEscapeProcessingToFals() throws SQLException {
+    public void setEscapeProcessingToFalse() throws SQLException {
         stat.setEscapeProcessing(false);
     }
 
