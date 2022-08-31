@@ -2,6 +2,7 @@ package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.data.Offset.offset;
 
 import java.lang.reflect.Method;
@@ -478,14 +479,13 @@ public class StatementTest {
     }
 
     @Test
-    public void setEscapeProcessingToFalse() throws SQLException {
-        stat.setEscapeProcessing(false);
+    public void setEscapeProcessingToFalse() {
+        assertThatNoException().isThrownBy(() -> stat.setEscapeProcessing(false));
     }
 
     @Test
     public void setEscapeProcessingToTrue() {
-        assertThatExceptionOfType(SQLException.class)
-                .isThrownBy(() -> stat.setEscapeProcessing(true));
+        assertThatNoException().isThrownBy(() -> stat.setEscapeProcessing(true));
     }
 
     @Test

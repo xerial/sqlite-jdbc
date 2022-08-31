@@ -363,10 +363,14 @@ public abstract class JDBC3Statement extends CoreStatement {
     }
 
     /** @see java.sql.Statement#setEscapeProcessing(boolean) */
-    public void setEscapeProcessing(boolean enable) throws SQLException {
-        if (enable) {
-            throw unsupported();
-        }
+    public void setEscapeProcessing(boolean enable) {
+        // no-op
+        // This previously threw a SQLException as unsupported (added in
+        // 44e559b74d53e2ca006a4638f57a4e6662d0f2c0),
+        // but it's not allowed to do that according to the method documentation.
+        // This had impacts when using CachedRowSet for example (Github #224).
+        // The default value according to the JDBC spec is true, so changing this should not have
+        // any impact.
     }
 
     protected SQLException unsupported() {
