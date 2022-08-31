@@ -545,8 +545,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     }
 
     /** @see java.sql.DatabaseMetaData#supportsFullOuterJoins() */
-    public boolean supportsFullOuterJoins() {
-        return false;
+    public boolean supportsFullOuterJoins() throws SQLException {
+        String[] version = conn.libversion().split("\\.");
+        return Integer.parseInt(version[0]) >= 3 && Integer.parseInt(version[1]) >= 39;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys() */
