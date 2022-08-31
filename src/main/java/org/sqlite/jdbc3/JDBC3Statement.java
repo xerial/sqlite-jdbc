@@ -4,6 +4,7 @@ import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.util.Arrays;
 import org.sqlite.ExtendedCommand;
@@ -74,7 +75,7 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     static class BackupObserver implements ProgressObserver {
         public void progress(int remaining, int pageCount) {
-            System.out.println(String.format("remaining:%d, page count:%d", remaining, pageCount));
+            System.out.printf("remaining:%d, page count:%d%n", remaining, pageCount);
         }
     }
 
@@ -364,29 +365,37 @@ public abstract class JDBC3Statement extends CoreStatement {
     /** @see java.sql.Statement#setEscapeProcessing(boolean) */
     public void setEscapeProcessing(boolean enable) throws SQLException {
         if (enable) {
-            throw unused();
+            throw unsupported();
         }
     }
 
-    protected SQLException unused() {
-        return new SQLException("not implemented by SQLite JDBC driver");
+    protected SQLException unsupported() {
+        return new SQLFeatureNotSupportedException("not implemented by SQLite JDBC driver");
     }
 
     // Statement ////////////////////////////////////////////////////
 
     public boolean execute(String sql, int[] colinds) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public boolean execute(String sql, String[] colnames) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public int executeUpdate(String sql, int[] colinds) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public int executeUpdate(String sql, String[] cols) throws SQLException {
-        throw unused();
+        throw unsupported();
+    }
+
+    public long executeLargeUpdate(String sql, int[] colinds) throws SQLException {
+        throw unsupported();
+    }
+
+    public long executeLargeUpdate(String sql, String[] cols) throws SQLException {
+        throw unsupported();
     }
 }

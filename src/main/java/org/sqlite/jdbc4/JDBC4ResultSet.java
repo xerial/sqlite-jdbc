@@ -320,18 +320,18 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         throw new SQLFeatureNotSupportedException();
     }
 
-    protected SQLException unused() {
-        return new SQLFeatureNotSupportedException();
+    protected SQLException unsupported() {
+        return new SQLFeatureNotSupportedException("not implemented by SQLite JDBC driver");
     }
 
     // ResultSet ////////////////////////////////////////////////////
 
     public Array getArray(int i) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public Array getArray(String col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public InputStream getAsciiStream(int col) throws SQLException {
@@ -359,20 +359,20 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
 
     @Deprecated
     public BigDecimal getBigDecimal(int col, int s) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     @Deprecated
     public BigDecimal getBigDecimal(String col, int s) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public Blob getBlob(int col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public Blob getBlob(String col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public Clob getClob(int col) throws SQLException {
@@ -387,20 +387,20 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
 
     @SuppressWarnings("rawtypes")
     public Object getObject(int col, Map map) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     @SuppressWarnings("rawtypes")
     public Object getObject(String col, Map map) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public Ref getRef(int i) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public Ref getRef(String col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public InputStream getUnicodeStream(int col) throws SQLException {
@@ -412,11 +412,11 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     }
 
     public URL getURL(int col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public URL getURL(String col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void insertRow() throws SQLException {
@@ -460,203 +460,203 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     }
 
     public void cancelRowUpdates() throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void deleteRow() throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateArray(int col, Array x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateArray(String col, Array x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateAsciiStream(int col, InputStream x, int l) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateAsciiStream(String col, InputStream x, int l) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBigDecimal(int col, BigDecimal x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBigDecimal(String col, BigDecimal x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBinaryStream(int c, InputStream x, int l) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBinaryStream(String c, InputStream x, int l) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBlob(int col, Blob x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBlob(String col, Blob x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBoolean(int col, boolean x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBoolean(String col, boolean x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateByte(int col, byte x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateByte(String col, byte x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBytes(int col, byte[] x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateBytes(String col, byte[] x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateCharacterStream(int c, Reader x, int l) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateCharacterStream(String c, Reader r, int l) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateClob(int col, Clob x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateClob(String col, Clob x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateDate(int col, Date x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateDate(String col, Date x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateDouble(int col, double x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateDouble(String col, double x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateFloat(int col, float x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateFloat(String col, float x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateInt(int col, int x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateInt(String col, int x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateLong(int col, long x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateLong(String col, long x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateNull(int col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateNull(String col) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateObject(int c, Object x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateObject(int c, Object x, int s) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateObject(String col, Object x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateObject(String c, Object x, int s) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateRef(int col, Ref x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateRef(String c, Ref x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateRow() throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateShort(int c, short x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateShort(String c, short x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateString(int c, String x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateString(String c, String x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateTime(int c, Time x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateTime(String c, Time x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateTimestamp(int c, Timestamp x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void updateTimestamp(String c, Timestamp x) throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     public void refreshRow() throws SQLException {
-        throw unused();
+        throw unsupported();
     }
 
     class SqliteClob implements NClob {
@@ -705,37 +705,37 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         }
 
         public long position(String arg0, long arg1) throws SQLException {
-            unused();
+            unsupported();
             return -1;
         }
 
         public long position(Clob arg0, long arg1) throws SQLException {
-            unused();
+            unsupported();
             return -1;
         }
 
         public OutputStream setAsciiStream(long arg0) throws SQLException {
-            unused();
+            unsupported();
             return null;
         }
 
         public Writer setCharacterStream(long arg0) throws SQLException {
-            unused();
+            unsupported();
             return null;
         }
 
         public int setString(long arg0, String arg1) throws SQLException {
-            unused();
+            unsupported();
             return -1;
         }
 
         public int setString(long arg0, String arg1, int arg2, int arg3) throws SQLException {
-            unused();
+            unsupported();
             return -1;
         }
 
         public void truncate(long arg0) throws SQLException {
-            unused();
+            unsupported();
         }
     }
 }
