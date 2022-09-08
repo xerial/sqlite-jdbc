@@ -39,6 +39,7 @@ jobs:
   test:
     name: test ${{ matrix.os }} jdk${{ matrix.java }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
         java: [ 8, 17, 18 ]
