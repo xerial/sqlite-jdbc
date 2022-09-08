@@ -106,6 +106,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: native-libs
+          path: src/main/resources/org/sqlite/native/
 
       - run: git status
       - name: Release commit and push
