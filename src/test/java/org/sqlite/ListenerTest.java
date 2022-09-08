@@ -238,6 +238,14 @@ public class ListenerTest {
         assertThat(NativeDBHelper.getCommitListener(database)).isEqualTo(0);
     }
 
+    @Test
+    public void testConnectionCloseWithAutoCommitDisabledAndCommitListener() throws Exception {
+        CountingSQLiteCommitListener commitListener = new CountingSQLiteCommitListener();
+        connectionOne.setAutoCommit(false);
+        connectionOne.addCommitListener(commitListener);
+        connectionOne.close();
+    }
+
     /** A helper class that simply counts the number of commits operations that were done. */
     static class CountingSQLiteCommitListener implements SQLiteCommitListener {
         final AtomicInteger committed = new AtomicInteger(0);
