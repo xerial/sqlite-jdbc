@@ -55,6 +55,7 @@ public class SQLiteConfig {
     private int openModeFlag = 0x00;
 
     private final int busyTimeout;
+    private boolean explicitReadOnly;
 
     private final SQLiteConnectionConfig defaultConnectionConfig;
 
@@ -89,6 +90,9 @@ public class SQLiteConfig {
         this.busyTimeout =
                 Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
+        this.explicitReadOnly =
+                Boolean.parseBoolean(
+                        pragmaTable.getProperty(Pragma.JDBC_EXPLICIT_READONLY.pragmaName, "false"));
     }
 
     public SQLiteConnectionConfig newConnectionConfig() {
@@ -181,6 +185,9 @@ public class SQLiteConfig {
         pragmaParams.remove(Pragma.LIMIT_VDBE_OP.pragmaName);
         pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
         pragmaParams.remove(Pragma.LIMIT_PAGE_COUNT.pragmaName);
+
+        // exclude this "fake" pragma from execution
+        pragmaParams.remove(Pragma.JDBC_EXPLICIT_READONLY.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
@@ -321,7 +328,8 @@ public class SQLiteConfig {
         pragmaTable.setProperty(
                 Pragma.DATE_STRING_FORMAT.pragmaName,
                 defaultConnectionConfig.getDateStringFormat());
-
+        pragmaTable.setProperty(
+                Pragma.JDBC_EXPLICIT_READONLY.pragmaName, this.explicitReadOnly ? "true" : "false");
         return pragmaTable;
     }
 
@@ -351,6 +359,20 @@ public class SQLiteConfig {
         }
     }
 
+    /** @return true if explicit read only transactions are enabled */
+    public boolean isExplicitReadOnly() {
+        return this.explicitReadOnly;
+    }
+
+    /**
+     * Enable read only transactions after connection creation if explicit read only is true.
+     *
+     * @param readOnly whether to enable explicit read only
+     */
+    public void setExplicitReadOnly(boolean readOnly) {
+        this.explicitReadOnly = readOnly;
+    }
+
     public static enum Pragma {
 
         // Parameters requiring SQLite3 API invocation
@@ -358,7 +380,7 @@ public class SQLiteConfig {
         SHARED_CACHE("shared_cache", "Enable SQLite Shared-Cache mode, native driver only", OnOff),
         LOAD_EXTENSION(
                 "enable_load_extension",
-                "Enable SQLite load_extention() function, native driver only",
+                "Enable SQLite load_extension() function, native driver only",
                 OnOff),
 
         // Pragmas that can be set after opening the database
@@ -450,7 +472,10 @@ public class SQLiteConfig {
                 null),
         BUSY_TIMEOUT("busy_timeout", null),
         HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
-        PASSWORD("password", null);
+        PASSWORD("password", null),
+
+        // extensions: "fake" pragmas to allow conformance with JDBC
+        JDBC_EXPLICIT_READONLY("jdbc.explicit_readonly");
 
         public final String pragmaName;
         public final String[] choices;

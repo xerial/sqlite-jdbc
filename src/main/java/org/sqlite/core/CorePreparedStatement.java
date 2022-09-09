@@ -23,6 +23,7 @@ import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.date.FastDateFormat;
+import org.sqlite.jdbc3.JDBC3Connection;
 import org.sqlite.jdbc4.JDBC4Statement;
 
 public abstract class CorePreparedStatement extends JDBC4Statement {
@@ -64,12 +65,20 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
             return new long[] {};
         }
 
-        try {
-            return conn.getDatabase()
-                    .executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
-        } finally {
-            clearBatch();
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
         }
+
+        return this.withConnectionTimeout(
+                () -> {
+                    try {
+                        return conn.getDatabase()
+                                .executeBatch(
+                                        pointer, batchQueryCount, batch, conn.getAutoCommit());
+                    } finally {
+                        clearBatch();
+                    }
+                });
     }
 
     /** @see org.sqlite.jdbc3.JDBC3Statement#clearBatch() () */

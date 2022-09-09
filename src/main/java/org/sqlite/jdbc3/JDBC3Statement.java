@@ -15,10 +15,14 @@ import org.sqlite.core.DB;
 import org.sqlite.core.DB.ProgressObserver;
 
 public abstract class JDBC3Statement extends CoreStatement {
+
+    private int queryTimeout; // in seconds, as per the JDBC spec
+
     // PUBLIC INTERFACE /////////////////////////////////////////////
 
     protected JDBC3Statement(SQLiteConnection conn) {
         super(conn);
+        this.queryTimeout = 0;
     }
 
     /** @see java.sql.Statement#close() */
@@ -27,20 +31,23 @@ public abstract class JDBC3Statement extends CoreStatement {
     }
 
     /** @see java.sql.Statement#execute(java.lang.String) */
-    public boolean execute(String sql) throws SQLException {
+    public boolean execute(final String sql) throws SQLException {
         internalClose();
 
-        SQLExtension ext = ExtendedCommand.parse(sql);
-        if (ext != null) {
-            ext.execute(conn.getDatabase());
+        return this.withConnectionTimeout(
+                () -> {
+                    SQLExtension ext = ExtendedCommand.parse(sql);
+                    if (ext != null) {
+                        ext.execute(conn.getDatabase());
 
-            return false;
-        }
+                        return false;
+                    }
 
-        this.sql = sql;
+                    JDBC3Statement.this.sql = sql;
 
-        conn.getDatabase().prepare(this);
-        return exec();
+                    conn.getDatabase().prepare(JDBC3Statement.this);
+                    return exec();
+                });
     }
 
     /** @see java.sql.Statement#execute(java.lang.String, int) */
@@ -63,14 +70,18 @@ public abstract class JDBC3Statement extends CoreStatement {
         internalClose();
         this.sql = sql;
 
-        conn.getDatabase().prepare(this);
+        return this.withConnectionTimeout(
+                () -> {
+                    conn.getDatabase().prepare(JDBC3Statement.this);
 
-        if (!exec()) {
-            internalClose();
-            throw new SQLException("query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
-        }
+                    if (!exec()) {
+                        internalClose();
+                        throw new SQLException(
+                                "query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
+                    }
 
-        return getResultSet();
+                    return getResultSet();
+                });
     }
 
     static class BackupObserver implements ProgressObserver {
@@ -80,7 +91,7 @@ public abstract class JDBC3Statement extends CoreStatement {
     }
 
     /** @see java.sql.Statement#executeUpdate(java.lang.String) */
-    public int executeUpdate(String sql) throws SQLException {
+    public int executeUpdate(final String sql) throws SQLException {
         return (int) executeLargeUpdate(sql);
     }
 
@@ -93,27 +104,30 @@ public abstract class JDBC3Statement extends CoreStatement {
     public long executeLargeUpdate(String sql) throws SQLException {
         internalClose();
         this.sql = sql;
-        DB db = conn.getDatabase();
 
-        long changes = 0;
-        SQLExtension ext = ExtendedCommand.parse(sql);
-        if (ext != null) {
-            // execute extended command
-            ext.execute(db);
-        } else {
-            try {
-                changes = db.total_changes();
+        return this.withConnectionTimeout(
+                () -> {
+                    DB db = conn.getDatabase();
+                    long changes = 0;
+                    SQLExtension ext = ExtendedCommand.parse(sql);
+                    if (ext != null) {
+                        // execute extended command
+                        ext.execute(db);
+                    } else {
+                        try {
+                            changes = db.total_changes();
 
-                // directly invokes the exec API to support multiple SQL statements
-                int statusCode = db._exec(sql);
-                if (statusCode != SQLITE_OK) throw DB.newSQLException(statusCode, "");
+                            // directly invokes the exec API to support multiple SQL statements
+                            int statusCode = db._exec(sql);
+                            if (statusCode != SQLITE_OK) throw DB.newSQLException(statusCode, "");
 
-                changes = db.total_changes() - changes;
-            } finally {
-                internalClose();
-            }
-        }
-        return changes;
+                            changes = db.total_changes() - changes;
+                        } finally {
+                            internalClose();
+                        }
+                    }
+                    return changes;
+                });
     }
 
     /** @see java.sql.Statement#executeLargeUpdate(java.lang.String, int) */
@@ -245,13 +259,15 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     /** @see java.sql.Statement#getQueryTimeout() */
     public int getQueryTimeout() throws SQLException {
-        return conn.getBusyTimeout();
+        return queryTimeout;
     }
 
     /** @see java.sql.Statement#setQueryTimeout(int) */
     public void setQueryTimeout(int seconds) throws SQLException {
-        if (seconds < 0) throw new SQLException("query timeout must be >= 0");
-        conn.setBusyTimeout(1000 * seconds);
+        if (seconds < 0) {
+            throw new SQLException("query timeout must be >= 0");
+        }
+        this.queryTimeout = seconds;
     }
 
     // TODO: write test
@@ -401,5 +417,27 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     public long executeLargeUpdate(String sql, String[] cols) throws SQLException {
         throw unsupported();
+    }
+
+    protected <T> T withConnectionTimeout(SQLCallable<T> callable) throws SQLException {
+        int origBusyTimeout = conn.getBusyTimeout();
+        if (queryTimeout > 0) {
+            // SQLite handles busy timeout in milliseconds, JDBC in seconds
+            conn.setBusyTimeout(1000 * queryTimeout);
+        }
+        try {
+            return callable.call();
+        } finally {
+            if (queryTimeout > 0) {
+                // reset connection timeout to the original value
+                conn.setBusyTimeout(origBusyTimeout);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    protected interface SQLCallable<T> {
+
+        T call() throws SQLException;
     }
 }

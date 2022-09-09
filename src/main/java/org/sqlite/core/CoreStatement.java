@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
+import org.sqlite.jdbc3.JDBC3Connection;
 import org.sqlite.jdbc4.JDBC4ResultSet;
 
 public abstract class CoreStatement implements Codes {
@@ -68,12 +69,17 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        }
+
         boolean success = false;
         boolean rc = false;
         try {
             rc = conn.getDatabase().execute(this, null);
             success = true;
         } finally {
+            notifyFirstStatementExecuted();
             resultsWaiting = rc;
             if (!success) {
                 this.pointer.close();
@@ -95,12 +101,17 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        }
+
         boolean rc = false;
         boolean success = false;
         try {
             rc = conn.getDatabase().execute(sql, conn.getAutoCommit());
             success = true;
         } finally {
+            notifyFirstStatementExecuted();
             resultsWaiting = rc;
             if (!success && pointer != null) {
                 pointer.close();
@@ -122,6 +133,10 @@ public abstract class CoreStatement implements Codes {
 
             if (resp != SQLITE_OK && resp != SQLITE_MISUSE) conn.getDatabase().throwex(resp);
         }
+    }
+
+    protected void notifyFirstStatementExecuted() {
+        conn.setFirstStatementExecuted(true);
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;
