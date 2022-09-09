@@ -45,7 +45,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         pointer.safeRunConsume(DB::reset);
 
         if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).checkTransactionMode();
+            ((JDBC3Connection)this.conn).tryEnforceTransactionMode();
         }
 
         return this.withConnectionTimeout(() -> {
@@ -72,7 +72,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         pointer.safeRunConsume(DB::reset);
 
         if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).checkTransactionMode();
+            ((JDBC3Connection)this.conn).tryEnforceTransactionMode();
         }
 
         return this.withConnectionTimeout(() -> {
@@ -106,7 +106,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         pointer.safeRunConsume(DB::reset);
 
         if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).checkTransactionMode();
+            ((JDBC3Connection)this.conn).tryEnforceTransactionMode();
         }
 
         return this.withConnectionTimeout(() -> conn.getDatabase().executeUpdate(JDBC3PreparedStatement.this, batch));

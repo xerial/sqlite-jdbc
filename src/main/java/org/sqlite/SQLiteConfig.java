@@ -356,7 +356,7 @@ public class SQLiteConfig {
         }
     }
 
-    public boolean isExplicitReadOnlyEnabled() {
+    public boolean isExplicitReadOnly() {
         return this.explicitReadOnly;
     }
 

@@ -20,10 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Executor;
-import org.sqlite.core.CoreDatabaseMetaData;
-import org.sqlite.core.DB;
-import org.sqlite.core.NativeDB;
-import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
 
 /** */
 public abstract class SQLiteConnection implements Connection {
@@ -32,8 +28,8 @@ public abstract class SQLiteConnection implements Connection {
     private CoreDatabaseMetaData meta = null;
     private final SQLiteConnectionConfig connectionConfig;
 
-    private TransactionMode currentTransactionType;
-    private boolean firstStatementWasExecuted = false;
+    private TransactionMode currentTransactionMode;
+    private boolean firstStatementExecuted = false;
 
     /**
      * Connection constructor for reusing an existing DB handle
@@ -71,9 +67,9 @@ public abstract class SQLiteConnection implements Connection {
             SQLiteConfig config = this.db.getConfig();
             this.connectionConfig = this.db.getConfig().newConnectionConfig();
             config.apply(this);
-            this.currentTransactionType = this.getDatabase().getConfig().getTransactionMode();
+            this.currentTransactionMode = this.getDatabase().getConfig().getTransactionMode();
             // connection starts in "clean" state (even though some PRAGMA statements were executed)
-            this.firstStatementWasExecuted = false;
+            this.firstStatementExecuted = false;
         } catch (Throwable t) {
             try {
                 if (newDB != null) {
@@ -86,20 +82,20 @@ public abstract class SQLiteConnection implements Connection {
         }
     }
 
-    public TransactionMode getCurrentTransactionType(){
-        return this.currentTransactionType;
+    public TransactionMode getCurrentTransactionMode(){
+        return this.currentTransactionMode;
     }
 
-    public void setCurrentTransactionType(final TransactionMode currentTransactionType) {
-        this.currentTransactionType = currentTransactionType;
+    public void setCurrentTransactionMode(final TransactionMode currentTransactionMode) {
+        this.currentTransactionMode = currentTransactionMode;
     }
 
-    public void setFirstStatementWasExecuted(final boolean firstStatementWasExecuted) {
-        this.firstStatementWasExecuted = firstStatementWasExecuted;
+    public void setFirstStatementExecuted(final boolean firstStatementExecuted) {
+        this.firstStatementExecuted = firstStatementExecuted;
     }
 
-    public boolean isFirstStatementWasExecuted() {
-        return firstStatementWasExecuted;
+    public boolean isFirstStatementExecuted() {
+        return firstStatementExecuted;
     }
 
 
@@ -365,10 +361,10 @@ public abstract class SQLiteConnection implements Connection {
 
         if(this.getConnectionConfig().isAutoCommit()){
             db.exec("commit;", ac);
-            this.currentTransactionType = null;
+            this.currentTransactionMode = null;
         }else{
             db.exec(this.transactionPrefix(), ac);
-            this.currentTransactionType = this.getConnectionConfig().getTransactionMode();
+            this.currentTransactionMode = this.getConnectionConfig().getTransactionMode();
         }
     }
 
@@ -449,8 +445,8 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("commit;", getAutoCommit());
         db.exec(this.transactionPrefix(), getAutoCommit());
-        this.firstStatementWasExecuted = false;
-        this.setCurrentTransactionType(this.getConnectionConfig().getTransactionMode());
+        this.firstStatementExecuted = false;
+        this.setCurrentTransactionMode(this.getConnectionConfig().getTransactionMode());
     }
 
     /** @see java.sql.Connection#rollback() */
@@ -460,8 +456,8 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("rollback;", getAutoCommit());
         db.exec(this.transactionPrefix(), getAutoCommit());
-        this.firstStatementWasExecuted = false;
-        this.setCurrentTransactionType(this.getConnectionConfig().getTransactionMode());
+        this.firstStatementExecuted = false;
+        this.setCurrentTransactionMode(this.getConnectionConfig().getTransactionMode());
     }
 
     /**

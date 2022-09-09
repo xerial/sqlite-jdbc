@@ -73,7 +73,7 @@ public abstract class CoreStatement implements Codes {
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
         if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).checkTransactionMode();
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
         }
 
         boolean success = false;
@@ -105,7 +105,7 @@ public abstract class CoreStatement implements Codes {
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
         if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).checkTransactionMode();
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
         }
 
         boolean rc = false;
@@ -140,7 +140,7 @@ public abstract class CoreStatement implements Codes {
     }
 
     protected void notifyFirstStatementExecuted() {
-        conn.setFirstStatementWasExecuted(true);
+        conn.setFirstStatementExecuted(true);
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;
