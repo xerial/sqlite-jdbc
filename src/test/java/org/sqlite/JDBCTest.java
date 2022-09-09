@@ -9,9 +9,6 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
 import java.io.PrintWriter;
 import java.io.File;
 
@@ -19,8 +16,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import org.junit.jupiter.api.Test;
+
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.*;
 
 
 public class JDBCTest {
@@ -58,8 +59,7 @@ public class JDBCTest {
     @Test
     public void canSetJdbcConnectionToReadOnly() throws Exception {
         SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
-        Connection connection = dataSource.getConnection();
-        try{
+        try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             assertThat(connection.isReadOnly()).isFalse();
             connection.setReadOnly(true);
@@ -68,59 +68,42 @@ public class JDBCTest {
             assertThat(connection.isReadOnly()).isFalse();
             connection.setReadOnly(true);
             assertThat(connection.isReadOnly()).isTrue();
-        }finally{
-            connection.close();
         }
     }
 
     @Test
     public void cannotSetJdbcConnectionToReadOnlyAfterFirstStatement() throws Exception {
         SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
-        Connection connection = dataSource.getConnection();
 
-        try{
+        try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            Statement statement = connection.createStatement();
             // execute a statement
-            try{
+            try (Statement statement = connection.createStatement()) {
                 boolean success = statement.execute("SELECT * FROM sqlite_master");
                 assertThat(success).isTrue();
-            }finally{
-                statement.close();
             }
             // try to assign read-only
-            try{
-                connection.setReadOnly(true);
-                fail("Managed to set readOnly = true on a dirty connection!");
-            }catch(SQLException expected){
-                // pass
-            }
-        }finally{
-            connection.close();
+            assertThatExceptionOfType(SQLException.class)
+                    .as("Managed to set readOnly = true on a dirty connection!")
+                    .isThrownBy(() -> connection.setReadOnly(true));
         }
     }
 
     @Test
     public void canSetJdbcConnectionToReadOnlyAfterCommit() throws Exception {
         SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
-        Connection connection = dataSource.getConnection();
-        try{
+        try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             connection.setReadOnly(true);
-            Statement statement = connection.createStatement();
             // execute a statement
-            try{
+            try (Statement statement = connection.createStatement()) {
                 boolean success = statement.execute("SELECT * FROM sqlite_master");
                 assertThat(success).isTrue();
-            }finally{
-                statement.close();
             }
             connection.commit();
 
             // try to assign a new read-only value
             connection.setReadOnly(false);
-        }finally{
-            connection.close();
         }
     }
 
@@ -129,21 +112,18 @@ public class JDBCTest {
         System.out.println("Creating JDBC Datasource");
         SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
         System.out.println("Creating JDBC Connection");
-        Connection connection = dataSource.getConnection();
-        System.out.println("JDBC Connection created");
-        try{
+        try (Connection connection = dataSource.getConnection()) {
+            System.out.println("JDBC Connection created");
             System.out.println("Disabling auto-commit");
             connection.setAutoCommit(false);
             System.out.println("Creating statement");
-            Statement statement = connection.createStatement();
             // execute a statement
-            try{
+            try (Statement statement = connection.createStatement()) {
                 System.out.println("Executing query");
                 boolean success = statement.execute("SELECT * FROM sqlite_master");
                 assertThat(success).isTrue();
-            }finally{
+            } finally {
                 System.out.println("Closing statement");
-                statement.close();
             }
             System.out.println("Performing rollback");
             connection.rollback();
@@ -151,151 +131,115 @@ public class JDBCTest {
             System.out.println("Setting connection to read-only");
             // try to assign read-only
             connection.setReadOnly(true);
-            Statement statement2 = connection.createStatement();
             // execute a statement
-            try{
+            try (Statement statement2 = connection.createStatement()) {
                 System.out.println("Executing query 2");
                 boolean success = statement2.execute("SELECT * FROM sqlite_master");
                 assertThat(success).isTrue();
-            }finally{
+            } finally {
                 System.out.println("Closing statement 2");
-                statement2.close();
             }
             System.out.println("Performing rollback 2");
             connection.rollback();
-        }finally{
-            connection.close();
         }
     }
 
     @Test
     public void cannotExecuteUpdatesWhenConnectionIsSetToReadOnly() throws Exception {
         SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
-        Connection connection = dataSource.getConnection();
-        try{
+        try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             connection.setReadOnly(true);
 
-            Statement statement = connection.createStatement();
             // execute a statement
-            try {
-                statement.execute("CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))");
-                fail("Managed to modify DB contents on a read-only connection!");
-            }catch(SQLException expected){
-                // pass
-            }finally{
-                statement.close();
+            try (Statement statement = connection.createStatement()) {
+                assertThatExceptionOfType(SQLException.class)
+                        .as("Managed to modify DB contents on a read-only connection!")
+                        .isThrownBy(() ->
+                                statement.execute("CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))"));
             }
             connection.rollback();
 
             // try to assign read-only
             connection.setReadOnly(true);
-        }finally{
-            connection.close();
         }
     }
 
     @Test
-    public void jdbcHammer() throws Exception{
+    void name() {
+    }
+
+    @Test
+    public void jdbcHammer() throws Exception {
         final SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
         File tempFile = File.createTempFile("myTestDB", ".db");
         dataSource.setUrl("jdbc:sqlite:" + tempFile.getAbsolutePath());
-        Connection connection = dataSource.getConnection();
-        try{
+        try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            Statement stmt = connection.createStatement();
-            try{
+            try (Statement stmt = connection.createStatement()) {
                 stmt.executeUpdate("CREATE TABLE TestTable(ID INT, testval INT, PRIMARY KEY(ID));");
                 stmt.executeUpdate("INSERT INTO TestTable (ID, testval) VALUES(1, 0);");
-            }finally{
-                stmt.close();
             }
             connection.commit();
-        }finally{
-            connection.close();
         }
 
         final AtomicInteger count = new AtomicInteger();
-        List<Thread> threads = new ArrayList<Thread>();
-        for(int i = 0; i < 10; i++){
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for(int i = 0; i < 100; i++){
-                        try{
-                            Connection connection = dataSource.getConnection();
-                            try{
-                                connection.setAutoCommit(false);
-                                boolean read = Math.random() < 0.5;
-                                if(read){
-                                    connection.setReadOnly(true);
-                                    Statement statement = connection.createStatement();
-                                    try{
-                                        ResultSet rs = statement.executeQuery("SELECT * FROM TestTable");
-                                        rs.close();
-                                    }finally{
-                                        statement.close();
-                                    }
-                                }else{
-                                    Statement statement = connection.createStatement();
-                                    try{
-                                        ResultSet rs = statement.executeQuery("SELECT * FROM TestTable");
-                                        try {
-                                            while(rs.next()){
-                                                int id = rs.getInt("ID");
-                                                int value = rs.getInt("testval");
-                                                count.incrementAndGet();
-                                                statement.executeUpdate("UPDATE TestTable SET testval = " + (value+1) + " WHERE ID = " + id);
-                                            }
-                                        }finally{
-                                            rs.close();
-                                        }
-                                    }finally{
-                                        statement.close();
-                                    }
-                                    connection.commit();
+        List<Thread> threads = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Thread thread = new Thread(() -> {
+                for (int i1 = 0; i1 < 100; i1++) {
+                    try {
+                        try (Connection connection = dataSource.getConnection()) {
+                            connection.setAutoCommit(false);
+                            boolean read = Math.random() < 0.5;
+                            if (read) {
+                                connection.setReadOnly(true);
+                                try (Statement statement = connection.createStatement()) {
+                                    ResultSet rs = statement.executeQuery("SELECT * FROM TestTable");
+                                    rs.close();
                                 }
-                            }finally{
-                                connection.close();
+                            } else {
+                                try (Statement statement = connection.createStatement()) {
+                                    try (ResultSet rs = statement.executeQuery("SELECT * FROM TestTable")) {
+                                        while (rs.next()) {
+                                            int id = rs.getInt("ID");
+                                            int value = rs.getInt("testval");
+                                            count.incrementAndGet();
+                                            statement.executeUpdate("UPDATE TestTable SET testval = " + (value + 1) + " WHERE ID = " + id);
+                                        }
+                                    }
+                                }
+                                connection.commit();
                             }
-                        }catch(SQLException e){
-                            throw new RuntimeException("Worker failed", e);
                         }
+                    } catch (SQLException e) {
+                        throw new RuntimeException("Worker failed", e);
                     }
                 }
             });
             thread.setName("Worker #" + (i + 1));
-            threads.add(thread );
+            threads.add(thread);
         }
-        for(Thread thread : threads){
+        for (Thread thread : threads) {
             thread.start();
         }
-        for(Thread thread : threads){
+        for (Thread thread : threads) {
             thread.join();
         }
-        Connection connection2 = dataSource.getConnection();
-        try{
+        try (Connection connection2 = dataSource.getConnection()) {
             connection2.setAutoCommit(false);
             connection2.setReadOnly(true);
-            Statement stmt = connection2.createStatement();
-            try{
-                ResultSet rs = stmt.executeQuery("SELECT * FROM TestTable");
-                try{
+            try (Statement stmt = connection2.createStatement()) {
+                try (ResultSet rs = stmt.executeQuery("SELECT * FROM TestTable")) {
                     assertThat(rs.next()).isTrue();
                     int id = rs.getInt("ID");
                     int val = rs.getInt("testval");
                     assertThat(id).isEqualTo(1);
                     assertThat(val).isEqualTo(count.get());
                     assertThat(rs.next()).isFalse();
-                }finally{
-                    rs.close();
                 }
-            }finally{
-                stmt.close();
             }
             connection2.commit();
-        }finally{
-            connection2.close();
         }
 
     }
