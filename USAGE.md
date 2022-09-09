@@ -126,3 +126,33 @@ You set the mode at the connection string level:
 ```java
 Connection connection = DriverManager.getConnection("jdbc:sqlite:db.sqlite?hexkey_mode=sse", "", "AE...");
 ```
+
+## Explicit read only transactions (use with Hibernate)
+
+In order for the driver to be compliant with Hibernate, it needs to allow setting the read only flag after a connection has been created.
+
+SQLite has a notion of "auto-upgrading" read-only transactions to read-write transactions. This can cause `SQLITE_BUSY` exceptions which are difficult to deal with in a JPA/Hibernate/Spring scenario.
+
+For example:
+
+- open connection
+- query data <--- this uses a read-only transaction in SQLite by default
+- write data <--- this is risky as it promotes the transaction to read-write
+- commit
+
+The approach taken is:
+
+- open transactions on demand
+- allow setting `readOnly` only if no statement has been executed yet
+- if `readOnly(false)` is received, then we _quit_ out of our transaction, and open a new transaction with `BEGIN IMMEDIATE`. This forces a global lock on the database, preventing `SQLITE_BUSY`.
+
+You can activate explicit read only support in 2 ways:
+- via `SQLiteConfig#setExplicitReadOnly(true)`: 
+```java
+SQLiteConfig config = new SQLiteConfig();
+config.setExplicitReadOnly(true);
+```
+- using the pragma `jdbc.explicit_readonly`:
+```java
+DriverManager.getConnection("jdbc:sqlite::memory:?jdbc.explicit_readonly=true");
+```
