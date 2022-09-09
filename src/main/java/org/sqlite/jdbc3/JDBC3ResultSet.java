@@ -72,7 +72,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         int statusCode = stmt.pointer.safeRunInt(DB::step);
         switch (statusCode) {
             case SQLITE_DONE:
-                close(); // agressive closing to avoid writer starvation
+                close(); // aggressive closing to avoid writer starvation
                 return false;
             case SQLITE_ROW:
                 row++;
@@ -85,12 +85,12 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSet#getType() */
-    public int getType() throws SQLException {
+    public int getType() {
         return ResultSet.TYPE_FORWARD_ONLY;
     }
 
     /** @see java.sql.ResultSet#getFetchSize() */
-    public int getFetchSize() throws SQLException {
+    public int getFetchSize() {
         return limitRows;
     }
 
@@ -120,17 +120,17 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSet#isAfterLast() */
-    public boolean isAfterLast() throws SQLException {
+    public boolean isAfterLast() {
         return !open && !emptyResultSet;
     }
 
     /** @see java.sql.ResultSet#isBeforeFirst() */
-    public boolean isBeforeFirst() throws SQLException {
+    public boolean isBeforeFirst() {
         return !emptyResultSet && open && row == 0;
     }
 
     /** @see java.sql.ResultSet#isFirst() */
-    public boolean isFirst() throws SQLException {
+    public boolean isFirst() {
         return row == 1;
     }
 
@@ -140,7 +140,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSet#getRow() */
-    public int getRow() throws SQLException {
+    public int getRow() {
         return row;
     }
 
@@ -186,7 +186,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getBoolean(int) */
     public boolean getBoolean(int col) throws SQLException {
-        return getInt(col) == 0 ? false : true;
+        return getInt(col) != 0;
     }
 
     /** @see java.sql.ResultSet#getBoolean(java.lang.String) */
@@ -242,23 +242,20 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getDate(int) */
     public Date getDate(int col) throws SQLException {
-        DB db = getDatabase();
         switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
             case SQLITE_TEXT:
+                String dateText = safeGetColumnText(col);
+                if ("".equals(dateText)) {
+                    return null;
+                }
                 try {
                     return new Date(
-                            getConnectionConfig()
-                                    .getDateFormat()
-                                    .parse(safeGetColumnText(col))
-                                    .getTime());
+                            getConnectionConfig().getDateFormat().parse(dateText).getTime());
                 } catch (Exception e) {
-                    SQLException error = new SQLException("Error parsing date");
-                    error.initCause(e);
-
-                    throw error;
+                    throw new SQLException("Error parsing date", e);
                 }
 
             case SQLITE_FLOAT:
@@ -271,25 +268,24 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getDate(int, java.util.Calendar) */
     public Date getDate(int col, Calendar cal) throws SQLException {
-        checkCalendar(cal);
-
-        DB db = getDatabase();
+        requireCalendarNotNull(cal);
         switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
             case SQLITE_TEXT:
+                String dateText = safeGetColumnText(col);
+                if ("".equals(dateText)) {
+                    return null;
+                }
                 try {
                     FastDateFormat dateFormat =
                             FastDateFormat.getInstance(
                                     getConnectionConfig().getDateStringFormat(), cal.getTimeZone());
 
-                    return new java.sql.Date(dateFormat.parse(safeGetColumnText(col)).getTime());
+                    return new java.sql.Date(dateFormat.parse(dateText).getTime());
                 } catch (Exception e) {
-                    SQLException error = new SQLException("Error parsing time stamp");
-                    error.initCause(e);
-
-                    throw error;
+                    throw new SQLException("Error parsing time stamp", e);
                 }
 
             case SQLITE_FLOAT:
@@ -314,7 +310,6 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getDouble(int) */
     public double getDouble(int col) throws SQLException {
-        DB db = getDatabase();
         if (safeGetColumnType(markCol(col)) == SQLITE_NULL) {
             return 0;
         }
@@ -328,7 +323,6 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getFloat(int) */
     public float getFloat(int col) throws SQLException {
-        DB db = getDatabase();
         if (safeGetColumnType(markCol(col)) == SQLITE_NULL) {
             return 0;
         }
@@ -382,23 +376,20 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getTime(int) */
     public Time getTime(int col) throws SQLException {
-        DB db = getDatabase();
         switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
             case SQLITE_TEXT:
+                String dateText = safeGetColumnText(col);
+                if ("".equals(dateText)) {
+                    return null;
+                }
                 try {
                     return new Time(
-                            getConnectionConfig()
-                                    .getDateFormat()
-                                    .parse(safeGetColumnText(col))
-                                    .getTime());
+                            getConnectionConfig().getDateFormat().parse(dateText).getTime());
                 } catch (Exception e) {
-                    SQLException error = new SQLException("Error parsing time");
-                    error.initCause(e);
-
-                    throw error;
+                    throw new SQLException("Error parsing time", e);
                 }
 
             case SQLITE_FLOAT:
@@ -411,24 +402,24 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getTime(int, java.util.Calendar) */
     public Time getTime(int col, Calendar cal) throws SQLException {
-        checkCalendar(cal);
-        DB db = getDatabase();
+        requireCalendarNotNull(cal);
         switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
             case SQLITE_TEXT:
+                String dateText = safeGetColumnText(col);
+                if ("".equals(dateText)) {
+                    return null;
+                }
                 try {
                     FastDateFormat dateFormat =
                             FastDateFormat.getInstance(
                                     getConnectionConfig().getDateStringFormat(), cal.getTimeZone());
 
-                    return new Time(dateFormat.parse(safeGetColumnText(col)).getTime());
+                    return new Time(dateFormat.parse(dateText).getTime());
                 } catch (Exception e) {
-                    SQLException error = new SQLException("Error parsing time");
-                    error.initCause(e);
-
-                    throw error;
+                    throw new SQLException("Error parsing time", e);
                 }
 
             case SQLITE_FLOAT:
@@ -453,23 +444,20 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getTimestamp(int) */
     public Timestamp getTimestamp(int col) throws SQLException {
-        DB db = getDatabase();
         switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
             case SQLITE_TEXT:
+                String dateText = safeGetColumnText(col);
+                if ("".equals(dateText)) {
+                    return null;
+                }
                 try {
                     return new Timestamp(
-                            getConnectionConfig()
-                                    .getDateFormat()
-                                    .parse(safeGetColumnText(col))
-                                    .getTime());
+                            getConnectionConfig().getDateFormat().parse(dateText).getTime());
                 } catch (Exception e) {
-                    SQLException error = new SQLException("Error parsing time stamp");
-                    error.initCause(e);
-
-                    throw error;
+                    throw new SQLException("Error parsing time stamp", e);
                 }
 
             case SQLITE_FLOAT:
@@ -483,26 +471,24 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar) */
     public Timestamp getTimestamp(int col, Calendar cal) throws SQLException {
-        if (cal == null) {
-            return getTimestamp(col);
-        }
-
+        requireCalendarNotNull(cal);
         switch (safeGetColumnType(markCol(col))) {
             case SQLITE_NULL:
                 return null;
 
             case SQLITE_TEXT:
+                String dateText = safeGetColumnText(col);
+                if ("".equals(dateText)) {
+                    return null;
+                }
                 try {
                     FastDateFormat dateFormat =
                             FastDateFormat.getInstance(
                                     getConnectionConfig().getDateStringFormat(), cal.getTimeZone());
 
-                    return new Timestamp(dateFormat.parse(safeGetColumnText(col)).getTime());
+                    return new Timestamp(dateFormat.parse(dateText).getTime());
                 } catch (Exception e) {
-                    SQLException error = new SQLException("Error parsing time stamp");
-                    error.initCause(e);
-
-                    throw error;
+                    throw new SQLException("Error parsing time stamp", e);
                 }
 
             case SQLITE_FLOAT:
@@ -559,17 +545,17 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSet#getCursorName() */
-    public String getCursorName() throws SQLException {
+    public String getCursorName() {
         return null;
     }
 
     /** @see java.sql.ResultSet#getWarnings() */
-    public SQLWarning getWarnings() throws SQLException {
+    public SQLWarning getWarnings() {
         return null;
     }
 
     /** @see java.sql.ResultSet#clearWarnings() */
-    public void clearWarnings() throws SQLException {}
+    public void clearWarnings() {}
 
     // ResultSetMetaData Functions //////////////////////////////////
 
@@ -589,7 +575,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     // is not null, done with checkCol(int).
 
     /** @see java.sql.ResultSet#getMetaData() */
-    public ResultSetMetaData getMetaData() throws SQLException {
+    public ResultSetMetaData getMetaData() {
         return (ResultSetMetaData) this;
     }
 
@@ -600,8 +586,23 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSetMetaData#getColumnClassName(int) */
     public String getColumnClassName(int col) throws SQLException {
-        checkCol(col);
-        return "java.lang.Object";
+        switch (safeGetColumnType(markCol(col))) {
+            case SQLITE_INTEGER:
+                long val = getLong(col);
+                if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
+                    return "java.lang.Long";
+                } else {
+                    return "java.lang.Integer";
+                }
+            case SQLITE_FLOAT:
+                return "java.lang.Double";
+            case SQLITE_BLOB:
+            case SQLITE_NULL:
+                return "java.lang.Object";
+            case SQLITE_TEXT:
+            default:
+                return "java.lang.String";
+        }
     }
 
     /** @see java.sql.ResultSetMetaData#getColumnCount() */
@@ -611,7 +612,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSetMetaData#getColumnDisplaySize(int) */
-    public int getColumnDisplaySize(int col) throws SQLException {
+    public int getColumnDisplaySize(int col) {
         return Integer.MAX_VALUE;
     }
 
@@ -661,7 +662,12 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                     || "INT".equals(typeName)
                     || "INTEGER".equals(typeName)
                     || "MEDIUMINT".equals(typeName)) {
-                return Types.INTEGER;
+                long val = getLong(col);
+                if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
+                    return Types.BIGINT;
+                } else {
+                    return Types.INTEGER;
+                }
             }
         }
 
@@ -701,6 +707,10 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
             if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
                 return Types.DATE;
+            }
+
+            if ("TIMESTAMP".equals(typeName)) {
+                return Types.TIMESTAMP;
             }
 
             if (valueType == SQLITE_TEXT
@@ -778,6 +788,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
         return declType;
     }
+
     /** @see java.sql.ResultSetMetaData#getScale(int) */
     public int getScale(int col) throws SQLException {
         String declType = getColumnDeclType(col);
@@ -786,7 +797,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
             Matcher matcher = COLUMN_PRECISION.matcher(declType);
 
             if (matcher.find()) {
-                String array[] = matcher.group(1).split(",");
+                String[] array = matcher.group(1).split(",");
 
                 if (array.length == 2) {
                     return Integer.parseInt(array[1].trim());
@@ -798,7 +809,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSetMetaData#getSchemaName(int) */
-    public String getSchemaName(int col) throws SQLException {
+    public String getSchemaName(int col) {
         return "";
     }
 
@@ -827,27 +838,27 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSetMetaData#isCaseSensitive(int) */
-    public boolean isCaseSensitive(int col) throws SQLException {
+    public boolean isCaseSensitive(int col) {
         return true;
     }
 
     /** @see java.sql.ResultSetMetaData#isCurrency(int) */
-    public boolean isCurrency(int col) throws SQLException {
+    public boolean isCurrency(int col) {
         return false;
     }
 
     /** @see java.sql.ResultSetMetaData#isDefinitelyWritable(int) */
-    public boolean isDefinitelyWritable(int col) throws SQLException {
+    public boolean isDefinitelyWritable(int col) {
         return true;
     } // FIXME: check db file constraints?
 
     /** @see java.sql.ResultSetMetaData#isReadOnly(int) */
-    public boolean isReadOnly(int col) throws SQLException {
+    public boolean isReadOnly(int col) {
         return false;
     }
 
     /** @see java.sql.ResultSetMetaData#isSearchable(int) */
-    public boolean isSearchable(int col) throws SQLException {
+    public boolean isSearchable(int col) {
         return true;
     }
 
@@ -859,27 +870,27 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSetMetaData#isWritable(int) */
-    public boolean isWritable(int col) throws SQLException {
+    public boolean isWritable(int col) {
         return true;
     }
 
     /** @see java.sql.ResultSet#getConcurrency() */
-    public int getConcurrency() throws SQLException {
+    public int getConcurrency() {
         return ResultSet.CONCUR_READ_ONLY;
     }
 
     /** @see java.sql.ResultSet#rowDeleted() */
-    public boolean rowDeleted() throws SQLException {
+    public boolean rowDeleted() {
         return false;
     }
 
     /** @see java.sql.ResultSet#rowInserted() */
-    public boolean rowInserted() throws SQLException {
+    public boolean rowInserted() {
         return false;
     }
 
     /** @see java.sql.ResultSet#rowUpdated() */
-    public boolean rowUpdated() throws SQLException {
+    public boolean rowUpdated() {
         return false;
     }
 
@@ -953,13 +964,10 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         return cal;
     }
 
-    public void checkCalendar(Calendar cal) throws SQLException {
-        if (cal != null) return;
-
-        SQLException e = new SQLException("Expected a calendar instance.");
-        e.initCause(new NullPointerException());
-
-        throw e;
+    private void requireCalendarNotNull(Calendar cal) throws SQLException {
+        if (cal == null) {
+            throw new SQLException("Expected a calendar instance.", new IllegalArgumentException());
+        }
     }
 
     private int safeGetColumnType(int col) throws SQLException {

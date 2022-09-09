@@ -1,12 +1,9 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.data.Offset.offset;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.StringTokenizer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,21 +56,21 @@ public class PrepStmtTest {
 
     @Test
     public void update() throws SQLException {
-        assertEquals(conn.prepareStatement("create table s1 (c1);").executeUpdate(), 0);
+        assertThat(conn.prepareStatement("create table s1 (c1);").executeUpdate()).isEqualTo(0);
         PreparedStatement prep = conn.prepareStatement("insert into s1 values (?);");
         prep.setInt(1, 3);
-        assertEquals(prep.executeUpdate(), 1);
-        assertNull(prep.getResultSet());
+        assertThat(prep.executeUpdate()).isEqualTo(1);
+        assertThat(prep.getResultSet()).isNull();
         prep.setInt(1, 5);
-        assertEquals(prep.executeUpdate(), 1);
+        assertThat(prep.executeUpdate()).isEqualTo(1);
         prep.setInt(1, 7);
-        assertEquals(prep.executeUpdate(), 1);
+        assertThat(prep.executeUpdate()).isEqualTo(1);
         prep.close();
 
         // check results with normal statement
         ResultSet rs = stat.executeQuery("select sum(c1) from s1;");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 15);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(15);
         rs.close();
     }
 
@@ -95,7 +93,7 @@ public class PrepStmtTest {
     public void emptyRS() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select null limit 0;");
         ResultSet rs = prep.executeQuery();
-        assertFalse(rs.next());
+        assertThat(rs.next()).isFalse();
         rs.close();
         prep.close();
     }
@@ -105,11 +103,12 @@ public class PrepStmtTest {
         PreparedStatement prep = conn.prepareStatement("select ?;");
         prep.setInt(1, Integer.MAX_VALUE);
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), Integer.MAX_VALUE);
-        assertEquals(rs.getString(1), Integer.toString(Integer.MAX_VALUE));
-        assertEquals(rs.getDouble(1), new Integer(Integer.MAX_VALUE).doubleValue(), 0.0001);
-        assertFalse(rs.next());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(Integer.MAX_VALUE);
+        assertThat(rs.getString(1)).isEqualTo(Integer.toString(Integer.MAX_VALUE));
+        assertThat(rs.getDouble(1))
+                .isCloseTo(new Integer(Integer.MAX_VALUE).doubleValue(), offset(0.0001));
+        assertThat(rs.next()).isFalse();
         rs.close();
         prep.close();
     }
@@ -120,11 +119,11 @@ public class PrepStmtTest {
         prep.setDouble(1, Double.MAX_VALUE);
         prep.setDouble(2, Double.MIN_VALUE);
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getDouble(1), Double.MAX_VALUE, 0.0001);
-        assertTrue(rs.next());
-        assertEquals(rs.getDouble(1), Double.MIN_VALUE, 0.0001);
-        assertFalse(rs.next());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDouble(1)).isCloseTo(Double.MAX_VALUE, offset(0.0001));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDouble(1)).isCloseTo(Double.MIN_VALUE, offset(0.0001));
+        assertThat(rs.next()).isFalse();
         rs.close();
     }
 
@@ -134,10 +133,10 @@ public class PrepStmtTest {
         PreparedStatement prep = conn.prepareStatement("select ?;");
         prep.setString(1, name);
         ResultSet rs = prep.executeQuery();
-        assertEquals(-1, prep.getUpdateCount());
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), name);
-        assertFalse(rs.next());
+        assertThat(prep.getUpdateCount()).isEqualTo(-1);
+        assertThat(rs.next()).isTrue();
+        assertThat(name).isEqualTo(rs.getString(1));
+        assertThat(rs.next()).isFalse();
         rs.close();
     }
 
@@ -157,10 +156,10 @@ public class PrepStmtTest {
         prep.setInt(2, Integer.MAX_VALUE);
         prep.setInt(3, 0);
         rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), Integer.MIN_VALUE);
-        assertEquals(rs.getInt(2), Integer.MAX_VALUE);
-        assertEquals(rs.getInt(3), 0);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(Integer.MIN_VALUE);
+        assertThat(rs.getInt(2)).isEqualTo(Integer.MAX_VALUE);
+        assertThat(rs.getInt(3)).isEqualTo(0);
 
         // strings
         String name = "Winston Leonard Churchill";
@@ -170,32 +169,33 @@ public class PrepStmtTest {
         prep.setString(2, mn);
         prep.setString(3, sn);
         prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), fn);
-        assertEquals(rs.getString(2), mn);
-        assertEquals(rs.getString(3), sn);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(fn);
+        assertThat(rs.getString(2)).isEqualTo(mn);
+        assertThat(rs.getString(3)).isEqualTo(sn);
 
         // mixed
         prep.setString(1, name);
         prep.setString(2, null);
         prep.setLong(3, Long.MAX_VALUE);
         prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), name);
-        assertNull(rs.getString(2));
-        assertTrue(rs.wasNull());
-        assertEquals(rs.getLong(3), Long.MAX_VALUE);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(name);
+        assertThat(rs.getString(2)).isNull();
+        assertThat(rs.wasNull()).isTrue();
+        assertThat(rs.getLong(3)).isEqualTo(Long.MAX_VALUE);
 
         // bytes
         prep.setBytes(1, b1);
         prep.setBytes(2, b2);
         prep.setBytes(3, b3);
         prep.executeQuery();
-        assertTrue(rs.next());
-        assertArrayEq(rs.getBytes(1), b1);
-        assertArrayEq(rs.getBytes(2), b2);
-        assertArrayEq(rs.getBytes(3), b3);
-        assertFalse(rs.next());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1)).containsExactly(b1);
+        assertThat(rs.getBytes(1)).containsExactly(b1);
+        assertThat(rs.getBytes(2)).containsExactly(b2);
+        assertThat(rs.getBytes(3)).containsExactly(b3);
+        assertThat(rs.next()).isFalse();
         rs.close();
 
         // null date, time and timestamp (fix #363)
@@ -203,10 +203,10 @@ public class PrepStmtTest {
         prep.setTime(2, null);
         prep.setTimestamp(3, null);
         rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertNull(rs.getDate(1));
-        assertNull(rs.getTime(2));
-        assertNull(rs.getTimestamp(3));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDate(1)).isNull();
+        assertThat(rs.getTime(2)).isNull();
+        assertThat(rs.getTimestamp(3)).isNull();
 
         // streams
         ByteArrayInputStream inByte = new ByteArrayInputStream(b1);
@@ -218,11 +218,11 @@ public class PrepStmtTest {
         prep.setUnicodeStream(3, inUnicode, b3.length);
 
         rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertArrayEq(b1, rs.getBytes(1));
-        assertEquals(new String(b2, StandardCharsets.UTF_8), rs.getString(2));
-        assertEquals(new String(b3, StandardCharsets.UTF_8), rs.getString(3));
-        assertFalse(rs.next());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1)).containsExactly(b1);
+        assertThat(rs.getString(2)).isEqualTo(new String(b2, StandardCharsets.UTF_8));
+        assertThat(rs.getString(3)).isEqualTo(new String(b3, StandardCharsets.UTF_8));
+        assertThat(rs.next()).isFalse();
         rs.close();
     }
 
@@ -234,11 +234,11 @@ public class PrepStmtTest {
         prep.setShort(3, Short.MIN_VALUE);
         prep.executeQuery();
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertNull(rs.getString("col1"));
-        assertTrue(rs.wasNull());
-        assertEquals(rs.getFloat("col2"), Float.MIN_VALUE, 0.0001);
-        assertEquals(rs.getShort("bingo"), Short.MIN_VALUE);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("col1")).isNull();
+        assertThat(rs.wasNull()).isTrue();
+        assertThat(rs.getFloat("col2")).isCloseTo(Float.MIN_VALUE, offset(0.0001F));
+        assertThat(rs.getShort("bingo")).isEqualTo(Short.MIN_VALUE);
         rs.close();
         prep.close();
     }
@@ -255,8 +255,8 @@ public class PrepStmtTest {
         conn.commit();
 
         ResultSet rs = stat.executeQuery("select count(a) from in1000;");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 1000);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1000);
         rs.close();
     }
 
@@ -278,31 +278,31 @@ public class PrepStmtTest {
         prep.executeUpdate();
 
         ResultSet rs = stat.executeQuery("select c1,c2,c3,c4,c5,c6,c7 from testobj;");
-        assertTrue(rs.next());
+        assertThat(rs.next()).isTrue();
 
-        assertEquals(rs.getInt(1), Integer.MAX_VALUE);
-        assertEquals((int) rs.getLong(1), Integer.MAX_VALUE);
-        assertEquals(rs.getFloat(2), Float.MAX_VALUE, 0.0001f);
-        assertEquals(rs.getDouble(3), Double.MAX_VALUE, 0.0001d);
-        assertEquals(rs.getLong(4), Long.MAX_VALUE);
-        assertFalse(rs.getBoolean(5));
-        assertEquals(rs.getByte(6), (byte) 7);
-        assertArrayEq(rs.getBytes(7), b1);
+        assertThat(rs.getInt(1)).isEqualTo(Integer.MAX_VALUE);
+        assertThat((int) rs.getLong(1)).isEqualTo(Integer.MAX_VALUE);
+        assertThat(rs.getFloat(2)).isCloseTo(Float.MAX_VALUE, offset(0.0001f));
+        assertThat(rs.getDouble(3)).isCloseTo(Double.MAX_VALUE, offset(0.0001d));
+        assertThat(rs.getLong(4)).isEqualTo(Long.MAX_VALUE);
+        assertThat(rs.getBoolean(5)).isFalse();
+        assertThat(rs.getByte(6)).isEqualTo((byte) 7);
+        assertThat(rs.getBytes(7)).containsExactly(b1);
 
-        assertNotNull(rs.getObject(1));
-        assertNotNull(rs.getObject(2));
-        assertNotNull(rs.getObject(3));
-        assertNotNull(rs.getObject(4));
-        assertNotNull(rs.getObject(5));
-        assertNotNull(rs.getObject(6));
-        assertNotNull(rs.getObject(7));
-        assertTrue(rs.getObject(1) instanceof Integer);
-        assertTrue(rs.getObject(2) instanceof Double);
-        assertTrue(rs.getObject(3) instanceof Double);
-        assertTrue(rs.getObject(4) instanceof String);
-        assertTrue(rs.getObject(5) instanceof Integer);
-        assertTrue(rs.getObject(6) instanceof Integer);
-        assertTrue(rs.getObject(7) instanceof byte[]);
+        assertThat(rs.getObject(1)).isNotNull();
+        assertThat(rs.getObject(2)).isNotNull();
+        assertThat(rs.getObject(3)).isNotNull();
+        assertThat(rs.getObject(4)).isNotNull();
+        assertThat(rs.getObject(5)).isNotNull();
+        assertThat(rs.getObject(6)).isNotNull();
+        assertThat(rs.getObject(7)).isNotNull();
+        assertThat(rs.getObject(1) instanceof Integer).isTrue();
+        assertThat(rs.getObject(2) instanceof Double).isTrue();
+        assertThat(rs.getObject(3) instanceof Double).isTrue();
+        assertThat(rs.getObject(4) instanceof String).isTrue();
+        assertThat(rs.getObject(5) instanceof Integer).isTrue();
+        assertThat(rs.getObject(6) instanceof Integer).isTrue();
+        assertThat(rs.getObject(7) instanceof byte[]).isTrue();
         rs.close();
     }
 
@@ -318,8 +318,8 @@ public class PrepStmtTest {
         PreparedStatement prep = conn.prepareStatement("select ?;");
         prep.setString(1, substr);
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), substr);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(substr);
     }
 
     @Test
@@ -343,22 +343,22 @@ public class PrepStmtTest {
                                 + "','"
                                 + utf08
                                 + "';");
-        assertArrayEq(rs.getBytes(1), getUtf8Bytes(utf01));
-        assertArrayEq(rs.getBytes(2), getUtf8Bytes(utf02));
-        assertArrayEq(rs.getBytes(3), getUtf8Bytes(utf03));
-        assertArrayEq(rs.getBytes(4), getUtf8Bytes(utf04));
-        assertArrayEq(rs.getBytes(5), getUtf8Bytes(utf05));
-        assertArrayEq(rs.getBytes(6), getUtf8Bytes(utf06));
-        assertArrayEq(rs.getBytes(7), getUtf8Bytes(utf07));
-        assertArrayEq(rs.getBytes(8), getUtf8Bytes(utf08));
-        assertEquals(rs.getString(1), utf01);
-        assertEquals(rs.getString(2), utf02);
-        assertEquals(rs.getString(3), utf03);
-        assertEquals(rs.getString(4), utf04);
-        assertEquals(rs.getString(5), utf05);
-        assertEquals(rs.getString(6), utf06);
-        assertEquals(rs.getString(7), utf07);
-        assertEquals(rs.getString(8), utf08);
+        assertThat(rs.getBytes(1)).containsExactly(getUtf8Bytes(utf01));
+        assertThat(rs.getBytes(2)).containsExactly(getUtf8Bytes(utf02));
+        assertThat(rs.getBytes(3)).containsExactly(getUtf8Bytes(utf03));
+        assertThat(rs.getBytes(4)).containsExactly(getUtf8Bytes(utf04));
+        assertThat(rs.getBytes(5)).containsExactly(getUtf8Bytes(utf05));
+        assertThat(rs.getBytes(6)).containsExactly(getUtf8Bytes(utf06));
+        assertThat(rs.getBytes(7)).containsExactly(getUtf8Bytes(utf07));
+        assertThat(rs.getBytes(8)).containsExactly(getUtf8Bytes(utf08));
+        assertThat(rs.getString(1)).isEqualTo(utf01);
+        assertThat(rs.getString(2)).isEqualTo(utf02);
+        assertThat(rs.getString(3)).isEqualTo(utf03);
+        assertThat(rs.getString(4)).isEqualTo(utf04);
+        assertThat(rs.getString(5)).isEqualTo(utf05);
+        assertThat(rs.getString(6)).isEqualTo(utf06);
+        assertThat(rs.getString(7)).isEqualTo(utf07);
+        assertThat(rs.getString(8)).isEqualTo(utf08);
         rs.close();
 
         PreparedStatement prep = conn.prepareStatement("select ?,?,?,?,?,?,?,?;");
@@ -371,23 +371,23 @@ public class PrepStmtTest {
         prep.setString(7, utf07);
         prep.setString(8, utf08);
         rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertArrayEq(rs.getBytes(1), getUtf8Bytes(utf01));
-        assertArrayEq(rs.getBytes(2), getUtf8Bytes(utf02));
-        assertArrayEq(rs.getBytes(3), getUtf8Bytes(utf03));
-        assertArrayEq(rs.getBytes(4), getUtf8Bytes(utf04));
-        assertArrayEq(rs.getBytes(5), getUtf8Bytes(utf05));
-        assertArrayEq(rs.getBytes(6), getUtf8Bytes(utf06));
-        assertArrayEq(rs.getBytes(7), getUtf8Bytes(utf07));
-        assertArrayEq(rs.getBytes(8), getUtf8Bytes(utf08));
-        assertEquals(rs.getString(1), utf01);
-        assertEquals(rs.getString(2), utf02);
-        assertEquals(rs.getString(3), utf03);
-        assertEquals(rs.getString(4), utf04);
-        assertEquals(rs.getString(5), utf05);
-        assertEquals(rs.getString(6), utf06);
-        assertEquals(rs.getString(7), utf07);
-        assertEquals(rs.getString(8), utf08);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1)).containsExactly(getUtf8Bytes(utf01));
+        assertThat(rs.getBytes(2)).containsExactly(getUtf8Bytes(utf02));
+        assertThat(rs.getBytes(3)).containsExactly(getUtf8Bytes(utf03));
+        assertThat(rs.getBytes(4)).containsExactly(getUtf8Bytes(utf04));
+        assertThat(rs.getBytes(5)).containsExactly(getUtf8Bytes(utf05));
+        assertThat(rs.getBytes(6)).containsExactly(getUtf8Bytes(utf06));
+        assertThat(rs.getBytes(7)).containsExactly(getUtf8Bytes(utf07));
+        assertThat(rs.getBytes(8)).containsExactly(getUtf8Bytes(utf08));
+        assertThat(rs.getString(1)).isEqualTo(utf01);
+        assertThat(rs.getString(2)).isEqualTo(utf02);
+        assertThat(rs.getString(3)).isEqualTo(utf03);
+        assertThat(rs.getString(4)).isEqualTo(utf04);
+        assertThat(rs.getString(5)).isEqualTo(utf05);
+        assertThat(rs.getString(6)).isEqualTo(utf06);
+        assertThat(rs.getString(7)).isEqualTo(utf07);
+        assertThat(rs.getString(8)).isEqualTo(utf08);
         rs.close();
     }
 
@@ -404,16 +404,16 @@ public class PrepStmtTest {
             prep.setDouble(4, Double.MAX_VALUE + i);
             prep.addBatch();
         }
-        assertArrayEq(prep.executeBatch(), new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
+        assertThat(prep.executeBatch()).containsExactly(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
         prep.close();
 
         rs = stat.executeQuery("select * from test;");
         for (int i = 0; i < 10; i++) {
-            assertTrue(rs.next());
-            assertEquals(rs.getInt(1), Integer.MIN_VALUE + i);
-            assertEquals(rs.getFloat(2), Float.MIN_VALUE + i, 0.0001);
-            assertEquals(rs.getString(3), "Hello " + i);
-            assertEquals(rs.getDouble(4), Double.MAX_VALUE + i, 0.0001);
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getInt(1)).isEqualTo(Integer.MIN_VALUE + i);
+            assertThat(rs.getFloat(2)).isCloseTo(Float.MIN_VALUE + i, offset(0.0001F));
+            assertThat(rs.getString(3)).isEqualTo("Hello " + i);
+            assertThat(rs.getDouble(4)).isCloseTo(Double.MAX_VALUE + i, offset(0.0001));
         }
         rs.close();
         stat.executeUpdate("drop table test;");
@@ -430,14 +430,14 @@ public class PrepStmtTest {
         prep.addBatch();
         int call2_length = prep.executeBatch().length;
 
-        assertEquals(1, call1_length);
-        assertEquals(1, call2_length);
+        assertThat(call1_length).isEqualTo(1);
+        assertThat(call2_length).isEqualTo(1);
 
         ResultSet rs = stat.executeQuery("select * from t");
         rs.next();
-        assertEquals("a", rs.getString(1));
+        assertThat(rs.getString(1)).isEqualTo("a");
         rs.next();
-        assertEquals("b", rs.getString(1));
+        assertThat(rs.getString(1)).isEqualTo("b");
     }
 
     @Test
@@ -465,11 +465,11 @@ public class PrepStmtTest {
             prep.setInt(1, Integer.MIN_VALUE + i);
             prep.addBatch();
         }
-        assertArrayEq(new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, prep.executeBatch());
+        assertThat(new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}).containsExactly(prep.executeBatch());
         prep.close();
         ResultSet rs = stat.executeQuery("select count(*) from test;");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 10);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(10);
         rs.close();
     }
 
@@ -480,37 +480,37 @@ public class PrepStmtTest {
         for (int i = 0; i < 10; i++) {
             prep.addBatch();
         }
-        assertArrayEq(new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, prep.executeBatch());
+        assertThat(new int[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}).containsExactly(prep.executeBatch());
         prep.close();
         ResultSet rs = stat.executeQuery("select count(*) from test;");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 10);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(10);
         rs.close();
     }
 
     @Test
     public void paramMetaData() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ?,?,?,?;");
-        assertEquals(prep.getParameterMetaData().getParameterCount(), 4);
+        assertThat(prep.getParameterMetaData().getParameterCount()).isEqualTo(4);
     }
 
     @Test
     public void metaData() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ? as col1, ? as col2, ? as delta;");
         ResultSetMetaData meta = prep.getMetaData();
-        assertEquals(meta.getColumnCount(), 3);
-        assertEquals(meta.getColumnName(1), "col1");
-        assertEquals(meta.getColumnName(2), "col2");
-        assertEquals(meta.getColumnName(3), "delta");
-        /*assertEquals(meta.getColumnType(1), Types.INTEGER);
-        assertEquals(meta.getColumnType(2), Types.INTEGER);
-        assertEquals(meta.getColumnType(3), Types.INTEGER);*/
+        assertThat(meta.getColumnCount()).isEqualTo(3);
+        assertThat(meta.getColumnName(1)).isEqualTo("col1");
+        assertThat(meta.getColumnName(2)).isEqualTo("col2");
+        assertThat(meta.getColumnName(3)).isEqualTo("delta");
+        assertThat(meta.getColumnType(1)).isEqualTo(Types.NUMERIC);
+        assertThat(meta.getColumnType(2)).isEqualTo(Types.NUMERIC);
+        assertThat(meta.getColumnType(3)).isEqualTo(Types.NUMERIC);
 
         prep.setInt(1, 2);
         prep.setInt(2, 3);
         prep.setInt(3, -1);
         meta = prep.executeQuery().getMetaData();
-        assertEquals(meta.getColumnCount(), 3);
+        assertThat(meta.getColumnCount()).isEqualTo(3);
         prep.close();
     }
 
@@ -524,9 +524,9 @@ public class PrepStmtTest {
         prep.executeUpdate();
 
         ResultSet rs = stat.executeQuery("select c1 from t;");
-        assertTrue(rs.next());
-        assertEquals(rs.getLong(1), d1.getTime());
-        assertTrue(rs.getDate(1).equals(d1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getLong(1)).isEqualTo(d1.getTime());
+        assertThat(rs.getDate(1)).isEqualTo(d1);
         rs.close();
     }
 
@@ -540,9 +540,9 @@ public class PrepStmtTest {
         prep.executeUpdate();
 
         ResultSet rs = stat.executeQuery("select strftime('%s', c1) * 1000 from t;");
-        assertTrue(rs.next());
-        assertEquals(rs.getLong(1), d1.getTime());
-        assertTrue(rs.getDate(1).equals(d1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getLong(1)).isEqualTo(d1.getTime());
+        assertThat(rs.getDate(1)).isEqualTo(d1);
     }
 
     @Test
@@ -577,17 +577,17 @@ public class PrepStmtTest {
         for (int i = 0; i < 10; i++) {
             prep.setInt(2, i);
             ResultSet rs = prep.executeQuery();
-            assertTrue(rs.next());
-            assertEquals(rs.getInt(1), 9);
-            assertEquals(rs.getInt(2), i);
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getInt(1)).isEqualTo(9);
+            assertThat(rs.getInt(2)).isEqualTo(i);
         }
 
         for (int i = 0; i < 10; i++) {
             prep.setInt(2, i);
             ResultSet rs = prep.executeQuery();
-            assertTrue(rs.next());
-            assertEquals(rs.getInt(1), 9);
-            assertEquals(rs.getInt(2), i);
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getInt(1)).isEqualTo(9);
+            assertThat(rs.getInt(2)).isEqualTo(i);
             rs.close();
         }
 
@@ -609,7 +609,7 @@ public class PrepStmtTest {
         prep.clearParameters();
         rs.next();
 
-        assertEquals(1, rs.getInt(1));
+        assertThat(rs.getInt(1)).isEqualTo(1);
 
         rs.close();
 
@@ -623,18 +623,19 @@ public class PrepStmtTest {
         rs.next();
 
         // gets the row with the NULL column
-        assertEquals(2, rs.getInt(1));
+        assertThat(rs.getInt(1)).isEqualTo(2);
 
         rs.close();
         nullPrep.close();
     }
 
+    @Test
     public void preparedStatementShouldNotThrowIfNotAllParamsSet() throws SQLException {
         PreparedStatement prep = conn.prepareStatement("select ? as col1, ? as col2, ? as col3;");
         ResultSetMetaData meta = prep.getMetaData();
 
         // leaves 0 and 1 unbound
-        assertEquals(meta.getColumnCount(), 3);
+        assertThat(meta.getColumnCount()).isEqualTo(3);
 
         // we only set one 1 param of the expected 3 params
         prep.setInt(1, 2);
@@ -642,6 +643,7 @@ public class PrepStmtTest {
         prep.close();
     }
 
+    @Test
     public void preparedStatementShouldNotThrowIfNotAllParamsSetBatch() throws SQLException {
         stat.executeUpdate("create table test (c1, c2);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?,?);");
@@ -654,94 +656,65 @@ public class PrepStmtTest {
 
     @Test
     public void noSuchTable() {
-        assertThrows(
-                SQLException.class, () -> conn.prepareStatement("select * from doesnotexist;"));
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> conn.prepareStatement("select * from doesnotexist;"));
     }
 
     @Test
-    public void noSuchCol() throws SQLException {
-        assertThrows(
-                SQLException.class, () -> conn.prepareStatement("select notacol from (select 1);"));
+    public void noSuchCol() {
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> conn.prepareStatement("select notacol from (select 1);"));
     }
 
     @Test
     public void noSuchColName() throws SQLException {
         ResultSet rs = conn.prepareStatement("select 1;").executeQuery();
-        assertTrue(rs.next());
-        assertThrows(SQLException.class, () -> rs.getInt("noSuchColName"));
+        assertThat(rs.next()).isTrue();
+        assertThatExceptionOfType(SQLException.class).isThrownBy(() -> rs.getInt("noSuchColName"));
     }
 
     @Test
     public void constraintErrorCodeExecute() throws SQLException {
-        assertEquals(
-                0,
-                stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
-        assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
+        assertThat(
+                        stat.executeUpdate(
+                                "create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"))
+                .isEqualTo(0);
+        assertThat(stat.executeUpdate("insert into foo values(1);")).isEqualTo(1);
         // try to insert a row with duplicate id
-        try {
-            PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
+        try (PreparedStatement statement = conn.prepareStatement("insert into foo values(?);")) {
             statement.setInt(1, 1);
-            statement.execute();
-            fail("expected exception");
-        } catch (SQLException e) {
-            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
+
+            assertThatThrownBy(statement::execute)
+                    .isInstanceOfSatisfying(
+                            SQLiteException.class,
+                            (e) -> {
+                                assertThat(e.getErrorCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_CONSTRAINT.code);
+                                assertThat(e.getResultCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE);
+                            });
         }
     }
 
     @Test
     public void constraintErrorCodeExecuteUpdate() throws SQLException {
-        assertEquals(
-                0,
-                stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
-        assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
+        assertThat(
+                        stat.executeUpdate(
+                                "create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"))
+                .isEqualTo(0);
+        assertThat(stat.executeUpdate("insert into foo values(1);")).isEqualTo(1);
         // try to insert a row with duplicate id
-        try {
-            PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
+        try (PreparedStatement statement = conn.prepareStatement("insert into foo values(?);")) {
             statement.setInt(1, 1);
-            statement.executeUpdate();
-            fail("expected exception");
-        } catch (SQLException e) {
-            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
-        }
-    }
-
-    @Test
-    public void constraintExtendedResultCodeExecute() throws SQLException {
-        assertEquals(
-                0,
-                stat.executeUpdate("create table foo (id integer, CONSTRAINT U_ID UNIQUE (id));"));
-        assertEquals(1, stat.executeUpdate("insert into foo values(1);"));
-        // try to insert a row with duplicate id
-        try {
-            PreparedStatement statement = conn.prepareStatement("insert into foo values(?);");
-            statement.setInt(1, 1);
-            statement.execute();
-            fail("expected exception");
-        } catch (SQLException e) {
-            assertEquals(SQLiteErrorCode.SQLITE_CONSTRAINT.code, e.getErrorCode());
-
-            // Extended error code should be preserved in SQLiteException#resultCode
-            assertEquals(
-                    SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE,
-                    ((SQLiteException) e).getResultCode());
-        }
-    }
-
-    private void assertArrayEq(byte[] a, byte[] b) {
-        assertNotNull(a);
-        assertNotNull(b);
-        assertEquals(a.length, b.length);
-        for (int i = 0; i < a.length; i++) {
-            assertEquals(a[i], b[i]);
-        }
-    }
-
-    private void assertArrayEq(int[] a, int[] b) {
-        assertNotNull(a);
-        assertNotNull(b);
-        assertEquals(a.length, b.length);
-        for (int i = 0; i < a.length; i++) {
-            assertEquals(a[i], b[i]);
+            assertThatThrownBy(statement::executeUpdate)
+                    .isInstanceOfSatisfying(
+                            SQLiteException.class,
+                            (e) -> {
+                                assertThat(e.getErrorCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_CONSTRAINT.code);
+                                assertThat(e.getResultCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE);
+                            });
         }
     }
 }

@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -35,21 +33,21 @@ public class ResultSetWithoutResultsTest {
 
     private void testStmtWithResult(Statement statement) throws SQLException {
         try (ResultSet rs = statement.executeQuery("select 123")) {
-            assertTrue(rs.isBeforeFirst());
-            assertFalse(rs.isAfterLast());
+            assertThat(rs.isBeforeFirst()).isTrue();
+            assertThat(rs.isAfterLast()).isFalse();
             rs.next();
-            assertFalse(rs.isBeforeFirst());
-            assertFalse(rs.isAfterLast());
-            assertEquals(123, rs.getInt(1));
+            assertThat(rs.isBeforeFirst()).isFalse();
+            assertThat(rs.isAfterLast()).isFalse();
+            assertThat(rs.getInt(1)).isEqualTo(123);
             rs.next();
-            assertTrue(rs.isAfterLast());
+            assertThat(rs.isAfterLast()).isTrue();
         }
     }
 
     private void runEmptyStatement(Statement statement) throws SQLException {
         try (ResultSet rs = statement.executeQuery("select 1 where 1=0")) {
-            assertFalse(rs.isBeforeFirst());
-            assertFalse(rs.isAfterLast());
+            assertThat(rs.isBeforeFirst()).isFalse();
+            assertThat(rs.isAfterLast()).isFalse();
         }
     }
 }

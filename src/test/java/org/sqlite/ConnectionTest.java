@@ -1,10 +1,8 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,9 +34,9 @@ public class ConnectionTest {
     @Test
     public void isValid() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
-        assertTrue(conn.isValid(0));
+        assertThat(conn.isValid(0)).isTrue();
         conn.close();
-        assertFalse(conn.isValid(0));
+        assertThat(conn.isValid(0)).isFalse();
     }
 
     @Test
@@ -48,12 +45,8 @@ public class ConnectionTest {
         Statement stat = conn.createStatement();
         conn.close();
 
-        try {
-            stat.executeUpdate("create table A(id, name)");
-        } catch (SQLException e) {
-            return; // successfully detect the operation on the closed DB
-        }
-        fail("should not reach here");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> stat.executeUpdate("create table A(id, name)"));
     }
 
     @Test
@@ -63,32 +56,26 @@ public class ConnectionTest {
         SQLiteConfig config = new SQLiteConfig();
         config.setReadOnly(true);
 
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
-        Statement stat = conn.createStatement();
-        try {
-            assertTrue(conn.isReadOnly());
-            // these updates must be forbidden in read-only mode
-            stat.executeUpdate("create table A(id, name)");
-            stat.executeUpdate("insert into A values(1, 'leo')");
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties())) {
+            try (Statement stat = conn.createStatement()) {
+                assertThat(conn.isReadOnly()).isTrue();
 
-            fail("read only flag is not properly set");
-        } catch (SQLException e) {
-            // success
-        } finally {
-            stat.close();
+                // these updates must be forbidden in read-only mode
+                assertThatThrownBy(
+                                () -> {
+                                    stat.executeUpdate("create table A(id, name)");
+                                    stat.executeUpdate("insert into A values(1, 'leo')");
+                                })
+                        .isInstanceOf(SQLException.class);
+            }
             conn.close();
-        }
 
-        config.setReadOnly(true); // should be a no-op
+            config.setReadOnly(true); // should be a no-op
 
-        try {
-            conn.setReadOnly(false);
-            fail("should not change read only flag after opening connection");
-        } catch (SQLException e) {
-            assert (e.getMessage()
-                    .contains("Cannot change read-only flag after establishing a connection."));
-        } finally {
-            conn.close();
+            assertThatThrownBy(() -> conn.setReadOnly(false))
+                    .isInstanceOf(SQLException.class)
+                    .hasMessageContaining(
+                            "Cannot change read-only flag after establishing a connection.");
         }
     }
 
@@ -96,10 +83,10 @@ public class ConnectionTest {
     public void foreignKeys() throws SQLException {
         SQLiteConfig config = new SQLiteConfig();
         config.enforceForeignKeys(true);
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
-        Statement stat = conn.createStatement();
 
-        try {
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
+                Statement stat = conn.createStatement()) {
+
             stat.executeUpdate(
                     "create table track(id integer primary key, name, aid, foreign key (aid) references artist(id))");
             stat.executeUpdate("create table artist(id integer primary key, name)");
@@ -107,16 +94,12 @@ public class ConnectionTest {
             stat.executeUpdate("insert into artist values(10, 'leo')");
             stat.executeUpdate("insert into track values(1, 'first track', 10)"); // OK
 
-            try {
-                stat.executeUpdate(
-                        "insert into track values(2, 'second track', 3)"); // invalid reference
-            } catch (SQLException e) {
-                return; // successfully detect violation of foreign key constraints
-            }
-            fail("foreign key constraint must be enforced");
-        } finally {
-            stat.close();
-            conn.close();
+            // invalid reference - detect violation of foreign key constraints
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(
+                            () ->
+                                    stat.executeUpdate(
+                                            "insert into track values(2, 'second track', 3)"));
         }
     }
 
@@ -124,14 +107,9 @@ public class ConnectionTest {
     public void canWrite() throws SQLException {
         SQLiteConfig config = new SQLiteConfig();
         config.enforceForeignKeys(true);
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
-        Statement stat = conn.createStatement();
-
-        try {
-            assertFalse(conn.isReadOnly());
-        } finally {
-            stat.close();
-            conn.close();
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties())) {
+            conn.createStatement();
+            assertThat(conn.isReadOnly()).isFalse();
         }
     }
 
@@ -139,21 +117,15 @@ public class ConnectionTest {
     public void synchronous() throws SQLException {
         SQLiteConfig config = new SQLiteConfig();
         config.setSynchronous(SynchronousMode.OFF);
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
-        Statement stat = conn.createStatement();
-
-        try {
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties());
+                Statement stat = conn.createStatement()) {
             ResultSet rs = stat.executeQuery("pragma synchronous");
             if (rs.next()) {
                 ResultSetMetaData rm = rs.getMetaData();
-                int i = rm.getColumnCount();
+                rm.getColumnCount();
                 int synchronous = rs.getInt(1);
-                assertEquals(0, synchronous);
+                assertThat(synchronous).isEqualTo(0);
             }
-
-        } finally {
-            stat.close();
-            conn.close();
         }
     }
 
@@ -167,33 +139,34 @@ public class ConnectionTest {
     public void isClosed() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         conn.close();
-        assertTrue(conn.isClosed());
+        assertThat(conn.isClosed()).isTrue();
     }
 
     @Test
     public void closeTest() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:");
         PreparedStatement prep = conn.prepareStatement("select null;");
-        ResultSet rs = prep.executeQuery();
+        prep.executeQuery();
         conn.close();
-        assertThrows(SQLException.class, prep::clearParameters);
+        assertThatExceptionOfType(SQLException.class).isThrownBy(prep::clearParameters);
     }
 
     @Test
     public void openInvalidLocation() {
-        assertThrows(SQLException.class, () -> DriverManager.getConnection("jdbc:sqlite:/"));
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> DriverManager.getConnection("jdbc:sqlite:/"));
     }
 
     @Test
     public void openResource() throws Exception {
         File testDB = copyToTemp("sample.db");
-        assertTrue(testDB.exists());
+        assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
                         String.format("jdbc:sqlite::resource:%s", testDB.toURI().toURL()));
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from coordinate");
-        assertTrue(rs.next());
+        assertThat(rs.next()).isTrue();
         rs.close();
         stat.close();
         conn.close();
@@ -202,7 +175,7 @@ public class ConnectionTest {
     @Test
     public void openJARResource() throws Exception {
         File testJAR = copyToTemp("testdb.jar");
-        assertTrue(testJAR.exists());
+        assertThat(testJAR.exists()).isTrue();
 
         Connection conn =
                 DriverManager.getConnection(
@@ -211,7 +184,7 @@ public class ConnectionTest {
                                 testJAR.toURI().toURL()));
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from coordinate");
-        assertTrue(rs.next());
+        assertThat(rs.next()).isTrue();
         rs.close();
         stat.close();
         conn.close();
@@ -219,10 +192,9 @@ public class ConnectionTest {
 
     @Test
     public void openFile() throws Exception {
-
         File testDB = copyToTemp("sample.db");
 
-        assertTrue(testDB.exists());
+        assertThat(testDB.exists()).isTrue();
         Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB));
         conn.close();
     }
@@ -236,15 +208,13 @@ public class ConnectionTest {
         }
         ExecutorService finalizer = Executors.newSingleThreadExecutor();
         try {
-            ArrayList<Future<Void>> futures = new ArrayList<Future<Void>>(rss.length);
+            ArrayList<Future<Void>> futures = new ArrayList<>(rss.length);
             for (final ResultSet rs : rss) {
                 futures.add(
                         finalizer.submit(
-                                new Callable<Void>() {
-                                    public Void call() throws Exception {
-                                        rs.close();
-                                        return null;
-                                    }
+                                () -> {
+                                    rs.close();
+                                    return null;
                                 }));
             }
             conn.close();
@@ -266,7 +236,7 @@ public class ConnectionTest {
         FileOutputStream out = new FileOutputStream(tmp);
 
         byte[] buf = new byte[8192];
-        for (int readBytes = 0; (readBytes = in.read(buf)) != -1; ) {
+        for (int readBytes; (readBytes = in.read(buf)) != -1; ) {
             out.write(buf, 0, readBytes);
         }
         out.flush();
@@ -289,16 +259,16 @@ public class ConnectionTest {
                 DriverManager.getConnection("jdbc:sqlite:file:memdb1?mode=memory&cache=shared");
         Statement stmt2 = conn2.createStatement();
         ResultSet rs = stmt2.executeQuery("select * from tbl");
-        assertTrue(rs.next());
-        assertEquals(100, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(100);
         stmt2.close();
 
         Connection conn3 = DriverManager.getConnection("jdbc:sqlite:file::memory:?cache=shared");
         Statement stmt3 = conn3.createStatement();
         stmt3.executeUpdate("attach 'file:memdb1?mode=memory&cache=shared' as memdb1");
         rs = stmt3.executeQuery("select * from memdb1.tbl");
-        assertTrue(rs.next());
-        assertEquals(100, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(100);
         stmt3.executeUpdate("create table tbl2(col int)");
         stmt3.executeUpdate("insert into tbl2 values(200)");
         stmt3.close();
@@ -306,8 +276,8 @@ public class ConnectionTest {
         Connection conn4 = DriverManager.getConnection("jdbc:sqlite:file::memory:?cache=shared");
         Statement stmt4 = conn4.createStatement();
         rs = stmt4.executeQuery("select * from tbl2");
-        assertTrue(rs.next());
-        assertEquals(200, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(200);
         rs.close();
         stmt4.close();
         conn4.close();
@@ -317,7 +287,7 @@ public class ConnectionTest {
     public void setPragmasFromURI() throws Exception {
         File testDB = copyToTemp("sample.db");
 
-        assertTrue(testDB.exists());
+        assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
                         String.format(
@@ -326,15 +296,15 @@ public class ConnectionTest {
         Statement stat = conn.createStatement();
 
         ResultSet rs = stat.executeQuery("pragma journal_mode");
-        assertEquals("wal", rs.getString(1));
+        assertThat(rs.getString(1)).isEqualTo("wal");
         rs.close();
 
         rs = stat.executeQuery("pragma synchronous");
-        assertEquals(false, rs.getBoolean(1));
+        assertThat(rs.getBoolean(1)).isEqualTo(false);
         rs.close();
 
         rs = stat.executeQuery("pragma journal_size_limit");
-        assertEquals(500, rs.getInt(1));
+        assertThat(rs.getInt(1)).isEqualTo(500);
         rs.close();
 
         stat.close();
@@ -345,15 +315,14 @@ public class ConnectionTest {
     public void limits() throws Exception {
         File testDB = copyToTemp("sample.db");
 
-        assertTrue(testDB.exists());
+        assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
                         String.format("jdbc:sqlite:%s?limit_attached=0", testDB));
         Statement stat = conn.createStatement();
 
-        assertThrows(
-                SQLException.class,
-                () -> stat.executeUpdate("ATTACH DATABASE attach_test.db AS attachDb"));
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> stat.executeUpdate("ATTACH DATABASE attach_test.db AS attachDb"));
 
         stat.close();
     }
@@ -366,7 +335,7 @@ public class ConnectionTest {
         Statement stat = conn.createStatement();
 
         ResultSet rs = stat.executeQuery("pragma foreign_keys");
-        assertEquals(true, rs.getBoolean(1));
+        assertThat(rs.getBoolean(1)).isEqualTo(true);
         rs.close();
 
         stat.close();
@@ -375,18 +344,18 @@ public class ConnectionTest {
 
     @Test
     public void errorOnEmptyPragmaValueInURI() {
-        assertThrows(
-                SQLException.class,
-                () ->
-                        DriverManager.getConnection(
-                                "jdbc:sqlite:file::memory:?journal_mode=&synchronous="));
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(
+                        () ->
+                                DriverManager.getConnection(
+                                        "jdbc:sqlite:file::memory:?journal_mode=&synchronous="));
     }
 
     @Test
     public void ignoreDoubleAmpersandsInURI() throws Exception {
         File testDB = copyToTemp("sample.db");
 
-        assertTrue(testDB.exists());
+        assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
                         String.format(
@@ -394,11 +363,11 @@ public class ConnectionTest {
         Statement stat = conn.createStatement();
 
         ResultSet rs = stat.executeQuery("pragma journal_mode");
-        assertEquals("wal", rs.getString(1));
+        assertThat(rs.getString(1)).isEqualTo("wal");
         rs.close();
 
         rs = stat.executeQuery("pragma synchronous");
-        assertEquals(false, rs.getBoolean(1));
+        assertThat(rs.getBoolean(1)).isFalse();
         rs.close();
 
         stat.close();
@@ -409,7 +378,7 @@ public class ConnectionTest {
     public void useLastSpecifiedPragmaValueInURI() throws Exception {
         File testDB = copyToTemp("sample.db");
 
-        assertTrue(testDB.exists());
+        assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
                         String.format(
@@ -418,7 +387,7 @@ public class ConnectionTest {
         Statement stat = conn.createStatement();
 
         ResultSet rs = stat.executeQuery("pragma journal_mode");
-        assertEquals("truncate", rs.getString(1));
+        assertThat(rs.getString(1)).isEqualTo("truncate");
         rs.close();
 
         stat.close();
@@ -429,7 +398,7 @@ public class ConnectionTest {
     public void overrideURIPragmaValuesWithProperties() throws Exception {
         File testDB = copyToTemp("sample.db");
 
-        assertTrue(testDB.exists());
+        assertThat(testDB.exists()).isTrue();
         Properties props = new Properties();
         props.setProperty(Pragma.JOURNAL_MODE.pragmaName, JournalMode.TRUNCATE.name());
         Connection conn =
@@ -438,7 +407,7 @@ public class ConnectionTest {
         Statement stat = conn.createStatement();
 
         ResultSet rs = stat.executeQuery("pragma journal_mode");
-        assertEquals("truncate", rs.getString(1));
+        assertThat(rs.getString(1)).isEqualTo("truncate");
         rs.close();
 
         stat.close();

@@ -27,6 +27,7 @@ package org.sqlite;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.*;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.sqlite.util.OSInfo;
 import org.sqlite.util.StringUtils;
 
@@ -50,6 +52,7 @@ import org.sqlite.util.StringUtils;
  */
 public class SQLiteJDBCLoader {
 
+    private static final String LOCK_EXT = ".lck";
     private static boolean extracted = false;
 
     /**
@@ -75,29 +78,30 @@ public class SQLiteJDBCLoader {
      * Deleted old native libraries e.g. on Windows the DLL file is not removed on VM-Exit (bug #80)
      */
     static void cleanup() {
-        String tempFolder = getTempDir().getAbsolutePath();
-        File dir = new File(tempFolder);
+        String searchPattern = "sqlite-" + getVersion();
 
-        File[] nativeLibFiles =
-                dir.listFiles(
-                        new FilenameFilter() {
-                            private final String searchPattern = "sqlite-" + getVersion();
-
-                            public boolean accept(File dir, String name) {
-                                return name.startsWith(searchPattern) && !name.endsWith(".lck");
-                            }
-                        });
-        if (nativeLibFiles != null) {
-            for (File nativeLibFile : nativeLibFiles) {
-                File lckFile = new File(nativeLibFile.getAbsolutePath() + ".lck");
-                if (!lckFile.exists()) {
-                    try {
-                        nativeLibFile.delete();
-                    } catch (SecurityException e) {
-                        System.err.println("Failed to delete old native lib" + e.getMessage());
-                    }
-                }
-            }
+        try (Stream<Path> dirList = Files.list(getTempDir().toPath())) {
+            dirList.filter(
+                            path ->
+                                    !path.getFileName().toString().endsWith(LOCK_EXT)
+                                            && path.getFileName()
+                                                    .toString()
+                                                    .startsWith(searchPattern))
+                    .forEach(
+                            nativeLib -> {
+                                Path lckFile = Paths.get(nativeLib + LOCK_EXT);
+                                if (Files.notExists(lckFile)) {
+                                    try {
+                                        Files.delete(nativeLib);
+                                    } catch (Exception e) {
+                                        System.err.println(
+                                                "Failed to delete old native lib: "
+                                                        + e.getMessage());
+                                    }
+                                }
+                            });
+        } catch (IOException e) {
+            System.err.println("Failed to open directory: " + e.getMessage());
         }
     }
 
@@ -194,59 +198,39 @@ public class SQLiteJDBCLoader {
         String uuid = UUID.randomUUID().toString();
         String extractedLibFileName =
                 String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
-        String extractedLckFileName = extractedLibFileName + ".lck";
+        String extractedLckFileName = extractedLibFileName + LOCK_EXT;
 
-        File extractedLibFile = new File(targetFolder, extractedLibFileName);
-        File extractedLckFile = new File(targetFolder, extractedLckFileName);
+        Path extractedLibFile = Paths.get(targetFolder, extractedLibFileName);
+        Path extractedLckFile = Paths.get(targetFolder, extractedLckFileName);
 
         try {
             // Extract a native library file into the target directory
-            InputStream reader = getResourceAsStream(nativeLibraryFilePath);
-            if (!extractedLckFile.exists()) {
-                new FileOutputStream(extractedLckFile).close();
-            }
-            FileOutputStream writer = new FileOutputStream(extractedLibFile);
-            try {
-                byte[] buffer = new byte[8192];
-                int bytesRead = 0;
-                while ((bytesRead = reader.read(buffer)) != -1) {
-                    writer.write(buffer, 0, bytesRead);
+            try (InputStream reader = getResourceAsStream(nativeLibraryFilePath)) {
+                if (Files.notExists(extractedLckFile)) {
+                    Files.createFile(extractedLckFile);
                 }
+
+                Files.copy(reader, extractedLibFile, StandardCopyOption.REPLACE_EXISTING);
             } finally {
                 // Delete the extracted lib file on JVM exit.
-                extractedLibFile.deleteOnExit();
-                extractedLckFile.deleteOnExit();
-
-                if (writer != null) {
-                    writer.close();
-                }
-                if (reader != null) {
-                    reader.close();
-                }
+                extractedLibFile.toFile().deleteOnExit();
+                extractedLckFile.toFile().deleteOnExit();
             }
 
             // Set executable (x) flag to enable Java to load the native library
-            extractedLibFile.setReadable(true);
-            extractedLibFile.setWritable(true, true);
-            extractedLibFile.setExecutable(true);
+            extractedLibFile.toFile().setReadable(true);
+            extractedLibFile.toFile().setWritable(true, true);
+            extractedLibFile.toFile().setExecutable(true);
 
             // Check whether the contents are properly copied from the resource folder
             {
-                InputStream nativeIn = getResourceAsStream(nativeLibraryFilePath);
-                InputStream extractedLibIn = new FileInputStream(extractedLibFile);
-                try {
+                try (InputStream nativeIn = getResourceAsStream(nativeLibraryFilePath);
+                        InputStream extractedLibIn = Files.newInputStream(extractedLibFile)) {
                     if (!contentsEquals(nativeIn, extractedLibIn)) {
                         throw new RuntimeException(
                                 String.format(
                                         "Failed to write a native library file at %s",
                                         extractedLibFile));
-                    }
-                } finally {
-                    if (nativeIn != null) {
-                        nativeIn.close();
-                    }
-                    if (extractedLibIn != null) {
-                        extractedLibIn.close();
                     }
                 }
             }
@@ -301,7 +285,7 @@ public class SQLiteJDBCLoader {
                                 + name
                                 + ". osinfo: "
                                 + OSInfo.getNativeLibFolderPathForCurrentOS());
-                System.err.println(e);
+                e.printStackTrace();
                 return false;
             }
 
@@ -320,7 +304,7 @@ public class SQLiteJDBCLoader {
             return;
         }
 
-        List<String> triedPaths = new LinkedList<String>();
+        List<String> triedPaths = new LinkedList<>();
 
         // Try loading library from org.sqlite.lib.path library path */
         String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
@@ -438,7 +422,7 @@ public class SQLiteJDBCLoader {
                 version = version.trim().replaceAll("[^0-9\\.]", "");
             }
         } catch (IOException e) {
-            System.err.println(e);
+            e.printStackTrace();
         }
         return version;
     }

@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.sql.DriverManager;
@@ -41,16 +39,13 @@ public class ListenerTest {
 
     @Test
     public void testSetAndRemoveUpdateHook() throws Exception {
-        final List<UpdateEvent> updates = new LinkedList<UpdateEvent>();
+        final List<UpdateEvent> updates = new LinkedList<>();
 
         SQLiteUpdateListener listener =
-                new SQLiteUpdateListener() {
-                    @Override
-                    public void onUpdate(Type type, String database, String table, long rowId) {
-                        synchronized (updates) {
-                            updates.add(new UpdateEvent(type, database, table, rowId));
-                            updates.notifyAll();
-                        }
+                (type, database, table, rowId) -> {
+                    synchronized (updates) {
+                        updates.add(new UpdateEvent(type, database, table, rowId));
+                        updates.notifyAll();
                     }
                 };
 
@@ -67,10 +62,10 @@ public class ListenerTest {
 
         if (updates.isEmpty()) throw new AssertionError("Never got update!");
 
-        assertEquals(1, updates.size());
-        assertEquals("sample", updates.get(0).table);
-        assertEquals(1, updates.get(0).rowId);
-        assertEquals(SQLiteUpdateListener.Type.INSERT, updates.get(0).type);
+        assertThat(updates.size()).isEqualTo(1);
+        assertThat(updates.get(0).table).isEqualTo("sample");
+        assertThat(updates.get(0).rowId).isEqualTo(1);
+        assertThat(updates.get(0).type).isEqualTo(SQLiteUpdateListener.Type.INSERT);
 
         updates.clear();
 
@@ -85,7 +80,7 @@ public class ListenerTest {
             }
         }
 
-        assertTrue(updates.isEmpty());
+        assertThat(updates.isEmpty()).isTrue();
     }
 
     /**
@@ -115,17 +110,17 @@ public class ListenerTest {
 
         if (updates.isEmpty()) throw new AssertionError("Never got update!");
 
-        assertEquals(1, updates.size());
-        assertEquals("sample", updates.get(0).table);
-        assertEquals(1, updates.get(0).rowId);
-        assertEquals(SQLiteUpdateListener.Type.INSERT, updates.get(0).type);
-        assertEquals(1, commitListener1.getNumCommits());
+        assertThat(updates.size()).isEqualTo(1);
+        assertThat(updates.get(0).table).isEqualTo("sample");
+        assertThat(updates.get(0).rowId).isEqualTo(1);
+        assertThat(updates.get(0).type).isEqualTo(SQLiteUpdateListener.Type.INSERT);
+        assertThat(commitListener1.getNumCommits()).isEqualTo(1);
 
         Statement secondStatement = connectionTwo.createStatement();
         secondStatement.execute("INSERT INTO sample (description) VALUES ('amor fati')");
 
-        assertTrue(listener1.getAllUpdates().isEmpty());
-        assertEquals(1, listener2.getAllUpdates().size());
+        assertThat(listener1.getAllUpdates().isEmpty()).isTrue();
+        assertThat(listener2.getAllUpdates().size()).isEqualTo(1);
 
         connectionOne.removeUpdateListener(listener1);
         connectionOne.removeCommitListener(commitListener2);
@@ -144,7 +139,7 @@ public class ListenerTest {
         }
 
         /**
-         * Get all of the stored updates in the order they arrived in.
+         * Get all the stored updates in the order they arrived in.
          *
          * @return the stored updates
          */
@@ -182,14 +177,14 @@ public class ListenerTest {
         connectionOne.setAutoCommit(true);
 
         // only one commit is done because we started with autocommit off..
-        assertEquals(1, commitListener.getNumCommits());
+        assertThat(commitListener.getNumCommits()).isEqualTo(1);
         List<UpdateEvent> updates = updateListener.getAllUpdates();
-        assertEquals(numStmts, updates.size());
+        assertThat(updates.size()).isEqualTo(numStmts);
 
         for (int i = 0; i < numStmts; i++) {
-            assertEquals(i + 1, updates.get(i).rowId);
-            assertEquals("sample", updates.get(i).table);
-            assertEquals(SQLiteUpdateListener.Type.INSERT, updates.get(i).type);
+            assertThat(updates.get(i).rowId).isEqualTo(i + 1);
+            assertThat(updates.get(i).table).isEqualTo("sample");
+            assertThat(updates.get(i).type).isEqualTo(SQLiteUpdateListener.Type.INSERT);
         }
 
         connectionOne.removeUpdateListener(updateListener);
@@ -210,14 +205,14 @@ public class ListenerTest {
         CountingSQLiteUpdateListener updateListener = new CountingSQLiteUpdateListener();
 
         connectionOne.addUpdateListener(updateListener);
-        assertNotEquals(0, NativeDBHelper.getUpdateListener(database));
+        assertThat(NativeDBHelper.getUpdateListener(database)).isNotEqualTo(0);
         connectionOne.removeUpdateListener(updateListener);
-        assertEquals(0, NativeDBHelper.getUpdateListener(database));
+        assertThat(NativeDBHelper.getUpdateListener(database)).isEqualTo(0);
 
         connectionOne.addUpdateListener(updateListener);
-        assertNotEquals(0, NativeDBHelper.getUpdateListener(database));
+        assertThat(NativeDBHelper.getUpdateListener(database)).isNotEqualTo(0);
         connectionOne.close();
-        assertEquals(0, NativeDBHelper.getUpdateListener(database));
+        assertThat(NativeDBHelper.getUpdateListener(database)).isEqualTo(0);
     }
 
     /**
@@ -233,14 +228,14 @@ public class ListenerTest {
 
         CountingSQLiteCommitListener commitListener = new CountingSQLiteCommitListener();
         connectionOne.addCommitListener(commitListener);
-        assertNotEquals(0, NativeDBHelper.getCommitListener(database));
+        assertThat(NativeDBHelper.getCommitListener(database)).isNotEqualTo(0);
         connectionOne.removeCommitListener(commitListener);
-        assertEquals(0, NativeDBHelper.getCommitListener(database));
+        assertThat(NativeDBHelper.getCommitListener(database)).isEqualTo(0);
 
         connectionOne.addCommitListener(commitListener);
-        assertNotEquals(0, NativeDBHelper.getCommitListener(database));
+        assertThat(NativeDBHelper.getCommitListener(database)).isNotEqualTo(0);
         connectionOne.close();
-        assertEquals(0, NativeDBHelper.getCommitListener(database));
+        assertThat(NativeDBHelper.getCommitListener(database)).isEqualTo(0);
     }
 
     /** A helper class that simply counts the number of commits operations that were done. */

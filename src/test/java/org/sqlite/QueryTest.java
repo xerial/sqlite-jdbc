@@ -9,11 +9,9 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
 import java.sql.Clob;
 import java.sql.Connection;
@@ -38,7 +36,8 @@ public class QueryTest {
     public void nullQuery() throws Exception {
         try (Connection conn = getConnection()) {
             try (Statement stmt = conn.createStatement()) {
-                assertThrows(NullPointerException.class, () -> stmt.execute(null));
+                assertThatExceptionOfType(NullPointerException.class)
+                        .isThrownBy(() -> stmt.execute(null));
             }
         }
     }
@@ -76,9 +75,9 @@ public class QueryTest {
         PreparedStatement stmt = conn.prepareStatement("select * from sample where data > ?");
         stmt.setObject(1, 3.0f);
         ResultSet rs = stmt.executeQuery();
-        assertTrue(rs.next());
+        assertThat(rs.next()).isTrue();
         float f2 = rs.getFloat(1);
-        assertEquals(f, f2, 0.0000001);
+        assertThat(f2).isCloseTo(f, offset(0.0000001F));
     }
 
     @Test
@@ -95,10 +94,10 @@ public class QueryTest {
         conn.createStatement().execute("insert into sample values('" + date + "')");
 
         ResultSet rs = conn.createStatement().executeQuery("select * from sample");
-        assertTrue(rs.next());
-        assertEquals(now, rs.getDate(1));
-        assertTrue(rs.next());
-        assertEquals(now, rs.getDate(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDate(1)).isEqualTo(now);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getDate(1)).isEqualTo(now);
 
         PreparedStatement stmt = conn.prepareStatement("insert into sample values(?)");
         stmt.setDate(1, new java.sql.Date(now.getTime()));
@@ -136,13 +135,13 @@ public class QueryTest {
         }
 
         try (ResultSet resultSet = conn.createStatement().executeQuery("select * from sample")) {
-            assertTrue(resultSet.next());
-            assertEquals(now, resultSet.getDate(1, customCalendar));
-            assertEquals(nowLikeCustomZoneIsUtc, resultSet.getDate(1, utcCalendar));
+            assertThat(resultSet.next()).isTrue();
+            assertThat(resultSet.getDate(1, customCalendar)).isEqualTo(now);
+            assertThat(resultSet.getDate(1, utcCalendar)).isEqualTo(nowLikeCustomZoneIsUtc);
 
-            assertTrue(resultSet.next());
-            assertEquals(now, resultSet.getDate(1, customCalendar));
-            assertEquals(nowLikeCustomZoneIsUtc, resultSet.getDate(1, utcCalendar));
+            assertThat(resultSet.next()).isTrue();
+            assertThat(resultSet.getDate(1, customCalendar)).isEqualTo(now);
+            assertThat(resultSet.getDate(1, utcCalendar)).isEqualTo(nowLikeCustomZoneIsUtc);
         }
     }
 
@@ -155,9 +154,9 @@ public class QueryTest {
         conn.createStatement().execute("insert into sample values(zeroblob(5))");
 
         ResultSet rs = conn.createStatement().executeQuery("select * from sample");
-        assertTrue(rs.next());
-        assertEquals(5, rs.getBytes(1).length);
-        assertFalse(rs.wasNull());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1).length).isEqualTo(5);
+        assertThat(rs.wasNull()).isFalse();
     }
 
     @Test
@@ -169,9 +168,9 @@ public class QueryTest {
         conn.createStatement().execute("insert into sample values(zeroblob(0))");
 
         ResultSet rs = conn.createStatement().executeQuery("select * from sample");
-        assertTrue(rs.next());
-        assertEquals(0, rs.getBytes(1).length);
-        assertFalse(rs.wasNull());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1).length).isEqualTo(0);
+        assertThat(rs.wasNull()).isFalse();
     }
 
     @Test
@@ -183,9 +182,9 @@ public class QueryTest {
         conn.createStatement().execute("insert into sample values(null)");
 
         ResultSet rs = conn.createStatement().executeQuery("select * from sample");
-        assertTrue(rs.next());
-        assertNull(rs.getBytes(1));
-        assertTrue(rs.wasNull());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1)).isNull();
+        assertThat(rs.wasNull()).isTrue();
     }
 
     @Test
@@ -244,14 +243,14 @@ public class QueryTest {
                             "select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=2 and mxp.pid=person.id and mxp.type='T'");
             while (rs.next()) {
                 // read the result set
-                assertEquals("Y,abc", rs.getString(1));
+                assertThat(rs.getString(1)).isEqualTo("Y,abc");
             }
             rs =
                     statement.executeQuery(
                             "select group_concat(ifnull(shortname, name)) from mxp, person where mxp.mid=1 and mxp.pid=person.id and mxp.type='T'");
             while (rs.next()) {
                 // read the result set
-                assertEquals("Y", rs.getString(1));
+                assertThat(rs.getString(1)).isEqualTo("Y");
             }
 
             PreparedStatement ps =
@@ -262,14 +261,14 @@ public class QueryTest {
             rs = ps.executeQuery();
             while (rs.next()) {
                 // read the result set
-                assertEquals("Y,abc", rs.getString(1));
+                assertThat(rs.getString(1)).isEqualTo("Y,abc");
             }
             ps.clearParameters();
             ps.setInt(1, 2);
             rs = ps.executeQuery();
             while (rs.next()) {
                 // read the result set
-                assertEquals("Y,abc", rs.getString(1));
+                assertThat(rs.getString(1)).isEqualTo("Y,abc");
             }
         }
     }
@@ -281,16 +280,17 @@ public class QueryTest {
             try (PreparedStatement stmt = conn.prepareStatement("select cast(? as clob)")) {
                 stmt.setString(1, content);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    assertTrue(rs.next());
+                    assertThat(rs.next()).isTrue();
                     Clob clob = rs.getClob(1);
                     int length = (int) clob.length();
-                    assertThrows(SQLException.class, () -> clob.getSubString(0, length));
-                    assertThrows(SQLException.class, () -> clob.getSubString(1, -1));
-                    assertEquals("", clob.getSubString(1, 0));
-                    assertEquals(content, clob.getSubString(1, length));
-                    assertEquals(
-                            content.substring(2, content.length() - 1),
-                            clob.getSubString(3, content.length() - 3));
+                    assertThatExceptionOfType(SQLException.class)
+                            .isThrownBy(() -> clob.getSubString(0, length));
+                    assertThatExceptionOfType(SQLException.class)
+                            .isThrownBy(() -> clob.getSubString(1, -1));
+                    assertThat(clob.getSubString(1, 0)).isEqualTo("");
+                    assertThat(clob.getSubString(1, length)).isEqualTo(content);
+                    assertThat(clob.getSubString(3, content.length() - 3))
+                            .isEqualTo(content.substring(2, content.length() - 1));
                 }
             }
         }
@@ -302,9 +302,9 @@ public class QueryTest {
             try (PreparedStatement stmt = conn.prepareStatement("select cast(? as clob)")) {
                 stmt.setString(1, null);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    assertTrue(rs.next());
+                    assertThat(rs.next()).isTrue();
                     Clob clob = rs.getClob(1);
-                    assertNull(clob);
+                    assertThat(clob).isNull();
                 }
             }
         }
@@ -322,6 +322,6 @@ public class QueryTest {
         int deletedCount = conn.createStatement().executeUpdate("delete from test");
         conn.close();
 
-        assertEquals(size, deletedCount);
+        assertThat(deletedCount).isEqualTo(size);
     }
 }

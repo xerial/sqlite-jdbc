@@ -9,7 +9,7 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -62,25 +62,22 @@ public class ReadUncommittedTest {
         prop.setProperty("shared_cache", "true");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals(
-                stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
-                "0",
-                "Fail to set pragma read_uncommitted");
+        assertThat(stat.executeQuery("PRAGMA read_uncommitted;").getString(1))
+                .as("Fail to set pragma read_uncommitted")
+                .isEqualTo("0");
 
         prop.setProperty("read_uncommitted", "true");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals(
-                "1",
-                stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
-                "Fail to set pragma read_uncommitted");
+        assertThat(stat.executeQuery("PRAGMA read_uncommitted;").getString(1))
+                .as("Fail to set pragma read_uncommitted")
+                .isEqualTo("1");
 
         prop.setProperty("read_uncommitted", "false");
         conn = DriverManager.getConnection("jdbc:sqlite:", prop);
         stat = conn.createStatement();
-        assertEquals(
-                "0",
-                stat.executeQuery("PRAGMA read_uncommitted;").getString(1),
-                "Fail to set pragma read_uncommitted");
+        assertThat(stat.executeQuery("PRAGMA read_uncommitted;").getString(1))
+                .as("Fail to set pragma read_uncommitted")
+                .isEqualTo("0");
     }
 }

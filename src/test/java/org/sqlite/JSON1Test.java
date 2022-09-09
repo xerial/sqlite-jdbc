@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -29,8 +27,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json(' { \"this\" : \"is\", \"a\": [ \"test\" ] } ')");
-        assertTrue(rs.next());
-        assertEquals("{\"this\":\"is\",\"a\":[\"test\"]}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"this\":\"is\",\"a\":[\"test\"]}");
     }
 
     @Test
@@ -39,8 +37,8 @@ public class JSON1Test {
 
         ResultSet rs =
                 conn.createStatement().executeQuery("select json_object('ex','[52,3.14159]')");
-        assertTrue(rs.next());
-        assertEquals("{\"ex\":\"[52,3.14159]\"}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"ex\":\"[52,3.14159]\"}");
     }
 
     @Test
@@ -50,8 +48,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_object('ex',json('[52,3.14159]'))");
-        assertTrue(rs.next());
-        assertEquals("{\"ex\":[52,3.14159]}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"ex\":[52,3.14159]}");
     }
 
     @Test
@@ -61,8 +59,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_object('ex',json_array(52,3.14159))");
-        assertTrue(rs.next());
-        assertEquals("{\"ex\":[52,3.14159]}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"ex\":[52,3.14159]}");
     }
 
     @Test
@@ -70,8 +68,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_object('a',2,'c',4)");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":4}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":4}");
     }
 
     @Test
@@ -79,8 +77,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_object('a',2,'c','{e:5}')");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":\"{e:5}\"}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":\"{e:5}\"}");
     }
 
     @Test
@@ -90,8 +88,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_object('a',2,'c',json_object('e',5))");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":{\"e\":5}}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":{\"e\":5}}");
     }
 
     @Test
@@ -99,8 +97,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_array(1,2,'3',4)");
-        assertTrue(rs.next());
-        assertEquals("[1,2,\"3\",4]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[1,2,\"3\",4]");
     }
 
     @Test
@@ -108,8 +106,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_array('[1,2]')");
-        assertTrue(rs.next());
-        assertEquals("[\"[1,2]\"]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[\"[1,2]\"]");
     }
 
     @Test
@@ -117,8 +115,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_array(json_array(1,2))");
-        assertTrue(rs.next());
-        assertEquals("[[1,2]]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[[1,2]]");
     }
 
     @Test
@@ -128,8 +126,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_array(1,null,'3','[4,5]','{\"six\":7.7}')");
-        assertTrue(rs.next());
-        assertEquals("[1,null,\"3\",\"[4,5]\",\"{\\\"six\\\":7.7}\"]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[1,null,\"3\",\"[4,5]\",\"{\\\"six\\\":7.7}\"]");
     }
 
     @Test
@@ -140,8 +138,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_array(1,null,'3',json('[4,5]'),json('{\"six\":7.7}'))");
-        assertTrue(rs.next());
-        assertEquals("[1,null,\"3\",[4,5],{\"six\":7.7}]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[1,null,\"3\",[4,5],{\"six\":7.7}]");
     }
 
     @Test
@@ -149,8 +147,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_array_length('[1,2,3,4]')");
-        assertTrue(rs.next());
-        assertEquals(4, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(4);
     }
 
     @Test
@@ -159,8 +157,8 @@ public class JSON1Test {
 
         ResultSet rs =
                 conn.createStatement().executeQuery("select json_array_length('[1,2,3,4]', '$')");
-        assertTrue(rs.next());
-        assertEquals(4, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(4);
     }
 
     @Test
@@ -170,8 +168,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_array_length('[1,2,3,4]', '$[2]')");
-        assertTrue(rs.next());
-        assertEquals(0, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(0);
     }
 
     @Test
@@ -181,8 +179,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_array_length('{\"one\":[1,2,3]}')");
-        assertTrue(rs.next());
-        assertEquals(0, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(0);
     }
 
     @Test
@@ -192,8 +190,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_array_length('{\"one\":[1,2,3]}', '$.one')");
-        assertTrue(rs.next());
-        assertEquals(3, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(3);
     }
 
     @Test
@@ -203,8 +201,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_array_length('{\"one\":[1,2,3]}', '$.two')");
-        assertTrue(rs.next());
-        assertEquals(null, rs.getObject(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getObject(1)).isEqualTo(null);
     }
 
     @Test
@@ -215,8 +213,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_extract('{\"a\":2,\"c\":[4,5,{\"f\":7}]}', '$')");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":[4,5,{\"f\":7}]}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":[4,5,{\"f\":7}]}");
     }
 
     @Test
@@ -227,8 +225,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_extract('{\"a\":2,\"c\":[4,5,{\"f\":7}]}', '$.c')");
-        assertTrue(rs.next());
-        assertEquals("[4,5,{\"f\":7}]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[4,5,{\"f\":7}]");
     }
 
     @Test
@@ -239,8 +237,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_extract('{\"a\":2,\"c\":[4,5,{\"f\":7}]}', '$.c[2]')");
-        assertTrue(rs.next());
-        assertEquals("{\"f\":7}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"f\":7}");
     }
 
     @Test
@@ -251,8 +249,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_extract('{\"a\":2,\"c\":[4,5,{\"f\":7}]}', '$.c[2].f')");
-        assertTrue(rs.next());
-        assertEquals(7, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(7);
     }
 
     @Test
@@ -263,8 +261,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_extract('{\"a\":2,\"c\":[4,5],\"f\":7}','$.c','$.a')");
-        assertTrue(rs.next());
-        assertEquals("[[4,5],2]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[[4,5],2]");
     }
 
     @Test
@@ -275,8 +273,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_extract('{\"a\":2,\"c\":[4,5,{\"f\":7}]}', '$.x')");
-        assertTrue(rs.next());
-        assertEquals(null, rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(null);
     }
 
     @Test
@@ -287,8 +285,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_extract('{\"a\":2,\"c\":[4,5,{\"f\":7}]}', '$.x', '$.a')");
-        assertTrue(rs.next());
-        assertEquals("[null,2]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[null,2]");
     }
 
     @Test
@@ -298,8 +296,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_insert('{\"a\":2,\"c\":4}', '$.a', 99)");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":4}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":4}");
     }
 
     @Test
@@ -309,8 +307,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_insert('{\"a\":2,\"c\":4}', '$.e', 99)");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":4,\"e\":99}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":4,\"e\":99}");
     }
 
     @Test
@@ -320,8 +318,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_replace('{\"a\":2,\"c\":4}', '$.a', 99)");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":99,\"c\":4}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":99,\"c\":4}");
     }
 
     @Test
@@ -331,8 +329,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_replace('{\"a\":2,\"c\":4}', '$.e', 99)");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":4}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":4}");
     }
 
     @Test
@@ -342,8 +340,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_set('{\"a\":2,\"c\":4}', '$.a', 99)");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":99,\"c\":4}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":99,\"c\":4}");
     }
 
     @Test
@@ -353,8 +351,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_set('{\"a\":2,\"c\":4}', '$.e', 99)");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":4,\"e\":99}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":4,\"e\":99}");
     }
 
     @Test
@@ -364,8 +362,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_set('{\"a\":2,\"c\":4}', '$.c', '[97,96]')");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":\"[97,96]\"}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":\"[97,96]\"}");
     }
 
     @Test
@@ -376,8 +374,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_set('{\"a\":2,\"c\":4}', '$.c', json('[97,96]'))");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":[97,96]}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":[97,96]}");
     }
 
     @Test
@@ -388,8 +386,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_set('{\"a\":2,\"c\":4}', '$.c', json_array(97,96))");
-        assertTrue(rs.next());
-        assertEquals("{\"a\":2,\"c\":[97,96]}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"a\":2,\"c\":[97,96]}");
     }
 
     @Test
@@ -398,8 +396,8 @@ public class JSON1Test {
 
         ResultSet rs =
                 conn.createStatement().executeQuery("select json_remove('[0,1,2,3,4]','$[2]')");
-        assertTrue(rs.next());
-        assertEquals("[0,1,3,4]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[0,1,3,4]");
     }
 
     @Test
@@ -409,8 +407,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_remove('[0,1,2,3,4]','$[2]','$[0]')");
-        assertTrue(rs.next());
-        assertEquals("[1,3,4]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[1,3,4]");
     }
 
     @Test
@@ -420,8 +418,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_remove('[0,1,2,3,4]','$[0]','$[2]')");
-        assertTrue(rs.next());
-        assertEquals("[1,2,4]", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("[1,2,4]");
     }
 
     @Test
@@ -430,8 +428,8 @@ public class JSON1Test {
 
         ResultSet rs =
                 conn.createStatement().executeQuery("select json_remove('{\"x\":25,\"y\":42}')");
-        assertTrue(rs.next());
-        assertEquals("{\"x\":25,\"y\":42}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"x\":25,\"y\":42}");
     }
 
     @Test
@@ -441,8 +439,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_remove('{\"x\":25,\"y\":42}','$.z')");
-        assertTrue(rs.next());
-        assertEquals("{\"x\":25,\"y\":42}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"x\":25,\"y\":42}");
     }
 
     @Test
@@ -452,8 +450,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_remove('{\"x\":25,\"y\":42}','$.y')");
-        assertTrue(rs.next());
-        assertEquals("{\"x\":25}", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("{\"x\":25}");
     }
 
     @Test
@@ -463,8 +461,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_remove('{\"x\":25,\"y\":42}','$')");
-        assertTrue(rs.next());
-        assertEquals(null, rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(null);
     }
 
     @Test
@@ -474,8 +472,8 @@ public class JSON1Test {
         ResultSet rs =
                 conn.createStatement()
                         .executeQuery("select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}')");
-        assertTrue(rs.next());
-        assertEquals("object", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("object");
     }
 
     @Test
@@ -486,8 +484,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$')");
-        assertTrue(rs.next());
-        assertEquals("object", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("object");
     }
 
     @Test
@@ -498,8 +496,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a')");
-        assertTrue(rs.next());
-        assertEquals("array", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("array");
     }
 
     @Test
@@ -510,8 +508,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a[0]')");
-        assertTrue(rs.next());
-        assertEquals("integer", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("integer");
     }
 
     @Test
@@ -522,8 +520,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a[1]')");
-        assertTrue(rs.next());
-        assertEquals("real", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("real");
     }
 
     @Test
@@ -534,8 +532,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a[2]')");
-        assertTrue(rs.next());
-        assertEquals("true", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("true");
     }
 
     @Test
@@ -546,8 +544,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a[3]')");
-        assertTrue(rs.next());
-        assertEquals("false", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("false");
     }
 
     @Test
@@ -558,8 +556,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a[4]')");
-        assertTrue(rs.next());
-        assertEquals("null", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("null");
     }
 
     @Test
@@ -570,8 +568,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a[5]')");
-        assertTrue(rs.next());
-        assertEquals("text", rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("text");
     }
 
     @Test
@@ -582,8 +580,8 @@ public class JSON1Test {
                 conn.createStatement()
                         .executeQuery(
                                 "select json_type('{\"a\":[2,3.5,true,false,null,\"x\"]}','$.a[6]')");
-        assertTrue(rs.next());
-        assertEquals(null, rs.getString(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(null);
     }
 
     @Test
@@ -591,8 +589,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_valid('{\"x\":35}')");
-        assertTrue(rs.next());
-        assertEquals(1, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
     }
 
     @Test
@@ -600,8 +598,8 @@ public class JSON1Test {
         Connection conn = getConnection();
 
         ResultSet rs = conn.createStatement().executeQuery("select json_valid('{\"x\":35')");
-        assertTrue(rs.next());
-        assertEquals(0, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(0);
     }
 
     @Test
@@ -629,11 +627,11 @@ public class JSON1Test {
                         + " where json_each.value LIKE '704-%'";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
-        assertTrue(rs.next());
-        assertEquals("james", rs.getString(1));
-        assertTrue(rs.next());
-        assertEquals("frank", rs.getString(1));
-        assertFalse(rs.next());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("james");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("frank");
+        assertThat(rs.next()).isFalse();
     }
 
     @Test
@@ -660,9 +658,9 @@ public class JSON1Test {
                         + " AND json_each.value LIKE '704-%'";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
-        assertTrue(rs.next());
-        assertEquals("james", rs.getString(1));
-        assertFalse(rs.next());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("james");
+        assertThat(rs.next()).isFalse();
     }
 
     @Test
@@ -679,17 +677,17 @@ public class JSON1Test {
                         + " WHERE json_tree.type NOT IN ('object', 'array')";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
-        assertTrue(rs.next());
-        assertEquals(1, rs.getInt(1));
-        assertEquals("$.a", rs.getString(2));
-        assertEquals(2, rs.getInt(3));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
+        assertThat(rs.getString(2)).isEqualTo("$.a");
+        assertThat(rs.getInt(3)).isEqualTo(2);
 
-        assertTrue(rs.next());
-        assertEquals(1, rs.getInt(1));
-        assertEquals("$.c", rs.getString(2));
-        assertEquals(4, rs.getInt(3));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
+        assertThat(rs.getString(2)).isEqualTo("$.c");
+        assertThat(rs.getInt(3)).isEqualTo(4);
 
-        assertFalse(rs.next());
+        assertThat(rs.next()).isFalse();
     }
 
     @Test
@@ -706,16 +704,16 @@ public class JSON1Test {
                         + " WHERE atom IS NOT NULL";
 
         ResultSet rs = conn.createStatement().executeQuery(q);
-        assertTrue(rs.next());
-        assertEquals(1, rs.getInt(1));
-        assertEquals("$.a", rs.getString(2));
-        assertEquals(2, rs.getInt(3));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
+        assertThat(rs.getString(2)).isEqualTo("$.a");
+        assertThat(rs.getInt(3)).isEqualTo(2);
 
-        assertTrue(rs.next());
-        assertEquals(1, rs.getInt(1));
-        assertEquals("$.c", rs.getString(2));
-        assertEquals(4, rs.getInt(3));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
+        assertThat(rs.getString(2)).isEqualTo("$.c");
+        assertThat(rs.getInt(3)).isEqualTo(4);
 
-        assertFalse(rs.next());
+        assertThat(rs.next()).isFalse();
     }
 }

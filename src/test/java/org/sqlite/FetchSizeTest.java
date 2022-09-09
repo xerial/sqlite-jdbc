@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,28 +31,28 @@ public class FetchSizeTest {
 
     @Test
     public void testFetchSize() throws SQLException {
-        assertEquals(conn.prepareStatement("create table s1 (c1)").executeUpdate(), 0);
+        assertThat(conn.prepareStatement("create table s1 (c1)").executeUpdate()).isEqualTo(0);
         PreparedStatement insertPrep = conn.prepareStatement("insert into s1 values (?)");
         insertPrep.setInt(1, 1);
-        assertEquals(insertPrep.executeUpdate(), 1);
+        assertThat(insertPrep.executeUpdate()).isEqualTo(1);
         insertPrep.setInt(1, 2);
-        assertEquals(insertPrep.executeUpdate(), 1);
+        assertThat(insertPrep.executeUpdate()).isEqualTo(1);
         insertPrep.setInt(1, 3);
-        assertEquals(insertPrep.executeUpdate(), 1);
+        assertThat(insertPrep.executeUpdate()).isEqualTo(1);
         insertPrep.setInt(1, 4);
-        assertEquals(insertPrep.executeUpdate(), 1);
+        assertThat(insertPrep.executeUpdate()).isEqualTo(1);
         insertPrep.setInt(1, 5);
-        assertEquals(insertPrep.executeUpdate(), 1);
+        assertThat(insertPrep.executeUpdate()).isEqualTo(1);
         insertPrep.close();
 
         PreparedStatement selectPrep = conn.prepareStatement("select c1 from s1");
         ResultSet rs = selectPrep.executeQuery();
         rs.setFetchSize(2);
-        assertTrue(rs.next());
-        assertTrue(rs.next());
-        assertTrue(rs.next());
-        assertTrue(rs.next());
-        assertTrue(rs.next());
-        assertFalse(rs.next());
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.next()).isFalse();
     }
 }

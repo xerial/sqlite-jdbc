@@ -143,11 +143,11 @@ public final class NativeDB extends DB {
 
     /** @see org.sqlite.core.DB#changes() */
     @Override
-    public synchronized native int changes();
+    public synchronized native long changes();
 
     /** @see org.sqlite.core.DB#total_changes() */
     @Override
-    public synchronized native int total_changes();
+    public synchronized native long total_changes();
 
     /** @see org.sqlite.core.DB#finalize(long) */
     @Override

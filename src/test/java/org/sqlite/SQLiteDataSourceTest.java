@@ -9,7 +9,7 @@
 // --------------------------------------
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.ByteOrder;
 import java.sql.Connection;
@@ -22,18 +22,17 @@ import org.junit.jupiter.api.Test;
 public class SQLiteDataSourceTest {
 
     @BeforeEach
-    public void setUp() throws Exception {}
+    public void setUp() {}
 
     @AfterEach
-    public void tearDown() throws Exception {}
+    public void tearDown() {}
 
     @Test
     public void enumParam() throws Exception {
 
         SQLiteDataSource ds = new SQLiteDataSource();
-        Connection conn = ds.getConnection();
-        Statement stat = conn.createStatement();
-        try {
+        try (Connection conn = ds.getConnection();
+                Statement stat = conn.createStatement()) {
 
             stat.executeUpdate("create table A (id integer, name)");
             stat.executeUpdate("insert into A values(1, 'leo')");
@@ -43,14 +42,10 @@ public class SQLiteDataSourceTest {
                 count++;
                 int id = rs.getInt(1);
                 String name = rs.getString(2);
-                assertEquals(1, id);
-                assertEquals("leo", name);
+                assertThat(id).isEqualTo(1);
+                assertThat(name).isEqualTo("leo");
             }
-            assertEquals(1, count);
-
-        } finally {
-            stat.close();
-            conn.close();
+            assertThat(count).isEqualTo(1);
         }
     }
 
@@ -78,15 +73,10 @@ public class SQLiteDataSourceTest {
             SQLiteDataSource ds = new SQLiteDataSource();
             ds.setEncoding(configArray[i]);
 
-            Connection conn = ds.getConnection();
-            Statement stat = conn.createStatement();
-            try {
-
+            try (Connection conn = ds.getConnection();
+                    Statement stat = conn.createStatement()) {
                 ResultSet rs = stat.executeQuery("pragma encoding");
-                assertEquals(encodingArray[i / 3], rs.getString(1));
-            } finally {
-                stat.close();
-                conn.close();
+                assertThat(rs.getString(1)).isEqualTo(encodingArray[i / 3]);
             }
         }
     }

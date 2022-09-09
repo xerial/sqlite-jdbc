@@ -4,6 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
@@ -263,11 +264,8 @@ public abstract class JDBC3Connection extends SQLiteConnection {
                         getAutoCommit());
     }
 
-
-    // UNUSED FUNCTIONS /////////////////////////////////////////////
-
     public Struct createStruct(String t, Object[] attr) throws SQLException {
-        throw new SQLException("unsupported by SQLite");
+        throw new SQLFeatureNotSupportedException("not implemented by SQLite JDBC driver");
     }
 
 

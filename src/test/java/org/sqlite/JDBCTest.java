@@ -9,6 +9,7 @@
 // --------------------------------------
 package org.sqlite;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.PrintWriter;
 import java.io.File;
 
@@ -51,7 +52,7 @@ public class JDBCTest {
 
     @Test
     public void shouldReturnNullIfProtocolUnhandled() throws Exception {
-        assertNull(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null));
+        assertThat(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null)).isNull();
     }
 
     @Test

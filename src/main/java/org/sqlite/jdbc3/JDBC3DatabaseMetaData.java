@@ -78,12 +78,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** @see java.sql.DatabaseMetaData#getJDBCMajorVersion() */
     public int getJDBCMajorVersion() {
-        return 2;
+        return 4;
     }
 
     /** @see java.sql.DatabaseMetaData#getJDBCMinorVersion() */
     public int getJDBCMinorVersion() {
-        return 1;
+        return 2;
     }
 
     /** @see java.sql.DatabaseMetaData#getDefaultTransactionIsolation() */
@@ -545,8 +545,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     }
 
     /** @see java.sql.DatabaseMetaData#supportsFullOuterJoins() */
-    public boolean supportsFullOuterJoins() {
-        return false;
+    public boolean supportsFullOuterJoins() throws SQLException {
+        String[] version = conn.libversion().split("\\.");
+        return Integer.parseInt(version[0]) >= 3 && Integer.parseInt(version[1]) >= 39;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys() */

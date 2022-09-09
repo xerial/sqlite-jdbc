@@ -7,12 +7,13 @@ import org.sqlite.core.NativeDB;
 import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -335,18 +336,9 @@ public abstract class SQLiteConnection implements Connection {
             //            }
         }
 
-        byte[] buffer = new byte[8192]; // 8K buffer
-        FileOutputStream writer = new FileOutputStream(dbFile);
-        InputStream reader = resourceAddr.openStream();
-        try {
-            int bytesRead = 0;
-            while ((bytesRead = reader.read(buffer)) != -1) {
-                writer.write(buffer, 0, bytesRead);
-            }
+        try (InputStream reader = resourceAddr.openStream()) {
+            Files.copy(reader, dbFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return dbFile;
-        } finally {
-            writer.close();
-            reader.close();
         }
     }
 

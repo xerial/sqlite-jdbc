@@ -1,9 +1,7 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -49,13 +47,13 @@ public class ProgressHandlerTest {
                 1,
                 new ProgressHandler() {
                     @Override
-                    protected int progress() throws SQLException {
+                    protected int progress() {
                         calls[0]++;
                         return 0;
                     }
                 });
         workWork();
-        assertTrue(calls[0] > 0);
+        assertThat(calls[0]).isGreaterThan(0);
     }
 
     @Test
@@ -66,21 +64,21 @@ public class ProgressHandlerTest {
                 1,
                 new ProgressHandler() {
                     @Override
-                    protected int progress() throws SQLException {
+                    protected int progress() {
                         calls[0]++;
                         return 0;
                     }
                 });
         workWork();
-        assertTrue(calls[0] > 0);
+        assertThat(calls[0]).isGreaterThan(0);
         int totalCalls = calls[0];
         ProgressHandler.clearHandler(conn);
         workWork();
-        assertEquals(totalCalls, calls[0]);
+        assertThat(calls[0]).isEqualTo(totalCalls);
     }
 
     @Test
-    public void testInterrupt() throws Exception {
+    public void testInterrupt() {
 
         try {
             ProgressHandler.setHandler(
@@ -88,7 +86,7 @@ public class ProgressHandlerTest {
                     1,
                     new ProgressHandler() {
                         @Override
-                        protected int progress() throws SQLException {
+                        protected int progress() {
                             return 1;
                         }
                     });
@@ -98,7 +96,7 @@ public class ProgressHandlerTest {
             return;
         }
         // Progress function throws, not reached
-        fail();
+        fail("Progress function throws, not reached");
     }
 
     /**
@@ -112,21 +110,21 @@ public class ProgressHandlerTest {
         SQLiteConnection sqliteConnection = (SQLiteConnection) conn;
         final DB database = sqliteConnection.getDatabase();
         setDummyHandler();
-        assertNotEquals(0, NativeDBHelper.getProgressHandler(database));
+        assertThat(NativeDBHelper.getProgressHandler(database)).isNotEqualTo(0);
         ProgressHandler.clearHandler(conn);
-        assertEquals(0, NativeDBHelper.getProgressHandler(database));
+        assertThat(NativeDBHelper.getProgressHandler(database)).isEqualTo(0);
         ProgressHandler.clearHandler(conn);
 
         setDummyHandler();
-        assertNotEquals(0, NativeDBHelper.getProgressHandler(database));
+        assertThat(NativeDBHelper.getProgressHandler(database)).isNotEqualTo(0);
         ProgressHandler.setHandler(conn, 1, null);
-        assertEquals(0, NativeDBHelper.getProgressHandler(database));
+        assertThat(NativeDBHelper.getProgressHandler(database)).isEqualTo(0);
         ProgressHandler.setHandler(conn, 1, null);
 
         setDummyHandler();
-        assertNotEquals(0, NativeDBHelper.getProgressHandler(database));
+        assertThat(NativeDBHelper.getProgressHandler(database)).isNotEqualTo(0);
         conn.close();
-        assertEquals(0, NativeDBHelper.getProgressHandler(database));
+        assertThat(NativeDBHelper.getProgressHandler(database)).isEqualTo(0);
     }
 
     private void setDummyHandler() throws SQLException {
@@ -135,7 +133,7 @@ public class ProgressHandlerTest {
                 1,
                 new ProgressHandler() {
                     @Override
-                    protected int progress() throws SQLException {
+                    protected int progress() {
                         return 0;
                     }
                 });

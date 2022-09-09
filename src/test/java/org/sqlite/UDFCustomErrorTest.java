@@ -1,6 +1,6 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,6 +38,7 @@ public class UDFCustomErrorTest {
                         throw new SQLException("myErr");
                     }
                 });
-        assertThrows(SQLException.class, () -> stat.executeQuery("select f9();"));
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> stat.executeQuery("select f9();"));
     }
 }

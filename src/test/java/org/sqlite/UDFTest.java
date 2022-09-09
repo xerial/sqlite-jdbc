@@ -1,8 +1,7 @@
 package org.sqlite;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -44,12 +43,12 @@ public class UDFTest {
                 "f1",
                 new Function() {
                     @Override
-                    public void xFunc() throws SQLException {
+                    public void xFunc() {
                         val = 4;
                     }
                 });
         stat.executeQuery("select f1();").close();
-        assertEquals(val, 4);
+        assertThat(val).isEqualTo(4);
     }
 
     @Test
@@ -64,14 +63,14 @@ public class UDFTest {
                     }
                 });
         ResultSet rs = stat.executeQuery("select f2();");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 4);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(4);
         rs.close();
 
         for (int i = 0; i < 20; i++) {
             rs = stat.executeQuery("select (f2() + " + i + ");");
-            assertTrue(rs.next());
-            assertEquals(rs.getInt(1), 4 + i);
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getInt(1)).isEqualTo(4 + i);
             rs.close();
         }
     }
@@ -89,8 +88,8 @@ public class UDFTest {
                 });
         for (int i = 0; i < 15; i++) {
             ResultSet rs = stat.executeQuery("select f3(" + i + ");");
-            assertTrue(rs.next());
-            assertEquals(rs.getInt(1), i);
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getInt(1)).isEqualTo(i);
             rs.close();
         }
     }
@@ -111,16 +110,16 @@ public class UDFTest {
                     }
                 });
         ResultSet rs = stat.executeQuery("select f4(2, 3, 9, -5);");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 9);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(9);
         rs.close();
         rs = stat.executeQuery("select f4(2);");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 2);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(2);
         rs.close();
         rs = stat.executeQuery("select f4(-3, -4, -5);");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), -12);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(-12);
     }
 
     @Test
@@ -135,8 +134,8 @@ public class UDFTest {
                     }
                 });
         ResultSet rs = stat.executeQuery("select f5();");
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "Hello World");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("Hello World");
 
         Function.create(
                 conn,
@@ -149,8 +148,8 @@ public class UDFTest {
                 });
         rs.close();
         rs = stat.executeQuery("select f6();");
-        assertTrue(rs.next());
-        assertEquals(rs.getLong(1), Long.MAX_VALUE);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getLong(1)).isEqualTo(Long.MAX_VALUE);
 
         Function.create(
                 conn,
@@ -163,8 +162,8 @@ public class UDFTest {
                 });
         rs.close();
         rs = stat.executeQuery("select f7();");
-        assertTrue(rs.next());
-        assertEquals(rs.getDouble(1), Double.MAX_VALUE, 0.0001);
+        assertThat(rs.next()).isTrue();
+        assertThat(Double.MAX_VALUE).isCloseTo(rs.getDouble(1), offset(0.0001));
 
         Function.create(
                 conn,
@@ -177,8 +176,8 @@ public class UDFTest {
                 });
         rs.close();
         rs = stat.executeQuery("select f8();");
-        assertTrue(rs.next());
-        assertArrayEq(rs.getBytes(1), b1);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1)).containsExactly(b1);
     }
 
     @Test
@@ -195,8 +194,8 @@ public class UDFTest {
         PreparedStatement prep = conn.prepareStatement("select farg_int(?);");
         prep.setInt(1, Integer.MAX_VALUE);
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), Integer.MAX_VALUE);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(Integer.MAX_VALUE);
         prep.close();
     }
 
@@ -214,8 +213,8 @@ public class UDFTest {
         PreparedStatement prep = conn.prepareStatement("select farg_long(?);");
         prep.setLong(1, Long.MAX_VALUE);
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getLong(1), Long.MAX_VALUE);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getLong(1)).isEqualTo(Long.MAX_VALUE);
         prep.close();
     }
 
@@ -233,8 +232,8 @@ public class UDFTest {
         PreparedStatement prep = conn.prepareStatement("select farg_doub(?);");
         prep.setDouble(1, Double.MAX_VALUE);
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getDouble(1), Double.MAX_VALUE, 0.0001);
+        assertThat(rs.next()).isTrue();
+        assertThat(Double.MAX_VALUE).isCloseTo(rs.getDouble(1), offset(0.0001));
         prep.close();
     }
 
@@ -252,8 +251,8 @@ public class UDFTest {
         PreparedStatement prep = conn.prepareStatement("select farg_blob(?);");
         prep.setBytes(1, b1);
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertArrayEq(rs.getBytes(1), b1);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1)).containsExactly(b1);
         prep.close();
     }
 
@@ -271,8 +270,8 @@ public class UDFTest {
         PreparedStatement prep = conn.prepareStatement("select farg_str(?);");
         prep.setString(1, "Hello");
         ResultSet rs = prep.executeQuery();
-        assertTrue(rs.next());
-        assertEquals(rs.getString(1), "Hello");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("Hello");
         prep.close();
     }
 
@@ -292,7 +291,7 @@ public class UDFTest {
                 "create trigger trigt after insert on trigtest"
                         + " begin select inform(new.c1); end;");
         stat.executeUpdate("insert into trigtest values (5);");
-        assertEquals(gotTrigger, 5);
+        assertThat(gotTrigger).isEqualTo(5);
     }
 
     @Test
@@ -322,8 +321,8 @@ public class UDFTest {
         stat.executeUpdate("insert into t values (2);");
         stat.executeUpdate("insert into t values (7);");
         ResultSet rs = stat.executeQuery("select mySum(c1), sum(c1) from t;");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), rs.getInt(2));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(rs.getInt(2));
     }
 
     @Test
@@ -369,16 +368,16 @@ public class UDFTest {
         ResultSet rs =
                 stat.executeQuery(
                         "select mySum(x) over (order by x rows between 1 preceding and 1 following) from t order by x;");
-        assertTrue(rs.next());
-        assertEquals(3, rs.getInt(1));
-        assertTrue(rs.next());
-        assertEquals(6, rs.getInt(1));
-        assertTrue(rs.next());
-        assertEquals(9, rs.getInt(1));
-        assertTrue(rs.next());
-        assertEquals(12, rs.getInt(1));
-        assertTrue(rs.next());
-        assertEquals(9, rs.getInt(1));
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(3);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(6);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(9);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(12);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(9);
     }
 
     @Test
@@ -388,12 +387,12 @@ public class UDFTest {
                 "f1",
                 new Function() {
                     @Override
-                    public void xFunc() throws SQLException {
+                    public void xFunc() {
                         val = 9;
                     }
                 });
         stat.executeQuery("select f1();").close();
-        assertEquals(val, 9);
+        assertThat(val).isEqualTo(9);
 
         Function.destroy(conn, "f1");
         Function.destroy(conn, "f1");
@@ -505,8 +504,8 @@ public class UDFTest {
                 stat.executeQuery(
                         "select f1() + f2() + f3() + f4() + f5() + f6()"
                                 + " + f7() + f8() + f9() + f10() + f11();");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11);
         rs.close();
     }
 
@@ -536,7 +535,7 @@ public class UDFTest {
                 "create trigger foo_trigger after insert on foo begin"
                         + " select func(new.rowid, new.col); end;");
         int times = 1000;
-        List<Thread> threads = new LinkedList<Thread>();
+        List<Thread> threads = new LinkedList<>();
         for (int tn = 0; tn < times; tn++) {
             threads.add(
                     new Thread("func thread " + tn) {
@@ -561,20 +560,11 @@ public class UDFTest {
 
         // check that all of the threads successfully executed
         ResultSet rs = stat.executeQuery("select sum(col) from foo;");
-        assertTrue(rs.next());
-        assertEquals(rs.getInt(1), times);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(times);
         rs.close();
 
         // check that custom function was executed each time
-        assertEquals(Integer.parseInt(func.toString()), times);
-    }
-
-    private void assertArrayEq(byte[] a, byte[] b) {
-        assertNotNull(a);
-        assertNotNull(b);
-        assertEquals(a.length, b.length);
-        for (int i = 0; i < a.length; i++) {
-            assertEquals(a[i], b[i]);
-        }
+        assertThat(Integer.parseInt(func.toString())).isEqualTo(times);
     }
 }
