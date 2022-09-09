@@ -1777,7 +1777,7 @@ static void freeCommitHandlerCtx(JNIEnv *env, void *ctx) {
 
 void clear_commit_listener(JNIEnv *env, jobject nativeDB, sqlite3 *db) {
     sqlite3_commit_hook(db, NULL, NULL);
-    sqlite3_update_hook(db, NULL, NULL);
+    sqlite3_rollback_hook(db, NULL, NULL);
     set_new_handler(env, nativeDB, "commitListener", NULL, freeCommitHandlerCtx);
 }
 
