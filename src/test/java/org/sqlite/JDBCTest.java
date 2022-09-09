@@ -57,6 +57,12 @@ public class JDBCTest {
     }
 
     @Test
+    public void pragmaReadOnly() throws SQLException {
+        SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite::memory:?jdbc.explicit_readonly=true");
+        assertThat(connection.getDatabase().getConfig().isExplicitReadOnly()).isTrue();
+    }
+
+    @Test
     public void canSetJdbcConnectionToReadOnly() throws Exception {
         SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
         try (Connection connection = dataSource.getConnection()) {
