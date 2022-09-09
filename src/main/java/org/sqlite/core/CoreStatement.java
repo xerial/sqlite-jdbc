@@ -17,7 +17,6 @@ package org.sqlite.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc3.JDBC3Connection;
@@ -47,9 +46,7 @@ public abstract class CoreStatement implements Codes {
         return conn.getConnectionConfig();
     }
 
-    /**
-     * @throws SQLException If the database is not opened.
-     */
+    /** @throws SQLException If the database is not opened. */
     protected final void checkOpen() throws SQLException {
         if (pointer.isClosed()) throw new SQLException("statement is not executing");
     }
@@ -123,7 +120,6 @@ public abstract class CoreStatement implements Codes {
 
         return pointer.safeRunInt(DB::column_count) != 0;
     }
-
 
     protected void internalClose() throws SQLException {
         if (this.pointer != null && !this.pointer.isClosed()) {

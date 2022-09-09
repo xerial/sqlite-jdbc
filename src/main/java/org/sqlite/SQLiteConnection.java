@@ -1,11 +1,5 @@
 package org.sqlite;
 
-import org.sqlite.SQLiteConfig.TransactionMode;
-import org.sqlite.core.CoreDatabaseMetaData;
-import org.sqlite.core.DB;
-import org.sqlite.core.NativeDB;
-import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +14,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import org.sqlite.SQLiteConfig.TransactionMode;
+import org.sqlite.core.CoreDatabaseMetaData;
+import org.sqlite.core.DB;
+import org.sqlite.core.NativeDB;
+import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
 
 /** */
 public abstract class SQLiteConnection implements Connection {
@@ -82,7 +81,7 @@ public abstract class SQLiteConnection implements Connection {
         }
     }
 
-    public TransactionMode getCurrentTransactionMode(){
+    public TransactionMode getCurrentTransactionMode() {
         return this.currentTransactionMode;
     }
 
@@ -97,7 +96,6 @@ public abstract class SQLiteConnection implements Connection {
     public boolean isFirstStatementExecuted() {
         return firstStatementExecuted;
     }
-
 
     public SQLiteConnectionConfig getConnectionConfig() {
         return connectionConfig;
@@ -359,10 +357,10 @@ public abstract class SQLiteConnection implements Connection {
         connectionConfig.setAutoCommit(ac);
         // db.exec(connectionConfig.isAutoCommit() ? "commit;" : this.transactionPrefix(), ac);
 
-        if(this.getConnectionConfig().isAutoCommit()){
+        if (this.getConnectionConfig().isAutoCommit()) {
             db.exec("commit;", ac);
             this.currentTransactionMode = null;
-        }else{
+        } else {
             db.exec(this.transactionPrefix(), ac);
             this.currentTransactionMode = this.getConnectionConfig().getTransactionMode();
         }
@@ -563,8 +561,7 @@ public abstract class SQLiteConnection implements Connection {
         return newFilename;
     }
 
-    protected String transactionPrefix(){
+    protected String transactionPrefix() {
         return this.connectionConfig.transactionPrefix();
     }
-
 }

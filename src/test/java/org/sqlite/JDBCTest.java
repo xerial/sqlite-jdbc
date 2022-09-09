@@ -9,20 +9,16 @@
 // --------------------------------------
 package org.sqlite;
 
-import java.io.PrintWriter;
-import java.io.File;
+import static org.assertj.core.api.Assertions.*;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import org.junit.jupiter.api.Test;
-
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.assertj.core.api.Assertions.*;
-
+import org.junit.jupiter.api.Test;
 
 public class JDBCTest {
     @Test
@@ -58,7 +54,10 @@ public class JDBCTest {
 
     @Test
     public void pragmaReadOnly() throws SQLException {
-        SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite::memory:?jdbc.explicit_readonly=true");
+        SQLiteConnection connection =
+                (SQLiteConnection)
+                        DriverManager.getConnection(
+                                "jdbc:sqlite::memory:?jdbc.explicit_readonly=true");
         assertThat(connection.getDatabase().getConfig().isExplicitReadOnly()).isTrue();
     }
 
@@ -161,8 +160,10 @@ public class JDBCTest {
             try (Statement statement = connection.createStatement()) {
                 assertThatExceptionOfType(SQLException.class)
                         .as("Managed to modify DB contents on a read-only connection!")
-                        .isThrownBy(() ->
-                                statement.execute("CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))"));
+                        .isThrownBy(
+                                () ->
+                                        statement.execute(
+                                                "CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))"));
             }
             connection.rollback();
 
@@ -172,8 +173,7 @@ public class JDBCTest {
     }
 
     @Test
-    void name() {
-    }
+    void name() {}
 
     @Test
     public void jdbcHammer() throws Exception {
@@ -192,37 +192,49 @@ public class JDBCTest {
         final AtomicInteger count = new AtomicInteger();
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            Thread thread = new Thread(() -> {
-                for (int i1 = 0; i1 < 100; i1++) {
-                    try {
-                        try (Connection connection = dataSource.getConnection()) {
-                            connection.setAutoCommit(false);
-                            boolean read = Math.random() < 0.5;
-                            if (read) {
-                                connection.setReadOnly(true);
-                                try (Statement statement = connection.createStatement()) {
-                                    ResultSet rs = statement.executeQuery("SELECT * FROM TestTable");
-                                    rs.close();
-                                }
-                            } else {
-                                try (Statement statement = connection.createStatement()) {
-                                    try (ResultSet rs = statement.executeQuery("SELECT * FROM TestTable")) {
-                                        while (rs.next()) {
-                                            int id = rs.getInt("ID");
-                                            int value = rs.getInt("testval");
-                                            count.incrementAndGet();
-                                            statement.executeUpdate("UPDATE TestTable SET testval = " + (value + 1) + " WHERE ID = " + id);
+            Thread thread =
+                    new Thread(
+                            () -> {
+                                for (int i1 = 0; i1 < 100; i1++) {
+                                    try {
+                                        try (Connection connection = dataSource.getConnection()) {
+                                            connection.setAutoCommit(false);
+                                            boolean read = Math.random() < 0.5;
+                                            if (read) {
+                                                connection.setReadOnly(true);
+                                                try (Statement statement =
+                                                        connection.createStatement()) {
+                                                    ResultSet rs =
+                                                            statement.executeQuery(
+                                                                    "SELECT * FROM TestTable");
+                                                    rs.close();
+                                                }
+                                            } else {
+                                                try (Statement statement =
+                                                        connection.createStatement()) {
+                                                    try (ResultSet rs =
+                                                            statement.executeQuery(
+                                                                    "SELECT * FROM TestTable")) {
+                                                        while (rs.next()) {
+                                                            int id = rs.getInt("ID");
+                                                            int value = rs.getInt("testval");
+                                                            count.incrementAndGet();
+                                                            statement.executeUpdate(
+                                                                    "UPDATE TestTable SET testval = "
+                                                                            + (value + 1)
+                                                                            + " WHERE ID = "
+                                                                            + id);
+                                                        }
+                                                    }
+                                                }
+                                                connection.commit();
+                                            }
                                         }
+                                    } catch (SQLException e) {
+                                        throw new RuntimeException("Worker failed", e);
                                     }
                                 }
-                                connection.commit();
-                            }
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException("Worker failed", e);
-                    }
-                }
-            });
+                            });
             thread.setName("Worker #" + (i + 1));
             threads.add(thread);
         }
@@ -247,7 +259,6 @@ public class JDBCTest {
             }
             connection2.commit();
         }
-
     }
 
     // helper methods -----------------------------------------------------------------
@@ -260,6 +271,4 @@ public class JDBCTest {
 
         return new SQLiteDataSource(config);
     }
-
-
 }

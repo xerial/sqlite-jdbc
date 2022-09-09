@@ -65,19 +65,20 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
             return new long[] {};
         }
 
-        if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
         }
 
-        return this.withConnectionTimeout(() -> {
-            try {
-        return conn.getDatabase()
-                .executeBatch(pointer, batchQueryCount, batch, conn.getAutoCommit());
-    } finally {
-                clearBatch();
-            }
-        });
-
+        return this.withConnectionTimeout(
+                () -> {
+                    try {
+                        return conn.getDatabase()
+                                .executeBatch(
+                                        pointer, batchQueryCount, batch, conn.getAutoCommit());
+                    } finally {
+                        clearBatch();
+                    }
+                });
     }
 
     /** @see org.sqlite.jdbc3.JDBC3Statement#clearBatch() () */

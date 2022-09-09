@@ -90,7 +90,9 @@ public class SQLiteConfig {
         this.busyTimeout =
                 Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
-        this.explicitReadOnly = Boolean.parseBoolean(pragmaTable.getProperty(Pragma.JDBC_EXPLICIT_READONLY.pragmaName, "false"));
+        this.explicitReadOnly =
+                Boolean.parseBoolean(
+                        pragmaTable.getProperty(Pragma.JDBC_EXPLICIT_READONLY.pragmaName, "false"));
     }
 
     public SQLiteConnectionConfig newConnectionConfig() {
@@ -326,7 +328,8 @@ public class SQLiteConfig {
         pragmaTable.setProperty(
                 Pragma.DATE_STRING_FORMAT.pragmaName,
                 defaultConnectionConfig.getDateStringFormat());
-        pragmaTable.setProperty(Pragma.JDBC_EXPLICIT_READONLY.pragmaName, this.explicitReadOnly ? "true" : "false");
+        pragmaTable.setProperty(
+                Pragma.JDBC_EXPLICIT_READONLY.pragmaName, this.explicitReadOnly ? "true" : "false");
         return pragmaTable;
     }
 
@@ -356,18 +359,17 @@ public class SQLiteConfig {
         }
     }
 
-    /**
-     * @return true if explicit read only transactions are enabled
-     */
+    /** @return true if explicit read only transactions are enabled */
     public boolean isExplicitReadOnly() {
         return this.explicitReadOnly;
     }
 
     /**
      * Enable read only transactions after connection creation if explicit read only is true.
+     *
      * @param readOnly whether to enable explicit read only
      */
-    public void setExplicitReadOnly(boolean readOnly){
+    public void setExplicitReadOnly(boolean readOnly) {
         this.explicitReadOnly = readOnly;
     }
 

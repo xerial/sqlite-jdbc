@@ -44,20 +44,22 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         rs.close();
         pointer.safeRunConsume(DB::reset);
 
-        if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
         }
 
-        return this.withConnectionTimeout(() -> {
-            boolean success = false;
-            try {
-                resultsWaiting = conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
-                success = true;
-                return 0 != columnCount;
-            } finally {
-                if (!success && !pointer.isClosed()) pointer.safeRunConsume(DB::reset);
-            }
-        });
+        return this.withConnectionTimeout(
+                () -> {
+                    boolean success = false;
+                    try {
+                        resultsWaiting =
+                                conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
+                        success = true;
+                        return 0 != columnCount;
+                    } finally {
+                        if (!success && !pointer.isClosed()) pointer.safeRunConsume(DB::reset);
+                    }
+                });
     }
 
     /** @see java.sql.PreparedStatement#executeQuery() */
@@ -71,22 +73,24 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         rs.close();
         pointer.safeRunConsume(DB::reset);
 
-        if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
         }
 
-        return this.withConnectionTimeout(() -> {
-            boolean success = false;
-            try {
-                resultsWaiting = conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
-                success = true;
-            } finally {
-                if (!success && !pointer.isClosed()) {
-            pointer.safeRunInt(DB::reset);
-        }
-            }
-            return getResultSet();
-        });
+        return this.withConnectionTimeout(
+                () -> {
+                    boolean success = false;
+                    try {
+                        resultsWaiting =
+                                conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
+                        success = true;
+                    } finally {
+                        if (!success && !pointer.isClosed()) {
+                            pointer.safeRunInt(DB::reset);
+                        }
+                    }
+                    return getResultSet();
+                });
     }
 
     /** @see java.sql.PreparedStatement#executeUpdate() */
@@ -105,11 +109,12 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         rs.close();
         pointer.safeRunConsume(DB::reset);
 
-        if(this.conn instanceof JDBC3Connection){
-            ((JDBC3Connection)this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
         }
 
-        return this.withConnectionTimeout(() -> conn.getDatabase().executeUpdate(JDBC3PreparedStatement.this, batch));
+        return this.withConnectionTimeout(
+                () -> conn.getDatabase().executeUpdate(JDBC3PreparedStatement.this, batch));
     }
 
     /** @see java.sql.PreparedStatement#addBatch() */
