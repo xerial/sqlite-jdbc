@@ -10,6 +10,8 @@
 package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import java.io.PrintWriter;
 import java.io.File;
 
@@ -19,8 +21,6 @@ import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 
 public class JDBCTest {
@@ -61,13 +61,13 @@ public class JDBCTest {
         Connection connection = dataSource.getConnection();
         try{
             connection.setAutoCommit(false);
-            assertFalse(connection.isReadOnly());
+            assertThat(connection.isReadOnly()).isFalse();
             connection.setReadOnly(true);
-            assertTrue(connection.isReadOnly());
+            assertThat(connection.isReadOnly()).isTrue();
             connection.setReadOnly(false);
-            assertFalse(connection.isReadOnly());
+            assertThat(connection.isReadOnly()).isFalse();
             connection.setReadOnly(true);
-            assertTrue(connection.isReadOnly());
+            assertThat(connection.isReadOnly()).isTrue();
         }finally{
             connection.close();
         }
@@ -84,7 +84,7 @@ public class JDBCTest {
             // execute a statement
             try{
                 boolean success = statement.execute("SELECT * FROM sqlite_master");
-                assertTrue(success);
+                assertThat(success).isTrue();
             }finally{
                 statement.close();
             }
@@ -111,7 +111,7 @@ public class JDBCTest {
             // execute a statement
             try{
                 boolean success = statement.execute("SELECT * FROM sqlite_master");
-                assertTrue(success);
+                assertThat(success).isTrue();
             }finally{
                 statement.close();
             }
@@ -140,7 +140,7 @@ public class JDBCTest {
             try{
                 System.out.println("Executing query");
                 boolean success = statement.execute("SELECT * FROM sqlite_master");
-                assertTrue(success);
+                assertThat(success).isTrue();
             }finally{
                 System.out.println("Closing statement");
                 statement.close();
@@ -156,7 +156,7 @@ public class JDBCTest {
             try{
                 System.out.println("Executing query 2");
                 boolean success = statement2.execute("SELECT * FROM sqlite_master");
-                assertTrue(success);
+                assertThat(success).isTrue();
             }finally{
                 System.out.println("Closing statement 2");
                 statement2.close();
@@ -281,12 +281,12 @@ public class JDBCTest {
             try{
                 ResultSet rs = stmt.executeQuery("SELECT * FROM TestTable");
                 try{
-                    assertTrue(rs.next());
+                    assertThat(rs.next()).isTrue();
                     int id = rs.getInt("ID");
                     int val = rs.getInt("testval");
-                    assertEquals(1, id);
-                    assertEquals(count.get(), val);
-                    assertFalse(rs.next());
+                    assertThat(id).isEqualTo(1);
+                    assertThat(val).isEqualTo(count.get());
+                    assertThat(rs.next()).isFalse();
                 }finally{
                     rs.close();
                 }
