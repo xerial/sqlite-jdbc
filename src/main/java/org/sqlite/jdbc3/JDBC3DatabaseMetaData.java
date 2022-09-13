@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.sql.Types;
@@ -1851,13 +1852,13 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** Not implemented yet. */
     public Struct createStruct(String t, Object[] attr) throws SQLException {
-        throw new SQLException("Not yet implemented by SQLite JDBC driver");
+        throw new SQLFeatureNotSupportedException("Not yet implemented by SQLite JDBC driver");
     }
 
     /** Not implemented yet. */
     public ResultSet getFunctionColumns(String a, String b, String c, String d)
             throws SQLException {
-        throw new SQLException("Not yet implemented by SQLite JDBC driver");
+        throw new SQLFeatureNotSupportedException("Not yet implemented by SQLite JDBC driver");
     }
 
     // inner classes

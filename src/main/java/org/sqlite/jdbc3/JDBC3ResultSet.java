@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Time;
@@ -135,8 +136,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     }
 
     /** @see java.sql.ResultSet#isLast() */
-    public boolean isLast() throws SQLException { // FIXME
-        throw new SQLException("function not yet implemented for SQLite");
+    public boolean isLast() throws SQLException {
+        throw new SQLFeatureNotSupportedException("not supported by sqlite");
     }
 
     /** @see java.sql.ResultSet#getRow() */
