@@ -94,7 +94,7 @@ jobs:
           path: src/main/resources/org/sqlite/native/
 
   push:
-    name: Push new native libraries to PR branch
+    name: Push new native libraries to branch
     runs-on: ubuntu-latest
     needs: [check, build]
     steps:
@@ -109,7 +109,7 @@ jobs:
           path: src/main/resources/org/sqlite/native/
 
       - run: git status
-      - name: Release commit and push
+      - name: Commit and push
         uses: EndBug/add-and-commit@v9
         with:
           message: 'chore: update native libraries'
