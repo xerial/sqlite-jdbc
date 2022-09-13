@@ -53,6 +53,13 @@ public class JDBCTest {
     }
 
     @Test
+    public void allDriverPropertyInfoShouldHaveADescription() throws Exception {
+        Driver driver = DriverManager.getDriver("jdbc:sqlite:");
+        assertThat(driver.getPropertyInfo(null, null))
+                .allSatisfy((info) -> assertThat(info.description).isNotNull());
+    }
+
+    @Test
     public void pragmaReadOnly() throws SQLException {
         SQLiteConnection connection =
                 (SQLiteConnection)

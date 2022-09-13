@@ -373,7 +373,7 @@ public class SQLiteConfig {
         this.explicitReadOnly = readOnly;
     }
 
-    public static enum Pragma {
+    public enum Pragma {
 
         // Parameters requiring SQLite3 API invocation
         OPEN_MODE("open_mode", "Database open-mode flag", null),
@@ -384,34 +384,86 @@ public class SQLiteConfig {
                 OnOff),
 
         // Pragmas that can be set after opening the database
-        CACHE_SIZE("cache_size"),
-        MMAP_SIZE("mmap_size"),
-        CASE_SENSITIVE_LIKE("case_sensitive_like", OnOff),
-        COUNT_CHANGES("count_changes", OnOff),
-        DEFAULT_CACHE_SIZE("default_cache_size"),
-        DEFER_FOREIGN_KEYS("defer_foreign_keys", OnOff),
-        EMPTY_RESULT_CALLBACKS("empty_result_callback", OnOff),
-        ENCODING("encoding", toStringArray(Encoding.values())),
-        FOREIGN_KEYS("foreign_keys", OnOff),
-        FULL_COLUMN_NAMES("full_column_names", OnOff),
-        FULL_SYNC("fullsync", OnOff),
-        INCREMENTAL_VACUUM("incremental_vacuum"),
-        JOURNAL_MODE("journal_mode", toStringArray(JournalMode.values())),
-        JOURNAL_SIZE_LIMIT("journal_size_limit"),
-        LEGACY_FILE_FORMAT("legacy_file_format", OnOff),
-        LOCKING_MODE("locking_mode", toStringArray(LockingMode.values())),
-        PAGE_SIZE("page_size"),
-        MAX_PAGE_COUNT("max_page_count"),
-        READ_UNCOMMITTED("read_uncommitted", OnOff),
-        RECURSIVE_TRIGGERS("recursive_triggers", OnOff),
-        REVERSE_UNORDERED_SELECTS("reverse_unordered_selects", OnOff),
-        SECURE_DELETE("secure_delete", new String[] {"true", "false", "fast"}),
-        SHORT_COLUMN_NAMES("short_column_names", OnOff),
-        SYNCHRONOUS("synchronous", toStringArray(SynchronousMode.values())),
-        TEMP_STORE("temp_store", toStringArray(TempStore.values())),
-        TEMP_STORE_DIRECTORY("temp_store_directory"),
-        USER_VERSION("user_version"),
-        APPLICATION_ID("application_id"),
+        CACHE_SIZE(
+                "cache_size",
+                "Maximum number of database disk pages that SQLite will hold in memory at once per open database file",
+                null),
+        MMAP_SIZE(
+                "mmap_size",
+                "Maximum number of bytes that are set aside for memory-mapped I/O on a single database",
+                null),
+        CASE_SENSITIVE_LIKE(
+                "case_sensitive_like",
+                "Installs a new application-defined LIKE function that is either case sensitive or insensitive depending on the value",
+                OnOff),
+        COUNT_CHANGES("count_changes", "Deprecated", OnOff),
+        DEFAULT_CACHE_SIZE("default_cache_size", "Deprecated", null),
+        DEFER_FOREIGN_KEYS(
+                "defer_foreign_keys",
+                "When the defer_foreign_keys PRAGMA is on, enforcement of all foreign key constraints is delayed until the outermost transaction is committed. The defer_foreign_keys pragma defaults to OFF so that foreign key constraints are only deferred if they are created as \"DEFERRABLE INITIALLY DEFERRED\". The defer_foreign_keys pragma is automatically switched off at each COMMIT or ROLLBACK. Hence, the defer_foreign_keys pragma must be separately enabled for each transaction. This pragma is only meaningful if foreign key constraints are enabled, of course.",
+                OnOff),
+        EMPTY_RESULT_CALLBACKS("empty_result_callback", "Deprecated", OnOff),
+        ENCODING(
+                "encoding",
+                "Set the encoding that the main database will be created with if it is created by this session",
+                toStringArray(Encoding.values())),
+        FOREIGN_KEYS("foreign_keys", "Set the enforcement of foreign key constraints", OnOff),
+        FULL_COLUMN_NAMES("full_column_names", "Deprecated", OnOff),
+        FULL_SYNC(
+                "fullsync",
+                "Whether or not the F_FULLFSYNC syncing method is used on systems that support it. Only Mac OS X supports F_FULLFSYNC.",
+                OnOff),
+        INCREMENTAL_VACUUM(
+                "incremental_vacuum",
+                "Causes up to N pages to be removed from the freelist. The database file is truncated by the same amount. The incremental_vacuum pragma has no effect if the database is not in auto_vacuum=incremental mode or if there are no pages on the freelist. If there are fewer than N pages on the freelist, or if N is less than 1, or if the \"(N)\" argument is omitted, then the entire freelist is cleared.",
+                null),
+        JOURNAL_MODE(
+                "journal_mode",
+                "Set the journal mode for databases associated with the current database connection",
+                toStringArray(JournalMode.values())),
+        JOURNAL_SIZE_LIMIT(
+                "journal_size_limit",
+                "Limit the size of rollback-journal and WAL files left in the file-system after transactions or checkpoints",
+                null),
+        LEGACY_FILE_FORMAT("legacy_file_format", "No-op", OnOff),
+        LOCKING_MODE(
+                "locking_mode",
+                "Set the database connection locking-mode",
+                toStringArray(LockingMode.values())),
+        PAGE_SIZE(
+                "page_size",
+                "Set the page size of the database. The page size must be a power of two between 512 and 65536 inclusive.",
+                null),
+        MAX_PAGE_COUNT(
+                "max_page_count", "Set the maximum number of pages in the database file", null),
+        READ_UNCOMMITTED("read_uncommitted", "Set READ UNCOMMITTED isolation", OnOff),
+        RECURSIVE_TRIGGERS("recursive_triggers", "Set the recursive trigger capability", OnOff),
+        REVERSE_UNORDERED_SELECTS(
+                "reverse_unordered_selects",
+                "When enabled, this PRAGMA causes many SELECT statements without an ORDER BY clause to emit their results in the reverse order from what they normally would",
+                OnOff),
+        SECURE_DELETE(
+                "secure_delete",
+                "When secure_delete is on, SQLite overwrites deleted content with zeros",
+                new String[] {"true", "false", "fast"}),
+        SHORT_COLUMN_NAMES("short_column_names", "Deprecated", OnOff),
+        SYNCHRONOUS(
+                "synchronous",
+                "Set the \"synchronous\" flag",
+                toStringArray(SynchronousMode.values())),
+        TEMP_STORE(
+                "temp_store",
+                "When temp_store is DEFAULT (0), the compile-time C preprocessor macro SQLITE_TEMP_STORE is used to determine where temporary tables and indices are stored. When temp_store is MEMORY (2) temporary tables and indices are kept as if they were in pure in-memory databases. When temp_store is FILE (1) temporary tables and indices are stored in a file. The temp_store_directory pragma can be used to specify the directory containing temporary files when FILE is specified. When the temp_store setting is changed, all existing temporary tables, indices, triggers, and views are immediately deleted.",
+                toStringArray(TempStore.values())),
+        TEMP_STORE_DIRECTORY("temp_store_directory", "Deprecated", null),
+        USER_VERSION(
+                "user_version",
+                "Set the value of the user-version integer at offset 60 in the database header. The user-version is an integer that is available to applications to use however they want. SQLite makes no use of the user-version itself.",
+                null),
+        APPLICATION_ID(
+                "application_id",
+                "Set the 32-bit signed big-endian \"Application ID\" integer located at offset 68 into the database header. Applications that use SQLite as their application file-format should set the Application ID integer to a unique integer so that utilities such as file(1) can determine the specific file type rather than just reporting \"SQLite3 Database\"",
+                null),
 
         // Limits
         LIMIT_LENGTH(
@@ -457,7 +509,10 @@ public class SQLiteConfig {
                 null),
 
         // Others
-        TRANSACTION_MODE("transaction_mode", toStringArray(TransactionMode.values())),
+        TRANSACTION_MODE(
+                "transaction_mode",
+                "Set the transaction mode",
+                toStringArray(TransactionMode.values())),
         DATE_PRECISION(
                 "date_precision",
                 "\"seconds\": Read and store integer dates as seconds from the Unix Epoch (SQLite standard).\n\"milliseconds\": (DEFAULT) Read and store integer dates as milliseconds from the Unix Epoch (Java standard).",
@@ -470,26 +525,30 @@ public class SQLiteConfig {
                 "date_string_format",
                 "Format to store and retrieve dates stored as text. Defaults to \"yyyy-MM-dd HH:mm:ss.SSS\"",
                 null),
-        BUSY_TIMEOUT("busy_timeout", null),
-        HEXKEY_MODE("hexkey_mode", toStringArray(HexKeyMode.values())),
-        PASSWORD("password", null),
+        BUSY_TIMEOUT(
+                "busy_timeout",
+                "Sets a busy handler that sleeps for a specified amount of time when a table is locked",
+                null),
+        HEXKEY_MODE("hexkey_mode", "Mode of the secret key", toStringArray(HexKeyMode.values())),
+        PASSWORD("password", "Database password", null),
 
         // extensions: "fake" pragmas to allow conformance with JDBC
-        JDBC_EXPLICIT_READONLY("jdbc.explicit_readonly");
+        JDBC_EXPLICIT_READONLY(
+                "jdbc.explicit_readonly", "Set explicit read only transactions", null);
 
         public final String pragmaName;
         public final String[] choices;
         public final String description;
 
-        private Pragma(String pragmaName) {
+        Pragma(String pragmaName) {
             this(pragmaName, null);
         }
 
-        private Pragma(String pragmaName, String[] choices) {
+        Pragma(String pragmaName, String[] choices) {
             this(pragmaName, null, choices);
         }
 
-        private Pragma(String pragmaName, String description, String[] choices) {
+        Pragma(String pragmaName, String description, String[] choices) {
             this.pragmaName = pragmaName;
             this.description = description;
             this.choices = choices;
@@ -654,7 +713,7 @@ public class SQLiteConfig {
         return result;
     }
 
-    public static enum Encoding implements PragmaValue {
+    public enum Encoding implements PragmaValue {
         UTF8("'UTF-8'"),
         UTF16("'UTF-16'"),
         UTF16_LITTLE_ENDIAN("'UTF-16le'"),
@@ -666,11 +725,11 @@ public class SQLiteConfig {
 
         public final String typeName;
 
-        private Encoding(String typeName) {
+        Encoding(String typeName) {
             this.typeName = typeName;
         }
 
-        private Encoding(Encoding encoding) {
+        Encoding(Encoding encoding) {
             this.typeName = encoding.getValue();
         }
 
@@ -683,7 +742,7 @@ public class SQLiteConfig {
         }
     }
 
-    public static enum JournalMode implements PragmaValue {
+    public enum JournalMode implements PragmaValue {
         DELETE,
         TRUNCATE,
         PERSIST,
@@ -796,7 +855,7 @@ public class SQLiteConfig {
         set(Pragma.LEGACY_FILE_FORMAT, use);
     }
 
-    public static enum LockingMode implements PragmaValue {
+    public enum LockingMode implements PragmaValue {
         NORMAL,
         EXCLUSIVE;
 
@@ -815,10 +874,6 @@ public class SQLiteConfig {
     public void setLockingMode(LockingMode mode) {
         setPragma(Pragma.LOCKING_MODE, mode.name());
     }
-
-    //    public void setLockingMode(String databaseName, LockingMode mode) {
-    //        setPragma(databaseName, Pragma.LOCKING_MODE, mode.name());
-    //    }
 
     /**
      * Sets the page size of the database. The page size must be a power of two between 512 and
@@ -891,7 +946,7 @@ public class SQLiteConfig {
         set(Pragma.SHORT_COLUMN_NAMES, enable);
     }
 
-    public static enum SynchronousMode implements PragmaValue {
+    public enum SynchronousMode implements PragmaValue {
         OFF,
         NORMAL,
         FULL;
@@ -923,7 +978,7 @@ public class SQLiteConfig {
         setPragma(Pragma.SYNCHRONOUS, mode.name());
     }
 
-    public static enum TempStore implements PragmaValue {
+    public enum TempStore implements PragmaValue {
         DEFAULT,
         FILE,
         MEMORY;
@@ -947,7 +1002,7 @@ public class SQLiteConfig {
         setPragma(Pragma.HEXKEY_MODE, mode.name());
     }
 
-    public static enum HexKeyMode implements PragmaValue {
+    public enum HexKeyMode implements PragmaValue {
         NONE,
         SSE,
         SQLCIPHER;
@@ -1014,7 +1069,7 @@ public class SQLiteConfig {
         set(Pragma.APPLICATION_ID, id);
     }
 
-    public static enum TransactionMode implements PragmaValue {
+    public enum TransactionMode implements PragmaValue {
         /** @deprecated Use {@code DEFERRED} instead. */
         @Deprecated
         DEFFERED,
@@ -1061,7 +1116,7 @@ public class SQLiteConfig {
         return this.defaultConnectionConfig.getTransactionMode();
     }
 
-    public static enum DatePrecision implements PragmaValue {
+    public enum DatePrecision implements PragmaValue {
         SECONDS,
         MILLISECONDS;
 
@@ -1079,7 +1134,7 @@ public class SQLiteConfig {
         this.defaultConnectionConfig.setDatePrecision(DatePrecision.getPrecision(datePrecision));
     }
 
-    public static enum DateClass implements PragmaValue {
+    public enum DateClass implements PragmaValue {
         INTEGER,
         TEXT,
         REAL;
