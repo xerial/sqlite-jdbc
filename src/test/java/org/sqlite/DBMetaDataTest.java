@@ -85,6 +85,27 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getTablesWithEscape() throws SQLException {
+        stat.executeUpdate("create table 'table%with%wildcards'(c1 integer)");
+        stat.executeUpdate("create table 'table_with_wildcards'(c2 integer)");
+        stat.executeUpdate("create table 'tableXwithXwildcards'(c3 integer)");
+
+        String esc = meta.getSearchStringEscape();
+        try (ResultSet rs =
+                meta.getTables(null, null, "table_with_wildcards".replace("_", esc + "_"), null)) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("table_with_wildcards");
+            assertThat(rs.next()).isFalse();
+        }
+        try (ResultSet rs =
+                meta.getTables(null, null, "table%with%wildcards".replace("%", esc + "%"), null)) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("table%with%wildcards");
+            assertThat(rs.next()).isFalse();
+        }
+    }
+
+    @Test
     public void getTableTypes() throws SQLException {
         ResultSet rs = meta.getTableTypes();
         assertThat(rs).isNotNull();
@@ -269,6 +290,25 @@ public class DBMetaDataTest {
         assertThat(rs.getString(4)).as("second column is named 'j'").isEqualTo("j");
         assertThat(rs.getString(24)).as("second column is generated").isEqualTo("YES");
         assertThat(rs.next()).isFalse();
+    }
+
+    @Test
+    public void getColumnsWithEscape() throws SQLException {
+        stat.executeUpdate("create table wildcard(col1 integer, co_1 integer, 'co%1' integer)");
+
+        String esc = meta.getSearchStringEscape();
+        try (ResultSet rs =
+                meta.getColumns(null, null, "wildcard", "co_1".replace("_", esc + "_"))) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("co_1");
+            assertThat(rs.next()).isFalse();
+        }
+        try (ResultSet rs =
+                meta.getColumns(null, null, "wildcard", "co%1".replace("%", esc + "%"))) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("co%1");
+            assertThat(rs.next()).isFalse();
+        }
     }
 
     @Test

@@ -248,7 +248,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** @see java.sql.DatabaseMetaData#getSearchStringEscape() */
     public String getSearchStringEscape() {
-        return null;
+        return "\\";
     }
 
     /** @see java.sql.DatabaseMetaData#getIdentifierQuoteString() */
@@ -850,7 +850,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         // create a Matrix Cursor for each of the tables
         // create a merge cursor from all the Matrix Cursors
         // and return the columname and type from:
-        //    "PRAGMA table_info(tablename)"
+        //    "PRAGMA table_xinfo(tablename)"
         // which returns data like this:
         //        sqlite> PRAGMA lastyear.table_info(gross_sales);
         //        cid|name|type|notnull|dflt_value|pk
@@ -1102,7 +1102,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         if (colNamePattern != null) {
                             sql.append(" where upper(cn) like upper('")
                                     .append(escape(colNamePattern))
-                                    .append("')");
+                                    .append("') ESCAPE '")
+                                    .append(getSearchStringEscape())
+                                    .append("'");
                         }
                     }
                 }
@@ -1714,7 +1716,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("  )").append("\n");
         sql.append(" WHERE TABLE_NAME LIKE '")
                 .append(tblNamePattern)
-                .append("' AND TABLE_TYPE IN (");
+                .append("' ESCAPE '")
+                .append(getSearchStringEscape())
+                .append("'")
+                .append(" AND TABLE_TYPE IN (");
 
         if (types == null || types.length == 0) {
             sql.append("'TABLE','VIEW'");
