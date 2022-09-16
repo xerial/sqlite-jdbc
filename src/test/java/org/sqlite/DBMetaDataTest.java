@@ -124,17 +124,133 @@ public class DBMetaDataTest {
     public void getTypeInfo() throws SQLException {
         ResultSet rs = meta.getTypeInfo();
         assertThat(rs).isNotNull();
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("TYPE_NAME")).isEqualTo("BLOB");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("TYPE_NAME")).isEqualTo("INTEGER");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("TYPE_NAME")).isEqualTo("NULL");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("TYPE_NAME")).isEqualTo("REAL");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("TYPE_NAME")).isEqualTo("TEXT");
+
+        testTypeInfo(
+                rs,
+                "BLOB",
+                Types.BLOB,
+                0,
+                null,
+                null,
+                null,
+                DatabaseMetaData.typeNullable,
+                false,
+                DatabaseMetaData.typeSearchable,
+                true,
+                false,
+                false,
+                0,
+                0,
+                10);
+        testTypeInfo(
+                rs,
+                "INTEGER",
+                Types.INTEGER,
+                0,
+                null,
+                null,
+                null,
+                DatabaseMetaData.typeNullable,
+                false,
+                DatabaseMetaData.typeSearchable,
+                false,
+                false,
+                true,
+                0,
+                0,
+                10);
+        testTypeInfo(
+                rs,
+                "NULL",
+                Types.NULL,
+                0,
+                null,
+                null,
+                null,
+                DatabaseMetaData.typeNullable,
+                false,
+                DatabaseMetaData.typeSearchable,
+                true,
+                false,
+                false,
+                0,
+                0,
+                10);
+        testTypeInfo(
+                rs,
+                "REAL",
+                Types.REAL,
+                0,
+                null,
+                null,
+                null,
+                DatabaseMetaData.typeNullable,
+                false,
+                DatabaseMetaData.typeSearchable,
+                false,
+                false,
+                false,
+                0,
+                0,
+                10);
+        testTypeInfo(
+                rs,
+                "TEXT",
+                Types.VARCHAR,
+                0,
+                null,
+                null,
+                null,
+                DatabaseMetaData.typeNullable,
+                true,
+                DatabaseMetaData.typeSearchable,
+                true,
+                false,
+                false,
+                0,
+                0,
+                10);
+
         assertThat(rs.next()).isFalse();
+    }
+
+    private void testTypeInfo(
+            ResultSet rs,
+            String name,
+            int type,
+            int precision,
+            String literalPrefix,
+            String literalSuffix,
+            String createParams,
+            int nullable,
+            boolean caseSensitive,
+            int searchable,
+            boolean unsigned,
+            boolean fixedPrecScale,
+            boolean autoIncrement,
+            int minScale,
+            int maxScale,
+            int radix)
+            throws SQLException {
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(name);
+        assertThat(rs.getInt(2)).isEqualTo(type);
+        assertThat(rs.getInt(3)).isEqualTo(precision);
+        assertThat(rs.getString(4)).isEqualTo(literalPrefix);
+        assertThat(rs.getString(5)).isEqualTo(literalSuffix);
+        assertThat(rs.getString(6)).isEqualTo(createParams);
+        assertThat(rs.getShort(7)).isEqualTo((short) nullable);
+        assertThat(rs.getBoolean(8)).isEqualTo(caseSensitive);
+        assertThat(rs.getShort(9)).isEqualTo((short) searchable);
+        assertThat(rs.getBoolean(10)).isEqualTo(unsigned);
+        assertThat(rs.getBoolean(11)).isEqualTo(fixedPrecScale);
+        assertThat(rs.getBoolean(12)).isEqualTo(autoIncrement);
+        assertThat(rs.getString(13)).isEqualTo(null);
+        assertThat(rs.getShort(14)).isEqualTo((short) minScale);
+        assertThat(rs.getShort(15)).isEqualTo((short) maxScale);
+        assertThat(rs.getInt(16)).isEqualTo(0);
+        assertThat(rs.getInt(17)).isEqualTo(0);
+        assertThat(rs.getInt(18)).isEqualTo(radix);
     }
 
     @Test

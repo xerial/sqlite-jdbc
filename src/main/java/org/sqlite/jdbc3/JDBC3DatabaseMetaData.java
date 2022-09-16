@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData.ImportedKeyFinder.ForeignKey;
+import org.sqlite.util.QueryUtils;
 import org.sqlite.util.StringUtils;
 
 public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabaseMetaData {
@@ -1760,45 +1762,125 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     /** @see java.sql.DatabaseMetaData#getTypeInfo() */
     public ResultSet getTypeInfo() throws SQLException {
         if (getTypeInfo == null) {
-            getTypeInfo =
-                    conn.prepareStatement(
-                            "select "
-                                    + "tn as TYPE_NAME, "
-                                    + "dt as DATA_TYPE, "
-                                    + "0 as PRECISION, "
-                                    + "null as LITERAL_PREFIX, "
-                                    + "null as LITERAL_SUFFIX, "
-                                    + "null as CREATE_PARAMS, "
-                                    + DatabaseMetaData.typeNullable
-                                    + " as NULLABLE, "
-                                    + "1 as CASE_SENSITIVE, "
-                                    + DatabaseMetaData.typeSearchable
-                                    + " as SEARCHABLE, "
-                                    + "0 as UNSIGNED_ATTRIBUTE, "
-                                    + "0 as FIXED_PREC_SCALE, "
-                                    + "0 as AUTO_INCREMENT, "
-                                    + "null as LOCAL_TYPE_NAME, "
-                                    + "0 as MINIMUM_SCALE, "
-                                    + "0 as MAXIMUM_SCALE, "
-                                    + "0 as SQL_DATA_TYPE, "
-                                    + "0 as SQL_DATETIME_SUB, "
-                                    + "10 as NUM_PREC_RADIX from ("
-                                    + "    select 'BLOB' as tn, "
-                                    + Types.BLOB
-                                    + " as dt union"
-                                    + "    select 'NULL' as tn, "
-                                    + Types.NULL
-                                    + " as dt union"
-                                    + "    select 'REAL' as tn, "
-                                    + Types.REAL
-                                    + " as dt union"
-                                    + "    select 'TEXT' as tn, "
-                                    + Types.VARCHAR
-                                    + " as dt union"
-                                    + "    select 'INTEGER' as tn, "
-                                    + Types.INTEGER
-                                    + " as dt"
-                                    + ") order by TYPE_NAME;");
+            String sql =
+                    QueryUtils.valuesQuery(
+                                    Arrays.asList(
+                                            "TYPE_NAME",
+                                            "DATA_TYPE",
+                                            "PRECISION",
+                                            "LITERAL_PREFIX",
+                                            "LITERAL_SUFFIX",
+                                            "CREATE_PARAMS",
+                                            "NULLABLE",
+                                            "CASE_SENSITIVE",
+                                            "SEARCHABLE",
+                                            "UNSIGNED_ATTRIBUTE",
+                                            "FIXED_PREC_SCALE",
+                                            "AUTO_INCREMENT",
+                                            "LOCAL_TYPE_NAME",
+                                            "MINIMUM_SCALE",
+                                            "MAXIMUM_SCALE",
+                                            "SQL_DATA_TYPE",
+                                            "SQL_DATETIME_SUB",
+                                            "NUM_PREC_RADIX"),
+                                    Arrays.asList(
+                                            Arrays.asList(
+                                                    "BLOB",
+                                                    Types.BLOB,
+                                                    0,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    DatabaseMetaData.typeNullable,
+                                                    0,
+                                                    DatabaseMetaData.typeSearchable,
+                                                    1,
+                                                    0,
+                                                    0,
+                                                    null,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    10),
+                                            Arrays.asList(
+                                                    "INTEGER",
+                                                    Types.INTEGER,
+                                                    0,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    DatabaseMetaData.typeNullable,
+                                                    0,
+                                                    DatabaseMetaData.typeSearchable,
+                                                    0,
+                                                    0,
+                                                    1,
+                                                    null,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    10),
+                                            Arrays.asList(
+                                                    "NULL",
+                                                    Types.NULL,
+                                                    0,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    DatabaseMetaData.typeNullable,
+                                                    0,
+                                                    DatabaseMetaData.typeSearchable,
+                                                    1,
+                                                    0,
+                                                    0,
+                                                    null,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    10),
+                                            Arrays.asList(
+                                                    "REAL",
+                                                    Types.REAL,
+                                                    0,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    DatabaseMetaData.typeNullable,
+                                                    0,
+                                                    DatabaseMetaData.typeSearchable,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    null,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    10),
+                                            Arrays.asList(
+                                                    "TEXT",
+                                                    Types.VARCHAR,
+                                                    0,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    DatabaseMetaData.typeNullable,
+                                                    1,
+                                                    DatabaseMetaData.typeSearchable,
+                                                    1,
+                                                    0,
+                                                    0,
+                                                    null,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    10)))
+                            + " order by TYPE_NAME";
+            getTypeInfo = conn.prepareStatement(sql);
         }
 
         getTypeInfo.clearParameters();
