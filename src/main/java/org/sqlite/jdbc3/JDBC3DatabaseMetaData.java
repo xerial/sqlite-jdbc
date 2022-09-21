@@ -1694,6 +1694,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("  NULL AS REF_GENERATION").append("\n");
         sql.append("FROM").append("\n");
         sql.append("  (").append("\n");
+        sql.append("    SELECT\n");
+        sql.append("      'sqlite_schema' AS NAME,\n");
+        sql.append("      'SYSTEM TABLE' AS TYPE");
+        sql.append("    UNION ALL").append("\n");
         sql.append("    SELECT").append("\n");
         sql.append("      NAME,").append("\n");
         sql.append("      UPPER(TYPE) AS TYPE").append("\n");
