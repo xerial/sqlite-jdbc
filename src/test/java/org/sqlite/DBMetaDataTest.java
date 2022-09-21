@@ -52,11 +52,15 @@ public class DBMetaDataTest {
         stat.close();
 
         assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+        assertThat(rs.getString("TABLE_TYPE")).isEqualTo("SYSTEM TABLE");
+        assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("test"); // 3
         assertThat(rs.getString("TABLE_TYPE")).isEqualTo("TABLE"); // 4
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
         assertThat(rs.getString("TABLE_TYPE")).isEqualTo("VIEW");
+        assertThat(rs.next()).isFalse();
         rs.close();
 
         rs = meta.getTables(null, null, "bob", null);
@@ -80,6 +84,12 @@ public class DBMetaDataTest {
         rs = meta.getTables(null, null, null, new String[] {"view"});
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
+        assertThat(rs.next()).isFalse();
+        rs.close();
+
+        rs = meta.getTables(null, null, null, new String[] {"system table"});
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
         assertThat(rs.next()).isFalse();
         rs.close();
     }
@@ -939,6 +949,10 @@ public class DBMetaDataTest {
 
         assertThat(rsTables.getString("TABLE_NAME")).isEqualTo("TABLE3");
         assertThat(rsTables.getString("TABLE_TYPE")).isEqualTo("GLOBAL TEMPORARY");
+
+        assertThat(rsTables.next()).isTrue();
+        assertThat(rsTables.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+        assertThat(rsTables.getString("TABLE_TYPE")).isEqualTo("SYSTEM TABLE");
 
         assertThat(rsTables.next()).isTrue();
         assertThat(rsTables.getString("TABLE_NAME")).isEqualTo("sqlite_sequence");

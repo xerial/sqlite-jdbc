@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData.ImportedKeyFinder.ForeignKey;
@@ -1721,24 +1722,22 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("    WHERE").append("\n");
         sql.append("      NAME LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("  )").append("\n");
-        sql.append(" WHERE TABLE_NAME LIKE '")
-                .append(tblNamePattern)
-                .append("' ESCAPE '")
-                .append(getSearchStringEscape())
-                .append("'")
-                .append(" AND TABLE_TYPE IN (");
+        sql.append(" WHERE TABLE_NAME LIKE '");
+        sql.append(tblNamePattern);
+        sql.append("' ESCAPE '");
+        sql.append(getSearchStringEscape());
+        sql.append("'");
 
-        if (types == null || types.length == 0) {
-            sql.append("'TABLE','VIEW'");
-        } else {
-            sql.append("'").append(types[0].toUpperCase()).append("'");
-
-            for (int i = 1; i < types.length; i++) {
-                sql.append(",'").append(types[i].toUpperCase()).append("'");
-            }
+        if (types != null && types.length != 0) {
+            sql.append(" AND TABLE_TYPE IN (");
+            sql.append(
+                    Arrays.stream(types)
+                            .map((t) -> "'" + t.toUpperCase() + "'")
+                            .collect(Collectors.joining(",")));
+            sql.append(")");
         }
 
-        sql.append(") ORDER BY TABLE_TYPE, TABLE_NAME;");
+        sql.append(" ORDER BY TABLE_TYPE, TABLE_NAME;");
 
         return ((CoreStatement) conn.createStatement()).executeQuery(sql.toString(), true);
     }
