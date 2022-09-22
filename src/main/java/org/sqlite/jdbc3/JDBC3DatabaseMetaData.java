@@ -1504,8 +1504,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
         if (i == 0) {
             sql = appendDummyForeignKeyList(sql);
+        } else {
+            sql.append(") ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ;");
         }
-        sql.append(") ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ;");
 
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
