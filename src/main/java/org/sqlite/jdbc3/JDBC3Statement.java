@@ -17,6 +17,7 @@ import org.sqlite.core.DB.ProgressObserver;
 public abstract class JDBC3Statement extends CoreStatement {
 
     private int queryTimeout; // in seconds, as per the JDBC spec
+    private long updateCount;
 
     // PUBLIC INTERFACE /////////////////////////////////////////////
 
@@ -46,7 +47,9 @@ public abstract class JDBC3Statement extends CoreStatement {
                     JDBC3Statement.this.sql = sql;
 
                     conn.getDatabase().prepare(JDBC3Statement.this);
-                    return exec();
+                    boolean result = exec();
+                    updateCount = getDatabase().changes();
+                    return result;
                 });
     }
 
@@ -180,7 +183,7 @@ public abstract class JDBC3Statement extends CoreStatement {
         if (!pointer.isClosed()
                 && !rs.isOpen()
                 && !resultsWaiting
-                && pointer.safeRunInt(DB::column_count) == 0) return db.changes();
+                && pointer.safeRunInt(DB::column_count) == 0) return updateCount;
         return -1;
     }
 

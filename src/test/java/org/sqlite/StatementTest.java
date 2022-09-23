@@ -135,6 +135,20 @@ public class StatementTest {
     }
 
     @Test
+    public void executeUpdateCount() throws SQLException {
+        assertThat(stat.execute("create table test (c1);")).isFalse();
+
+        Statement stat2 = conn.createStatement();
+        assertThat(stat2.execute("insert into test values('abc'),('def');")).isFalse();
+        assertThat(stat2.getMoreResults()).isFalse();
+        assertThat(stat2.getUpdateCount()).isEqualTo(-1);
+
+        assertThat(stat.getUpdateCount()).isEqualTo(0);
+        assertThat(stat.getMoreResults()).isFalse();
+        assertThat(stat.getUpdateCount()).isEqualTo(-1);
+    }
+
+    @Test
     public void colNameAccess() throws SQLException {
         assertThat(stat.executeUpdate("create table tab (id, firstname, surname);")).isEqualTo(0);
         assertThat(stat.executeUpdate("insert into tab values (0, 'Bob', 'Builder');"))
