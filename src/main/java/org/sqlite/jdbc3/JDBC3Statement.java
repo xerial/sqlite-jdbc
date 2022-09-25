@@ -362,7 +362,7 @@ public abstract class JDBC3Statement extends CoreStatement {
     /** @see java.sql.Statement#getMoreResults(int) */
     public boolean getMoreResults(int c) throws SQLException {
         checkOpen();
-        internalClose(); // as we never have another result, clean up pointer
+        updateCount = -1;
         return false;
     }
 
