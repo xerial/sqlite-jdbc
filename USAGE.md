@@ -156,3 +156,20 @@ config.setExplicitReadOnly(true);
 ```java
 DriverManager.getConnection("jdbc:sqlite::memory:?jdbc.explicit_readonly=true");
 ```
+
+## How to use with Android
+
+Android expects JNI native libraries to be bundled differently than a normal Java application.
+
+You will need to extract the native libraries from our jar (from `org/sqlite/native/Linux-Android`), and place them in the `jniLibs` directory:
+
+![android-studio-screenshot](./.github/README_IMAGES/android_jnilibs.png)
+
+The name of directories in our jar and in Android Studio differ, here is a mapping table:
+
+| Jar directory | Android Studio directory |
+|---------------|--------------------------|
+| aarch64       | arm64-v8a                |
+| arm           | armeabi                  |
+| x86           | x86                      |
+| x86_64        | x86_64                   |
