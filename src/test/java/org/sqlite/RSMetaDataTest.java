@@ -13,6 +13,8 @@ import java.sql.Types;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.sqlite.jdbc3.JDBC3ResultSet;
+import org.sqlite.jdbc4.JDBC4ResultSet;
 
 public class RSMetaDataTest {
     private Connection conn;
@@ -55,9 +57,12 @@ public class RSMetaDataTest {
         assertThat(meta.isAutoIncrement(1)).isTrue();
         assertThat(meta.isAutoIncrement(2)).isFalse();
         assertThat(meta.isAutoIncrement(3)).isFalse();
-        assertThat(meta.isNullable(1)).isEqualTo(ResultSetMetaData.columnNoNulls);
+        assertThat(meta.isNullable(1)).isEqualTo(ResultSetMetaData.columnNullable);
         assertThat(meta.isNullable(2)).isEqualTo(ResultSetMetaData.columnNullable);
         assertThat(meta.isNullable(3)).isEqualTo(ResultSetMetaData.columnNullable);
+        assertThat(((JDBC3ResultSet) meta).isPrimary(1)).isTrue();
+        assertThat(((JDBC3ResultSet) meta).isPrimary(2)).isFalse();
+        assertThat(((JDBC3ResultSet) meta).isPrimary(3)).isFalse();
     }
 
     @Test
@@ -187,6 +192,12 @@ public class RSMetaDataTest {
     public void nullable() throws SQLException {
         meta = stat.executeQuery("select null;").getMetaData();
         assertThat(meta.isNullable(1)).isEqualTo(ResultSetMetaData.columnNullable);
+    }
+
+    @Test
+    public void primary() throws SQLException {
+        meta = stat.executeQuery("select pid from people;").getMetaData();
+        assertThat(((JDBC4ResultSet) meta).isPrimary(1)).isTrue();
     }
 
     @Test
