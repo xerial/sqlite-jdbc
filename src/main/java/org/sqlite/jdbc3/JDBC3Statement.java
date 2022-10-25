@@ -360,17 +360,23 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#getMoreResults()
      */
     public boolean getMoreResults() throws SQLException {
-        return getMoreResults(Statement.CLOSE_ALL_RESULTS);
+        return getMoreResults(Statement.CLOSE_CURRENT_RESULT);
     }
 
     /** @see java.sql.Statement#getMoreResults(int) */
     public boolean getMoreResults(int current) throws SQLException {
         checkOpen();
 
-        // we support a single result set, need to close it if requested
-        if (current == Statement.CLOSE_CURRENT_RESULT || current == Statement.CLOSE_ALL_RESULTS) {
-            rs.close();
+        if (current == Statement.KEEP_CURRENT_RESULT || current == Statement.CLOSE_ALL_RESULTS) {
+            throw new SQLFeatureNotSupportedException(
+                    "Argument not supported: Statement.KEEP_CURRENT_RESULT or Statement.CLOSE_ALL_RESULTS");
         }
+        if (current != Statement.CLOSE_CURRENT_RESULT) {
+            throw new SQLException("Invalid argument");
+        }
+
+        // we support a single result set, close it
+        rs.close();
 
         // as we don't have more result, change the update count to -1
         updateCount = -1;
