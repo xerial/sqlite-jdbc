@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.Arrays;
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
@@ -18,6 +19,7 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     private int queryTimeout; // in seconds, as per the JDBC spec
     private long updateCount;
+    private boolean exhaustedResults = false;
 
     // PUBLIC INTERFACE /////////////////////////////////////////////
 
@@ -141,6 +143,8 @@ public abstract class JDBC3Statement extends CoreStatement {
     /** @see java.sql.Statement#getResultSet() */
     public ResultSet getResultSet() throws SQLException {
         checkOpen();
+
+        if (exhaustedResults) return null;
 
         if (rs.isOpen()) {
             throw new SQLException("ResultSet already requested");
@@ -370,6 +374,9 @@ public abstract class JDBC3Statement extends CoreStatement {
 
         // as we don't have more result, change the update count to -1
         updateCount = -1;
+        exhaustedResults = true;
+
+        // always return false as we never have more results
         return false;
     }
 
