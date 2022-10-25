@@ -832,18 +832,6 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
                 : ResultSetMetaData.columnNullable;
     }
 
-    /**
-     * Indicates whether the values in the designated column are primary attributes.
-     *
-     * @param col the first column is 1, the second is 2, ...
-     * @return whether the given column correspond to a primary attribute or not
-     * @throws SQLException if a database access error occurs
-     */
-    public boolean isPrimary(int col) throws SQLException {
-        checkMeta();
-        return meta[checkCol(col)][1];
-    }
-
     /** @see java.sql.ResultSetMetaData#isAutoIncrement(int) */
     public boolean isAutoIncrement(int col) throws SQLException {
         checkMeta();
