@@ -356,12 +356,19 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#getMoreResults()
      */
     public boolean getMoreResults() throws SQLException {
-        return getMoreResults(0);
+        return getMoreResults(Statement.CLOSE_ALL_RESULTS);
     }
 
     /** @see java.sql.Statement#getMoreResults(int) */
-    public boolean getMoreResults(int c) throws SQLException {
+    public boolean getMoreResults(int current) throws SQLException {
         checkOpen();
+
+        // we support a single result set, need to close it if requested
+        if (current == Statement.CLOSE_CURRENT_RESULT || current == Statement.CLOSE_ALL_RESULTS) {
+            rs.close();
+        }
+
+        // as we don't have more result, change the update count to -1
         updateCount = -1;
         return false;
     }
