@@ -123,15 +123,21 @@ public class StatementTest {
         assertThat(rs.wasNull()).isTrue();
         assertThat(stat.getMoreResults()).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
 
         assertThat(stat.execute("select null;")).isTrue();
         assertThat(stat.getMoreResults()).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
 
         assertThat(stat.execute("create table test (c1);")).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(0);
         assertThat(stat.getMoreResults()).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
     }
 
     @Test
@@ -373,8 +379,13 @@ public class StatementTest {
     public void executeClearRS() throws SQLException {
         assertThat(stat.execute("select null;")).isTrue();
         assertThat(stat.getResultSet()).isNotNull();
+        assertThatExceptionOfType(SQLException.class)
+                .as("requesting the same result set twice should throw an exception")
+                .isThrownBy(() -> stat.getResultSet());
         assertThat(stat.getMoreResults()).isFalse();
-        assertThatExceptionOfType(SQLException.class).isThrownBy(() -> stat.getResultSet());
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
+        assertThat(stat.getUpdateCount()).isEqualTo(-1);
     }
 
     @Test
