@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.Arrays;
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
@@ -18,6 +19,7 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     private int queryTimeout; // in seconds, as per the JDBC spec
     private long updateCount;
+    private boolean exhaustedResults = false;
 
     // PUBLIC INTERFACE /////////////////////////////////////////////
 
@@ -141,6 +143,8 @@ public abstract class JDBC3Statement extends CoreStatement {
     /** @see java.sql.Statement#getResultSet() */
     public ResultSet getResultSet() throws SQLException {
         checkOpen();
+
+        if (exhaustedResults) return null;
 
         if (rs.isOpen()) {
             throw new SQLException("ResultSet already requested");
@@ -356,13 +360,29 @@ public abstract class JDBC3Statement extends CoreStatement {
      * @see java.sql.Statement#getMoreResults()
      */
     public boolean getMoreResults() throws SQLException {
-        return getMoreResults(0);
+        return getMoreResults(Statement.CLOSE_CURRENT_RESULT);
     }
 
     /** @see java.sql.Statement#getMoreResults(int) */
-    public boolean getMoreResults(int c) throws SQLException {
+    public boolean getMoreResults(int current) throws SQLException {
         checkOpen();
-        internalClose(); // as we never have another result, clean up pointer
+
+        if (current == Statement.KEEP_CURRENT_RESULT || current == Statement.CLOSE_ALL_RESULTS) {
+            throw new SQLFeatureNotSupportedException(
+                    "Argument not supported: Statement.KEEP_CURRENT_RESULT or Statement.CLOSE_ALL_RESULTS");
+        }
+        if (current != Statement.CLOSE_CURRENT_RESULT) {
+            throw new SQLException("Invalid argument");
+        }
+
+        // we support a single result set, close it
+        rs.close();
+
+        // as we don't have more result, change the update count to -1
+        updateCount = -1;
+        exhaustedResults = true;
+
+        // always return false as we never have more results
         return false;
     }
 

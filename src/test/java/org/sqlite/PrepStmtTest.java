@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.data.Offset.offset;
 
 import java.io.ByteArrayInputStream;
@@ -716,5 +714,22 @@ public class PrepStmtTest {
                                         .isEqualTo(SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE);
                             });
         }
+    }
+
+    @Test
+    public void getMoreResultsDoesNotCloseStatement() throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("select ?");
+        ps.setString(1, "Hello");
+
+        ResultSet rs = ps.executeQuery();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("Hello");
+        assertThat(rs.next()).isFalse();
+
+        assertThat(ps.getMoreResults()).isFalse();
+        assertThat(rs.isClosed()).isTrue();
+        assertThat(ps.isClosed()).isFalse();
+
+        assertThatNoException().isThrownBy(ps::clearParameters);
     }
 }

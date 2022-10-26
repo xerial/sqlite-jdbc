@@ -14,6 +14,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.Calendar;
 import org.junit.jupiter.api.AfterEach;
@@ -123,15 +124,21 @@ public class StatementTest {
         assertThat(rs.wasNull()).isTrue();
         assertThat(stat.getMoreResults()).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
 
         assertThat(stat.execute("select null;")).isTrue();
         assertThat(stat.getMoreResults()).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
 
         assertThat(stat.execute("create table test (c1);")).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(0);
         assertThat(stat.getMoreResults()).isFalse();
         assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
     }
 
     @Test
@@ -373,8 +380,28 @@ public class StatementTest {
     public void executeClearRS() throws SQLException {
         assertThat(stat.execute("select null;")).isTrue();
         assertThat(stat.getResultSet()).isNotNull();
+        assertThatExceptionOfType(SQLException.class)
+                .as("requesting the same result set twice should throw an exception")
+                .isThrownBy(() -> stat.getResultSet());
         assertThat(stat.getMoreResults()).isFalse();
-        assertThatExceptionOfType(SQLException.class).isThrownBy(() -> stat.getResultSet());
+        assertThat(stat.isClosed()).isFalse();
+        assertThat(stat.getResultSet()).isNull();
+        assertThat(stat.getUpdateCount()).isEqualTo(-1);
+    }
+
+    @Test
+    public void getMoreResultsArguments() throws SQLException {
+        assertThat(stat.execute("select null;")).isTrue();
+        assertThat(stat.getResultSet()).isNotNull();
+        assertThatExceptionOfType(SQLException.class)
+                .as("getMoreResults only accepts valid arguments")
+                .isThrownBy(() -> stat.getMoreResults(15));
+        assertThatExceptionOfType(SQLFeatureNotSupportedException.class)
+                .as("getMoreResults with CLOSE_ALL_RESULTS is not supported")
+                .isThrownBy(() -> stat.getMoreResults(Statement.CLOSE_ALL_RESULTS));
+        assertThatExceptionOfType(SQLFeatureNotSupportedException.class)
+                .as("getMoreResults with KEEP_CURRENT_RESULT is not supported")
+                .isThrownBy(() -> stat.getMoreResults(Statement.KEEP_CURRENT_RESULT));
     }
 
     @Test
