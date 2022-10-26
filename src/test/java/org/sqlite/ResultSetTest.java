@@ -167,6 +167,31 @@ public class ResultSetTest {
     }
 
     @Test
+    public void testNumericTypes() throws SQLException {
+        stat.executeUpdate("create table numeric(c1, c2, c3)");
+        stat.executeUpdate("insert into numeric values (1, 1.1, null)");
+
+        ResultSet rs = stat.executeQuery("select * from numeric");
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
+        assertThat(rs.getInt(2)).isEqualTo(1);
+        assertThat(rs.getInt(3)).isEqualTo(0);
+        assertThat(rs.getLong(1)).isEqualTo(1L);
+        assertThat(rs.getLong(2)).isEqualTo(1L);
+        assertThat(rs.getLong(3)).isEqualTo(0L);
+        assertThat(rs.getDouble(1)).isEqualTo(1.0D);
+        assertThat(rs.getDouble(2)).isEqualTo(1.1D);
+        assertThat(rs.getDouble(3)).isEqualTo(0D);
+        assertThat(rs.getFloat(1)).isEqualTo(1.0F);
+        assertThat(rs.getFloat(2)).isEqualTo(1.1F);
+        assertThat(rs.getFloat(3)).isEqualTo(0F);
+        assertThat(rs.getString(1)).isEqualTo("1");
+        assertThat(rs.getString(2)).isEqualTo("1.1");
+        assertThat(rs.getString(3)).isNull();
+    }
+
+    @Test
     public void testGetBigDecimal() throws SQLException {
         stat.executeUpdate(
                 "create table bigdecimal(c1, c2 integer, c3 real, c4 double, c5 decimal, c6 numeric, c7 float)");
