@@ -13,8 +13,6 @@ import java.sql.Types;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.sqlite.jdbc3.JDBC3ResultSet;
-import org.sqlite.jdbc4.JDBC4ResultSet;
 
 public class RSMetaDataTest {
     private Connection conn;
