@@ -27,6 +27,9 @@ public class RSMetaDataTest {
                 "create table People (pid integer primary key autoincrement, "
                         + " firstname string(255), surname string(25,5), dob date);");
         stat.executeUpdate(
+                "create table Film (id integer primary key autoincrement, "
+                        + " title string(255) not null, length integer not null, budget real);");
+        stat.executeUpdate(
                 "insert into people values (null, 'Mohandas', 'Gandhi', " + " '1869-10-02');");
         meta = stat.executeQuery("select pid, firstname, surname from people;").getMetaData();
     }
@@ -55,7 +58,7 @@ public class RSMetaDataTest {
         assertThat(meta.isAutoIncrement(1)).isTrue();
         assertThat(meta.isAutoIncrement(2)).isFalse();
         assertThat(meta.isAutoIncrement(3)).isFalse();
-        assertThat(meta.isNullable(1)).isEqualTo(ResultSetMetaData.columnNoNulls);
+        assertThat(meta.isNullable(1)).isEqualTo(ResultSetMetaData.columnNullable);
         assertThat(meta.isNullable(2)).isEqualTo(ResultSetMetaData.columnNullable);
         assertThat(meta.isNullable(3)).isEqualTo(ResultSetMetaData.columnNullable);
     }
@@ -185,8 +188,11 @@ public class RSMetaDataTest {
 
     @Test
     public void nullable() throws SQLException {
-        meta = stat.executeQuery("select null;").getMetaData();
+        meta = stat.executeQuery("select * from film;").getMetaData();
         assertThat(meta.isNullable(1)).isEqualTo(ResultSetMetaData.columnNullable);
+        assertThat(meta.isNullable(2)).isEqualTo(ResultSetMetaData.columnNoNulls);
+        assertThat(meta.isNullable(3)).isEqualTo(ResultSetMetaData.columnNoNulls);
+        assertThat(meta.isNullable(4)).isEqualTo(ResultSetMetaData.columnNullable);
     }
 
     @Test

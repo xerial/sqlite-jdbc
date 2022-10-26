@@ -818,7 +818,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     /** @see java.sql.ResultSetMetaData#isNullable(int) */
     public int isNullable(int col) throws SQLException {
         checkMeta();
-        return meta[checkCol(col)][1]
+        return meta[checkCol(col)][0]
                 ? ResultSetMetaData.columnNoNulls
                 : ResultSetMetaData.columnNullable;
     }
