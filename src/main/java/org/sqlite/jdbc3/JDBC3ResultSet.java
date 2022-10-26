@@ -154,30 +154,20 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#getBigDecimal(int) */
     public BigDecimal getBigDecimal(int col) throws SQLException {
-        final int valueType = safeGetColumnType(checkCol(col));
-        if (valueType == SQLITE_NULL) return null;
-
-        final int columnType = getColumnType(col);
-
-        if (columnType == Types.INTEGER) {
-            long decimal = getLong(col);
-            return BigDecimal.valueOf(decimal);
-        } else if (columnType == Types.FLOAT
-                || columnType == Types.REAL
-                || columnType == Types.DOUBLE) {
-            final double decimal = getDouble(col);
-            if (Double.isNaN(decimal)) {
-                throw new SQLException("Bad value for type BigDecimal : Not a Number");
-            } else {
-                return BigDecimal.valueOf(decimal);
-            }
-        } else {
-            final String stringValue = getString(col);
-            try {
-                return new BigDecimal(stringValue);
-            } catch (NumberFormatException e) {
-                throw new SQLException("Bad value for type BigDecimal : " + stringValue);
-            }
+        switch (safeGetColumnType(checkCol(col))) {
+            case SQLITE_NULL:
+                return null;
+            case SQLITE_FLOAT:
+                return BigDecimal.valueOf(safeGetDoubleCol(col));
+            case SQLITE_INTEGER:
+                return BigDecimal.valueOf(safeGetLongCol(col));
+            default:
+                final String stringValue = safeGetColumnText(col);
+                try {
+                    return new BigDecimal(stringValue);
+                } catch (NumberFormatException e) {
+                    throw new SQLException("Bad value for type BigDecimal : " + stringValue);
+                }
         }
     }
 
