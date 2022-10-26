@@ -3,6 +3,7 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -163,5 +164,92 @@ public class ResultSetTest {
         ResultSet resultSet = stat.executeQuery("select * from test where id = 0");
         assertThat(resultSet.next()).isFalse();
         assertThat(resultSet.findColumn("id")).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetBigDecimal() throws SQLException {
+        stat.executeUpdate(
+                "create table bigdecimal(c1, c2 integer, c3 real, c4 double, c5 decimal, c6 numeric, c7 float)");
+        stat.executeUpdate("insert into bigdecimal values (1, 2, 3, 4, 5, 6, 7)");
+        stat.executeUpdate("insert into bigdecimal values ('1', '2', '3', '4', '5', '6', '7')");
+        stat.executeUpdate("insert into bigdecimal values (1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1)");
+        stat.executeUpdate(
+                "insert into bigdecimal values ('1.1', '2.1', '3.1', '4.1', '5.1', '6.1', '7.1')");
+        stat.executeUpdate(
+                "insert into bigdecimal values (null, null, null, null, null, null, null)");
+        stat.executeUpdate(
+                "insert into bigdecimal values ('null', '', 'abc', 'abc', 'abc', 'abc', 'abc')");
+
+        ResultSet rs = stat.executeQuery("select * from bigdecimal");
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBigDecimal(1)).isEqualTo(new BigDecimal("1"));
+        assertThat(rs.getBigDecimal(2)).isEqualTo(new BigDecimal("2"));
+        assertThat(rs.getBigDecimal(3)).isEqualTo(new BigDecimal("3.0"));
+        assertThat(rs.getBigDecimal(4)).isEqualTo(new BigDecimal("4.0"));
+        assertThat(rs.getBigDecimal(5)).isEqualTo(new BigDecimal("5"));
+        assertThat(rs.getBigDecimal(6)).isEqualTo(new BigDecimal("6"));
+        assertThat(rs.getBigDecimal(7)).isEqualTo(new BigDecimal("7.0"));
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBigDecimal(1)).isEqualTo(new BigDecimal("1"));
+        assertThat(rs.getBigDecimal(2)).isEqualTo(new BigDecimal("2"));
+        assertThat(rs.getBigDecimal(3)).isEqualTo(new BigDecimal("3.0"));
+        assertThat(rs.getBigDecimal(4)).isEqualTo(new BigDecimal("4.0"));
+        assertThat(rs.getBigDecimal(5)).isEqualTo(new BigDecimal("5"));
+        assertThat(rs.getBigDecimal(6)).isEqualTo(new BigDecimal("6"));
+        assertThat(rs.getBigDecimal(7)).isEqualTo(new BigDecimal("7.0"));
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBigDecimal(1)).isEqualTo(new BigDecimal("1.1"));
+        assertThat(rs.getBigDecimal(2)).isEqualTo(new BigDecimal("2.1"));
+        assertThat(rs.getBigDecimal(3)).isEqualTo(new BigDecimal("3.1"));
+        assertThat(rs.getBigDecimal(4)).isEqualTo(new BigDecimal("4.1"));
+        assertThat(rs.getBigDecimal(5)).isEqualTo(new BigDecimal("5.1"));
+        assertThat(rs.getBigDecimal(6)).isEqualTo(new BigDecimal("6.1"));
+        assertThat(rs.getBigDecimal(7)).isEqualTo(new BigDecimal("7.1"));
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBigDecimal(1)).isEqualTo(new BigDecimal("1.1"));
+        assertThat(rs.getBigDecimal(2)).isEqualTo(new BigDecimal("2.1"));
+        assertThat(rs.getBigDecimal(3)).isEqualTo(new BigDecimal("3.1"));
+        assertThat(rs.getBigDecimal(4)).isEqualTo(new BigDecimal("4.1"));
+        assertThat(rs.getBigDecimal(5)).isEqualTo(new BigDecimal("5.1"));
+        assertThat(rs.getBigDecimal(6)).isEqualTo(new BigDecimal("6.1"));
+        assertThat(rs.getBigDecimal(7)).isEqualTo(new BigDecimal("7.1"));
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBigDecimal(1)).isNull();
+        assertThat(rs.getBigDecimal(2)).isNull();
+        assertThat(rs.getBigDecimal(3)).isNull();
+        assertThat(rs.getBigDecimal(4)).isNull();
+        assertThat(rs.getBigDecimal(5)).isNull();
+        assertThat(rs.getBigDecimal(6)).isNull();
+        assertThat(rs.getBigDecimal(7)).isNull();
+
+        assertThat(rs.next()).isTrue();
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> rs.getBigDecimal(1))
+                .withMessageContaining("Bad value for type BigDecimal");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> rs.getBigDecimal(2))
+                .withMessageContaining("Bad value for type BigDecimal");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> rs.getBigDecimal(3))
+                .withMessageContaining("Bad value for type BigDecimal");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> rs.getBigDecimal(4))
+                .withMessageContaining("Bad value for type BigDecimal");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> rs.getBigDecimal(5))
+                .withMessageContaining("Bad value for type BigDecimal");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> rs.getBigDecimal(6))
+                .withMessageContaining("Bad value for type BigDecimal");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> rs.getBigDecimal(7))
+                .withMessageContaining("Bad value for type BigDecimal");
+
+        assertThat(rs.next()).isFalse();
     }
 }
