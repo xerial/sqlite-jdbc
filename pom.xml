@@ -334,6 +334,8 @@
                                 <include>**/RSMetaDataTest</include>
                                 <!--  SegFault  -->
                                 <exclude>**/UDFCustomErrorTest.java</exclude>
+                                <!--  Not needed  -->
+                                <exclude>**/architecture/*.java</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
