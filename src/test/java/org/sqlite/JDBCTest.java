@@ -271,7 +271,7 @@ public class JDBCTest {
     // helper methods -----------------------------------------------------------------
 
     private SQLiteDataSource createDatasourceWithExplicitReadonly() {
-        DriverManager.setLogWriter(new PrintWriter(System.out));
+//        DriverManager.setLogWriter(new PrintWriter(System.out));
         SQLiteConfig config = new SQLiteConfig();
         config.setExplicitReadOnly(true);
         config.setBusyTimeout(10000);
