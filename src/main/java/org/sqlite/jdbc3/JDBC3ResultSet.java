@@ -962,7 +962,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         }
     }
 
-    private int safeGetColumnType(int col) throws SQLException {
+    protected int safeGetColumnType(int col) throws SQLException {
         return stmt.pointer.safeRunInt((db, ptr) -> db.column_type(ptr, col));
     }
 

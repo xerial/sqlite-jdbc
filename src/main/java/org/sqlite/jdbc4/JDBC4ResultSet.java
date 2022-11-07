@@ -311,13 +311,42 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
     }
 
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        if (type == null) throw new SQLException("requested type cannot be null");
+        if (type == String.class) return type.cast(getString(columnIndex));
+        if (type == Boolean.class) return type.cast(getBoolean(columnIndex));
+        if (type == BigDecimal.class) return type.cast(getBigDecimal(columnIndex));
+        if (type == byte[].class) return type.cast(getBytes(columnIndex));
+        if (type == Date.class) return type.cast(getDate(columnIndex));
+        if (type == Time.class) return type.cast(getTime(columnIndex));
+        if (type == Timestamp.class) return type.cast(getTimestamp(columnIndex));
+
+        int columnType = safeGetColumnType(markCol(columnIndex));
+        if (type == Double.class) {
+            if (columnType == SQLITE_INTEGER || columnType == SQLITE_FLOAT)
+                return type.cast(getDouble(columnIndex));
+            throw new SQLException("Bad value for type Double");
+        }
+        if (type == Long.class) {
+            if (columnType == SQLITE_INTEGER || columnType == SQLITE_FLOAT)
+                return type.cast(getLong(columnIndex));
+            throw new SQLException("Bad value for type Long");
+        }
+        if (type == Float.class) {
+            if (columnType == SQLITE_INTEGER || columnType == SQLITE_FLOAT)
+                return type.cast(getFloat(columnIndex));
+            throw new SQLException("Bad value for type Float");
+        }
+        if (type == Integer.class) {
+            if (columnType == SQLITE_INTEGER || columnType == SQLITE_FLOAT)
+                return type.cast(getInt(columnIndex));
+            throw new SQLException("Bad value for type Integer");
+        }
+
+        throw unsupported();
     }
 
     public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        return getObject(findColumn(columnLabel), type);
     }
 
     protected SQLException unsupported() {

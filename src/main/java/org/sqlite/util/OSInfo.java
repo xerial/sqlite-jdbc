@@ -219,6 +219,11 @@ public class OSInfo {
     }
 
     public static String getArchName() {
+        String override = System.getProperty("org.sqlite.osinfo.architecture");
+        if (override != null) {
+            return override;
+        }
+
         String osArch = System.getProperty("os.arch");
 
         if (osArch.startsWith("arm")) {
