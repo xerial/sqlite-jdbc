@@ -5,11 +5,15 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -274,6 +278,51 @@ public class ResultSetTest {
         assertThatExceptionOfType(SQLException.class)
                 .isThrownBy(() -> rs.getBigDecimal(7))
                 .withMessageContaining("Bad value for type BigDecimal");
+
+        assertThat(rs.next()).isFalse();
+    }
+
+    @Test
+    void getObjectWithRequestedType() throws SQLException {
+        stat.executeUpdate(
+            "create table getobject(c1)");
+        stat.executeUpdate("insert into getobject values (1)");
+        stat.executeUpdate("insert into getobject values ('abc')");
+
+        ResultSet rs = stat.executeQuery("select * from getobject");
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getObject(1, String.class)).isEqualTo("1");
+        assertThat(rs.getObject(1, Boolean.class)).isTrue();
+        assertThat(rs.getObject(1, BigDecimal.class)).isEqualTo(rs.getBigDecimal(1));
+        assertThat(rs.getObject(1, byte[].class)).isEqualTo(rs.getBytes(1));
+        assertThat(rs.getObject(1, Double.class)).isEqualTo(rs.getDouble(1));
+        assertThat(rs.getObject(1, Long.class)).isEqualTo(rs.getLong(1));
+        assertThat(rs.getObject(1, Float.class)).isEqualTo(rs.getFloat(1));
+        assertThat(rs.getObject(1, Integer.class)).isEqualTo(rs.getInt(1));
+        assertThat(rs.getObject(1, Date.class)).isEqualTo(rs.getDate(1));
+        assertThat(rs.getObject(1, Time.class)).isEqualTo(rs.getTime(1));
+        assertThat(rs.getObject(1, Timestamp.class)).isEqualTo(rs.getTimestamp(1));
+
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getObject(1, String.class)).isEqualTo("abc");
+        assertThat(rs.getObject(1, Boolean.class)).isFalse();
+        assertThat(rs.getObject(1, byte[].class)).isEqualTo(rs.getBytes(1));
+        assertThatExceptionOfType(SQLException.class)
+            .isThrownBy(() -> rs.getObject(1, BigDecimal.class))
+            .withMessageContaining("Bad value for type BigDecimal");
+        assertThatExceptionOfType(SQLException.class)
+            .isThrownBy(() -> rs.getObject(1, Double.class))
+            .withMessageContaining("Bad value for type Double");
+        assertThatExceptionOfType(SQLException.class)
+            .isThrownBy(() -> rs.getObject(1, Long.class))
+            .withMessageContaining("Bad value for type Long");
+        assertThatExceptionOfType(SQLException.class)
+            .isThrownBy(() -> rs.getObject(1, Float.class))
+            .withMessageContaining("Bad value for type Float");
+        assertThatExceptionOfType(SQLException.class)
+            .isThrownBy(() -> rs.getObject(1, Integer.class))
+            .withMessageContaining("Bad value for type Integer");
 
         assertThat(rs.next()).isFalse();
     }
