@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        java: [ 8, 17, 18 ]
+        java: [ 11, 17, 18 ]
         include:
           - os: windows-latest
             java: 18
@@ -185,7 +185,7 @@ jobs:
         uses: actions/setup-java@v3
         with: # running setup-java again overwrites the settings.xml
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '11'
           java-package: jdk
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_CENTRAL_USERNAME # env variable for username in deploy (1)
