@@ -220,7 +220,7 @@ public class OSInfo {
 
     public static String getArchName() {
         String override = System.getProperty("org.sqlite.osinfo.architecture");
-        if(override != null) {
+        if (override != null) {
             return override;
         }
 

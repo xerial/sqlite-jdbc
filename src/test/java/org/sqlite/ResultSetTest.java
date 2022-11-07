@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -284,8 +283,7 @@ public class ResultSetTest {
 
     @Test
     void getObjectWithRequestedType() throws SQLException {
-        stat.executeUpdate(
-            "create table getobject(c1)");
+        stat.executeUpdate("create table getobject(c1)");
         stat.executeUpdate("insert into getobject values (1)");
         stat.executeUpdate("insert into getobject values ('abc')");
 
@@ -309,20 +307,20 @@ public class ResultSetTest {
         assertThat(rs.getObject(1, Boolean.class)).isFalse();
         assertThat(rs.getObject(1, byte[].class)).isEqualTo(rs.getBytes(1));
         assertThatExceptionOfType(SQLException.class)
-            .isThrownBy(() -> rs.getObject(1, BigDecimal.class))
-            .withMessageContaining("Bad value for type BigDecimal");
+                .isThrownBy(() -> rs.getObject(1, BigDecimal.class))
+                .withMessageContaining("Bad value for type BigDecimal");
         assertThatExceptionOfType(SQLException.class)
-            .isThrownBy(() -> rs.getObject(1, Double.class))
-            .withMessageContaining("Bad value for type Double");
+                .isThrownBy(() -> rs.getObject(1, Double.class))
+                .withMessageContaining("Bad value for type Double");
         assertThatExceptionOfType(SQLException.class)
-            .isThrownBy(() -> rs.getObject(1, Long.class))
-            .withMessageContaining("Bad value for type Long");
+                .isThrownBy(() -> rs.getObject(1, Long.class))
+                .withMessageContaining("Bad value for type Long");
         assertThatExceptionOfType(SQLException.class)
-            .isThrownBy(() -> rs.getObject(1, Float.class))
-            .withMessageContaining("Bad value for type Float");
+                .isThrownBy(() -> rs.getObject(1, Float.class))
+                .withMessageContaining("Bad value for type Float");
         assertThatExceptionOfType(SQLException.class)
-            .isThrownBy(() -> rs.getObject(1, Integer.class))
-            .withMessageContaining("Bad value for type Integer");
+                .isThrownBy(() -> rs.getObject(1, Integer.class))
+                .withMessageContaining("Bad value for type Integer");
 
         assertThat(rs.next()).isFalse();
     }

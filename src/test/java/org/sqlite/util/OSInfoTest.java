@@ -158,7 +158,6 @@ public class OSInfoTest {
     @SetSystemProperty(key = "os.name", value = "Windows")
     void testOverride() {
         assertThat(OSInfo.getArchName()).isEqualTo("overridden");
-        assertThat(OSInfo.getNativeLibFolderPathForCurrentOS())
-            .isEqualTo("Windows/overridden");
+        assertThat(OSInfo.getNativeLibFolderPathForCurrentOS()).isEqualTo("Windows/overridden");
     }
 }
