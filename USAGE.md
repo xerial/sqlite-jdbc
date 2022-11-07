@@ -88,6 +88,12 @@ You can use a specific version of the native library by setting the following JV
 -Dorg.sqlite.lib.name=your-custom.dll
 ```
 
+## Override detected architecture
+
+If the detected architecture is incorrect for your system, thus loading the wrong native library, you can override the value setting the following JVM property:
+```
+-Dorg.sqlite.osinfo.architecture=arm
+```
 
 ## Configure Connections
 ```java
