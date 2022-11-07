@@ -101,9 +101,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-                    <!--jdkToolchain>
-                        <version>(,1.8]</version>
-                    </jdkToolchain-->
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
@@ -116,9 +113,6 @@
                         </goals>
                         <configuration>
                             <release>9</release>
-                            <!--jdkToolchain>
-                                <version>[9,)</version>
-                            </jdkToolchain-->
                             <compileSourceRoots>
                                 <compileSourceRoot>${java9.sourceDirectory}</compileSourceRoot>
                             </compileSourceRoots>
