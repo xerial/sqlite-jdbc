@@ -142,7 +142,6 @@
                     <archive>
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                         <manifestEntries>
-                            <Automatic-Module-Name>org.xerial.sqlitejdbc</Automatic-Module-Name>
                             <Multi-Release>true</Multi-Release>
                         </manifestEntries>
                     </archive>
