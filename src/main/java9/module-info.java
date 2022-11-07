@@ -1,6 +1,5 @@
 module org.xerial.sqlitejdbc {
 
-    requires transitive java.logging;
     requires transitive java.sql;
     requires transitive java.sql.rowset;
 
