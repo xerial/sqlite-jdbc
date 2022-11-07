@@ -13,8 +13,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.1</junit.version>
         <surefire.version>2.22.2</surefire.version>
+        <osgi-test.version>1.2.1</osgi-test.version>
+        <osgi-test-framework.version>0.0.1</osgi-test-framework.version>
+        <equinoxVersion>3.18.0</equinoxVersion>
     </properties>
-
+    
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -138,8 +141,9 @@
                     <instructions>
                         <Bundle-SymbolicName>org.xerial.sqlite-jdbc;singleton:=true</Bundle-SymbolicName>
                         <Import-Package>
-                            *;resolution:=optional
+                            *
                         </Import-Package>
+                        <Bundle-Activator>org.sqlite.osgi.SQLiteActivator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
@@ -424,5 +428,35 @@
             <version>1.3.4</version>
             <scope>test</scope>
         </dependency>
+	    <!-- dependencies related to OSGi support -->
+		<dependency>
+		    <groupId>org.osgi</groupId>
+		    <artifactId>org.osgi.service.jdbc</artifactId>
+		    <version>1.0.1</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.osgi</groupId>
+		    <artifactId>org.osgi.framework</artifactId>
+		    <version>1.10.0</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.junit5</artifactId>
+			<version>${osgi-test.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.laeubisoft</groupId>
+			<artifactId>osgi-test-framework</artifactId>
+			<version>${osgi-test-framework.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.osgi</artifactId>
+			<version>${equinoxVersion}</version>
+		</dependency>
     </dependencies>
 </project>
