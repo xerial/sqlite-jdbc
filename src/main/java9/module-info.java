@@ -12,7 +12,5 @@ module org.xerial.sqlitejdbc {
     exports org.sqlite.util;
 
     provides java.sql.Driver with org.sqlite.JDBC;
-    provides javax.sql.DataSource with org.sqlite.SQLiteDataSource;
-    provides javax.sql.ConnectionPoolDataSource with org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
 }
