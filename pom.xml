@@ -179,6 +179,12 @@
                     <configFile>jreleaser.yml</configFile>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.13.0</version>
+            </plugin>
         </plugins>
 
         <pluginManagement>
