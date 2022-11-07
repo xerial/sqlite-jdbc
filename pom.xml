@@ -58,8 +58,6 @@
                 <targetPath>META-INF/services</targetPath>
                 <includes>
                     <include>java.sql.Driver</include>
-                    <include>javax.sql.DataSource</include>
-                    <include>javax.sql.ConnectionPoolDataSource</include>
                 </includes>
             </resource>
             <resource>
