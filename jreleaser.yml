@@ -1,5 +1,6 @@
 project:
   versionPattern: CUSTOM
+  copyright: Taro L. Saito
 release:
   github:
     discussionCategoryName: Announcements
@@ -9,9 +10,9 @@ release:
       formatted: ALWAYS
       format: '- {{commitShortHash}} {{commitTitle}}'
       preset: 'conventional-commits'
+      skipMergeCommits: true
       excludeLabels:
         - 'chore'
-        - 'merge'
       labelers:
         - label: 'chore'
           title: '[maven-release-plugin] prepare'
@@ -22,6 +23,16 @@ release:
           labels:
             - 'perf'
           order: 25
+      hide:
+        uncategorized: true
+    issues:
+      enabled: true
+      comment: '🎉 This issue has been resolved in `{{tagName}}` ([Release Notes]({{releaseNotesUrl}}))'
+      applyMilestone: 'ALWAYS'
+      label:
+        name: 'released'
+        description: 'Issue has been released'
+        color: '#ededed'
 files:
   artifacts:
     - path: 'target/{{projectName}}-{{projectVersion}}.jar'
