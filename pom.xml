@@ -219,6 +219,9 @@
                                 <requireMavenVersion>
                                     <version>3.2.5</version>
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>11</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>
