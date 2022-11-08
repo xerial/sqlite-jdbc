@@ -8,7 +8,7 @@ release:
     changelog:
       links: true
       formatted: ALWAYS
-      format: '- {{commitShortHash}} {{commitTitle}}'
+      format: '- {{commitTitle}} ({{commitShortHash}})'
       preset: 'conventional-commits'
       skipMergeCommits: true
       excludeLabels:
