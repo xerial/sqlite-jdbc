@@ -13,6 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.1</junit.version>
         <surefire.version>2.22.2</surefire.version>
+        <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
     </properties>
 
     <licenses>
@@ -100,9 +101,24 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>8</release>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>java9-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>9</release>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${java9.sourceDirectory}</compileSourceRoot>
+                            </compileSourceRoots>
+                            <multiReleaseOutput>true</multiReleaseOutput>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -125,7 +141,7 @@
                     <archive>
                         <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                         <manifestEntries>
-                            <Automatic-Module-Name>org.xerial.sqlitejdbc</Automatic-Module-Name>
+                            <Multi-Release>true</Multi-Release>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -201,6 +217,9 @@
                                 <requireMavenVersion>
                                     <version>3.2.5</version>
                                 </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>11</version>
+                                </requireJavaVersion>
                             </rules>
                         </configuration>
                     </execution>

@@ -1,8 +1,7 @@
 # Development
 ## Prerequisites
 
-- JDK 8
-- JDK 11 is required to run the `spotless` plugin for code formatting
+- JDK 11
 
 ## Commits
 
@@ -21,7 +20,7 @@ Since August 2022 the commit messages follow the [Conventional Commits](https://
 # How to compile the native libraries
 ## Prerequisites
 
-1. JDK 8
+1. JDK 11
 2. Perl
 3. Maven
 4. make
