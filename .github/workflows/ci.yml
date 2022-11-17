@@ -179,6 +179,9 @@ jobs:
     if: github.repository_owner == 'xerial' && github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
+      - name: Print inputs
+        run: |
+          echo "Perform release: ${{ github.event.inputs.perform_release }}"
       - uses: actions/checkout@v3
         if: ${{ github.event_name == 'push' || github.event.inputs.perform_release == false}}
       # when performing a release we need the full git history to generate the changelog
