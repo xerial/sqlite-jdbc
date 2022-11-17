@@ -51,6 +51,7 @@ public abstract class JDBC3Statement extends CoreStatement {
                     conn.getDatabase().prepare(JDBC3Statement.this);
                     boolean result = exec();
                     updateCount = getDatabase().changes();
+                    exhaustedResults = false;
                     return result;
                 });
     }
@@ -84,6 +85,7 @@ public abstract class JDBC3Statement extends CoreStatement {
                         throw new SQLException(
                                 "query does not return ResultSet", "SQLITE_DONE", SQLITE_DONE);
                     }
+                    exhaustedResults = false;
 
                     return getResultSet();
                 });
