@@ -142,6 +142,38 @@ public class StatementTest {
     }
 
     @Test
+    public void gh_809_execute_reuseStatement() throws SQLException {
+        for (int i = 0; i < 2; i++) {
+            assertThat(stat.execute("select 1")).isTrue();
+
+            try (ResultSet rs = stat.getResultSet()) {
+                assertThat(rs).isNotNull();
+                assertThat(rs.next()).isTrue();
+                assertThat(rs.getInt(1)).isEqualTo(1);
+                assertThat(rs.next()).isFalse();
+            }
+
+            assertThat(stat.getMoreResults()).isFalse();
+            assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        }
+    }
+
+    @Test
+    public void gh_809_executeQuery_reuseStatement() throws SQLException {
+        for (int i = 0; i < 2; i++) {
+            ResultSet rs = stat.executeQuery("select 1");
+
+            assertThat(rs).isNotNull();
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getInt(1)).isEqualTo(1);
+            assertThat(rs.next()).isFalse();
+
+            assertThat(stat.getMoreResults()).isFalse();
+            assertThat(stat.getUpdateCount()).isEqualTo(-1);
+        }
+    }
+
+    @Test
     public void executeUpdateCount() throws SQLException {
         assertThat(stat.execute("create table test (c1);")).isFalse();
 
