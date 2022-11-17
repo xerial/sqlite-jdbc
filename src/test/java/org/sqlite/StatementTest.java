@@ -179,6 +179,7 @@ public class StatementTest {
 
         Statement stat2 = conn.createStatement();
         assertThat(stat2.execute("insert into test values('abc'),('def');")).isFalse();
+        assertThat(stat2.getUpdateCount()).isEqualTo(2);
         assertThat(stat2.getMoreResults()).isFalse();
         assertThat(stat2.getUpdateCount()).isEqualTo(-1);
 
