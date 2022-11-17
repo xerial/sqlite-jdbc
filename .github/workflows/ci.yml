@@ -2,6 +2,11 @@ name: CI
 
 on:
   workflow_dispatch:
+    inputs:
+      perform_release:
+        description: 'Perform release'
+        default: false
+        type: boolean
   pull_request:
     paths:
       - '**.java'
@@ -175,10 +180,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        if: ${{ github.event_name == 'push' }}
-      # a workflow dispatch indicates a release, we need the full git history to generate the changelog
+        if: ${{ github.event_name == 'push' || github.event.inputs.perform_release == false}}
+      # when performing a release we need the full git history to generate the changelog
       - uses: actions/checkout@v3
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event.inputs.perform_release == true }}
         with:
           fetch-depth: 0
       - name: Set up Apache Maven Central
@@ -198,9 +203,9 @@ jobs:
       - name: Cancel action for non SNAPSHOT push
         if: ${{ github.event_name == 'push' && !endsWith(env.PROJECT_VERSION, '-SNAPSHOT')}}
         uses: andymckay/cancel-action@0.3
-      # from that point, push means we deploy snapshot, workflow_dispatch means we perform a release
+      # from that point, if github.event.inputs.perform_release is true we perform a release, else we deploy snapshot
       - name: Prepare release
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event.inputs.perform_release == true }}
         run: |
           mvn --no-transfer-progress versions:set -DremoveSnapshot -DgenerateBackupPoms=false
           echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
@@ -212,24 +217,24 @@ jobs:
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }} # must be the same env variable name as (2)
           MAVEN_CENTRAL_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }} # must be the same env variable name as (3)
       - name: Release commit and push
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event.inputs.perform_release == true }}
         uses: EndBug/add-and-commit@v9
         with:
           message: 'chore(release): ${{ env.RELEASE_VERSION }} [skip ci]'
           tag: '${{ env.RELEASE_VERSION }} --force'
           default_author: github_actions
       - name: Create Github release with JReleaser
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event.inputs.perform_release == true }}
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn --batch-mode --no-transfer-progress -DskipTests jreleaser:full-release
       - name: Prepare next snapshot
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event.inputs.perform_release == true }}
         run: |
           mvn versions:set -DnextSnapshot -DgenerateBackupPoms=false
       - name: Next snapshot commit and push
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event.inputs.perform_release == true }}
         uses: EndBug/add-and-commit@v9
         with:
           message: 'chore(release): prepare next snapshot [skip ci]'
