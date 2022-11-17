@@ -94,7 +94,7 @@ public abstract class CoreResultSet implements Codes {
      */
     public int checkCol(int col) throws SQLException {
         if (colsMeta == null) {
-            throw new IllegalStateException("SQLite JDBC: inconsistent internal state");
+            throw new SQLException("SQLite JDBC: inconsistent internal state");
         }
         if (col < 1 || col > colsMeta.length) {
             throw new SQLException("column " + col + " out of bounds [1," + colsMeta.length + "]");
