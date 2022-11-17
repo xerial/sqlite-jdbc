@@ -110,7 +110,6 @@ public abstract class CoreResultSet implements Codes {
      * @throws SQLException
      */
     protected int markCol(int col) throws SQLException {
-        checkOpen();
         checkCol(col);
         lastCol = col;
         return --col;
