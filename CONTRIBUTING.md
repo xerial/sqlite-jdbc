@@ -75,7 +75,7 @@ The project version can change by 2 means:
 2. When triggering a release. This is done automatically through GitHub Actions.
 
 ## Trigger a release
-A release can be triggered from GitHub Actions by [manually running](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow) the **CI** workflow.
+A release can be triggered from GitHub Actions by [manually running](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow) the **CI** workflow and ticking the **Perform release** option.
 
 ## What happens when performing a release?
 
