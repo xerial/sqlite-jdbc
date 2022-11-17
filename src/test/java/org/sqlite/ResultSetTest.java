@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
@@ -323,5 +324,24 @@ public class ResultSetTest {
                 .withMessageContaining("Bad value for type Integer");
 
         assertThat(rs.next()).isFalse();
+    }
+
+    @Test
+    void gh808_getResultSetMetadataAfterReadingLastRow() throws SQLException {
+        for (int i = 0; i < 2; i++) {
+            ResultSet rs = stat.executeQuery("select 1");
+            assertThat(rs).isNotNull();
+
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.isAfterLast()).isFalse();
+
+            assertThat(rs.next()).isFalse();
+            assertThat(rs.isClosed()).isFalse();
+            assertThat(rs.isAfterLast()).isTrue();
+
+            ResultSetMetaData meta = rs.getMetaData();
+            assertThat(meta).isNotNull();
+            assertThat(meta.getColumnCount()).isEqualTo(1);
+        }
     }
 }
