@@ -39,10 +39,10 @@ jobs:
           echo "::echo::on"
           if [[ "${{ github.event_name == 'workflow_dispatch' }}" == 'true' ]]
           then
-            echo "::set-output name=ref::${{ github.ref_name }}"
+            echo "ref=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           elif [[ "${{ steps.check.outputs.triggered }}" == 'true' ]]
           then
-            echo "::set-output name=ref::${{ steps.comment-branch.outputs.head_ref }}"
+            echo "ref=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_OUTPUT
           else
             echo ""
           fi
@@ -68,7 +68,7 @@ jobs:
             echo " ]}"
           ) | jq -c .)
           echo $matrix | jq .
-          echo "::set-output name=matrix::$matrix"
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   build:
     name: Build native libraries
