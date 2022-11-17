@@ -759,4 +759,22 @@ public class PrepStmtTest {
         assertThat(ps1.getMoreResults()).isFalse();
         assertThat(ps1.getUpdateCount()).isEqualTo(-1);
     }
+
+    @Test
+    public void gh811_getMetadata_before_execution() throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("select 1")) {
+            ps.executeQuery();
+            ResultSetMetaData meta = ps.getMetaData();
+            assertThat(meta).isNotNull();
+            assertThat(meta.getColumnCount()).isEqualTo(1);
+            assertThat(meta.getColumnClassName(1)).isEqualTo("java.lang.Integer");
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement("select 1")) {
+            ResultSetMetaData meta = ps.getMetaData();
+            assertThat(meta).isNotNull();
+            assertThat(meta.getColumnCount()).isEqualTo(1);
+            assertThat(meta.getColumnClassName(1)).isEqualTo("java.lang.Object");
+        }
+    }
 }
