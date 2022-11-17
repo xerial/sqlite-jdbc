@@ -42,6 +42,8 @@ public abstract class CoreResultSet implements Codes {
     protected int limitRows;
     /** number of current row, starts at 1 (0 is for before loading data) */
     protected int row = 0;
+
+    protected boolean pastLastRow = false;
     /** last column accessed, for wasNull(). -1 if none */
     protected int lastCol;
 
@@ -128,6 +130,7 @@ public abstract class CoreResultSet implements Codes {
         meta = null;
         limitRows = 0;
         row = 0;
+        pastLastRow = false;
         lastCol = -1;
         columnNameToIndex = null;
         emptyResultSet = false;

@@ -53,7 +53,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#next() */
     public boolean next() throws SQLException {
-        if (!open || emptyResultSet) {
+        if (!open || emptyResultSet || pastLastRow) {
             return false; // finished ResultSet
         }
         lastCol = -1;
@@ -73,7 +73,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         int statusCode = stmt.pointer.safeRunInt(DB::step);
         switch (statusCode) {
             case SQLITE_DONE:
-                close(); // aggressive closing to avoid writer starvation
+                pastLastRow = true;
                 return false;
             case SQLITE_ROW:
                 row++;
@@ -122,7 +122,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSet#isAfterLast() */
     public boolean isAfterLast() {
-        return !open && !emptyResultSet;
+        return pastLastRow && !emptyResultSet;
     }
 
     /** @see java.sql.ResultSet#isBeforeFirst() */
