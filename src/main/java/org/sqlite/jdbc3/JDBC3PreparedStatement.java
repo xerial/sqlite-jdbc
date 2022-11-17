@@ -55,6 +55,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
                         resultsWaiting =
                                 conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
                         success = true;
+                        updateCount = getDatabase().changes();
                         return 0 != columnCount;
                     } finally {
                         if (!success && !pointer.isClosed()) pointer.safeRunConsume(DB::reset);

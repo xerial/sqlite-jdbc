@@ -18,7 +18,7 @@ import org.sqlite.core.DB.ProgressObserver;
 public abstract class JDBC3Statement extends CoreStatement {
 
     private int queryTimeout; // in seconds, as per the JDBC spec
-    private long updateCount;
+    protected long updateCount;
     private boolean exhaustedResults = false;
 
     // PUBLIC INTERFACE /////////////////////////////////////////////

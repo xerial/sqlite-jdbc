@@ -88,22 +88,6 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
         batchQueryCount = 0;
     }
 
-    /** @see org.sqlite.jdbc3.JDBC3Statement#getUpdateCount() */
-    @Override
-    public int getUpdateCount() throws SQLException {
-        return (int) getLargeUpdateCount();
-    }
-
-    /** @see org.sqlite.jdbc3.JDBC3Statement#getLargeUpdateCount() */
-    @Override
-    public long getLargeUpdateCount() throws SQLException {
-        if (pointer.isClosed() || resultsWaiting || rs.isOpen()) {
-            return -1;
-        }
-
-        return conn.getDatabase().changes();
-    }
-
     // PARAMETER FUNCTIONS //////////////////////////////////////////
 
     /**
