@@ -12,7 +12,6 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -271,7 +270,7 @@ public class JDBCTest {
     // helper methods -----------------------------------------------------------------
 
     private SQLiteDataSource createDatasourceWithExplicitReadonly() {
-//        DriverManager.setLogWriter(new PrintWriter(System.out));
+        //        DriverManager.setLogWriter(new PrintWriter(System.out));
         SQLiteConfig config = new SQLiteConfig();
         config.setExplicitReadOnly(true);
         config.setBusyTimeout(10000);
