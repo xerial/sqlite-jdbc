@@ -111,7 +111,12 @@ public class OSInfo {
     }
 
     public static boolean isAndroid() {
-        return System.getProperty("java.runtime.name", "").toLowerCase().contains("android");
+        boolean firstCheck =
+                System.getProperty("java.runtime.name", "").toLowerCase().contains("android");
+        if (!firstCheck) {
+            return checkIfAndroidTermux();
+        }
+        return firstCheck;
     }
 
     public static boolean isMusl() {
@@ -255,5 +260,15 @@ public class OSInfo {
 
     static String translateArchNameToFolderName(String archName) {
         return archName.replaceAll("\\W", "");
+    }
+
+    static boolean checkIfAndroidTermux() {
+        String output;
+        try {
+            output = processRunner.runAndWaitFor("uname -o");
+        } catch (IOException | InterruptedException e) {
+            return false;
+        }
+        return output.toString().toLowerCase().contains("android");
     }
 }
