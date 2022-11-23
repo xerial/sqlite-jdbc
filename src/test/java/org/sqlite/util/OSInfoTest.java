@@ -110,15 +110,35 @@ public class OSInfoTest {
     // it's unlikely we run tests on an Android device
     @Test
     void testIsNotAndroid() {
+        assertThat(OSInfo.isAndroidRuntime()).isFalse();
+        assertThat(OSInfo.isAndroidTermux()).isFalse();
         assertThat(OSInfo.isAndroid()).isFalse();
+    }
+
+    @Test
+    public void testIsAndroidTermux() throws Exception {
+        try {
+            ProcessRunner mockRunner = mock(ProcessRunner.class);
+            OSInfo.processRunner = mockRunner;
+            when(mockRunner.runAndWaitFor("uname -o")).thenReturn("Android");
+
+            assertThat(OSInfo.isAndroidTermux()).isTrue();
+            assertThat(OSInfo.isAndroidRuntime()).isFalse();
+            assertThat(OSInfo.isAndroid()).isTrue();
+        } finally {
+            OSInfo.processRunner = new ProcessRunner();
+        }
     }
 
     @Nested
     @SetSystemProperty(key = "java.runtime.name", value = "Java for Android")
     @SetSystemProperty(key = "os.name", value = "Linux for Android")
-    class Android {
+    class AndroidRuntime {
+
         @Test
-        public void testIsAndroid() {
+        public void testIsAndroidRuntime() {
+            assertThat(OSInfo.isAndroidRuntime()).isTrue();
+            assertThat(OSInfo.isAndroidTermux()).isFalse();
             assertThat(OSInfo.isAndroid()).isTrue();
         }
 
