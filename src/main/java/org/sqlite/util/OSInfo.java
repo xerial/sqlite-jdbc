@@ -111,7 +111,19 @@ public class OSInfo {
     }
 
     public static boolean isAndroid() {
+        return isAndroidRuntime() || isAndroidTermux();
+    }
+
+    public static boolean isAndroidRuntime() {
         return System.getProperty("java.runtime.name", "").toLowerCase().contains("android");
+    }
+
+    public static boolean isAndroidTermux() {
+        try {
+            return processRunner.runAndWaitFor("uname -o").toLowerCase().contains("android");
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     public static boolean isMusl() {
