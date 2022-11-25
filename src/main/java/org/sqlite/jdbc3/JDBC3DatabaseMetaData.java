@@ -2039,7 +2039,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         /** Pattern used to extract a named primary key. */
         private final Pattern FK_NAMED_PATTERN =
                 Pattern.compile(
-                        "CONSTRAINT\\s*([A-Za-z_][A-Za-z\\d_]*)?\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\)",
+                        "CONSTRAINT\\s*\"?([A-Za-z_][A-Za-z\\d_]*)?\"?\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\)",
                         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
         private final String fkTableName;
