@@ -100,7 +100,11 @@ public class ExtendedCommand {
         }
 
         public void execute(DB db) throws SQLException {
-            db.backup(srcDB, destFile, null);
+            int rc = db.backup(srcDB, destFile, null);
+
+            if (rc != SQLiteErrorCode.SQLITE_OK.code) {
+                throw DB.newSQLException(rc, "Restore failed");
+            }
         }
     }
 
@@ -145,7 +149,11 @@ public class ExtendedCommand {
 
         /** @see org.sqlite.ExtendedCommand.SQLExtension#execute(org.sqlite.core.DB) */
         public void execute(DB db) throws SQLException {
-            db.restore(targetDB, srcFile, null);
+            int rc = db.restore(targetDB, srcFile, null);
+
+            if (rc != SQLiteErrorCode.SQLITE_OK.code) {
+                throw DB.newSQLException(rc, "Restore failed");
+            }
         }
     }
 }
