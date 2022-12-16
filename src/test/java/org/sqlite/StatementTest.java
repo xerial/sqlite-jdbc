@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
+import java.time.Instant;
 import java.util.Calendar;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -616,5 +617,13 @@ public class StatementTest {
     @Test
     public void getFetchDirection() throws SQLException {
         assertThat(stat.getFetchDirection()).isEqualTo(ResultSet.FETCH_FORWARD);
+    }
+
+    @Test
+    public void unixepoch() throws SQLException {
+        ResultSet rs = stat.executeQuery("select unixepoch()");
+        long javaEpoch = Instant.now().getEpochSecond();
+
+        assertThat(rs.getLong(1)).isCloseTo(javaEpoch, offset(1L));
     }
 }
