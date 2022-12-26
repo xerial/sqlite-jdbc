@@ -479,7 +479,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     phandleclass = (*env)->FindClass(env, "org/sqlite/ProgressHandler");
     if(!phandleclass) return JNI_ERR;
     phandleclass = (*env)->NewWeakGlobalRef(env, phandleclass);
-    phandle_mth_progress = (*env)->GetMethodID(env, bhandleclass, "progress", "()I");
+    phandle_mth_progress = (*env)->GetMethodID(env, phandleclass, "progress", "()I");
 
     bhandleclass = (*env)->FindClass(env, "org/sqlite/BusyHandler");
     if(!bhandleclass) return JNI_ERR;
