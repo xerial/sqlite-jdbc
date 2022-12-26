@@ -29,6 +29,12 @@
 
 static jclass dbclass = 0;
 static jfieldID dbpointer = 0;
+static jfieldID db_busyHandler = 0;
+static jfieldID db_commitListener = 0;
+static jfieldID db_updateListener = 0;
+static jfieldID db_progressHandler = 0;
+static jmethodID db_mth_onUpdate = 0;
+static jmethodID db_mth_onCommit = 0;
 static jmethodID mth_stringToUtf8ByteArray = 0;
 static jmethodID mth_throwex = 0;
 static jmethodID mth_throwexcode = 0;
@@ -62,6 +68,8 @@ static jclass bhandleclass = 0;
 static jmethodID bhandle_mth_callback = 0;
 
 static jmethodID exp_msg = 0;
+
+static jclass bool_array_class = 0;
 
 static void * toref(jlong value)
 {
@@ -223,7 +231,6 @@ static void sethandle(JNIEnv *env, jobject nativeDB, sqlite3 * ref)
 
 struct BusyHandlerContext {
     JavaVM * vm;
-    jmethodID methodId;
     jobject obj;
 };
 
@@ -233,12 +240,9 @@ static void free_busy_handler(JNIEnv *env, void *toFree) {
     free(toFree);
 }
 
-static void set_new_handler(JNIEnv *env, jobject nativeDB, char *fieldName,
+static void set_new_handler(JNIEnv *env, jobject nativeDB, jfieldID handlerField,
                              void * newHandler, void (*free_handler)(JNIEnv*, void*))
 {
-    jfieldID handlerField = (*env)->GetFieldID(env, dbclass, fieldName, "J");
-    assert(handlerField);
-
     void *toFree = toref((*env)->GetLongField(env, nativeDB, handlerField));
     if (toFree) {
         free_handler(env, toFree);
@@ -439,6 +443,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     if (!dbclass) return JNI_ERR;
     dbclass = (*env)->NewWeakGlobalRef(env, dbclass);
     dbpointer = (*env)->GetFieldID(env, dbclass, "pointer", "J");
+    db_busyHandler = (*env)->GetFieldID(env, dbclass, "busyHandler", "J");
+    db_commitListener = (*env)->GetFieldID(env, dbclass, "commitListener", "J");
+    db_updateListener = (*env)->GetFieldID(env, dbclass, "updateListener", "J");
+    db_progressHandler = (*env)->GetFieldID(env, dbclass, "progressHandler", "J");
+    db_mth_onUpdate = (*env)->GetMethodID(env, dbclass, "onUpdate", "(ILjava/lang/String;Ljava/lang/String;J)V");
+    db_mth_onCommit = (*env)->GetMethodID(env, dbclass, "onCommit", "(Z)V");
     mth_stringToUtf8ByteArray = (*env)->GetStaticMethodID(
             env, dbclass, "stringToUtf8ByteArray", "(Ljava/lang/String;)[B");
     mth_throwex = (*env)->GetMethodID(env, dbclass, "throwex", "()V");
@@ -489,6 +499,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     jclass exclass = (*env)->FindClass(env, "java/lang/Throwable");
     exp_msg = (*env)->GetMethodID(
             env, exclass, "toString", "()Ljava/lang/String;");
+
+    jclass bool_array_class = (*env)->FindClass(env, "[Z");
 
     return JNI_VERSION_1_2;
 }
@@ -606,10 +618,10 @@ int busyHandlerCallBack(void* callback, int nbPrevInvok) {
     struct BusyHandlerContext *busyHandlerContext = (struct BusyHandlerContext*) callback;
     (*(busyHandlerContext->vm))->AttachCurrentThread(busyHandlerContext->vm, (void **)&env, 0);
 
-    return (*env)->CallIntMethod(   env, 
-                                    busyHandlerContext->obj,
-                                    busyHandlerContext->methodId,
-                                    nbPrevInvok);
+    return (*env)->CallIntMethod(env,
+                                 busyHandlerContext->obj,
+                                 bhandle_mth_callback,
+                                 nbPrevInvok);
 }
 
 void change_busy_handler(JNIEnv *env, jobject nativeDB, jobject busyHandler)
@@ -629,7 +641,6 @@ void change_busy_handler(JNIEnv *env, jobject nativeDB, jobject busyHandler)
         (*env)->GetJavaVM(env, &busyHandlerContext->vm);
 
         busyHandlerContext->obj = (*env)->NewGlobalRef(env, busyHandler);
-        busyHandlerContext->methodId = bhandle_mth_callback;
     }
 
     if (busyHandlerContext) {
@@ -638,7 +649,7 @@ void change_busy_handler(JNIEnv *env, jobject nativeDB, jobject busyHandler)
         sqlite3_busy_handler(db, NULL, NULL);
     }
 
-    set_new_handler(env, nativeDB, "busyHandler", busyHandlerContext, &free_busy_handler);
+    set_new_handler(env, nativeDB, db_busyHandler, busyHandlerContext, &free_busy_handler);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_busy_1handler(
@@ -1423,8 +1434,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_sqlite_core_NativeDB_column_1metadata(
     dbstmt = toref(stmt);
 
     colCount = sqlite3_column_count(dbstmt);
-    array = (*env)->NewObjectArray(
-        env, colCount, (*env)->FindClass(env, "[Z"), NULL) ;
+    array = (*env)->NewObjectArray(env, colCount, bool_array_class, NULL);
     if (!array) { throwex_outofmemory(env); return 0; }
 
     colDataRaw = (jboolean*)malloc(3 * sizeof(jboolean));
@@ -1641,7 +1651,6 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
 
 struct ProgressHandlerContext {
     JavaVM *vm;
-    jmethodID mth;
     jobject phandler;
 };
 
@@ -1655,7 +1664,7 @@ static int progress_handler_function(void *ctx) {
     JNIEnv *env = 0;
     struct ProgressHandlerContext* progressHandlerContext = (struct ProgressHandlerContext*) ctx;
     (*progressHandlerContext->vm)->AttachCurrentThread(progressHandlerContext->vm, (void **)&env, 0);
-    jint rv = (*env)->CallIntMethod(env, progressHandlerContext->phandler, progressHandlerContext->mth);
+    jint rv = (*env)->CallIntMethod(env, progressHandlerContext->phandler, phandle_mth_progress);
     return rv;
 }
 
@@ -1676,7 +1685,6 @@ static void change_progress_handler(JNIEnv *env, jobject nativeDB, jobject progr
         (*env)->GetJavaVM(env, &progressHandlerContext->vm);
 
         progressHandlerContext->phandler = (*env)->NewGlobalRef(env, progressHandler);
-        progressHandlerContext->mth = phandle_mth_progress;
     }
 
     if (progressHandlerContext) {
@@ -1685,7 +1693,7 @@ static void change_progress_handler(JNIEnv *env, jobject nativeDB, jobject progr
         sqlite3_progress_handler(gethandle(env, nativeDB), 0, NULL, NULL);
     }
 
-    set_new_handler(env, nativeDB, "progressHandler", progressHandlerContext, &free_progress_handler);
+    set_new_handler(env, nativeDB, db_progressHandler, progressHandlerContext, &free_progress_handler);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_register_1progress_1handler(
@@ -1711,7 +1719,6 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_clear_1progress_1handler(
 struct UpdateHandlerContext {
     JavaVM *vm;
     jobject handler;
-    jmethodID method;
 };
 
 
@@ -1723,7 +1730,7 @@ void update_hook(void *context, int type, char const *database, char const *tabl
     jstring databaseString = (*env)->NewStringUTF(env, database);
     jstring tableString    = (*env)->NewStringUTF(env, table);
 
-    (*env)->CallVoidMethod(env, update_handler_context->handler, update_handler_context->method, type, databaseString, tableString, row);
+    (*env)->CallVoidMethod(env, update_handler_context->handler, db_mth_onUpdate, type, databaseString, tableString, row);
 
     (*env)->DeleteLocalRef(env, databaseString);
     (*env)->DeleteLocalRef(env, tableString);
@@ -1737,17 +1744,16 @@ static void free_update_handler(JNIEnv *env, void *ctx) {
 
 static void clear_update_listener(JNIEnv *env, jobject nativeDB){
     sqlite3_update_hook(gethandle(env, nativeDB), NULL, NULL);
-    set_new_handler(env, nativeDB, "updateListener", NULL, &free_update_handler);
+    set_new_handler(env, nativeDB, db_updateListener NULL, &free_update_handler);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1update_1listener(JNIEnv *env, jobject nativeDB, jboolean enabled) {
     if (enabled) {
         struct UpdateHandlerContext* update_handler_context = (struct UpdateHandlerContext*) malloc(sizeof(struct UpdateHandlerContext));
-        update_handler_context->method = (*env)->GetMethodID(env, dbclass, "onUpdate", "(ILjava/lang/String;Ljava/lang/String;J)V");
         update_handler_context->handler = (*env)->NewGlobalRef(env, nativeDB);
         (*env)->GetJavaVM(env, &update_handler_context->vm);
         sqlite3_update_hook(gethandle(env, nativeDB), &update_hook, update_handler_context);
-        set_new_handler(env, nativeDB, "updateListener", update_handler_context, &free_update_handler);
+        set_new_handler(env, nativeDB, db_updateListener, update_handler_context, &free_update_handler);
     } else {
         clear_update_listener(env, nativeDB);
     }
@@ -1758,14 +1764,13 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1update_1listener(JNIEn
 struct CommitHandlerContext {
     JavaVM *vm;
     jobject handler;
-    jmethodID method;
 };
 
 int commit_hook(void *context) {
     struct CommitHandlerContext *commit_handler_context = (struct CommitHandlerContext*) context;
     JNIEnv *env = 0;
     (*commit_handler_context->vm)->AttachCurrentThread(commit_handler_context->vm, (void **)&env, 0);
-    (*env)->CallVoidMethod(env, commit_handler_context->handler, commit_handler_context->method, 1);
+    (*env)->CallVoidMethod(env, commit_handler_context->handler, db_mth_onCommit, 1);
     return 0;
 }
 
@@ -1773,7 +1778,7 @@ void rollback_hook(void *context) {
     struct CommitHandlerContext *commit_handler_context = (struct CommitHandlerContext*) context;
     JNIEnv *env = 0;
     (*commit_handler_context->vm)->AttachCurrentThread(commit_handler_context->vm, (void **)&env, 0);
-    (*env)->CallVoidMethod(env, commit_handler_context->handler, commit_handler_context->method, 0);
+    (*env)->CallVoidMethod(env, commit_handler_context->handler, db_mth_onCommit, 0);
 }
 
 static void freeCommitHandlerCtx(JNIEnv *env, void *ctx) {
@@ -1785,7 +1790,7 @@ static void freeCommitHandlerCtx(JNIEnv *env, void *ctx) {
 void clear_commit_listener(JNIEnv *env, jobject nativeDB, sqlite3 *db) {
     sqlite3_commit_hook(db, NULL, NULL);
     sqlite3_rollback_hook(db, NULL, NULL);
-    set_new_handler(env, nativeDB, "commitListener", NULL, freeCommitHandlerCtx);
+    set_new_handler(env, nativeDB, db_commitListener, NULL, freeCommitHandlerCtx);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1commit_1listener(JNIEnv *env, jobject nativeDB, jboolean enabled) {
@@ -1793,11 +1798,10 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1commit_1listener(JNIEn
     if (enabled) {
         struct CommitHandlerContext *commit_handler_context = (struct CommitHandlerContext*) malloc(sizeof(struct CommitHandlerContext));
         commit_handler_context->handler = (*env)->NewGlobalRef(env, nativeDB);
-        commit_handler_context->method  = (*env)->GetMethodID(env, dbclass, "onCommit", "(Z)V");
         (*env)->GetJavaVM(env, &commit_handler_context->vm);
         sqlite3_commit_hook(db, &commit_hook, commit_handler_context);
         sqlite3_rollback_hook(db, &rollback_hook, commit_handler_context);
-        set_new_handler(env, nativeDB, "commitListener", commit_handler_context, freeCommitHandlerCtx);
+        set_new_handler(env, nativeDB, db_commitListener, commit_handler_context, freeCommitHandlerCtx);
     } else {
         clear_commit_listener(env, nativeDB, db);
     }
