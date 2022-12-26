@@ -500,9 +500,9 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     exp_msg = (*env)->GetMethodID(
             env, exclass, "toString", "()Ljava/lang/String;");
 
-    jclass bool_array_class = (*env)->FindClass(env, "[Z");
+    bool_array_class = (*env)->FindClass(env, "[Z");
     if(!bool_array_class) return JNI_ERR;
-    bool_array_class = (*env)->NewGlobalRef(env, bool_array_class);
+    bool_array_class = (*env)->NewWeakGlobalRef(env, bool_array_class);
 
     return JNI_VERSION_1_2;
 }
@@ -531,7 +531,7 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
 
     if (bhandleclass) (*env)->DeleteWeakGlobalRef(env, bhandleclass);
 
-    if (bool_array_class) (*env)->DeleteGlobalRef(env, bool_array_class);
+    if (bool_array_class) (*env)->DeleteWeakGlobalRef(env, bool_array_class);
 }
 
 
