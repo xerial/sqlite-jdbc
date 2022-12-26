@@ -67,6 +67,7 @@ static jmethodID phandle_mth_progress = 0;
 static jclass bhandleclass = 0;
 static jmethodID bhandle_mth_callback = 0;
 
+static jclass exclass = 0;
 static jmethodID exp_msg = 0;
 
 static jclass bool_array_class = 0;
@@ -496,7 +497,9 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     bhandleclass = (*env)->NewWeakGlobalRef(env, bhandleclass);
     bhandle_mth_callback = (*env)->GetMethodID(env, bhandleclass, "callback", "(I)I");
 
-    jclass exclass = (*env)->FindClass(env, "java/lang/Throwable");
+    exclass = (*env)->FindClass(env, "java/lang/Throwable");
+    if(!exclass) return JNI_ERR;
+    exclass = (*env)->NewWeakGlobalRef(env, exclass);
     exp_msg = (*env)->GetMethodID(
             env, exclass, "toString", "()Ljava/lang/String;");
 
@@ -530,6 +533,8 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     if (phandleclass) (*env)->DeleteWeakGlobalRef(env, phandleclass);
 
     if (bhandleclass) (*env)->DeleteWeakGlobalRef(env, bhandleclass);
+
+    if (exclass) (*env)->DeleteWeakGlobalRef(env, exclass);
 
     if (bool_array_class) (*env)->DeleteWeakGlobalRef(env, bool_array_class);
 }
