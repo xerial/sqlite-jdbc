@@ -53,8 +53,13 @@ static jmethodID w_mth_inverse = 0;
 static jmethodID w_mth_xvalue = 0;
 
 static jclass pclass = 0;
-static jclass phandleclass = 0;
 static jmethodID pmethod = 0;
+
+static jclass phandleclass = 0;
+static jmethodID phandle_mth_progress = 0;
+
+static jclass bhandleclass = 0;
+static jmethodID bhandle_mth_callback = 0;
 
 static jmethodID exp_msg = 0;
 
@@ -474,6 +479,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     phandleclass = (*env)->FindClass(env, "org/sqlite/ProgressHandler");
     if(!phandleclass) return JNI_ERR;
     phandleclass = (*env)->NewWeakGlobalRef(env, phandleclass);
+    phandle_mth_progress = (*env)->GetMethodID(env, bhandleclass, "progress", "()I");
+
+    bhandleclass = (*env)->FindClass(env, "org/sqlite/BusyHandler");
+    if(!bhandleclass) return JNI_ERR;
+    bhandleclass = (*env)->NewWeakGlobalRef(env, bhandleclass);
+    bhandle_mth_callback = (*env)->GetMethodID(env, bhandleclass, "callback", "(I)I");
 
     jclass exclass = (*env)->FindClass(env, "java/lang/Throwable");
     exp_msg = (*env)->GetMethodID(
@@ -503,6 +514,8 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     if (pclass) (*env)->DeleteWeakGlobalRef(env, pclass);
 
     if (phandleclass) (*env)->DeleteWeakGlobalRef(env, phandleclass);
+
+    if (bhandleclass) (*env)->DeleteWeakGlobalRef(env, bhandleclass);
 }
 
 
@@ -616,10 +629,7 @@ void change_busy_handler(JNIEnv *env, jobject nativeDB, jobject busyHandler)
         (*env)->GetJavaVM(env, &busyHandlerContext->vm);
 
         busyHandlerContext->obj = (*env)->NewGlobalRef(env, busyHandler);
-        busyHandlerContext->methodId = (*env)->GetMethodID(  env,
-                                                   (*env)->GetObjectClass(env, busyHandlerContext->obj),
-                                                   "callback",
-                                                   "(I)I");
+        busyHandlerContext->methodId = bhandle_mth_callback;
     }
 
     if (busyHandlerContext) {
@@ -1666,10 +1676,7 @@ static void change_progress_handler(JNIEnv *env, jobject nativeDB, jobject progr
         (*env)->GetJavaVM(env, &progressHandlerContext->vm);
 
         progressHandlerContext->phandler = (*env)->NewGlobalRef(env, progressHandler);
-        progressHandlerContext->mth = (*env)->GetMethodID(  env,
-                                                   (*env)->GetObjectClass(env, progressHandlerContext->phandler),
-                                                   "progress",
-                                                   "()I");
+        progressHandlerContext->mth = phandle_mth_progress;
     }
 
     if (progressHandlerContext) {
