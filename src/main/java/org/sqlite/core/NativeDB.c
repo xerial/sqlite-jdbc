@@ -1744,7 +1744,7 @@ static void free_update_handler(JNIEnv *env, void *ctx) {
 
 static void clear_update_listener(JNIEnv *env, jobject nativeDB){
     sqlite3_update_hook(gethandle(env, nativeDB), NULL, NULL);
-    set_new_handler(env, nativeDB, db_updateListener NULL, &free_update_handler);
+    set_new_handler(env, nativeDB, db_updateListener, NULL, &free_update_handler);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1update_1listener(JNIEnv *env, jobject nativeDB, jboolean enabled) {
