@@ -10,6 +10,7 @@ import java.sql.Statement;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 public class ExtensionTest {
     Connection conn;
@@ -62,6 +63,7 @@ public class ExtensionTest {
     }
 
     @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
     public void extFunctions() throws Exception {
         Utils.assumeJdbcExtensions(conn);
 
@@ -74,6 +76,7 @@ public class ExtensionTest {
     }
 
     @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
     public void dbstat() throws Exception {
         assumeThat(Utils.getCompileOptions(conn))
                 .as("SQLite has to be compiled with ENABLE_DBSTAT_VTAB")

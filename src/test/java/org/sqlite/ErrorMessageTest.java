@@ -11,8 +11,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.sqlite.core.DB;
 
+@DisabledInNativeImage // assertj Assumptions do not work in native-image tests
 public class ErrorMessageTest {
     @Test
     public void moved() throws SQLException, IOException {

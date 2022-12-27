@@ -65,14 +65,18 @@ jobs:
         run: mvn --batch-mode --no-transfer-progress test
 
   test_graalvm:
-    name: test ubuntu-latest jdk11 GraalVM native-image
+    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        java: [ 11 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: graalvm/setup-graalvm@v1
         with:
           version: '22.3.0'
-          java-version: '11'
+          java-version: ${{ matrix.java }}
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test

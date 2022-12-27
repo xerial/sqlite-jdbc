@@ -1,0 +1,15 @@
+[
+  {
+    "name": "com.sun.rowset.providers.RIOptimisticProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.sql.Types",
+    "allPublicFields": true
+  }
+]

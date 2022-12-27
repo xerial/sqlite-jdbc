@@ -1,0 +1,17 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "^org/sqlite/.+\\.(jar|db)$"
+      },
+      {
+        "pattern": "\\Qjavax/sql/rowset/rowset.properties\\E"
+      }
+    ]
+  },
+  "bundles": [
+    {
+      "name": "com.sun.rowset.RowSetResourceBundle"
+    }
+  ]
+}

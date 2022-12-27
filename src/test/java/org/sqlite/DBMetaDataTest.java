@@ -19,6 +19,7 @@ import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 /** These tests are designed to stress Statements on memory databases. */
 public class DBMetaDataTest {
@@ -1537,6 +1538,7 @@ public class DBMetaDataTest {
     }
 
     @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
     public void version() throws Exception {
         assumeThat(Utils.getCompileOptions(conn))
                 .as("Can't check the version if not compiled by us")
