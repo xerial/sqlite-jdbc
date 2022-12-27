@@ -372,6 +372,7 @@
                                 <exclude>**/MultipleClassLoaderTest.java</exclude>
                                 <!--  Not needed  -->
                                 <exclude>**/architecture/*.java</exclude>
+                                <exclude>**/OSInfoTest.java</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
