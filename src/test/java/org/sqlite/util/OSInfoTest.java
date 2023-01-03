@@ -53,6 +53,7 @@ public class OSInfoTest {
         assertThat(OSInfo.translateArchNameToFolderName("i386")).isEqualTo("i386");
         assertThat(OSInfo.translateArchNameToFolderName("x86")).isEqualTo("x86");
         assertThat(OSInfo.translateArchNameToFolderName("ppc")).isEqualTo("ppc");
+        assertThat(OSInfo.translateArchNameToFolderName("loongarch64")).isEqualTo("loongarch64");
         assertThat(OSInfo.translateArchNameToFolderName("amd64")).isEqualTo("amd64");
     }
 
