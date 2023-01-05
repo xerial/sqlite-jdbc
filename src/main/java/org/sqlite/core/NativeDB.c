@@ -1521,49 +1521,6 @@ void copyLoop(JNIEnv *env, sqlite3_backup *pBackup, jobject progress,
     } while (rc == SQLITE_OK || rc == SQLITE_BUSY || rc == SQLITE_LOCKED);
 }
 
-jmethodID getBackupRestoreMethod(JNIEnv *env, jobject progress) {
-    if(!progress)
-        return 0;
-
-    jmethodID ret = (*env)->GetMethodID(env,
-                                       (*env)->GetObjectClass(env, progress),
-                                       "progress",
-                                        "(II)V");
-    return ret;
-}
-
-void updateProgress(JNIEnv *env, sqlite3_backup *pBackup, jobject progress, jmethodID progressMth) {
-    if (progressMth) {
-       int remaining = sqlite3_backup_remaining(pBackup);
-       int pagecount = sqlite3_backup_pagecount(pBackup);
-       (*env)->CallVoidMethod(env, progress, progressMth, remaining, pagecount);
-    }
-}
-
-void copyLoop(JNIEnv *env, sqlite3_backup *pBackup, jobject progress,
-              int pagesPerStep, int nTimeoutLimit, int sleepTimeMillis) {
-    int rc;
-    int nTimeout = 0;
-
-    jmethodID progressMth = getBackupRestoreMethod(env, progress);
-
-    do {
-          rc = sqlite3_backup_step(pBackup, pagesPerStep);
-
-          // if the step completed successfully, update progress
-          if (rc == SQLITE_OK || rc == SQLITE_DONE) {
-              updateProgress(env, pBackup, progress, progressMth);
-          }
-
-          if (rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
-              if (nTimeout++ >= nTimeoutLimit)
-                 break;
-              sqlite3_sleep(sleepTimeMillis);
-          }
-    } while (rc == SQLITE_OK || rc == SQLITE_BUSY || rc == SQLITE_LOCKED);
-}
-
-
 /*
 ** Perform an online backup of database pDb to the database file named
 ** by zFilename. This function copies pagesPerStep database pages from pDb to
