@@ -58,8 +58,8 @@ static jclass  wclass = 0;
 static jmethodID w_mth_inverse = 0;
 static jmethodID w_mth_xvalue = 0;
 
-static jclass pclass = 0;
-static jmethodID pmethod = 0;
+static jclass pobserverclass = 0;
+static jmethodID pobserver_mth_progress = 0;
 
 static jclass phandleclass = 0;
 static jmethodID phandle_mth_progress = 0;
@@ -482,10 +482,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     w_mth_inverse = (*env)->GetMethodID(env, wclass, "xInverse", "()V");
     w_mth_xvalue = (*env)->GetMethodID(env, wclass, "xValue", "()V");
 
-    pclass = (*env)->FindClass(env, "org/sqlite/core/DB$ProgressObserver");
-    if(!pclass) return JNI_ERR;
-    pclass = (*env)->NewWeakGlobalRef(env, pclass);
-    pmethod = (*env)->GetMethodID(env, pclass, "progress", "(II)V");
+    pobserverclass = (*env)->FindClass(env, "org/sqlite/core/DB$ProgressObserver");
+    if(!pobserverclass) return JNI_ERR;
+    pobserverclass = (*env)->NewWeakGlobalRef(env, pobserverclass);
+    pobserver_mth_progress = (*env)->GetMethodID(env, pobserverclass, "progress", "(II)V");
 
     phandleclass = (*env)->FindClass(env, "org/sqlite/ProgressHandler");
     if(!phandleclass) return JNI_ERR;
@@ -528,7 +528,7 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
 
     if (wclass) (*env)->DeleteWeakGlobalRef(env, wclass);
 
-    if (pclass) (*env)->DeleteWeakGlobalRef(env, pclass);
+    if (pobserverclass) (*env)->DeleteWeakGlobalRef(env, pobserverclass);
 
     if (phandleclass) (*env)->DeleteWeakGlobalRef(env, phandleclass);
 
@@ -1486,29 +1486,18 @@ JNIEXPORT jobjectArray JNICALL Java_org_sqlite_core_NativeDB_column_1metadata(
 // backup function
 
 void reportProgress(JNIEnv* env, jobject func, int remaining, int pageCount) {
-  if(!func)
-    return;
+    if(!func)
+        return;
 
-  (*env)->CallVoidMethod(env, func, pmethod, remaining, pageCount);
+    (*env)->CallVoidMethod(env, func, pobserver_mth_progress, remaining, pageCount);
 }
 
-jmethodID getBackupRestoreMethod(JNIEnv *env, jobject progress) {
-    if(!progress)
-        return 0;
-
-    jmethodID ret = (*env)->GetMethodID(env,
-                                       (*env)->GetObjectClass(env, progress),
-                                       "progress",
-                                        "(II)V");
-    return ret;
-}
-
-void updateProgress(JNIEnv *env, sqlite3_backup *pBackup, jobject progress, jmethodID progressMth) {
-    if (progressMth) {
-       int remaining = sqlite3_backup_remaining(pBackup);
-       int pagecount = sqlite3_backup_pagecount(pBackup);
-       (*env)->CallVoidMethod(env, progress, progressMth, remaining, pagecount);
-    }
+void updateProgress(JNIEnv *env, sqlite3_backup *pBackup, jobject progress) {
+    if (!progress)
+        return;
+    int remaining = sqlite3_backup_remaining(pBackup);
+    int pagecount = sqlite3_backup_pagecount(pBackup);
+    (*env)->CallVoidMethod(env, progress, pobserver_mth_progress, remaining, pagecount);
 }
 
 void copyLoop(JNIEnv *env, sqlite3_backup *pBackup, jobject progress,
@@ -1516,14 +1505,12 @@ void copyLoop(JNIEnv *env, sqlite3_backup *pBackup, jobject progress,
     int rc;
     int nTimeout = 0;
 
-    jmethodID progressMth = getBackupRestoreMethod(env, progress);
-
     do {
           rc = sqlite3_backup_step(pBackup, pagesPerStep);
 
           // if the step completed successfully, update progress
           if (rc == SQLITE_OK || rc == SQLITE_DONE) {
-              updateProgress(env, pBackup, progress, progressMth);
+              updateProgress(env, pBackup, progress);
           }
 
           if (rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
