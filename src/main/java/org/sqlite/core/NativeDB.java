@@ -29,6 +29,10 @@ import org.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 public final class NativeDB extends DB {
+    private static final int DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS = 100;
+    private static final int DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL = 3;
+    private static final int DEFAULT_PAGES_PER_BACKUP_STEP = 100;
+
     /** SQLite connection handle. */
     private long pointer = 0;
 
@@ -368,11 +372,44 @@ public final class NativeDB extends DB {
     @Override
     public int backup(String dbName, String destFileName, ProgressObserver observer)
             throws SQLException {
-        return backup(stringToUtf8ByteArray(dbName), stringToUtf8ByteArray(destFileName), observer);
+        return backup(
+                stringToUtf8ByteArray(dbName),
+                stringToUtf8ByteArray(destFileName),
+                observer,
+                DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS,
+                DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL,
+                DEFAULT_PAGES_PER_BACKUP_STEP);
+    }
+
+    /**
+     * @see org.sqlite.core.DB#backup(String, String, org.sqlite.core.DB.ProgressObserver, int, int,
+     *     int)
+     */
+    @Override
+    public int backup(
+            String dbName,
+            String destFileName,
+            ProgressObserver observer,
+            int sleepTimeMillis,
+            int nTimeouts,
+            int pagesPerStep)
+            throws SQLException {
+        return backup(
+                stringToUtf8ByteArray(dbName),
+                stringToUtf8ByteArray(destFileName),
+                observer,
+                sleepTimeMillis,
+                nTimeouts,
+                pagesPerStep);
     }
 
     synchronized native int backup(
-            byte[] dbNameUtf8, byte[] destFileNameUtf8, ProgressObserver observer)
+            byte[] dbNameUtf8,
+            byte[] destFileNameUtf8,
+            ProgressObserver observer,
+            int sleepTimeMillis,
+            int nTimeouts,
+            int pagesPerStep)
             throws SQLException;
 
     /**
@@ -384,11 +421,41 @@ public final class NativeDB extends DB {
             throws SQLException {
 
         return restore(
-                stringToUtf8ByteArray(dbName), stringToUtf8ByteArray(sourceFileName), observer);
+                dbName,
+                sourceFileName,
+                observer,
+                DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS,
+                DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL,
+                DEFAULT_PAGES_PER_BACKUP_STEP);
+    }
+
+    /** @see org.sqlite.core.DB#restore(String, String, ProgressObserver, int, int, int) */
+    @Override
+    public synchronized int restore(
+            String dbName,
+            String sourceFileName,
+            ProgressObserver observer,
+            int sleepTimeMillis,
+            int nTimeouts,
+            int pagesPerStep)
+            throws SQLException {
+
+        return restore(
+                stringToUtf8ByteArray(dbName),
+                stringToUtf8ByteArray(sourceFileName),
+                observer,
+                sleepTimeMillis,
+                nTimeouts,
+                pagesPerStep);
     }
 
     synchronized native int restore(
-            byte[] dbNameUtf8, byte[] sourceFileName, ProgressObserver observer)
+            byte[] dbNameUtf8,
+            byte[] sourceFileName,
+            ProgressObserver observer,
+            int sleepTimeMillis,
+            int nTimeouts,
+            int pagesPerStep)
             throws SQLException;
 
     // COMPOUND FUNCTIONS (for optimisation) /////////////////////////

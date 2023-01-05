@@ -1492,32 +1492,80 @@ void reportProgress(JNIEnv* env, jobject func, int remaining, int pageCount) {
   (*env)->CallVoidMethod(env, func, pmethod, remaining, pageCount);
 }
 
+jmethodID getBackupRestoreMethod(JNIEnv *env, jobject progress) {
+    if(!progress)
+        return 0;
+
+    jmethodID ret = (*env)->GetMethodID(env,
+                                       (*env)->GetObjectClass(env, progress),
+                                       "progress",
+                                        "(II)V");
+    return ret;
+}
+
+void updateProgress(JNIEnv *env, sqlite3_backup *pBackup, jobject progress, jmethodID progressMth) {
+    if (progressMth) {
+       int remaining = sqlite3_backup_remaining(pBackup);
+       int pagecount = sqlite3_backup_pagecount(pBackup);
+       (*env)->CallVoidMethod(env, progress, progressMth, remaining, pagecount);
+    }
+}
+
+void copyLoop(JNIEnv *env, sqlite3_backup *pBackup, jobject progress,
+              int pagesPerStep, int nTimeoutLimit, int sleepTimeMillis) {
+    int rc;
+    int nTimeout = 0;
+
+    jmethodID progressMth = getBackupRestoreMethod(env, progress);
+
+    do {
+          rc = sqlite3_backup_step(pBackup, pagesPerStep);
+
+          // if the step completed successfully, update progress
+          if (rc == SQLITE_OK || rc == SQLITE_DONE) {
+              updateProgress(env, pBackup, progress, progressMth);
+          }
+
+          if (rc == SQLITE_BUSY || rc == SQLITE_LOCKED) {
+              if (nTimeout++ >= nTimeoutLimit)
+                 break;
+              sqlite3_sleep(sleepTimeMillis);
+          }
+    } while (rc == SQLITE_OK || rc == SQLITE_BUSY || rc == SQLITE_LOCKED);
+}
+
 
 /*
 ** Perform an online backup of database pDb to the database file named
-** by zFilename. This function copies 5 database pages from pDb to
-** zFilename, then unlocks pDb and sleeps for 250 ms, then repeats the
-** process until the entire database is backed up.
-** 
+** by zFilename. This function copies pagesPerStep database pages from pDb to
+** zFilename per step. If the backup step returns SQLITE_BUSY or SQLITE_LOCKED,
+** the function waits nTimeoutLimit milliseconds before trying again. Should
+** this occur more than nTimeoutLimit times, the backup/restore will fail and
+** the corresponding error code is returned. If any other return code is
+** returned during the copy, the backup/restore is aborted, and error is
+** returned.
+**
 ** The third argument passed to this function must be a pointer to a progress
-** function. After each set of 5 pages is backed up, the progress function
+** function or null. After each set of pages is backed up, the progress function
 ** is invoked with two integer parameters: the number of pages left to
 ** copy, and the total number of pages in the source file. This information
 ** may be used, for example, to update a GUI progress bar.
 **
 ** While this function is running, another thread may use the database pDb, or
-** another process may access the underlying database file via a separate 
+** another process may access the underlying database file via a separate
 ** connection.
 **
 ** If the backup process is successfully completed, SQLITE_OK is returned.
 ** Otherwise, if an error occurs, an SQLite error code is returned.
 */
-
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
   JNIEnv *env, jobject this, 
   jbyteArray zDBName,
   jbyteArray zFilename,       /* Name of file to back up to */
-  jobject observer            /* Progress function to invoke */     
+  jobject observer,           /* Progress function to invoke */
+  jint sleepTimeMillis,        /* number of milliseconds to sleep if DB is busy */
+  jint nTimeoutLimit,          /* max number of SQLite Busy return codes before failing */
+  jint pagesPerStep            /* number of DB pages to copy per step */
 )
 {
 #if SQLITE_VERSION_NUMBER >= 3006011
@@ -1555,12 +1603,12 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
   }
   rc = sqlite3_open_v2(dFileName, &pFile, flags, NULL);
 
-  if( rc==SQLITE_OK ){
+  if(rc == SQLITE_OK) {
 
     /* Open the sqlite3_backup object used to accomplish the transfer */
     pBackup = sqlite3_backup_init(pFile, "main", pDb, dDBName);
     if( pBackup ){
-      while((rc = sqlite3_backup_step(pBackup,100))==SQLITE_OK ){}
+      copyLoop(env, pBackup, observer, pagesPerStep, nTimeoutLimit, sleepTimeMillis);
 
       /* Release resources allocated by backup_init(). */
       (void)sqlite3_backup_finish(pBackup);
@@ -1584,8 +1632,11 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   JNIEnv *env, jobject this, 
   jbyteArray zDBName,
-  jbyteArray zFilename,         /* Name of file to back up to */
-  jobject observer              /* Progress function to invoke */
+  jbyteArray zFilename,         /* Name of file to restore from */
+  jobject observer,             /* Progress function to invoke */
+  jint sleepTimeMillis,         /* number of milliseconds to sleep if DB is busy */
+  jint nTimeoutLimit,           /* max number of SQLite Busy return codes before failing */
+  jint pagesPerStep             /* number of DB pages to copy per step */
 )
 {
 #if SQLITE_VERSION_NUMBER >= 3006011
@@ -1624,18 +1675,12 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   }
   rc = sqlite3_open_v2(dFileName, &pFile, flags, NULL);
 
-  if( rc==SQLITE_OK ){
+  if (rc == SQLITE_OK) {
 
     /* Open the sqlite3_backup object used to accomplish the transfer */
     pBackup = sqlite3_backup_init(pDb, dDBName, pFile, "main");
-    if( pBackup ){
-        while( (rc = sqlite3_backup_step(pBackup,100))==SQLITE_OK
-              || rc==SQLITE_BUSY  ){
-              if( rc==SQLITE_BUSY ){
-                if( nTimeout++ >= 3 ) break;
-                sqlite3_sleep(100);
-            }
-        }
+    if (pBackup) {
+      copyLoop(env, pBackup, observer, pagesPerStep, nTimeoutLimit, sleepTimeMillis);
       /* Release resources allocated by backup_init(). */
       (void)sqlite3_backup_finish(pBackup);
     }
