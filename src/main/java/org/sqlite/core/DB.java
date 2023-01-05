@@ -763,6 +763,28 @@ public abstract class DB implements Codes {
             throws SQLException;
 
     /**
+     * @param dbName Database name to be backed up.
+     * @param destFileName Target backup file name.
+     * @param observer ProgressObserver object.
+     * @param sleepTimeMillis time to wait during a backup/restore operation if sqlite3_backup_step
+     *     returns SQLITE_BUSY before continuing
+     * @param nTimeouts the number of times sqlite3_backup_step can return SQLITE_BUSY before
+     *     failing
+     * @param pagesPerStep the number of pages to copy in each sqlite3_backup_step. If this is
+     *     negative, the entire DB is copied at once.
+     * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
+     * @throws SQLException
+     */
+    public abstract int backup(
+            String dbName,
+            String destFileName,
+            ProgressObserver observer,
+            int sleepTimeMillis,
+            int nTimeouts,
+            int pagesPerStep)
+            throws SQLException;
+
+    /**
      * @param dbName Database name for restoring data.
      * @param sourceFileName Source file name.
      * @param observer ProgressObserver object.
@@ -770,6 +792,28 @@ public abstract class DB implements Codes {
      * @throws SQLException
      */
     public abstract int restore(String dbName, String sourceFileName, ProgressObserver observer)
+            throws SQLException;
+
+    /**
+     * @param dbName the name of the db to restore
+     * @param sourceFileName the filename of the source db to restore
+     * @param observer ProgressObserver object.
+     * @param sleepTimeMillis time to wait during a backup/restore operation if sqlite3_backup_step
+     *     returns SQLITE_BUSY before continuing
+     * @param nTimeouts the number of times sqlite3_backup_step can return SQLITE_BUSY before
+     *     failing
+     * @param pagesPerStep the number of pages to copy in each sqlite3_backup_step. If this is
+     *     negative, the entire DB is copied at once.
+     * @return <a href="http://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
+     * @throws SQLException
+     */
+    public abstract int restore(
+            String dbName,
+            String sourceFileName,
+            ProgressObserver observer,
+            int sleepTimeMillis,
+            int nTimeouts,
+            int pagesPerStep)
             throws SQLException;
 
     /**
