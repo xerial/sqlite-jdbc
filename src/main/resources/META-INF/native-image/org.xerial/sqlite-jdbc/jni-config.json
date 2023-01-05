@@ -1,5 +1,9 @@
 [
     {
+        "name":"java.lang.Throwable",
+        "methods":[{"name":"toString","parameterTypes":[] }]
+    },
+    {
         "name":"org.sqlite.core.DB",
         "allDeclaredMethods":true,
         "allPublicMethods": true,
