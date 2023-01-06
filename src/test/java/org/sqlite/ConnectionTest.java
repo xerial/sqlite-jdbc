@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteConfig.JournalMode;
 import org.sqlite.SQLiteConfig.Pragma;
 import org.sqlite.SQLiteConfig.SynchronousMode;
@@ -30,6 +31,8 @@ import org.sqlite.SQLiteConfig.SynchronousMode;
  * These tests check whether access to files is woring correctly and some Connection.close() cases.
  */
 public class ConnectionTest {
+
+    @TempDir static File tempDir;
 
     @Test
     public void isValid() throws SQLException {
@@ -226,12 +229,8 @@ public class ConnectionTest {
 
     public static File copyToTemp(String fileName) throws IOException {
         InputStream in = ConnectionTest.class.getResourceAsStream(fileName);
-        File dir = new File("target");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
 
-        File tmp = File.createTempFile(fileName, "", new File("target"));
+        File tmp = File.createTempFile(fileName, "", tempDir);
         tmp.deleteOnExit();
         FileOutputStream out = new FileOutputStream(tmp);
 

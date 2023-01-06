@@ -45,9 +45,9 @@ public class ExtendedCommandTest {
         assertThat(b.srcDB).isEqualTo("main");
         assertThat(b.destFile).isEqualTo("tmp folder with space");
 
-        b = parseBackupCommand("backup to target/sample.db");
+        b = parseBackupCommand("backup to something/sample.db");
         assertThat(b.srcDB).isEqualTo("main");
-        assertThat(b.destFile).isEqualTo("target/sample.db");
+        assertThat(b.destFile).isEqualTo("something/sample.db");
     }
 
     @Test
@@ -65,8 +65,8 @@ public class ExtendedCommandTest {
         assertThat(b.targetDB).isEqualTo("main");
         assertThat(b.srcFile).isEqualTo("tmp folder with space");
 
-        b = parseRestoreCommand("restore from target/sample.db");
+        b = parseRestoreCommand("restore from something/sample.db");
         assertThat(b.targetDB).isEqualTo("main");
-        assertThat(b.srcFile).isEqualTo("target/sample.db");
+        assertThat(b.srcFile).isEqualTo("something/sample.db");
     }
 }

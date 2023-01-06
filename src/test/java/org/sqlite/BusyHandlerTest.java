@@ -3,6 +3,7 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -15,10 +16,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.core.DB;
 import org.sqlite.core.NativeDBHelper;
 
 public class BusyHandlerTest {
+
+    @TempDir static Path tempDir;
     private Connection conn;
     private Statement stat;
 
@@ -36,7 +40,8 @@ public class BusyHandlerTest {
      * @throws SQLException if the connection cannot be established
      */
     private static Connection createConnection(int threadNum) throws SQLException {
-        return DriverManager.getConnection("jdbc:sqlite:target/test" + threadNum + ".db");
+        return DriverManager.getConnection(
+                "jdbc:sqlite:" + tempDir.resolve("test" + threadNum + ".db"));
     }
 
     @AfterEach
