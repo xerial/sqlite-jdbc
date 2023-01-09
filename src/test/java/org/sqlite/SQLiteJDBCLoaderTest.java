@@ -27,7 +27,6 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -40,10 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 public class SQLiteJDBCLoaderTest {
-    @TempDir static Path tempDir;
 
     private Connection connection = null;
 
@@ -117,7 +114,7 @@ public class SQLiteJDBCLoaderTest {
         final AtomicInteger completedThreads = new AtomicInteger(0);
         ExecutorService pool = Executors.newFixedThreadPool(32);
         for (int i = 0; i < 32; i++) {
-            final String connStr = "jdbc:sqlite:" + tempDir.resolve("sample-" + i + ".db");
+            final String connStr = "jdbc:sqlite:target/sample-" + i + ".db";
             final int sleepMillis = i;
             pool.execute(
                     () -> {
