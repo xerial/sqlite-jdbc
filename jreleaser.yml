@@ -25,6 +25,10 @@ release:
           order: 25
       hide:
         uncategorized: true
+        contributors:
+          - '[bot]'
+          - 'github-actions'
+          - 'GitHub'
     issues:
       enabled: true
       comment: '🎉 This issue has been resolved in `{{tagName}}` ([Release Notes]({{releaseNotesUrl}}))'
