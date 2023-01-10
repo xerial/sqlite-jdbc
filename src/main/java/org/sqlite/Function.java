@@ -314,7 +314,7 @@ public abstract class Function {
          *
          * @throws SQLException
          * @see <a
-         *     href="http://www.sqlite.org/c3ref/aggregate_context.html">http://www.sqlite.org/c3ref/aggregate_context.html</a>
+         *     href="https://www.sqlite.org/c3ref/aggregate_context.html">https://www.sqlite.org/c3ref/aggregate_context.html</a>
          */
         protected abstract void xStep() throws SQLException;
 
@@ -323,7 +323,7 @@ public abstract class Function {
          *
          * @throws SQLException
          * @see <a
-         *     href="http://www.sqlite.org/c3ref/aggregate_context.html">http://www.sqlite.org/c3ref/aggregate_context.html</a>
+         *     href="https://www.sqlite.org/c3ref/aggregate_context.html">https://www.sqlite.org/c3ref/aggregate_context.html</a>
          */
         protected abstract void xFinal() throws SQLException;
 
@@ -344,7 +344,7 @@ public abstract class Function {
          *
          * @throws SQLException
          * @see <a
-         *     href="https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions">https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions</a>
+         *     href="https://www.sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions">https://www.sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions</a>
          */
         protected abstract void xInverse() throws SQLException;
 
@@ -353,7 +353,7 @@ public abstract class Function {
          *
          * @throws SQLException
          * @see <a
-         *     href="https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions">https://sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions</a>
+         *     href="https://www.sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions">https://www.sqlite.org/windowfunctions.html#user_defined_aggregate_window_functions</a>
          */
         protected abstract void xValue() throws SQLException;
     }

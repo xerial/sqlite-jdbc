@@ -237,7 +237,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             // when a SAVEPOINT is the outermost savepoint and not
             // with a BEGIN...COMMIT then the behavior is the same
             // as BEGIN DEFERRED TRANSACTION
-            // http://www.sqlite.org/lang_savepoint.html
+            // https://www.sqlite.org/lang_savepoint.html
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
@@ -252,7 +252,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             // when a SAVEPOINT is the outermost savepoint and not
             // with a BEGIN...COMMIT then the behavior is the same
             // as BEGIN DEFERRED TRANSACTION
-            // http://www.sqlite.org/lang_savepoint.html
+            // https://www.sqlite.org/lang_savepoint.html
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);

@@ -32,7 +32,7 @@
     * **Note**: Don't use 3.35.0 if you are Apple Silicon (M1) user. 3.35.0 failed to include M1 binary
 *   2020-12-10: sqlite-jdbc-3.34.0
     * Improved the performance of reading String columns
-    * Support URI file names (file://...) in backup/restore commands https://sqlite.org/uri.html
+    * Support URI file names (file://...) in backup/restore commands https://www.sqlite.org/uri.html
     * Show SQL strings in PreparedStatements.toString()
 *   2020-12-08: sqlite-jdbc-3.32.3.3
     * Apple Silicon (M1) support
@@ -83,16 +83,16 @@
 *   2017-06-22: sqlite-jdbc-3.19.3
     * Upgrade to SQLite [3.19.3](https://www.sqlite.org/releaselog/3_19_3.html)
 *   2017-05-18: sqlite-jdbc-3.18.0
-    * Upgrade to SQLite [3.18.0](http://sqlite.org/releaselog/3_18_0.html)
+    * Upgrade to SQLite [3.18.0](https://www.sqlite.org/releaselog/3_18_0.html)
 *   2017-01-10: sqlite-jdbc-3.16.1
-    * Upgrade to SQLite [3.16.1](https://sqlite.org/releaselog/3_16_1.html)
+    * Upgrade to SQLite [3.16.1](https://www.sqlite.org/releaselog/3_16_1.html)
     * Add experimental support for ppc64, armv5, v6 (Raspberry PI), v7 and android-arm.
     * Fix a bug in prepared statements #74
     * Building all native libraries using cross compilers in docker images
 *   2016-11-04: sqlite-jdbc-3.15.1
-    * Upgrade to SQLite [3.15.1](https://sqlite.org/releaselog/3_15_1.html)
+    * Upgrade to SQLite [3.15.1](https://www.sqlite.org/releaselog/3_15_1.html)
 *   2016-11-04: sqlite-jdbc-3.15.0
-    * Upgrade to SQLite [3.15.0](https://sqlite.org/releaselog/3_15_0.html)
+    * Upgrade to SQLite [3.15.0](https://www.sqlite.org/releaselog/3_15_0.html)
     * Cleanup extracted temp library files upon start
     * Fix various metadata problems
 
@@ -160,8 +160,8 @@
 
 
 *   2009 January 19th: sqlite-jdbc-3.6.10 released. This version is compatible with
-    sqlite version 3.6.10. <http://www.sqlite.org/releaselog/3_6_10.html>
-    * Added `READ_UNCOMMITTED` mode support for better query performance: (see also <http://www.sqlite.org/sharedcache.html> )
+    sqlite version 3.6.10. <https://www.sqlite.org/releaselog/3_6_10.html>
+    * Added `READ_UNCOMMITTED` mode support for better query performance: (see also <https://www.sqlite.org/sharedcache.html> )
 
         ```java
         // READ_UNCOMMITTED mode works only in shared_cache mode.
@@ -173,16 +173,16 @@
 
 
 *   2008 December 17th: sqlite-jdbc-3.6.7 released.
-    *   Related information: <http://www.sqlite.org/releaselog/3_6_7.html>
+    *   Related information: <https://www.sqlite.org/releaselog/3_6_7.html>
 *   2008 December 1st: sqlite-jdbc-3.6.6.2 released,
-    *   Fixed a bug incorporated in the version 3.6.6 <http://www.sqlite.org/releaselog/3_6_6_2.html>
+    *   Fixed a bug incorporated in the version 3.6.6 <https://www.sqlite.org/releaselog/3_6_6_2.html>
 *   2008 November 20th: sqlite-jdbc-3.6.6 release.
-    *   Related information sqlite-3.6.6 changes: <http://www.sqlite.org/releaselog/3_6_6.html>
+    *   Related information sqlite-3.6.6 changes: <https://www.sqlite.org/releaselog/3_6_6.html>
 *   2008 November 11th: sqlite-jdbc-3.6.4.1. A bug fix release
     *   Pure-java version didn't work correctly. Fixed in both 3.6.4.1 and 3.6.4.
         If you have already downloaded 3.6.4, please obtain the latest one on the download page.
 *   2008 October 16th: sqlite-jdbc-3.6.4 released.
-    *   Changes from SQLite 3.6.3: <http://www.sqlite.org/releaselog/3_6_4.html>
+    *   Changes from SQLite 3.6.3: <https://www.sqlite.org/releaselog/3_6_4.html>
     *   `R*-Tree` index and `UPDATE/DELTE` syntax with `LIMIT` clause are available from this build.
 *   2008 October 14th: sqlite-jdbc-3.6.3 released. Compatible with SQLite 3.6.3.
 *   2008 September 18th: sqlite-jdbc-3.6.2 released. Compatible with SQLite 3.6.2
@@ -202,7 +202,7 @@
 *   2008 May 1st: sqlite-jdbc is now in the maven central repository!
     [How to use SQLiteJDBC with Maven2](#using-sqlite-jdbc-with-maven2)
 *   2008 Mar. 18th: sqlite-jdbc-3.5.7 released.
-    *   This version corresponds to [SQLite 3.5.7](http://www.sqlite.org/releaselog/3_5_7.html).
+    *   This version corresponds to [SQLite 3.5.7](https://www.sqlite.org/releaselog/3_5_7.html).
 
 
 *   2008 Mar. 10th: sqlite-jdbc-v042 released.

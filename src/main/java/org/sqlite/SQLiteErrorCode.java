@@ -29,7 +29,7 @@ package org.sqlite;
  *
  * @author leo
  * @see <a
- *     href="http://www.sqlite.org/c3ref/c_abort.html">http://www.sqlite.org/c3ref/c_abort.html</a>
+ *     href="https://www.sqlite.org/c3ref/c_abort.html">https://www.sqlite.org/c3ref/c_abort.html</a>
  */
 public enum SQLiteErrorCode {
     UNKNOWN_ERROR(-1, "unknown error"),

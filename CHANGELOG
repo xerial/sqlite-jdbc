@@ -43,7 +43,7 @@ Release 3.7.15-SNAPSHOT-2
 * Fixed clean target to remove previous driver builds
 * Issue #42 - Using shared in-memory with URI filename
     * Added support for URI filenames
-        1. <http://www.sqlite.org/uri.html> examples <http://www.sqlite.org/c3ref/open.html#urifilenameexamples>
+        1. <https://www.sqlite.org/uri.html> examples <https://www.sqlite.org/c3ref/open.html#urifilenameexamples>
 * Issue #47 - MetaData.getExportedKeys() returns empty string for a named foreign key
 * Issue #46 - org.sqlite.MetaData.getExportedKeys constructs incorrect SQL
 * Issue #44 - getExportedKeys throws Null Exception for foreign key without explicit primary column name
@@ -52,7 +52,7 @@ Release 3.7.15-SNAPSHOT-2
 * Issue #43 - ResultSetMetaData does not return the SQL Type if there are no results from the query.
     1. ResultSetMetaData.getColumnTypeName() now gets type from either 'create table' statement or CAST(expr AS TYPE) otherwise sqlite3_value_type.
     2. ResultSetMetaData.getColumnType() now parses the result from getColumnTypeName() to return a type.
-    3. Driver recognizes the types listed at <http://www.sqlite.org/datatype3.html#affname> under 'Affinity Name Examples'.
+    3. Driver recognizes the types listed at <https://www.sqlite.org/datatype3.html#affname> under 'Affinity Name Examples'.
 * Issue #36 - Fixed case where a calling PreparedStatement.clearParameters() after a ResultSet is opened, caused subsequent calls to the ResultSet to return null.
     1. PreparedStatement.clearParameters() now uses sqlite3_clear_bindings instead of sqlite3_reset.
     2. PreparedStatement.clearParameters() does not reset current ResultSet.
@@ -76,7 +76,7 @@ Release 3.7.15-SNAPSHOT
 * Issue #11 - Enhanced MetaData.getPrimaryKeys():
     1. Return named primary keys and correct key sequence.
     2. Also result set is ordered by column name as per JDBC spec.
-* Issue #1 - Added support for WAL JournalMode. <http://www.sqlite.org/wal.html>
-* Issue #4 - Enhanced SQLiteDataSource, SQLiteConfig and Conn to enable setting the transaction mode. <http://www.sqlite.org/lang_transaction.html>
+* Issue #1 - Added support for WAL JournalMode. <https://www.sqlite.org/wal.html>
+* Issue #4 - Enhanced SQLiteDataSource, SQLiteConfig and Conn to enable setting the transaction mode. <https://www.sqlite.org/lang_transaction.html>
 * Issue #5 - Fixed NativeDB.c errors when compiling with Visual Studio 2010.
 * Issue #2 - Fixed issue where SQLiteDataSource: setEncoding not working. And also enabled using UTF-8, UTF-16, UTF-16le, and UTF-16be.
