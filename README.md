@@ -5,7 +5,7 @@
 [![javadoc](https://javadoc.io/badge2/org.xerial/sqlite-jdbc/javadoc.svg)](https://javadoc.io/doc/org.xerial/sqlite-jdbc)
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/org.xerial/sqlite-jdbc?color=blue&label=maven%20snapshot&server=https%3A%2F%2Foss.sonatype.org%2F)](https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/)
 
-SQLite JDBC is a library for accessing and creating [SQLite](http://sqlite.org) database files in Java.
+SQLite JDBC is a library for accessing and creating [SQLite](https://www.sqlite.org) database files in Java.
 
 Our SQLiteJDBC library requires no configuration since native libraries for major OSs, including Windows, macOS, Linux etc., are assembled into a single JAR (Java Archive) file.
 
@@ -13,7 +13,7 @@ Our SQLiteJDBC library requires no configuration since native libraries for majo
 
 :arrow_right: More usage examples and configuration are available in [USAGE.md](USAGE.md)
 
-SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](http://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
+SQLite JDBC is a library for accessing SQLite databases through the JDBC API. For the general usage of JDBC, see [JDBC Tutorial](https://docs.oracle.com/javase/tutorial/jdbc/index.html) or [Oracle JDBC Documentation](https://www.oracle.com/technetwork/java/javase/tech/index-jsp-136101.html).
 
 1. [Download](#download) `sqlite-jdbc-(VERSION).jar`
 then append this jar file into your classpath.

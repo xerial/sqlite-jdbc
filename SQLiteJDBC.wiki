@@ -2,13 +2,13 @@
 
 = SQLite JDBC Driver =
 
-SQLite JDBC driver developed by [wiki:leo Taro L. Saito] is an extension of [http://www.zentus.com/sqlitejdbc Zentus's SQLite JDBC driver] that enables Java to access [http://sqlite.org SQLite] database files.
+SQLite JDBC driver developed by [wiki:leo Taro L. Saito] is an extension of [http://www.zentus.com/sqlitejdbc Zentus's SQLite JDBC driver] that enables Java to access [https://www.sqlite.org SQLite] database files.
 
 Our SQLiteJDBC library, developed as a part of [http://www.xerial.org Xerial project], requires no configuration since all native libraries for Windows, Mac OS X, Linux and pure-java SQLite, which works in any OS enviroment, are assembled into a single JAR (Java Archive) file. The usage is quite simple; [#Download Download] our sqlite-jdbc library, then append the library (JAR file) to your class path. See [#Usage the sample code]. 
 
 == What is different from Zentus's SQLite JDBC? ==
 
-The original Zentus's SQLite JDBC driver http://www.zentus.com/sqlitejdbc/ itself is an excellent utility for using [http://sqlite.org SQLite] databases from Java language, and our SQLiteJDBC library also relies on its implementation. However, its pure-java version, which totally translates c/c++ codes of SQLite into Java, is significantly slower compared to its native version, which uses SQLite binaries compiled for each OS (win, mac, linux). 
+The original Zentus's SQLite JDBC driver http://www.zentus.com/sqlitejdbc/ itself is an excellent utility for using [https://www.sqlite.org SQLite] databases from Java language, and our SQLiteJDBC library also relies on its implementation. However, its pure-java version, which totally translates c/c++ codes of SQLite into Java, is significantly slower compared to its native version, which uses SQLite binaries compiled for each OS (win, mac, linux). 
 
 To use the native version of sqlite-jdbc, user had to set a path to the native codes (dll, jnilib, so files, which are JNDI C programs) by using command-line arguments, e.g., -Djava.library.path=(path to the dll, jnilib, etc.), or -Dorg.sqlite.lib.path, etc. This process was error-prone and bothersome to tell every user to set these variables. Our SQLiteJDBC library completely does away these inconveniences. 
 
@@ -42,8 +42,8 @@ Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.to
   * 2009 February 18th: sqlite-jdbc-3.6.11 released. 
     * Fixed a bug in !PrepStmt, which does not clear the batch contents after executeBatch(). [http://groups.google.com/group/xerial/browse_thread/thread/1fa83eb36f6d5dab Discussion].
 
-  * 2009 January 19th: sqlite-jdbc-3.6.10 released. This version is compatible with sqlite version 3.6.10. http://www.sqlite.org/releaselog/3_6_10.html
-    * Added READ_UNCOMMITTED mode support for better query performance: (see also http://www.sqlite.org/sharedcache.html )
+  * 2009 January 19th: sqlite-jdbc-3.6.10 released. This version is compatible with sqlite version 3.6.10. https://www.sqlite.org/releaselog/3_6_10.html
+    * Added READ_UNCOMMITTED mode support for better query performance: (see also https://www.sqlite.org/sharedcache.html )
 {{{
 #!java
  // READ_UNCOMMITTED mode works only in shared_cache mode.
@@ -52,12 +52,12 @@ Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.to
  Connection conn = DriverManager.getConnection("jdbc:sqlite:", prop);
  conn.setTransactionIsolation(Conn.TRANSACTION_READ_UNCOMMITTED);
 }}}
-  * 2008 December 17th: sqlite-jdbc-3.6.7 released. Related information: http://www.sqlite.org/releaselog/3_6_7.html
-  * 2008 December 1st: sqlite-jdbc-3.6.6.2 released, which fixed a bug incorporated in the version 3.6.6 http://www.sqlite.org/releaselog/3_6_6_2.html 
-  * 2008 November 20th: sqlite-jdbc-3.6.6 release. sqlite-3.6.6 changes: http://www.sqlite.org/releaselog/3_6_6.html
-Å@* 2008 November 11th: sqlite-jdbc-3.6.4.1. A bug fix release 
+  * 2008 December 17th: sqlite-jdbc-3.6.7 released. Related information: https://www.sqlite.org/releaselog/3_6_7.html
+  * 2008 December 1st: sqlite-jdbc-3.6.6.2 released, which fixed a bug incorporated in the version 3.6.6 https://www.sqlite.org/releaselog/3_6_6_2.html 
+  * 2008 November 20th: sqlite-jdbc-3.6.6 release. sqlite-3.6.6 changes: https://www.sqlite.org/releaselog/3_6_6.html
+ÔøΩ@* 2008 November 11th: sqlite-jdbc-3.6.4.1. A bug fix release 
     * Pure-java version didn't work correctly. Fixed in both 3.6.4.1 and 3.6.4. If you have already downloaded 3.6.4, please obtain the latest one on the download page.
- * 2008 October 16th: sqlite-jdbc-3.6.4 released. Changes from SQLite 3.6.3: http://www.sqlite.org/releaselog/3_6_4.html 
+ * 2008 October 16th: sqlite-jdbc-3.6.4 released. Changes from SQLite 3.6.3: https://www.sqlite.org/releaselog/3_6_4.html 
    * R*-Tree index and UPDATE/DELTE syntax with LIMIT clause are available from this build.
  * 2008 October 14th: sqlite-jdbc-3.6.3 released. Compatible with SQLite 3.6.3.
  * 2008 September 18th: sqlite-jdbc-3.6.2 released. Compatible with SQLite 3.6.2 and contains pure-java and native versions.
@@ -68,7 +68,7 @@ Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.to
  * 2008 May 20th: sqlite-jdbc-3.5.9 released.
  * 2008 May 20th: sqlite-jdbc-3.5.8 released (corresponding to SQLite 3.5.8 and sqlite-jdbc-v047). From this release, Windows, Mac OS X, Linux (i386, amd64) and Solaris (SunOS, sparcv9) libraries are bundled into one jar file.
  * 2008 May 1st: sqlite-jdbc is now in the maven central repository! [#UsingSQLiteJDBCwithMaven2 How to use SQLiteJDBC with Maven2]
- * 2008 Mar. 18th: sqlite-jdbc-3.5.7 released. This version corresponds to [http://www.sqlite.org/releaselog/3_5_7.html SQLite 3.5.7].
+ * 2008 Mar. 18th: sqlite-jdbc-3.5.7 released. This version corresponds to [https://www.sqlite.org/releaselog/3_5_7.html SQLite 3.5.7].
 
  * 2008 Mar. 10th: sqlite-jdbc-v042 released. Corresponding to SQLite 3.5.6, which integrates FTS3 (full text search). 
  * 2008 Jan. 31st: sqlite-jdbc-v038.4 released.   SQLiteJDBCLoder.initialize() is no longer requried. 

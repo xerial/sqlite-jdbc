@@ -262,7 +262,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /**
      * @see java.sql.DatabaseMetaData#getSQLKeywords()
-     * @see <a href="https://sqlite.org/lang_keywords.html">SQLite Keywords</a>
+     * @see <a href="https://www.sqlite.org/lang_keywords.html">SQLite Keywords</a>
      */
     public String getSQLKeywords() {
         return "ABORT,ACTION,AFTER,ANALYZE,ATTACH,AUTOINCREMENT,BEFORE,"
@@ -1002,7 +1002,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                         /*
                          * improved column types
-                         * ref http://www.sqlite.org/datatype3.html - 2.1 Determination Of Column Affinity
+                         * ref https://www.sqlite.org/datatype3.html - 2.1 Determination Of Column Affinity
                          * plus some degree of artistic-license applied
                          */
                         colType = colType == null ? "TEXT" : colType.toUpperCase();
@@ -2216,7 +2216,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     }
 
     /**
-     * Follow rules in <a href="https://sqlite.org/lang_keywords.html">SQLite Keywords</a>
+     * Follow rules in <a href="https://www.sqlite.org/lang_keywords.html">SQLite Keywords</a>
      *
      * @param name Identifier name
      * @return Unquoted identifier
