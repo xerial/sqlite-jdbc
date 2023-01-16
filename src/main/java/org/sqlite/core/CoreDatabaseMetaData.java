@@ -184,6 +184,35 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
         return buf.toString();
     }
 
+    /**
+     * Returns line without changes or with escaped schema prefix
+     * @param schema schema name
+     * @param line of text to prepend to
+     * @return The SQL escaped schema name with dot or empty string
+     */
+    protected String prependSchemaPrefix(String schema, String line) {
+        if (schema == null) {
+            return line;
+        } else {
+            return escape(schema) + "." + line;
+        }
+    }
+
+    /**
+     * Adds line without changes or with escaped schema prefix
+     * @param sql String builder for sql request
+     * @param schema schema name
+     * @param line line to prepend schema prefix to
+     */
+    protected void prependSchemaPrefix(StringBuilder sql, String schema, String line) {
+        if (schema == null) {
+            sql.append(line);
+        } else {
+            sql.append(schema).append('.').append(line);
+        }
+    }
+
+
     // inner classes
 
     /** Pattern used to extract column order for an unnamed primary key. */

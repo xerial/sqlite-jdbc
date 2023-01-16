@@ -3,7 +3,10 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -16,9 +19,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.*;
 
 /** These tests are designed to stress Statements on memory databases. */
 public class DBMetaDataTest {
@@ -1398,10 +1400,10 @@ public class DBMetaDataTest {
         stat.executeUpdate(
                 "create table address (pid integer, name, foreign key(pid) references person(id))");
 
-        ResultSet importedKeys = meta.getImportedKeys("default", "global", "address");
+        ResultSet importedKeys = meta.getImportedKeys("default", null, "address");
         assertThat(importedKeys.next()).isTrue();
         assertThat(importedKeys.getString("PKTABLE_CAT")).isEqualTo("default");
-        assertThat(importedKeys.getString("PKTABLE_SCHEM")).isEqualTo("global");
+        assertThat(importedKeys.getString("PKTABLE_SCHEM")).isEqualTo(null);
         assertThat(importedKeys.getString("FKTABLE_CAT")).isEqualTo("default");
         assertThat(importedKeys.getString("PKTABLE_NAME")).isEqualTo("person");
         assertThat(importedKeys.getString("PKCOLUMN_NAME")).isEqualTo("id");
@@ -1423,12 +1425,12 @@ public class DBMetaDataTest {
         stat.executeUpdate(
                 "create table address (pid integer, name, foreign key(pid) references person(id))");
 
-        ResultSet exportedKeys = meta.getExportedKeys("default", "global", "person");
+        ResultSet exportedKeys = meta.getExportedKeys("default", null, "person");
         assertThat(exportedKeys.next()).isTrue();
         assertThat(exportedKeys.getString("PKTABLE_CAT")).isEqualTo("default");
-        assertThat(exportedKeys.getString("PKTABLE_SCHEM")).isEqualTo("global");
+        assertThat(exportedKeys.getString("PKTABLE_SCHEM")).isEqualTo(null);
         assertThat(exportedKeys.getString("FKTABLE_CAT")).isEqualTo("default");
-        assertThat(exportedKeys.getString("FKTABLE_SCHEM")).isEqualTo("global");
+        assertThat(exportedKeys.getString("FKTABLE_SCHEM")).isEqualTo(null);
         assertThat(exportedKeys.getString("PK_NAME")).isNotNull();
         assertThat(exportedKeys.getString("FK_NAME")).isNotNull();
 
@@ -1567,5 +1569,316 @@ public class DBMetaDataTest {
         assertThat(meta.getDatabaseMajorVersion()).as("db major version").isEqualTo(majorVersion);
         assertThat(meta.getDatabaseMinorVersion()).as("db minor version").isEqualTo(minorVersion);
         assertThat(meta.getUserName()).as("user name").isNull();
+    }
+
+    @Nested
+    class DBMetadataTestWithAttachedDatabases {
+        File testDB;
+
+        @BeforeEach
+        public void init() throws IOException, SQLException {
+            ((SQLiteConnection) conn).getDatabase().getConfig().setReadAttachedDatabases(true);
+            testDB = Files.createTempFile("temp", ".sqlite").toFile();
+            stat.executeUpdate("attach database \"" + testDB.toURI().toURL() + "\" as db2;");
+            stat.executeUpdate(
+                    "create table db2.test2 (id integer primary key, fn float default 0.0, sn not null, intvalue integer"
+                            + "(5), realvalue real(8,3));");
+            stat.executeUpdate("create view db2.testView2 as select * from db2.test2;");
+        }
+
+        @Test
+        public void readSchemaWithAttachedDatabases() throws SQLException {
+            ResultSet rs = meta.getSchemas();
+            assertThat(rs.next()).isTrue();
+            ResultSetMetaData rsMeta = rs.getMetaData();
+            assertThat(rsMeta.getColumnCount()).isEqualTo(2);
+            assertThat(rsMeta.getColumnName(1)).isEqualTo("TABLE_SCHEM");
+            assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("main");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("db2");
+            assertThat(rsMeta.getColumnName(2)).isEqualTo("TABLE_CATALOG");
+        }
+
+        @Test
+        public void getTablesForAttachedDatabase() throws SQLException {
+            ResultSet rs = meta.getTables(null, "db2", null, null);
+            assertThat(rs).isNotNull();
+
+            stat.getGeneratedKeys().close();
+            stat.close();
+
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+            assertThat(rs.getString("TABLE_TYPE")).isEqualTo("SYSTEM TABLE");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2"); // 3
+            assertThat(rs.getString("TABLE_TYPE")).isEqualTo("TABLE"); // 4
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
+            assertThat(rs.getString("TABLE_TYPE")).isEqualTo("VIEW");
+            assertThat(rs.next()).isFalse();
+            rs.close();
+
+            rs = meta.getTables(null, null, "bob", null);
+            assertThat(rs.next()).isFalse();
+            rs.close();
+            rs = meta.getTables(null, null, "test", null);
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.next()).isFalse();
+            rs.close();
+            rs = meta.getTables(null, null, "test%", null);
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.next()).isTrue();
+            rs.close();
+
+            rs = meta.getTables(null, null, null, new String[]{"table"});
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
+            assertThat(rs.next()).isFalse();
+            rs.close();
+
+            rs = meta.getTables(null, null, null, new String[]{"view"});
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
+            assertThat(rs.next()).isFalse();
+            rs.close();
+
+            rs = meta.getTables(null, null, null, new String[]{"system table"});
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+            assertThat(rs.next()).isFalse();
+            rs.close();
+        }
+
+        @Test
+        public void getColumnsForAttachedDatabaseTables() throws SQLException {
+            ResultSet rs = meta.getColumns(null, "db2", "test2", "id");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
+            assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
+            assertThat(rs.getString("COLUMN_DEF")).isNull();
+            assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.INTEGER);
+            assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(2000000000);
+            assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(0);
+            assertThat(rs.getString("IS_AUTOINCREMENT")).isEqualTo("NO");
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "test2", "fn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
+            assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.FLOAT);
+            assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
+            assertThat(rs.getString("COLUMN_DEF")).isEqualTo("0.0");
+            assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(2000000000);
+            assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(10);
+            assertThat(rs.getString("IS_AUTOINCREMENT")).isEqualTo("NO");
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "test2", "sn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
+            assertThat(rs.getString("IS_NULLABLE")).isEqualTo("NO");
+            assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(2000000000);
+            assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(10);
+            assertThat(rs.getString("COLUMN_DEF")).isNull();
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "test2", "intvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
+            assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.INTEGER);
+            assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
+            assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(5);
+            assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(0);
+            assertThat(rs.getString("COLUMN_DEF")).isNull();
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "test2", "realvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.FLOAT);
+            assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
+            assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(11);
+            assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(3);
+            assertThat(rs.getString("COLUMN_DEF")).isNull();
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "test2", "%");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "test2", "%n");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "test%", "%");
+            // TABLE "test2"
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            // VIEW "testView2"
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "%", "%");
+            // TABLE "test2"
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            // VIEW "testView2"
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            assertThat(rs.next()).isFalse();
+
+            rs = meta.getColumns(null, "db2", "doesnotexist", "%");
+            assertThat(rs.next()).isFalse();
+            assertThat(rs.getMetaData().getColumnCount()).isEqualTo(24);
+        }
+
+        @Test
+        public void columnOrderOfgetExportedKeysForAttachedDatabase() throws SQLException {
+
+            stat.executeUpdate("create table db2.person (id integer primary key)");
+            stat.executeUpdate("create table db2.address (pid integer, name, foreign key(pid) references person(id))");
+
+            ResultSet exportedKeys = meta.getExportedKeys("default", "db2", "person");
+            assertThat(exportedKeys.next()).isTrue();
+            assertThat(exportedKeys.getString("PKTABLE_CAT")).isEqualTo("default");
+            assertThat(exportedKeys.getString("PKTABLE_SCHEM")).isEqualTo("db2");
+            assertThat(exportedKeys.getString("FKTABLE_CAT")).isEqualTo("default");
+            assertThat(exportedKeys.getString("FKTABLE_SCHEM")).isEqualTo("db2");
+            assertThat(exportedKeys.getString("PK_NAME")).isNotNull();
+            assertThat(exportedKeys.getString("FK_NAME")).isNotNull();
+
+            assertThat(exportedKeys.getString("PKTABLE_NAME")).isEqualTo("person");
+            assertThat(exportedKeys.getString("PKCOLUMN_NAME")).isEqualTo("id");
+            assertThat(exportedKeys.getString("FKTABLE_NAME")).isEqualTo("address");
+            assertThat(exportedKeys.getString("FKCOLUMN_NAME")).isEqualTo("pid");
+
+            exportedKeys.close();
+
+            exportedKeys = meta.getExportedKeys(null, "db2", "address");
+            assertThat(exportedKeys.next()).isFalse();
+            exportedKeys.close();
+
+            // With explicit primary column defined.
+            stat.executeUpdate("create table db2.REFERRED (ID integer primary key not null)");
+            stat.executeUpdate(
+                    "create table db2.REFERRING (ID integer, RID integer, constraint fk\r\n foreign\tkey\r\n(RID) "
+                            + "references REFERRED(id))");
+
+            exportedKeys = meta.getExportedKeys(null, "db2", "referred");
+            assertThat(exportedKeys.getString("PKTABLE_NAME")).isEqualTo("REFERRED");
+            assertThat(exportedKeys.getString("FKTABLE_NAME")).isEqualTo("REFERRING");
+            assertThat(exportedKeys.getString("FK_NAME")).isEqualTo("fk");
+            exportedKeys.close();
+        }
+
+        @Test
+        public void getIndexInfoOnTestForAttachedDatabase() throws SQLException {
+            ResultSet rs = meta.getIndexInfo(null, "db2", "test2", false, false);
+            assertThat(rs).isNotNull();
+        }
+
+        @Test
+        public void getIndexInfoIndexedSingleForAttachedDatabase() throws SQLException {
+            stat.executeUpdate("create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
+            stat.executeUpdate("create index db2.testindex_idx on testindex (sn);");
+
+            ResultSet rs = meta.getIndexInfo(null, "db2", "testindex", false, false);
+            ResultSetMetaData rsmd = rs.getMetaData();
+
+            assertThat(rs).isNotNull();
+            assertThat(rsmd).isNotNull();
+        }
+
+        @Test
+        public void getIndexInfoIndexedSingleExprForAttachedDatabase() throws SQLException {
+            stat.executeUpdate("create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
+            stat.executeUpdate("create index db2.testindex_idx on testindex (sn, fn/2);");
+
+            ResultSet rs = meta.getIndexInfo(null, "db2", "testindex", false, false);
+            ResultSetMetaData rsmd = rs.getMetaData();
+
+            assertThat(rs).isNotNull();
+            assertThat(rsmd).isNotNull();
+        }
+
+        @Test
+        public void getIndexInfoIndexedMultiForAttachedDatabase() throws SQLException {
+            stat.executeUpdate("create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
+            stat.executeUpdate("create index db2.testindex_idx on testindex (sn);");
+            stat.executeUpdate("create index db2.testindex_pk_idx on testindex (id);");
+
+            ResultSet rs = meta.getIndexInfo(null, "db2", "testindex", false, false);
+            ResultSetMetaData rsmd = rs.getMetaData();
+
+            assertThat(rs).isNotNull();
+            assertThat(rsmd).isNotNull();
+        }
+
+        @AfterEach
+        public void exit() throws SQLException {
+            ((SQLiteConnection) conn).getDatabase().getConfig().setReadAttachedDatabases(false);
+            stat.executeUpdate("Detach database db2;");
+            testDB.deleteOnExit();
+        }
+
     }
 }

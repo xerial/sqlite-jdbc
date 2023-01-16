@@ -681,7 +681,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** @see java.sql.DatabaseMetaData#supportsSchemasInDataManipulation() */
     public boolean supportsSchemasInDataManipulation() {
-        return false;
+        return conn.getDatabase().getConfig().isReadAttachedDatabases();
     }
 
     /** @see java.sql.DatabaseMetaData#supportsSchemasInIndexDefinitions() */
@@ -915,7 +915,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         checkOpen();
 
         StringBuilder sql = new StringBuilder(700);
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, tblname as TABLE_NAME, ")
+        sql.append("select null as TABLE_CAT, ").append(quote(s)).append(" as TABLE_SCHEM, tblname as TABLE_NAME, ")
                 .append(
                         "cn as COLUMN_NAME, ct as DATA_TYPE, tn as TYPE_NAME, colSize as COLUMN_SIZE, ")
                 .append(
@@ -948,12 +948,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 ResultSet rsColAutoinc = null;
                 try {
                     statColAutoinc = conn.createStatement();
-                    rsColAutoinc =
-                            statColAutoinc.executeQuery(
-                                    "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM sqlite_master "
-                                            + "WHERE LOWER(name) = LOWER('"
-                                            + escape(tableName)
-                                            + "') AND TYPE IN ('table', 'view')");
+                    rsColAutoinc = statColAutoinc.executeQuery(
+                            "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM " + prependSchemaPrefix(s,
+                            "sqlite_master WHERE LOWER(name) = LOWER('") + escape(tableName)
+                                    + "') AND TYPE IN ('table', 'view')");
                     rsColAutoinc.next();
                     isAutoIncrement = rsColAutoinc.getInt(1) == 1;
                 } finally {
@@ -974,7 +972,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 }
 
                 // For each table, get the column info and build into overall SQL
-                String pragmaStatement = "PRAGMA table_xinfo('" + escape(tableName) + "')";
+                String pragmaStatement = "PRAGMA " + prependSchemaPrefix(s, "table_xinfo('" + escape(tableName) +
+                        "')");
                 try (Statement colstat = conn.createStatement();
                         ResultSet rscol = colstat.executeQuery(pragmaStatement)) {
 
@@ -1173,9 +1172,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     /** @see java.sql.DatabaseMetaData#getSchemas() */
     public ResultSet getSchemas() throws SQLException {
         if (getSchemas == null) {
-            getSchemas =
-                    conn.prepareStatement(
-                            "select null as TABLE_SCHEM, null as TABLE_CATALOG limit 0;");
+            if (conn.getDatabase().getConfig().isReadAttachedDatabases()) {
+                getSchemas = conn.prepareStatement(
+                        "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list;");
+            } else {
+                getSchemas = conn.prepareStatement("select null as TABLE_SCHEM, null as TABLE_CATALOG limit 0;");
+            }
         }
 
         return getSchemas.executeQuery();
@@ -1195,12 +1197,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      *     java.lang.String)
      */
     public ResultSet getPrimaryKeys(String c, String s, String table) throws SQLException {
-        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table, s);
         String[] columns = pkFinder.getColumns();
 
         Statement stat = conn.createStatement();
         StringBuilder sql = new StringBuilder(512);
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
+        sql.append("select null as TABLE_CAT, ").append(quote(s)).append(" as TABLE_SCHEM, '")
                 .append(escape(table))
                 .append("' as TABLE_NAME, cn as COLUMN_NAME, ks as KEY_SEQ, pk as PK_NAME from (");
 
@@ -1245,12 +1247,13 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      */
     public ResultSet getExportedKeys(String catalog, String schema, String table)
             throws SQLException {
-        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table, schema);
         String[] pkColumns = pkFinder.getColumns();
         Statement stat = conn.createStatement();
 
         catalog = (catalog != null) ? quote(catalog) : null;
-        schema = (schema != null) ? quote(schema) : null;
+
+        String quotedSchema = (schema != null) ? quote(schema) : null;
 
         StringBuilder exportedKeysQuery = new StringBuilder(512);
 
@@ -1259,8 +1262,11 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         if (pkColumns != null) {
             // retrieve table list
             ArrayList<String> tableList;
-            try (ResultSet rs =
-                    stat.executeQuery("select name from sqlite_master where type = 'table'")) {
+            try (
+                    ResultSet rs = stat.executeQuery(
+                            "select name from " + prependSchemaPrefix(schema, "sqlite_master where type = " +
+                                    "'table'"))
+            ) {
                 tableList = new ArrayList<>();
 
                 while (rs.next()) {
@@ -1276,7 +1282,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
             // find imported keys for each table
             for (String tbl : tableList) {
-                final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(tbl);
+                final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(tbl, schema);
                 List<ForeignKey> fkNames = impFkFinder.getFkList();
 
                 for (ForeignKey foreignKey : fkNames) {
@@ -1340,7 +1346,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("select ")
                 .append(catalog)
                 .append(" as PKTABLE_CAT, ")
-                .append(schema)
+                .append(quotedSchema)
                 .append(" as PKTABLE_SCHEM, ")
                 .append(quote(target))
                 .append(" as PKTABLE_NAME, ")
@@ -1348,7 +1354,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 .append(" as PKCOLUMN_NAME, ")
                 .append(catalog)
                 .append(" as FKTABLE_CAT, ")
-                .append(schema)
+                .append(quotedSchema)
                 .append(" as FKTABLE_SCHEM, ")
                 .append(hasImportedKey ? "fkt" : "''")
                 .append(" as FKTABLE_NAME, ")
@@ -1426,7 +1432,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             return ((CoreStatement) stat).executeQuery(sql.toString(), true);
         }
 
-        final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(table);
+        final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(table, schema);
         List<ForeignKey> fkNames = impFkFinder.getFkList();
 
         int i = 0;
@@ -1439,7 +1445,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
             String pkName = null;
             try {
-                PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(PKTabName);
+                PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(PKTabName, schema);
                 pkName = pkFinder.getName();
                 if (PKColName == null) {
                     PKColName = pkFinder.getColumns()[0];
@@ -1523,7 +1529,9 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
         // define the column header
         // this is from the JDBC spec, it is part of the driver protocol
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
+        sql.append("select null as TABLE_CAT,")
+                .append(quote(s))
+                .append(" as TABLE_SCHEM, '")
                 .append(escape(table))
                 .append(
                         "' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
@@ -1533,7 +1541,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         "cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
 
         // this always returns a result set now, previously threw exception
-        rs = stat.executeQuery("pragma index_list('" + escape(table) + "');");
+        rs = stat.executeQuery("pragma " + prependSchemaPrefix(s, "index_list('" + escape(table) + "');"));
 
         ArrayList<ArrayList<Object>> indexList = new ArrayList<>();
         while (rs.next()) {
@@ -1557,7 +1565,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             while (indexIterator.hasNext()) {
                 currentIndex = indexIterator.next();
                 String indexName = currentIndex.get(0).toString();
-                rs = stat.executeQuery("pragma index_info('" + escape(indexName) + "');");
+                rs = stat.executeQuery("pragma " + prependSchemaPrefix(s, "index_info('" + escape(indexName) + "');"));
 
                 while (rs.next()) {
 
@@ -1704,7 +1712,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("      NAME,").append("\n");
         sql.append("      UPPER(TYPE) AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
-        sql.append("      sqlite_master").append("\n");
+        sql.append("      ");
+        prependSchemaPrefix(sql, s, "sqlite_master\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME NOT LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("      AND UPPER(TYPE) IN ('TABLE', 'VIEW')").append("\n");
@@ -1719,7 +1728,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("      NAME,").append("\n");
         sql.append("      'SYSTEM TABLE' AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
-        sql.append("      sqlite_master").append("\n");
+        sql.append("      ");
+        prependSchemaPrefix(sql, s, "sqlite_master\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("  )").append("\n");
@@ -1962,6 +1972,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** Parses the sqlite_master table for a table's primary key */
     class PrimaryKeyFinder {
+        String schema;
         /** The table name. */
         String table;
 
@@ -1971,15 +1982,20 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         /** The column(s) for the primary key. */
         String[] pkColumns = null;
 
+        public PrimaryKeyFinder(String table) throws SQLException {
+            this(table, null);
+        }
+
         /**
          * Constructor.
          *
-         * @param table The table for which to get find a primary key.
+         * @param table  The table for which to get find a primary key.
+         * @param schema Schema in which table is located
          * @throws SQLException
          */
-        public PrimaryKeyFinder(String table) throws SQLException {
+        public PrimaryKeyFinder(String table, String schema) throws SQLException {
             this.table = table;
-
+            this.schema = schema;
             if (table == null || table.trim().length() == 0) {
                 throw new SQLException("Invalid table name: '" + this.table + "'");
             }
@@ -1988,10 +2004,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     // read create SQL script for table
                     ResultSet rs =
                             stat.executeQuery(
-                                    "select sql from sqlite_master where"
+                                    "select sql from " + prependSchemaPrefix(schema, "sqlite_master where"
                                             + " lower(name) = lower('"
                                             + escape(table)
-                                            + "') and type in ('table', 'view')")) {
+                                            + "') and type in ('table', 'view')"))) {
 
                 if (!rs.next()) throw new SQLException("Table not found: '" + table + "'");
 
@@ -2007,8 +2023,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 }
 
                 if (pkColumns == null) {
-                    try (ResultSet rs2 =
-                            stat.executeQuery("pragma table_info('" + escape(table) + "');")) {
+                    try (
+                            ResultSet rs2 = stat.executeQuery(
+                                    "pragma " + prependSchemaPrefix(schema, "table_info('" + escape(table) + "');"))
+                    ) {
                         while (rs2.next()) {
                             if (rs2.getBoolean(6)) pkColumns = new String[] {rs2.getString(2)};
                         }
@@ -2046,6 +2064,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         private final List<ForeignKey> fkList = new ArrayList<>();
 
         public ImportedKeyFinder(String table) throws SQLException {
+            this(table, null);
+        }
+
+        public ImportedKeyFinder(String table, String schema) throws SQLException {
 
             if (table == null || table.trim().length() == 0) {
                 throw new SQLException("Invalid table name: '" + table + "'");
@@ -2053,14 +2075,15 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
             this.fkTableName = table;
 
-            List<String> fkNames = getForeignKeyNames(this.fkTableName);
+            List<String> fkNames = getForeignKeyNames(this.fkTableName, schema);
 
-            try (Statement stat = conn.createStatement();
-                    ResultSet rs =
-                            stat.executeQuery(
-                                    "pragma foreign_key_list('"
-                                            + escape(this.fkTableName.toLowerCase())
-                                            + "')")) {
+            try (
+                    Statement stat = conn.createStatement();
+                    ResultSet rs = stat.executeQuery("pragma " + prependSchemaPrefix(
+                            schema,
+                            "foreign_key_list('" + escape(this.fkTableName.toLowerCase()) + "')"
+                    ))
+            ) {
 
                 int prevFkId = -1;
                 int count = 0;
@@ -2097,19 +2120,15 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
         }
 
-        private List<String> getForeignKeyNames(String tbl) throws SQLException {
+        private List<String> getForeignKeyNames(String tbl, String schema) throws SQLException {
             List<String> fkNames = new ArrayList<>();
             if (tbl == null) {
                 return fkNames;
             }
             try (Statement stat2 = conn.createStatement();
-                    ResultSet rs =
-                            stat2.executeQuery(
-                                    "select sql from sqlite_master where"
-                                            + " lower(name) = lower('"
-                                            + escape(tbl)
-                                            + "')")) {
-
+                    ResultSet rs = stat2.executeQuery("select sql from " + prependSchemaPrefix(schema,
+                            "sqlite_master where" + " lower(name) = lower('" + escape(tbl) + "')"
+                    ))) {
                 if (rs.next()) {
                     Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
 
