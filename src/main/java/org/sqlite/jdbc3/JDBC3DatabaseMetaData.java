@@ -681,7 +681,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** @see java.sql.DatabaseMetaData#supportsSchemasInDataManipulation() */
     public boolean supportsSchemasInDataManipulation() {
-        return true;
+        return false;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsSchemasInIndexDefinitions() */
