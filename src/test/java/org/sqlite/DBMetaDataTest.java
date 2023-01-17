@@ -1087,7 +1087,7 @@ public class DBMetaDataTest {
     @Test
     public void columnOrderOfgetSchemas() throws SQLException {
         ResultSet rs = meta.getSchemas();
-        assertThat(rs.next()).isFalse();
+        assertThat(rs.next()).isTrue();
         ResultSetMetaData rsmeta = rs.getMetaData();
         assertThat(rsmeta.getColumnCount()).isEqualTo(2);
         assertThat(rsmeta.getColumnName(1)).isEqualTo("TABLE_SCHEM");
@@ -1577,7 +1577,6 @@ public class DBMetaDataTest {
 
         @BeforeEach
         public void init() throws IOException, SQLException {
-            ((SQLiteConnection) conn).getDatabase().getConfig().setReadAttachedDatabases(true);
             testDB = Files.createTempFile("temp", ".sqlite").toFile();
             stat.executeUpdate("attach database \"" + testDB.toURI().toURL() + "\" as db2;");
             stat.executeUpdate(
@@ -1875,7 +1874,6 @@ public class DBMetaDataTest {
 
         @AfterEach
         public void exit() throws SQLException {
-            ((SQLiteConnection) conn).getDatabase().getConfig().setReadAttachedDatabases(false);
             stat.executeUpdate("Detach database db2;");
             testDB.deleteOnExit();
         }

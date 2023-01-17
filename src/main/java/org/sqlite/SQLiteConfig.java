@@ -56,7 +56,6 @@ public class SQLiteConfig {
 
     private final int busyTimeout;
     private boolean explicitReadOnly;
-    private boolean readAttachedDatabases;
 
     private final SQLiteConnectionConfig defaultConnectionConfig;
 
@@ -94,10 +93,6 @@ public class SQLiteConfig {
         this.explicitReadOnly =
                 Boolean.parseBoolean(
                         pragmaTable.getProperty(Pragma.JDBC_EXPLICIT_READONLY.pragmaName, "false"));
-        this.readAttachedDatabases =
-                Boolean.parseBoolean(
-                        pragmaTable.getProperty(
-                                Pragma.METADATA_READ_ATTACHED_DATABASES.pragmaName, "false"));
     }
 
     public SQLiteConnectionConfig newConnectionConfig() {
@@ -191,9 +186,8 @@ public class SQLiteConfig {
         pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
         pragmaParams.remove(Pragma.LIMIT_PAGE_COUNT.pragmaName);
 
-        // exclude these "fake" pragmas from execution
+        // exclude this "fake" pragma from execution
         pragmaParams.remove(Pragma.JDBC_EXPLICIT_READONLY.pragmaName);
-        pragmaParams.remove(Pragma.METADATA_READ_ATTACHED_DATABASES.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
@@ -336,10 +330,6 @@ public class SQLiteConfig {
                 defaultConnectionConfig.getDateStringFormat());
         pragmaTable.setProperty(
                 Pragma.JDBC_EXPLICIT_READONLY.pragmaName, this.explicitReadOnly ? "true" : "false");
-        pragmaTable.setProperty(
-            Pragma.METADATA_READ_ATTACHED_DATABASES.pragmaName,
-            this.readAttachedDatabases ? "true" : "false"
-        );
         return pragmaTable;
     }
 
@@ -381,20 +371,6 @@ public class SQLiteConfig {
      */
     public void setExplicitReadOnly(boolean readOnly) {
         this.explicitReadOnly = readOnly;
-    }
-
-    /** @return true if reading attached databases is allowed */
-    public boolean isReadAttachedDatabases() {
-        return readAttachedDatabases;
-    }
-
-    /**
-     * Enable reading attached databases in metadata, they will be shown as schemas
-     *
-     * @param readAttachedDatabases whether to read attached databases
-     */
-    public void setReadAttachedDatabases(boolean readAttachedDatabases) {
-        this.readAttachedDatabases = readAttachedDatabases;
     }
 
     public enum Pragma {
@@ -558,11 +534,8 @@ public class SQLiteConfig {
 
         // extensions: "fake" pragmas to allow conformance with JDBC
         JDBC_EXPLICIT_READONLY(
-                "jdbc.explicit_readonly", "Set explicit read only transactions", null),
-        // "fake" pragma to allow configurating metadata reading by driver
-        METADATA_READ_ATTACHED_DATABASES("metadata.read_attached_databases",
-                "Set read attached databases as schemas",
-                OnOff);
+                "jdbc.explicit_readonly", "Set explicit read only transactions", null);
+
         public final String pragmaName;
         public final String[] choices;
         public final String description;

@@ -681,7 +681,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** @see java.sql.DatabaseMetaData#supportsSchemasInDataManipulation() */
     public boolean supportsSchemasInDataManipulation() {
-        return conn.getDatabase().getConfig().isReadAttachedDatabases();
+        return true;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsSchemasInIndexDefinitions() */
@@ -1172,12 +1172,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     /** @see java.sql.DatabaseMetaData#getSchemas() */
     public ResultSet getSchemas() throws SQLException {
         if (getSchemas == null) {
-            if (conn.getDatabase().getConfig().isReadAttachedDatabases()) {
-                getSchemas = conn.prepareStatement(
-                        "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list;");
-            } else {
-                getSchemas = conn.prepareStatement("select null as TABLE_SCHEM, null as TABLE_CATALOG limit 0;");
-            }
+            getSchemas = conn.prepareStatement(
+                "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list;");
         }
 
         return getSchemas.executeQuery();
