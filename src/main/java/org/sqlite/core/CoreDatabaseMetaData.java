@@ -186,6 +186,7 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
 
     /**
      * Returns line without changes or with escaped schema prefix
+     *
      * @param schema schema name
      * @param line of text to prepend to
      * @return The SQL escaped schema name with dot or empty string
@@ -200,6 +201,7 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
 
     /**
      * Adds line without changes or with escaped schema prefix
+     *
      * @param sql String builder for sql request
      * @param schema schema name
      * @param line line to prepend schema prefix to
@@ -211,7 +213,6 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
             sql.append(schema).append('.').append(line);
         }
     }
-
 
     // inner classes
 

@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.junit.jupiter.api.*;
 
 /** These tests are designed to stress Statements on memory databases. */
@@ -1372,7 +1371,7 @@ public class DBMetaDataTest {
                     .isNull();
             assertThat(rs.getString("TABLE_SCHEM"))
                     .as("DatabaseMetaData.getPrimaryKeys: TABLE_SCHEM")
-                    .isNull();
+                    .isEqualTo("main");
             assertThat(rs.getString("TABLE_NAME"))
                     .as("DatabaseMetaData.getPrimaryKeys: TABLE_NAME")
                     .isEqualTo(tableName);
@@ -1403,7 +1402,7 @@ public class DBMetaDataTest {
         ResultSet importedKeys = meta.getImportedKeys("default", null, "address");
         assertThat(importedKeys.next()).isTrue();
         assertThat(importedKeys.getString("PKTABLE_CAT")).isEqualTo("default");
-        assertThat(importedKeys.getString("PKTABLE_SCHEM")).isEqualTo(null);
+        assertThat(importedKeys.getString("PKTABLE_SCHEM")).isEqualTo("main");
         assertThat(importedKeys.getString("FKTABLE_CAT")).isEqualTo("default");
         assertThat(importedKeys.getString("PKTABLE_NAME")).isEqualTo("person");
         assertThat(importedKeys.getString("PKCOLUMN_NAME")).isEqualTo("id");
@@ -1428,9 +1427,9 @@ public class DBMetaDataTest {
         ResultSet exportedKeys = meta.getExportedKeys("default", null, "person");
         assertThat(exportedKeys.next()).isTrue();
         assertThat(exportedKeys.getString("PKTABLE_CAT")).isEqualTo("default");
-        assertThat(exportedKeys.getString("PKTABLE_SCHEM")).isEqualTo(null);
+        assertThat(exportedKeys.getString("PKTABLE_SCHEM")).isEqualTo("main");
         assertThat(exportedKeys.getString("FKTABLE_CAT")).isEqualTo("default");
-        assertThat(exportedKeys.getString("FKTABLE_SCHEM")).isEqualTo(null);
+        assertThat(exportedKeys.getString("FKTABLE_SCHEM")).isEqualTo("main");
         assertThat(exportedKeys.getString("PK_NAME")).isNotNull();
         assertThat(exportedKeys.getString("FK_NAME")).isNotNull();
 
@@ -1630,23 +1629,42 @@ public class DBMetaDataTest {
             assertThat(rs.next()).isTrue();
             rs.close();
 
-            rs = meta.getTables(null, null, null, new String[]{"table"});
+            rs = meta.getTables(null, null, null, new String[] {"table"});
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
             assertThat(rs.next()).isFalse();
             rs.close();
 
-            rs = meta.getTables(null, null, null, new String[]{"view"});
+            rs = meta.getTables(null, null, null, new String[] {"view"});
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
             assertThat(rs.next()).isFalse();
             rs.close();
 
-            rs = meta.getTables(null, null, null, new String[]{"system table"});
+            rs = meta.getTables(null, null, null, new String[] {"system table"});
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
             assertThat(rs.next()).isFalse();
             rs.close();
+        }
+
+        @Test
+        public void testDynamicDatabaseAttachment() throws IOException, SQLException {
+            ResultSet schemas = meta.getSchemas();
+            schemas.close();
+            File thirdDB = Files.createTempFile("db3", ".sqlite").toFile();
+            stat.executeUpdate("attach database \"" + thirdDB.toURI().toURL() + "\" as db3;");
+            try {
+                schemas = meta.getSchemas();
+                boolean schemaFound = false;
+                while (schemas.next()) {
+                    schemaFound = "db3".equals(schemas.getString("TABLE_SCHEM"));
+                }
+                assertThat(schemaFound).isTrue();
+            } finally {
+                stat.executeUpdate("detach database db3;");
+                thirdDB.deleteOnExit();
+            }
         }
 
         @Test
@@ -1791,10 +1809,21 @@ public class DBMetaDataTest {
         }
 
         @Test
+        public void getTablesForDefaultSchema() throws SQLException {
+            ResultSet rs = meta.getTables(null, null, null, new String[] {"table"});
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
+            assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("main");
+            assertThat(rs.next()).isFalse();
+            rs.close();
+        }
+
+        @Test
         public void columnOrderOfgetExportedKeysForAttachedDatabase() throws SQLException {
 
             stat.executeUpdate("create table db2.person (id integer primary key)");
-            stat.executeUpdate("create table db2.address (pid integer, name, foreign key(pid) references person(id))");
+            stat.executeUpdate(
+                    "create table db2.address (pid integer, name, foreign key(pid) references person(id))");
 
             ResultSet exportedKeys = meta.getExportedKeys("default", "db2", "person");
             assertThat(exportedKeys.next()).isTrue();
@@ -1837,7 +1866,8 @@ public class DBMetaDataTest {
 
         @Test
         public void getIndexInfoIndexedSingleForAttachedDatabase() throws SQLException {
-            stat.executeUpdate("create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
+            stat.executeUpdate(
+                    "create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
             stat.executeUpdate("create index db2.testindex_idx on testindex (sn);");
 
             ResultSet rs = meta.getIndexInfo(null, "db2", "testindex", false, false);
@@ -1849,7 +1879,8 @@ public class DBMetaDataTest {
 
         @Test
         public void getIndexInfoIndexedSingleExprForAttachedDatabase() throws SQLException {
-            stat.executeUpdate("create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
+            stat.executeUpdate(
+                    "create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
             stat.executeUpdate("create index db2.testindex_idx on testindex (sn, fn/2);");
 
             ResultSet rs = meta.getIndexInfo(null, "db2", "testindex", false, false);
@@ -1861,7 +1892,8 @@ public class DBMetaDataTest {
 
         @Test
         public void getIndexInfoIndexedMultiForAttachedDatabase() throws SQLException {
-            stat.executeUpdate("create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
+            stat.executeUpdate(
+                    "create table db2.testindex (id integer primary key, fn float default 0.0, sn not null);");
             stat.executeUpdate("create index db2.testindex_idx on testindex (sn);");
             stat.executeUpdate("create index db2.testindex_pk_idx on testindex (id);");
 
@@ -1877,6 +1909,5 @@ public class DBMetaDataTest {
             stat.executeUpdate("Detach database db2;");
             testDB.deleteOnExit();
         }
-
     }
 }
