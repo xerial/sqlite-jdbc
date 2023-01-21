@@ -46,12 +46,12 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        java: [ 11, 17, 18 ]
+        java: [ 11, 17, 19 ]
         include:
           - os: windows-latest
-            java: 18
+            java: 19
           - os: macos-latest
-            java: 18
+            java: 19
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -158,7 +158,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 18
+          java-version: 19
           java-package: jdk
           cache: 'maven'
       - run: brew install sqlite3

@@ -171,7 +171,7 @@ public abstract class SQLiteConnection implements Connection {
      *
      * @param mode One of {@link SQLiteConfig.TransactionMode}
      * @see <a
-     *     href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     *     href="https://www.sqlite.org/lang_transaction.html">https://www.sqlite.org/lang_transaction.html</a>
      */
     protected void setTransactionMode(SQLiteConfig.TransactionMode mode) {
         connectionConfig.setTransactionMode(mode);
@@ -212,7 +212,7 @@ public abstract class SQLiteConnection implements Connection {
      * Opens a connection to the database using an SQLite library. * @throws SQLException
      *
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
+     *     href="https://www.sqlite.org/c3ref/c_open_autoproxy.html">https://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
     private static DB open(String url, String origFileName, Properties props) throws SQLException {
         // Create a copy of the given properties
@@ -369,7 +369,7 @@ public abstract class SQLiteConnection implements Connection {
     /**
      * @return The busy timeout value for the connection.
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
+     *     href="https://www.sqlite.org/c3ref/busy_timeout.html">https://www.sqlite.org/c3ref/busy_timeout.html</a>
      */
     public int getBusyTimeout() {
         return db.getConfig().getBusyTimeout();
@@ -380,7 +380,7 @@ public abstract class SQLiteConnection implements Connection {
      * off all busy handlers.
      *
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/busy_timeout.html">http://www.sqlite.org/c3ref/busy_timeout.html</a>
+     *     href="https://www.sqlite.org/c3ref/busy_timeout.html">https://www.sqlite.org/c3ref/busy_timeout.html</a>
      * @param timeoutMillis The timeout value in milliseconds.
      * @throws SQLException
      */
@@ -428,7 +428,7 @@ public abstract class SQLiteConnection implements Connection {
      * @return Compile-time library version numbers.
      * @throws SQLException
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/c_source_id.html">http://www.sqlite.org/c3ref/c_source_id.html</a>
+     *     href="https://www.sqlite.org/c3ref/c_source_id.html">https://www.sqlite.org/c3ref/c_source_id.html</a>
      */
     public String libversion() throws SQLException {
         checkOpen();

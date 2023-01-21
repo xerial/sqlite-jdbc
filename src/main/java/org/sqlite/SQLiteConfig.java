@@ -36,7 +36,7 @@ import java.util.TreeSet;
 /**
  * SQLite Configuration
  *
- * <p>See also http://www.sqlite.org/pragma.html
+ * <p>See also https://www.sqlite.org/pragma.html
  *
  * @author leo
  */
@@ -564,7 +564,7 @@ public class SQLiteConfig {
      *
      * @param mode The open mode.
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
+     *     href="https://www.sqlite.org/c3ref/c_open_autoproxy.html">https://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
     public void setOpenMode(SQLiteOpenMode mode) {
         openModeFlag |= mode.flag;
@@ -575,7 +575,7 @@ public class SQLiteConfig {
      *
      * @param mode The open mode.
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/c_open_autoproxy.html">http://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
+     *     href="https://www.sqlite.org/c3ref/c_open_autoproxy.html">https://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
     public void resetOpenMode(SQLiteOpenMode mode) {
         openModeFlag &= ~mode.flag;
@@ -587,7 +587,7 @@ public class SQLiteConfig {
      *
      * @param enable True to enable; false to disable.
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/enable_shared_cache.html">www.sqlite.org/c3ref/enable_shared_cache.html</a>
+     *     href="https://www.sqlite.org/c3ref/enable_shared_cache.html">www.sqlite.org/c3ref/enable_shared_cache.html</a>
      */
     public void setSharedCache(boolean enable) {
         set(Pragma.SHARED_CACHE, enable);
@@ -598,7 +598,7 @@ public class SQLiteConfig {
      *
      * @param enable True to enable; false to disable.
      * @see <a
-     *     href="http://www.sqlite.org/c3ref/load_extension.html">www.sqlite.org/c3ref/load_extension.html</a>
+     *     href="https://www.sqlite.org/c3ref/load_extension.html">www.sqlite.org/c3ref/load_extension.html</a>
      */
     public void enableLoadExtension(boolean enable) {
         set(Pragma.LOAD_EXTENSION, enable);
@@ -627,7 +627,7 @@ public class SQLiteConfig {
      *
      * @param numberOfPages Cache size in number of pages.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
      */
     public void setCacheSize(int numberOfPages) {
         set(Pragma.CACHE_SIZE, numberOfPages);
@@ -638,7 +638,7 @@ public class SQLiteConfig {
      *
      * @param enable True to enable; false to disable.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_case_sensitive_like">www.sqlite.org/pragma.html#pragma_case_sensitive_like</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_case_sensitive_like">www.sqlite.org/pragma.html#pragma_case_sensitive_like</a>
      */
     public void enableCaseSensitiveLike(boolean enable) {
         set(Pragma.CASE_SENSITIVE_LIKE, enable);
@@ -649,7 +649,7 @@ public class SQLiteConfig {
      *     DELETE statements return the number of rows they modified.
      * @param enable True to enable; false to disable.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_count_changes">www.sqlite.org/pragma.html#pragma_count_changes</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_count_changes">www.sqlite.org/pragma.html#pragma_count_changes</a>
      */
     @Deprecated
     public void enableCountChanges(boolean enable) {
@@ -662,7 +662,7 @@ public class SQLiteConfig {
      *
      * @param numberOfPages Cache size in number of pages.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_cache_size">www.sqlite.org/pragma.html#pragma_cache_size</a>
      */
     public void setDefaultCacheSize(int numberOfPages) {
         set(Pragma.DEFAULT_CACHE_SIZE, numberOfPages);
@@ -683,7 +683,7 @@ public class SQLiteConfig {
      * @deprecated Enables or disables the empty_result_callbacks flag.
      * @param enable True to enable; false to disable. false.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks">http://www.sqlite.org/pragma.html#pragma_empty_result_callbacks</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_empty_result_callbacks">https://www.sqlite.org/pragma.html#pragma_empty_result_callbacks</a>
      */
     @Deprecated
     public void enableEmptyResultCallBacks(boolean enable) {
@@ -760,7 +760,7 @@ public class SQLiteConfig {
      *
      * @param encoding One of {@link Encoding}
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_encoding">www.sqlite.org/pragma.html#pragma_encoding</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_encoding">www.sqlite.org/pragma.html#pragma_encoding</a>
      */
     public void setEncoding(Encoding encoding) {
         setPragma(Pragma.ENCODING, encoding.typeName);
@@ -773,7 +773,7 @@ public class SQLiteConfig {
      *
      * @param enforce True to enable; false to disable.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_foreign_keys">www.sqlite.org/pragma.html#pragma_foreign_keys</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_foreign_keys">www.sqlite.org/pragma.html#pragma_foreign_keys</a>
      */
     public void enforceForeignKeys(boolean enforce) {
         set(Pragma.FOREIGN_KEYS, enforce);
@@ -785,7 +785,7 @@ public class SQLiteConfig {
      *     SELECT statements.
      * @param enable True to enable; false to disable.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_full_column_names">www.sqlite.org/pragma.html#pragma_full_column_names</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_full_column_names">www.sqlite.org/pragma.html#pragma_full_column_names</a>
      */
     @Deprecated
     public void enableFullColumnNames(boolean enable) {
@@ -799,7 +799,7 @@ public class SQLiteConfig {
      *
      * @param enable True to enable; false to disable.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_fullfsync">www.sqlite.org/pragma.html#pragma_fullfsync</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_fullfsync">www.sqlite.org/pragma.html#pragma_fullfsync</a>
      */
     public void enableFullSync(boolean enable) {
         set(Pragma.FULL_SYNC, enable);
@@ -807,12 +807,12 @@ public class SQLiteConfig {
 
     /**
      * Sets the incremental_vacuum value; the number of pages to be removed from the <a
-     * href="http://www.sqlite.org/fileformat2.html#freelist">freelist</a>. The database file is
+     * href="https://www.sqlite.org/fileformat2.html#freelist">freelist</a>. The database file is
      * truncated by the same amount.
      *
      * @param numberOfPagesToBeRemoved The number of pages to be removed.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_incremental_vacuum">www.sqlite.org/pragma.html#pragma_incremental_vacuum</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_incremental_vacuum">www.sqlite.org/pragma.html#pragma_incremental_vacuum</a>
      */
     public void incrementalVacuum(int numberOfPagesToBeRemoved) {
         set(Pragma.INCREMENTAL_VACUUM, numberOfPagesToBeRemoved);
@@ -823,7 +823,7 @@ public class SQLiteConfig {
      *
      * @param mode One of {@link JournalMode}
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_journal_mode">www.sqlite.org/pragma.html#pragma_journal_mode</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_journal_mode">www.sqlite.org/pragma.html#pragma_journal_mode</a>
      */
     public void setJournalMode(JournalMode mode) {
         setPragma(Pragma.JOURNAL_MODE, mode.name());
@@ -835,7 +835,7 @@ public class SQLiteConfig {
      *
      * @param limit Limit value in bytes. A negative number implies no limit.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_journal_size_limit">www.sqlite.org/pragma.html#pragma_journal_size_limit</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_journal_size_limit">www.sqlite.org/pragma.html#pragma_journal_size_limit</a>
      */
     public void setJounalSizeLimit(int limit) {
         set(Pragma.JOURNAL_SIZE_LIMIT, limit);
@@ -849,7 +849,7 @@ public class SQLiteConfig {
      *
      * @param use True to turn on legacy file format; false to turn off.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_legacy_file_format">www.sqlite.org/pragma.html#pragma_legacy_file_format</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_legacy_file_format">www.sqlite.org/pragma.html#pragma_legacy_file_format</a>
      */
     public void useLegacyFileFormat(boolean use) {
         set(Pragma.LEGACY_FILE_FORMAT, use);
@@ -869,7 +869,7 @@ public class SQLiteConfig {
      *
      * @param mode One of {@link LockingMode}
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_locking_mode">www.sqlite.org/pragma.html#pragma_locking_mode</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_locking_mode">www.sqlite.org/pragma.html#pragma_locking_mode</a>
      */
     public void setLockingMode(LockingMode mode) {
         setPragma(Pragma.LOCKING_MODE, mode.name());
@@ -881,7 +881,7 @@ public class SQLiteConfig {
      *
      * @param numBytes A power of two between 512 and 65536 inclusive.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_page_size">www.sqlite.org/pragma.html#pragma_page_size</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_page_size">www.sqlite.org/pragma.html#pragma_page_size</a>
      */
     public void setPageSize(int numBytes) {
         set(Pragma.PAGE_SIZE, numBytes);
@@ -892,7 +892,7 @@ public class SQLiteConfig {
      *
      * @param numPages Number of pages.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_max_page_count">www.sqlite.org/pragma.html#pragma_max_page_count</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_max_page_count">www.sqlite.org/pragma.html#pragma_max_page_count</a>
      */
     public void setMaxPageCount(int numPages) {
         set(Pragma.MAX_PAGE_COUNT, numPages);
@@ -903,7 +903,7 @@ public class SQLiteConfig {
      *
      * @param useReadUncommitedIsolationMode True to turn on; false to disable. disabled otherwise.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_read_uncommitted">www.sqlite.org/pragma.html#pragma_read_uncommitted</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_read_uncommitted">www.sqlite.org/pragma.html#pragma_read_uncommitted</a>
      */
     public void setReadUncommited(boolean useReadUncommitedIsolationMode) {
         set(Pragma.READ_UNCOMMITTED, useReadUncommitedIsolationMode);
@@ -928,7 +928,7 @@ public class SQLiteConfig {
      *
      * @param enable True to enable reverse_unordered_selects.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects">www.sqlite.org/pragma.html#pragma_reverse_unordered_selects</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects">www.sqlite.org/pragma.html#pragma_reverse_unordered_selects</a>
      */
     public void enableReverseUnorderedSelects(boolean enable) {
         set(Pragma.REVERSE_UNORDERED_SELECTS, enable);
@@ -940,7 +940,7 @@ public class SQLiteConfig {
      *
      * @param enable True to enable short_column_names.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_short_column_names">www.sqlite.org/pragma.html#pragma_short_column_names</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_short_column_names">www.sqlite.org/pragma.html#pragma_short_column_names</a>
      */
     public void enableShortColumnNames(boolean enable) {
         set(Pragma.SHORT_COLUMN_NAMES, enable);
@@ -972,7 +972,7 @@ public class SQLiteConfig {
      *     </ul>
      *
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_synchronous">www.sqlite.org/pragma.html#pragma_synchronous</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_synchronous">www.sqlite.org/pragma.html#pragma_synchronous</a>
      */
     public void setSynchronous(SynchronousMode mode) {
         setPragma(Pragma.SYNCHRONOUS, mode.name());
@@ -1024,7 +1024,7 @@ public class SQLiteConfig {
      *     <li>MEMORY - temporary tables and indices are kept in as if they were pure in-memory
      *         databases memory
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_temp_store">www.sqlite.org/pragma.html#pragma_temp_store</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_temp_store">www.sqlite.org/pragma.html#pragma_temp_store</a>
      */
     public void setTempStore(TempStore storeType) {
         setPragma(Pragma.TEMP_STORE, storeType.name());
@@ -1036,7 +1036,7 @@ public class SQLiteConfig {
      *
      * @param directoryName Directory name for storing temporary tables and indices.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_temp_store_directory">www.sqlite.org/pragma.html#pragma_temp_store_directory</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_temp_store_directory">www.sqlite.org/pragma.html#pragma_temp_store_directory</a>
      */
     public void setTempStoreDirectory(String directoryName) {
         setPragma(Pragma.TEMP_STORE_DIRECTORY, String.format("'%s'", directoryName));
@@ -1049,7 +1049,7 @@ public class SQLiteConfig {
      *
      * @param version A big-endian 32-bit signed integer.
      * @see <a
-     *     href="http://www.sqlite.org/pragma.html#pragma_user_version">www.sqlite.org/pragma.html#pragma_user_version</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_user_version">www.sqlite.org/pragma.html#pragma_user_version</a>
      */
     public void setUserVersion(int version) {
         set(Pragma.USER_VERSION, version);
@@ -1063,7 +1063,7 @@ public class SQLiteConfig {
      *
      * @param id A big-endian 32-bit unsigned integer.
      * @see <a
-     *     href="http://sqlite.org/pragma.html#pragma_application_id">www.sqlite.org/pragma.html#pragma_application_id</a>
+     *     href="https://www.sqlite.org/pragma.html#pragma_application_id">www.sqlite.org/pragma.html#pragma_application_id</a>
      */
     public void setApplicationId(int id) {
         set(Pragma.APPLICATION_ID, id);
@@ -1094,7 +1094,7 @@ public class SQLiteConfig {
      *
      * @param transactionMode One of {@link TransactionMode}.
      * @see <a
-     *     href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     *     href="https://www.sqlite.org/lang_transaction.html">https://www.sqlite.org/lang_transaction.html</a>
      */
     public void setTransactionMode(TransactionMode transactionMode) {
         this.defaultConnectionConfig.setTransactionMode(transactionMode);
@@ -1105,7 +1105,7 @@ public class SQLiteConfig {
      *
      * @param transactionMode One of DEFERRED, IMMEDIATE or EXCLUSIVE.
      * @see <a
-     *     href="http://www.sqlite.org/lang_transaction.html">http://www.sqlite.org/lang_transaction.html</a>
+     *     href="https://www.sqlite.org/lang_transaction.html">https://www.sqlite.org/lang_transaction.html</a>
      */
     public void setTransactionMode(String transactionMode) {
         setTransactionMode(TransactionMode.getMode(transactionMode));

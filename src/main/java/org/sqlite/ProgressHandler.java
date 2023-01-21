@@ -3,7 +3,7 @@ package org.sqlite;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/** https://sqlite.org/c3ref/progress_handler.html */
+/** https://www.sqlite.org/c3ref/progress_handler.html */
 public abstract class ProgressHandler {
     /**
      * Sets a progress handler for the connection.

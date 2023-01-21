@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests the JSON1 extension using the examples listed in the documentation.
  *
- * @see <a href="http://sqlite.org/json1.html">http://sqlite.org/json1.html</a>
+ * @see <a href="https://www.sqlite.org/json1.html">https://www.sqlite.org/json1.html</a>
  */
 public class JSON1Test {
 

@@ -32,7 +32,7 @@ Usage instructions for applications calling the sqlite3 API functions:
   In your application, call sqlite3_enable_load_extension(db,1) to
   allow loading external libraries.  Then load the library libsqlitefunctions
   using sqlite3_load_extension; the third argument should be 0.
-  See http://www.sqlite.org/cvstrac/wiki?p=LoadableExtensions.
+  See https://www.sqlite.org/cvstrac/wiki?p=LoadableExtensions.
   Select statements may now use these functions, as in
   SELECT cos(radians(inclination)) FROM satsum WHERE satnum = 25544;
 
@@ -44,7 +44,7 @@ Usage instructions for the sqlite3 program:
    0.707106781186548
   Note: Loading extensions is by default prohibited as a
   security measure; see "Security Considerations" in
-  http://www.sqlite.org/cvstrac/wiki?p=LoadableExtensions.
+  https://www.sqlite.org/cvstrac/wiki?p=LoadableExtensions.
   If the sqlite3 program and library are built this
   way, you cannot use these functions from the program, you 
   must write your own program using the sqlite3 API, and call
