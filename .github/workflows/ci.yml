@@ -69,7 +69,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        java: [ 11 ]
+        java: [ 11, 17 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
