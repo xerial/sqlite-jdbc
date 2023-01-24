@@ -77,7 +77,7 @@ Linux-x86_SQLITE_FLAGS  :=
 Linux-x86_64_CC        := $(CROSS_PREFIX)gcc
 Linux-x86_64_STRIP     := $(CROSS_PREFIX)strip
 Linux-x86_64_CCFLAGS   := -Ilib/inc_linux -I$(JAVA_HOME)/include -Os -fPIC -m64 -fvisibility=hidden
-Linux-x86_64_LINKFLAGS := -shared -static-libgcc
+Linux-x86_64_LINKFLAGS := -shared -static-libgcc -lm
 Linux-x86_64_LIBNAME   := libsqlitejdbc.so
 Linux-x86_64_SQLITE_FLAGS  := 
 
@@ -112,7 +112,7 @@ Linux-Android-arm_SQLITE_FLAGS  :=
 Linux-Android-aarch64_CC        := $(CROSS_PREFIX)clang
 Linux-Android-aarch64_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
 Linux-Android-aarch64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
-Linux-Android-aarch64_LINKFLAGS := -shared -static-libgcc
+Linux-Android-aarch64_LINKFLAGS := -shared -static-libgcc -lm
 Linux-Android-aarch64_LIBNAME   := libsqlitejdbc.so
 Linux-Android-aarch64_SQLITE_FLAGS  :=
 
