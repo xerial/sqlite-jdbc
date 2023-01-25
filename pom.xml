@@ -13,6 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.1</junit.version>
         <surefire.version>3.0.0-M7</surefire.version>
+        <graalvm.version>22.3.0</graalvm.version>
         <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
     </properties>
 
@@ -331,6 +332,10 @@
 
         <profile>
             <id>native</id>
+            <properties>
+                <!-- unclear if this is required, jigsaw causes issues -->
+                <maven.compiler.release>11</maven.compiler.release>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -381,6 +386,17 @@
     </profiles>
 
     <dependencies>
+        <!--
+        This dependency makes compilation on non-GraalVM versions possible.
+        The dependency should however never actually be required by end-users because if they require
+        GraalVM features, they will be provided by the JDK they are using.
+        -->
+        <dependency>
+            <groupId>org.graalvm.sdk</groupId>
+            <artifactId>graal-sdk</artifactId>
+            <version>${graalvm.version}</version>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
