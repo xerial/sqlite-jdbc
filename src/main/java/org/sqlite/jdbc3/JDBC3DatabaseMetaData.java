@@ -950,7 +950,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     statColAutoinc = conn.createStatement();
                     rsColAutoinc =
                             statColAutoinc.executeQuery(
-                                    "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM sqlite_master "
+                                    "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM sqlite_schema "
                                             + "WHERE LOWER(name) = LOWER('"
                                             + escape(tableName)
                                             + "') AND TYPE IN ('table', 'view')");
@@ -1260,7 +1260,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             // retrieve table list
             ArrayList<String> tableList;
             try (ResultSet rs =
-                    stat.executeQuery("select name from sqlite_master where type = 'table'")) {
+                    stat.executeQuery("select name from sqlite_schema where type = 'table'")) {
                 tableList = new ArrayList<>();
 
                 while (rs.next()) {
@@ -1704,7 +1704,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("      NAME,").append("\n");
         sql.append("      UPPER(TYPE) AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
-        sql.append("      sqlite_master").append("\n");
+        sql.append("      sqlite_schema").append("\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME NOT LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("      AND UPPER(TYPE) IN ('TABLE', 'VIEW')").append("\n");
@@ -1719,7 +1719,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("      NAME,").append("\n");
         sql.append("      'SYSTEM TABLE' AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
-        sql.append("      sqlite_master").append("\n");
+        sql.append("      sqlite_schema").append("\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("  )").append("\n");
@@ -1960,7 +1960,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     ".*CONSTRAINT\\s*(.*?)\\s*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    /** Parses the sqlite_master table for a table's primary key */
+    /** Parses the sqlite_schema table for a table's primary key */
     class PrimaryKeyFinder {
         /** The table name. */
         String table;
@@ -1988,7 +1988,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     // read create SQL script for table
                     ResultSet rs =
                             stat.executeQuery(
-                                    "select sql from sqlite_master where"
+                                    "select sql from sqlite_schema where"
                                             + " lower(name) = lower('"
                                             + escape(table)
                                             + "') and type in ('table', 'view')")) {
@@ -2105,7 +2105,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             try (Statement stat2 = conn.createStatement();
                     ResultSet rs =
                             stat2.executeQuery(
-                                    "select sql from sqlite_master where"
+                                    "select sql from sqlite_schema where"
                                             + " lower(name) = lower('"
                                             + escape(tbl)
                                             + "')")) {
