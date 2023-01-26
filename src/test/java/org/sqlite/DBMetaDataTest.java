@@ -137,8 +137,8 @@ public class DBMetaDataTest {
 
         testTypeInfo(
                 rs,
-                "BLOB",
-                Types.BLOB,
+                "NULL",
+                Types.NULL,
                 0,
                 null,
                 null,
@@ -171,23 +171,6 @@ public class DBMetaDataTest {
                 10);
         testTypeInfo(
                 rs,
-                "NULL",
-                Types.NULL,
-                0,
-                null,
-                null,
-                null,
-                DatabaseMetaData.typeNullable,
-                false,
-                DatabaseMetaData.typeSearchable,
-                true,
-                false,
-                false,
-                0,
-                0,
-                10);
-        testTypeInfo(
-                rs,
                 "REAL",
                 Types.REAL,
                 0,
@@ -213,6 +196,23 @@ public class DBMetaDataTest {
                 null,
                 DatabaseMetaData.typeNullable,
                 true,
+                DatabaseMetaData.typeSearchable,
+                true,
+                false,
+                false,
+                0,
+                0,
+                10);
+        testTypeInfo(
+                rs,
+                "BLOB",
+                Types.BLOB,
+                0,
+                null,
+                null,
+                null,
+                DatabaseMetaData.typeNullable,
+                false,
                 DatabaseMetaData.typeSearchable,
                 true,
                 false,

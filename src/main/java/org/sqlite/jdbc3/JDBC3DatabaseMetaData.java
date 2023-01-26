@@ -1883,7 +1883,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                                     0,
                                                     0,
                                                     10)))
-                            + " order by TYPE_NAME";
+                            + " order by DATA_TYPE";
             getTypeInfo = conn.prepareStatement(sql);
         }
 
