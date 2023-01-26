@@ -937,8 +937,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         ResultSet rs = null;
         try {
             // Get all tables implied by the input
-            final String[] types = new String[] {"TABLE", "VIEW"};
-            rs = getTables(c, s, tblNamePattern, types);
+            rs = getTables(c, s, tblNamePattern, null);
             while (rs.next()) {
                 String tableName = rs.getString(3);
 
