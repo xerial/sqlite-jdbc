@@ -77,7 +77,7 @@ Linux-x86_SQLITE_FLAGS  :=
 Linux-x86_64_CC        := $(CROSS_PREFIX)gcc
 Linux-x86_64_STRIP     := $(CROSS_PREFIX)strip
 Linux-x86_64_CCFLAGS   := -Ilib/inc_linux -I$(JAVA_HOME)/include -Os -fPIC -m64 -fvisibility=hidden
-Linux-x86_64_LINKFLAGS := -shared -static-libgcc -lm
+Linux-x86_64_LINKFLAGS := $(Default_LINKFLAGS)
 Linux-x86_64_LIBNAME   := libsqlitejdbc.so
 Linux-x86_64_SQLITE_FLAGS  := 
 
