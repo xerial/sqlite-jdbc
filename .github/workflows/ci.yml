@@ -80,7 +80,7 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test
-        run: mvn --batch-mode --no-transfer-progress -P native test
+        run: mvn --batch-mode --no-transfer-progress -P native verify
 
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}

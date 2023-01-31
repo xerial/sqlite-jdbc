@@ -107,7 +107,7 @@ public class SqliteJdbcFeature implements Feature {
 
         // BusyHandler JNI calls
         RuntimeJNIAccess.register(BusyHandler.class);
-        RuntimeJNIAccess.register(method(BusyHandler.class, "callback"));
+        RuntimeJNIAccess.register(method(BusyHandler.class, "callback", int.class));
 
         // Throwable JNI calls
         RuntimeJNIAccess.register(Throwable.class);

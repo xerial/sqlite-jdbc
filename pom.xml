@@ -349,7 +349,7 @@
                                 <goals>
                                     <goal>test</goal>
                                 </goals>
-                                <phase>test</phase>
+                                <phase>integration-test</phase>
                             </execution>
                         </executions>
                         <configuration>
