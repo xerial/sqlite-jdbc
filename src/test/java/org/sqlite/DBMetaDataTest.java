@@ -18,8 +18,11 @@ import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** These tests are designed to stress Statements on memory databases. */
 public class DBMetaDataTest {
@@ -1595,5 +1598,32 @@ public class DBMetaDataTest {
         assertThat(meta.getDatabaseMajorVersion()).as("db major version").isEqualTo(majorVersion);
         assertThat(meta.getDatabaseMinorVersion()).as("db minor version").isEqualTo(minorVersion);
         assertThat(meta.getUserName()).as("user name").isNull();
+    }
+
+    @Nested
+    class SqliteSchema {
+        @ParameterizedTest
+        @ValueSource(strings = {"sqlite_schema", "sqlite_master"})
+        public void getImportedKeys(String table) throws SQLException {
+            ResultSet importedKeys = meta.getImportedKeys(null, null, table);
+
+            assertThat(importedKeys.next()).isFalse();
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"sqlite_schema", "sqlite_master"})
+        public void getExportedKeys(String table) throws SQLException {
+            ResultSet exportedKeys = meta.getExportedKeys(null, null, table);
+
+            assertThat(exportedKeys.next()).isFalse();
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"sqlite_schema", "sqlite_master"})
+        public void getPrimaryKeys(String table) throws SQLException {
+            ResultSet primaryKeys = meta.getPrimaryKeys(null, null, table);
+
+            assertThat(primaryKeys.next()).isFalse();
+        }
     }
 }

@@ -1979,6 +1979,11 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         public PrimaryKeyFinder(String table) throws SQLException {
             this.table = table;
 
+            // specific handling for sqlite_schema and synonyms, so that
+            // getExportedKeys/getPrimaryKeys return an empty ResultSet instead of throwing an
+            // exception
+            if ("sqlite_schema".equals(table) || "sqlite_master".equals(table)) return;
+
             if (table == null || table.trim().length() == 0) {
                 throw new SQLException("Invalid table name: '" + this.table + "'");
             }
