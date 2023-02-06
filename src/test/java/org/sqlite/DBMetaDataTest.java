@@ -1063,8 +1063,7 @@ public class DBMetaDataTest {
         assertThat(rsmeta.getColumnName(16)).isEqualTo("CHAR_OCTET_LENGTH");
         assertThat(rsmeta.getColumnName(17)).isEqualTo("ORDINAL_POSITION");
         assertThat(rsmeta.getColumnName(18)).isEqualTo("IS_NULLABLE");
-        // should be SCOPE_CATALOG, but misspelt in the standard
-        assertThat(rsmeta.getColumnName(19)).isEqualTo("SCOPE_CATLOG");
+        assertThat(rsmeta.getColumnName(19)).isEqualTo("SCOPE_CATALOG");
         assertThat(rsmeta.getColumnName(20)).isEqualTo("SCOPE_SCHEMA");
         assertThat(rsmeta.getColumnName(21)).isEqualTo("SCOPE_TABLE");
         assertThat(rsmeta.getColumnName(22)).isEqualTo("SOURCE_DATA_TYPE");
