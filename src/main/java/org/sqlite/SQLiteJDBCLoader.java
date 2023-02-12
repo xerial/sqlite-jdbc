@@ -27,7 +27,10 @@ package org.sqlite;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -403,27 +406,39 @@ public class SQLiteJDBCLoader {
 
     /** @return The version of the SQLite JDBC driver. */
     public static String getVersion() {
+        return VersionHolder.VERSION;
+    }
 
-        URL versionFile =
-                SQLiteJDBCLoader.class.getResource(
-                        "/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
-        if (versionFile == null) {
-            versionFile =
-                    SQLiteJDBCLoader.class.getResource(
-                            "/META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
-        }
+    /**
+     * This class will load the version from resources during <clinit>. By initializing this at
+     * build-time in native-image, the resources do not need to be included in the native executable
+     * and we're eliminating the IO operations as well.
+     */
+    public static final class VersionHolder {
+        private static final String VERSION;
 
-        String version = "unknown";
-        try {
-            if (versionFile != null) {
-                Properties versionData = new Properties();
-                versionData.load(versionFile.openStream());
-                version = versionData.getProperty("version", version);
-                version = version.trim().replaceAll("[^0-9\\.]", "");
+        static {
+            URL versionFile =
+                    VersionHolder.class.getResource(
+                            "/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
+            if (versionFile == null) {
+                versionFile =
+                        VersionHolder.class.getResource(
+                                "/META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            String version = "unknown";
+            try {
+                if (versionFile != null) {
+                    Properties versionData = new Properties();
+                    versionData.load(versionFile.openStream());
+                    version = versionData.getProperty("version", version);
+                    version = version.trim().replaceAll("[^0-9\\.]", "");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            VERSION = version;
         }
-        return version;
     }
 }

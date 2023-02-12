@@ -332,10 +332,6 @@
 
         <profile>
             <id>native</id>
-            <properties>
-                <!-- unclear if this is required, jigsaw causes issues -->
-                <maven.compiler.release>11</maven.compiler.release>
-            </properties>
             <build>
                 <plugins>
                     <plugin>

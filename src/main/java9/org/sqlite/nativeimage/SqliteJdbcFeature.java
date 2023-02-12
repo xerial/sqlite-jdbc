@@ -2,6 +2,7 @@ package org.sqlite.nativeimage;
 
 import org.graalvm.nativeimage.Platform;
 import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeJNIAccess;
 import org.graalvm.nativeimage.hosted.RuntimeResourceAccess;
 import org.sqlite.*;
@@ -16,25 +17,18 @@ public class SqliteJdbcFeature implements Feature {
 
     @Override
     public void beforeAnalysis(BeforeAnalysisAccess a) {
+        RuntimeClassInitialization.initializeAtBuildTime(SQLiteJDBCLoader.VersionHolder.class);
+        RuntimeClassInitialization.initializeAtBuildTime(JDBC3DatabaseMetaData.class);
         a.registerReachabilityHandler(
                 this::nativeDbReachable, method(SQLiteJDBCLoader.class, "initialize"));
     }
 
     private void nativeDbReachable(DuringAnalysisAccess a) {
         registerResources(a);
-        registerJNICalls(a);
+        registerJNICalls();
     }
 
     private void registerResources(DuringAnalysisAccess a) {
-        RuntimeResourceAccess.addResource(
-                SQLiteJDBCLoader.class.getModule(),
-                "META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
-        RuntimeResourceAccess.addResource(
-                SQLiteJDBCLoader.class.getModule(),
-                "META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
-        RuntimeResourceAccess.addResource(
-                JDBC3DatabaseMetaData.class.getModule(), "sqlite-jdbc.properties");
-
         // TODO need a smarter way to get this resource location
         String libraryResource;
         if (Platform.includedIn(Platform.WINDOWS_AMD64.class)) {
@@ -57,7 +51,7 @@ public class SqliteJdbcFeature implements Feature {
         RuntimeResourceAccess.addResource(SQLiteJDBCLoader.class.getModule(), libraryResource);
     }
 
-    private void registerJNICalls(DuringAnalysisAccess a) {
+    private void registerJNICalls() {
         // NativeDB and DB JNI calls
         RuntimeJNIAccess.register(NativeDB.class);
         RuntimeJNIAccess.register(
