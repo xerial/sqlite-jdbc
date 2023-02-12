@@ -3,6 +3,7 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -15,12 +16,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.core.DB;
 import org.sqlite.core.NativeDBHelper;
 
 public class BusyHandlerTest {
     private Connection conn;
     private Statement stat;
+    @TempDir Path tempDir;
 
     @BeforeEach
     public void connect() throws Exception {
@@ -35,8 +38,9 @@ public class BusyHandlerTest {
      * @return the connection
      * @throws SQLException if the connection cannot be established
      */
-    private static Connection createConnection(int threadNum) throws SQLException {
-        return DriverManager.getConnection("jdbc:sqlite:target/test" + threadNum + ".db");
+    private Connection createConnection(int threadNum) throws SQLException {
+        return DriverManager.getConnection(
+                "jdbc:sqlite:" + tempDir.resolve("test" + threadNum + ".db"));
     }
 
     @AfterEach
@@ -46,7 +50,7 @@ public class BusyHandlerTest {
     }
 
     /** An internal helper class which tests that BusyHandlers are thread safe */
-    public static class BusyWork extends Thread {
+    public class BusyWork extends Thread {
         private final Connection busyWorkConn;
         private final Statement stat;
         private final CountDownLatch lockedLatch = new CountDownLatch(1);
@@ -115,40 +119,41 @@ public class BusyHandlerTest {
     }
 
     private void basicBusyHandler(int threadNum) throws Exception {
-        Connection localConn = createConnection(threadNum);
-        final int[] calls = {0};
-        BusyHandler.setHandler(
-                localConn,
-                new BusyHandler() {
-                    @Override
-                    protected int callback(int nbPrevInvok) {
-                        assertThat(calls[0]).isEqualTo(nbPrevInvok);
-                        calls[0]++;
+        try (Connection localConn = createConnection(threadNum)) {
+            final int[] calls = {0};
+            BusyHandler.setHandler(
+                    localConn,
+                    new BusyHandler() {
+                        @Override
+                        protected int callback(int nbPrevInvok) {
+                            assertThat(calls[0]).isEqualTo(nbPrevInvok);
+                            calls[0]++;
 
-                        if (nbPrevInvok <= 1) {
-                            return 1;
-                        } else {
-                            return 0;
+                            if (nbPrevInvok <= 1) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
                         }
-                    }
-                });
+                    });
 
-        BusyWork busyWork = new BusyWork(threadNum);
-        busyWork.start();
+            BusyWork busyWork = new BusyWork(threadNum);
+            busyWork.start();
 
-        // let busyWork block inside insert
-        busyWork.lockedLatch.await();
+            // let busyWork block inside insert
+            busyWork.lockedLatch.await();
 
-        try (Statement localStat = localConn.createStatement()) {
-            Throwable thrown = catchThrowable(() -> doWork(localStat));
-            assertThat(thrown).isInstanceOf(SQLiteException.class);
-            assertThat(((SQLiteException) thrown).getErrorCode())
-                    .isEqualTo(SQLiteErrorCode.SQLITE_BUSY.code);
+            try (Statement localStat = localConn.createStatement()) {
+                Throwable thrown = catchThrowable(() -> doWork(localStat));
+                assertThat(thrown).isInstanceOf(SQLiteException.class);
+                assertThat(((SQLiteException) thrown).getErrorCode())
+                        .isEqualTo(SQLiteErrorCode.SQLITE_BUSY.code);
+            }
+
+            busyWork.completeLatch.countDown();
+            busyWork.join();
+            assertThat(calls[0]).isEqualTo(3);
         }
-
-        busyWork.completeLatch.countDown();
-        busyWork.join();
-        assertThat(calls[0]).isEqualTo(3);
     }
 
     /**
