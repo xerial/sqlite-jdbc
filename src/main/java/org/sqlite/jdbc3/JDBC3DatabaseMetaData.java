@@ -913,8 +913,28 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         //        empty string --- if it cannot be determined whether the column is auto incremented
         // parameter is unknown
         checkOpen();
-
+        ResultSet schemas = getSchemas(c, s);
+        ArrayList<String> schemasNames = getSchemasNames(schemas);
         StringBuilder sql = new StringBuilder(700);
+        sql.append("SELECT * FROM (");
+        for (int i = 0; i < schemasNames.size(); i++) {
+            appendGetSchemaColumns(sql ,c, schemasNames.get(i), tblNamePattern, colNamePattern);
+            if (i != schemasNames.size() - 1) {
+                sql.append(" UNION ALL ");
+            } else {
+                sql.append("\n) order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
+            }
+        }
+
+        Statement stat = conn.createStatement();
+        return ((CoreStatement) stat).executeQuery(sql.toString(), true);
+    }
+
+    private StringBuilder appendGetSchemaColumns(
+        StringBuilder sql, String c, String s, String tblNamePattern, String colNamePattern
+    )
+    throws SQLException {
+
         sql.append("select null as TABLE_CAT, ")
                 .append(quote(s == null ? "main" : s))
                 .append(" as TABLE_SCHEM, tblname as TABLE_NAME, ")
@@ -953,8 +973,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     rsColAutoinc =
                             statColAutoinc.executeQuery(
                                     "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM "
-                                            + prependSchemaPrefix(
-                                                    s, "sqlite_master WHERE LOWER(name) = LOWER('")
+                                            + prependSchemaPrefix(s, "sqlite_master WHERE LOWER(name) = LOWER('")
                                             + escape(tableName)
                                             + "') AND TYPE IN ('table', 'view')");
                     rsColAutoinc.next();
@@ -979,8 +998,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 // For each table, get the column info and build into overall SQL
                 String pragmaStatement =
                         "PRAGMA "
-                                + prependSchemaPrefix(
-                                        s, "table_xinfo('" + escape(tableName) + "')");
+                                + prependSchemaPrefix(s, "table_xinfo('" + escape(tableName) + "')");
                 try (Statement colstat = conn.createStatement();
                         ResultSet rscol = colstat.executeQuery(pragmaStatement)) {
 
@@ -1130,14 +1148,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         }
 
         if (colFound) {
-            sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
+            sql.append(") ");
         } else {
             sql.append(
-                    "select null as ordpos, null as colnullable, null as ct, null as colsize, null as colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement, null as colgenerated) limit 0;");
+                    "select null as ordpos, null as colnullable, null as ct, null as colsize, null as "
+                        + "colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as "
+                        + "colautoincrement, null as colgenerated limit 0)");
         }
-
-        Statement stat = conn.createStatement();
-        return ((CoreStatement) stat).executeQuery(sql.toString(), true);
+        return sql;
     }
 
     /**
@@ -1224,6 +1242,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             createSchemaPrimaryKeysQuery(schemaNames.get(i), table, sql);
             if (i != schemaNames.size() - 1) {
                 sql.append(" union all ");
+            } else {
+                sql.append(" order by cn;");
             }
         }
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
@@ -1266,7 +1286,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     .append(i + 1)
                     .append(" as ks");
         }
-        sql.append(") order by cn;");
+        sql.append(") ");
     }
 
     private static final Map<String, Integer> RULE_MAP = new HashMap<>();
@@ -1772,7 +1792,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("SELECT").append("\n");
         sql.append("  NULL AS TABLE_CAT,").append("\n");
         sql.append("  ")
-                .append(quote(s == null ? "main" : s))
+                .append(quote(s))
                 .append(" AS TABLE_SCHEM,")
                 .append("\n");
         sql.append("  NAME AS TABLE_NAME,").append("\n");
@@ -1787,7 +1807,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("  (").append("\n");
         sql.append("    SELECT\n");
         sql.append("      'sqlite_schema' AS NAME,\n");
-        sql.append("      'SYSTEM TABLE' AS TYPE");
+        sql.append("      'SYSTEM TABLE' AS TYPE\n");
         sql.append("    UNION ALL").append("\n");
         sql.append("    SELECT").append("\n");
         sql.append("      NAME,").append("\n");
