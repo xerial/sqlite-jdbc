@@ -25,10 +25,6 @@ public class JDBC4DatabaseMetaData extends JDBC3DatabaseMetaData {
         throw new SQLFeatureNotSupportedException();
     }
 
-    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
-    }
-
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }

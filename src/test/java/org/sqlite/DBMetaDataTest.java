@@ -91,7 +91,10 @@ public class DBMetaDataTest {
         rs = meta.getTables(null, null, null, new String[] {"system table"});
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
-        assertThat(rs.next()).isFalse();
+        assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("main");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+        assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("temp");
         rs.close();
     }
 
@@ -928,7 +931,7 @@ public class DBMetaDataTest {
         ResultSet rsTables =
                 meta.getTables(
                         null,
-                        null,
+                        "",
                         null,
                         new String[] {"TABLE", "VIEW", "GLOBAL TEMPORARY", "SYSTEM TABLE"});
 
@@ -1629,19 +1632,19 @@ public class DBMetaDataTest {
             assertThat(rs.next()).isTrue();
             rs.close();
 
-            rs = meta.getTables(null, null, null, new String[] {"table"});
+            rs = meta.getTables(null, "main", null, new String[] {"table"});
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
             assertThat(rs.next()).isFalse();
             rs.close();
 
-            rs = meta.getTables(null, null, null, new String[] {"view"});
+            rs = meta.getTables(null, "main", null, new String[] {"view"});
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
             assertThat(rs.next()).isFalse();
             rs.close();
 
-            rs = meta.getTables(null, null, null, new String[] {"system table"});
+            rs = meta.getTables(null, "main", null, new String[] {"system table"});
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
             assertThat(rs.next()).isFalse();
@@ -1810,7 +1813,7 @@ public class DBMetaDataTest {
 
         @Test
         public void getTablesForDefaultSchema() throws SQLException {
-            ResultSet rs = meta.getTables(null, null, null, new String[] {"table"});
+            ResultSet rs = meta.getTables(null, "", null, new String[] {"table"});
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
             assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("main");

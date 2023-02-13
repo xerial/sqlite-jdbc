@@ -164,6 +164,21 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
     }
 
     /**
+     * Escapes all wildcards, to prevent pattern matching for
+     * functions which should not support it
+     * @param val The string to escape
+     * @return The string with escaped wildcards
+     */
+    protected static String escapeWildcards(final String val) {
+        if (val == null) {
+            return null;
+        }
+        String replacement = val.replace("%", "\\%");
+        replacement = replacement.replace("_", "\\_");
+        return replacement;
+    }
+
+    /**
      * Applies SQL escapes for special characters in a given string.
      *
      * @param val The string to escape.
