@@ -924,7 +924,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             if (i != schemasNames.size() - 1) {
                 sql.append(" UNION ALL ");
             } else {
-                sql.append("\n) order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
+                sql.append("\n) order by TABLE_NAME, TABLE_SCHEM, ORDINAL_POSITION;");
             }
         }
         if (schemasNames.size() == 0) {
@@ -1228,7 +1228,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         if (getSchemas == null) {
             getSchemas =
                     conn.prepareStatement(
-                            "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list;");
+                            "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list order by "
+                                + "TABLE_SCHEM;");
         }
 
         return getSchemas.executeQuery();
@@ -1244,7 +1245,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         }
         Statement stat = conn.createStatement();
         String sql = "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list\n"
-            + "where TABLE_SCHEM like '" + schemaPattern + "' escape '" + getSearchStringEscape() + "';";
+            + "where TABLE_SCHEM like '" + schemaPattern + "' escape '" + getSearchStringEscape() + "' order by "
+            + "TABLE_SCHEM;";
         return stat.executeQuery(sql);
     }
 
@@ -1527,7 +1529,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             throws SQLException {
         ResultSet rs;
         Statement stat = conn.createStatement();
-        StringBuilder sql = new StringBuilder(700);
+        StringBuilder sql = new StringBuilder(1024);
         ResultSet schemas = getSchemas(null, escapeWildcards(schema));
         List<String> schemasNames = getSchemasNames(schemas);
         for (int i = 0; i < schemasNames.size(); i++) {
