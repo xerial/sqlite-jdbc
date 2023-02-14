@@ -916,8 +916,10 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         ResultSet schemas = getSchemas(c, s);
         ArrayList<String> schemasNames = getSchemasNames(schemas);
         StringBuilder sql = new StringBuilder(700);
-        sql.append("SELECT * FROM (");
         for (int i = 0; i < schemasNames.size(); i++) {
+            if (i == 0) {
+                sql.append("SELECT * FROM (");
+            }
             appendGetSchemaColumns(sql ,c, schemasNames.get(i), tblNamePattern, colNamePattern);
             if (i != schemasNames.size() - 1) {
                 sql.append(" UNION ALL ");
@@ -925,7 +927,34 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 sql.append("\n) order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
             }
         }
-
+        if (schemasNames.size() == 0) {
+            sql.append("select ");
+            sql.append("\tnull as TABLE_CAT,\n")
+                .append("\tnull as TABLE_SCHEM,\n")
+                .append("\tnull as TABLE_NAME,\n")
+                .append("\tnull as COLUMN_NAME,\n")
+                .append("\tnull as DATA_TYPE,\n")
+                .append("\tnull as TYPE_NAME,\n")
+                .append("\tnull as COLUMN_SIZE,\n")
+                .append("\tnull as BUFFER_LENGTH,\n")
+                .append("\tnull as DECIMAL_DIGITS,\n")
+                .append("\tnull as NUM_PREC_RADIX,\n")
+                .append("\tnull as NULLABLE,\n")
+                .append("\tnull as REMARKS,\n")
+                .append("\tnull as COLUMN_DEF,\n")
+                .append("\tnull as SQL_DATA_TYPE,\n")
+                .append("\tnull as SQL_DATETIME_SUB,\n")
+                .append("\tnull as CHAR_OCTET_LENGTH,\n")
+                .append("\tnull as ORDINAL_POSITION,\n")
+                .append("\tnull as IS_NULLABLE,\n")
+                .append("\tnull as SCOPE_CATLOG,\n")
+                .append("\tnull as SCOPE_SCHEMA,\n")
+                .append("\tnull as SCOPE_TABLE,\n")
+                .append("\tnull as SOURCE_DATA_TYPE,\n")
+                .append("\tnull as IS_AUTOINCREMENT,\n")
+                .append("\tnull as IS_GENERATEDCOLUMN\n")
+                .append("\t limit 0");
+        }
         Statement stat = conn.createStatement();
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
@@ -1246,6 +1275,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 sql.append(" order by cn;");
             }
         }
+        if (schemaNames.size() == 0) {
+            sql.append("select null as TABLE_CAT, ")
+                .append("null")
+                .append(" as TABLE_SCHEM, '")
+                .append("null")
+                .append("' as TABLE_NAME, null as COLUMN_NAME, null as KEY_SEQ, null as PK_NAME limit 0;");
+        }
+
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
 
@@ -1449,7 +1486,24 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 sql.append(";");
             }
         }
-
+        if (schemasNames.size() == 0) {
+            sql.append("select\n")
+                .append("\tnull as PKTABLE_CAT,\n")
+                .append("\tnull as PKTABLE_SCHEM,\n")
+                .append("\tnull as PKTABLE_NAME,\n")
+                .append("\tnull as PKCOLUMN_NAME,\n")
+                .append("\tnull as FKTABLE_CAT,\n")
+                .append("\tnull as FKTABLE_SCHEM,\n")
+                .append("\t'null' as FKTABLE_NAME,\n")
+                .append("\tnull as FKCOLUMN_NAME,\n")
+                .append("\tnull as KEY_SEQ,\n")
+                .append("\tnull as UPDATE_RULE,\n")
+                .append("\tnull as DELETE_RULE,\n")
+                .append("\tnull as FK_NAME,\n")
+                .append("\tnull as PK_NAME,\n")
+                .append("\tnull as DEFERRABILITY\n")
+                .append("limit 0;");
+        }
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
 
@@ -1461,7 +1515,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 .append(" as dr, ")
                 .append(" '' as fkn, ")
                 .append(" '' as pkn ")
-                .append(") limit 0;");
+                .append(" limit 0");
         return sql;
     }
 
@@ -1502,6 +1556,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 appendDummyForeignKeyList(sql);
                 if (i != schemasNames.size() - 1) {
                     sql.append(" union all ");
+                } else {
+                    sql.append(";");
                 }
                 continue;
             }
@@ -1590,6 +1646,23 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             } else {
                 sql.append(") ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ;");
             }
+        }
+        if (schemasNames.size() == 0) {
+            sql.append("select\n")
+                .append("\tnull as PKTABLE_CAT,\n")
+                .append("\tnull as PKTABLE_SCHEM,\n")
+                .append("\tnull as PKTABLE_NAME,\n")
+                .append("\tnull as PKCOLUMN_NAME,\n")
+                .append("\tnull as FKTABLE_CAT,\n")
+                .append("\tnull as FKTABLE_SCHEM,\n")
+                .append("\tnull as FKTABLE_NAME,\n")
+                .append("\tnull as FKCOLUMN_NAME,\n")
+                .append("\tnull as KEY_SEQ,\n")
+                .append("\tnull as UPDATE_RULE,\n")
+                .append("\tnull as DELETE_RULE,\n")
+                .append("\tnull as FK_NAME,\n")
+                .append("\tnull as PK_NAME,\n")
+                .append("\tnull as DEFERRABILITY limit 0;");
 
         }
 
@@ -1602,86 +1675,91 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
      */
     public ResultSet getIndexInfo(String c, String s, String table, boolean u, boolean approximate)
             throws SQLException {
-        ResultSet rs;
         Statement stat = conn.createStatement();
-        StringBuilder sql = new StringBuilder(500);
-
-        // define the column header
-        // this is from the JDBC spec, it is part of the driver protocol
-        sql.append("select null as TABLE_CAT,")
-                .append(quote(s == null ? "main" : s))
-                .append(" as TABLE_SCHEM, '")
+        ResultSet schemas = getSchemas(c, escapeWildcards(s));
+        ArrayList<String> schemasNames = getSchemasNames(schemas);
+        StringBuilder sql = new StringBuilder(1000);
+        for (int i = 0; i < schemasNames.size(); i++) {
+            ResultSet rs;
+            // define the column header
+            // this is from the JDBC spec, it is part of the driver protocol
+            sql.append("select null as TABLE_CAT,'")
+                .append(escape(schemasNames.get(i)))
+                .append("' as TABLE_SCHEM, '")
                 .append(escape(table))
-                .append(
-                        "' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
+                .append("' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
                 .append(Integer.toString(DatabaseMetaData.tableIndexOther))
                 .append(" as TYPE, op as ORDINAL_POSITION, ")
                 .append(
-                        "cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
+                    "cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
 
-        // this always returns a result set now, previously threw exception
-        rs =
-                stat.executeQuery(
-                        "pragma " + prependSchemaPrefix(s, "index_list('" + escape(table) + "');"));
+            // this always returns a result set now, previously threw exception
+            rs = stat.executeQuery("pragma " + prependSchemaPrefix(s, "index_list('" + escape(schemasNames.get(i)) +
+                "');"));
 
-        ArrayList<ArrayList<Object>> indexList = new ArrayList<>();
-        while (rs.next()) {
-            indexList.add(new ArrayList<>());
-            indexList.get(indexList.size() - 1).add(rs.getString(2));
-            indexList.get(indexList.size() - 1).add(rs.getInt(3));
-        }
-        rs.close();
-        if (indexList.size() == 0) {
-            // if pragma index_list() returns no information, use this null block
-            sql.append("select null as un, null as n, null as op, null as cn) limit 0;");
-            return ((CoreStatement) stat).executeQuery(sql.toString(), true);
-        } else {
-            // loop over results from pragma call, getting specific info for each index
+            ArrayList<ArrayList<Object>> indexList = new ArrayList<>();
+            while (rs.next()) {
+                indexList.add(new ArrayList<>());
+                indexList.get(indexList.size() - 1).add(rs.getString(2));
+                indexList.get(indexList.size() - 1).add(rs.getInt(3));
+            }
+            rs.close();
+            if (indexList.size() == 0) {
+                // if pragma index_list() returns no information, use this null block
+                sql.append("select null as un, null as n, null as op, null as cn limit 0");
+            } else {
+                // loop over results from pragma call, getting specific info for each index
 
-            Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
-            ArrayList<Object> currentIndex;
+                Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
+                ArrayList<Object> currentIndex;
 
-            ArrayList<String> unionAll = new ArrayList<>();
+                ArrayList<String> unionAll = new ArrayList<>();
 
-            while (indexIterator.hasNext()) {
-                currentIndex = indexIterator.next();
-                String indexName = currentIndex.get(0).toString();
-                rs =
-                        stat.executeQuery(
-                                "pragma "
-                                        + prependSchemaPrefix(
-                                                s, "index_info('" + escape(indexName) + "');"));
+                while (indexIterator.hasNext()) {
+                    currentIndex = indexIterator.next();
+                    String indexName = currentIndex.get(0).toString();
+                    rs = stat.executeQuery(
+                        "pragma " + prependSchemaPrefix(s, "index_info('" + escape(indexName) + "');"));
 
-                while (rs.next()) {
+                    while (rs.next()) {
 
-                    StringBuilder sqlRow = new StringBuilder();
+                        StringBuilder sqlRow = new StringBuilder();
 
-                    String colName = rs.getString(3);
-                    sqlRow.append("select ")
+                        String colName = rs.getString(3);
+                        sqlRow.append("select ")
                             .append(1 - (Integer) currentIndex.get(1))
                             .append(" as un,'")
                             .append(escape(indexName))
                             .append("' as n,")
                             .append(rs.getInt(1) + 1)
                             .append(" as op,");
-                    if (colName == null) { // expression index
-                        sqlRow.append("null");
-                    } else {
-                        sqlRow.append("'").append(escape(colName)).append("'");
-                    }
-                    sqlRow.append(" as cn");
+                        if (colName == null) { // expression index
+                            sqlRow.append("null");
+                        } else {
+                            sqlRow.append("'").append(escape(colName)).append("'");
+                        }
+                        sqlRow.append(" as cn");
 
-                    unionAll.add(sqlRow.toString());
+                        unionAll.add(sqlRow.toString());
+                    }
+
+                    rs.close();
                 }
 
-                rs.close();
+                String sqlBlock = StringUtils.join(unionAll, " union all ");
+                sql.append(sqlBlock);
             }
-
-            String sqlBlock = StringUtils.join(unionAll, " union all ");
-
-            return ((CoreStatement) stat)
-                    .executeQuery(sql.append(sqlBlock).append(");").toString(), true);
+            if (i != schemasNames.size() - 1) {
+                sql.append(") union all ");
+            }  else {
+                sql.append(");");
+            }
         }
+        if (schemasNames.size() == 0) {
+            sql.append("select null as un, null as n, null as op, null as cn limit 0");
+        }
+        return ((CoreStatement) stat)
+            .executeQuery(sql.toString(), true);
     }
 
     /**
@@ -1779,6 +1857,21 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 sql.append(" ORDER BY TABLE_TYPE, TABLE_NAME;");
             }
         }
+        if (schemasNames.size() == 0) {
+            sql.append("\nSelect");
+            sql.append("\n  NULL AS TABLE_CAT,");
+            sql.append("\n      NULL AS TABLE_SCHEM,");
+            sql.append("\n  NULL AS TABLE_NAME,");
+            sql.append("\n      NULL AS TABLE_TYPE,");
+            sql.append("\n  NULL AS REMARKS,");
+            sql.append("\n      NULL AS TYPE_CAT,");
+            sql.append("\n  NULL AS TYPE_SCHEM,");
+            sql.append("\n      NULL AS TYPE_NAME,");
+            sql.append("\n  NULL AS SELF_REFERENCING_COL_NAME,");
+            sql.append("\n      NULL AS REF_GENERATION");
+            sql.append("\n   LIMIT 0;");
+        }
+
         return ((CoreStatement) conn.createStatement()).executeQuery(sql.toString(), true);
     }
 

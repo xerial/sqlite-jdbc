@@ -1573,6 +1573,120 @@ public class DBMetaDataTest {
         assertThat(meta.getUserName()).as("user name").isNull();
     }
 
+    @Test
+    public void testRequestsWithNonExistentSchemas() throws SQLException {
+        ResultSet rs = meta.getSchemas(null, "nonexistent");
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+        ResultSetMetaData rsmeta = rs.getMetaData();
+        assertThat(rsmeta.getColumnCount()).isEqualTo(2);
+        assertThat(rsmeta.getColumnName(1)).isEqualTo("TABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(2)).isEqualTo("TABLE_CATALOG");
+
+        rs = meta.getIndexInfo(null, "nonexistent", null, false, false);
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+
+        rs = meta.getTables(null, "nonexistent", null, null);
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+        rsmeta = rs.getMetaData();
+        assertThat(rsmeta.getColumnCount()).isEqualTo(10);
+        assertThat(rsmeta.getColumnName(1)).isEqualTo("TABLE_CAT");
+        assertThat(rsmeta.getColumnName(2)).isEqualTo("TABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(3)).isEqualTo("TABLE_NAME");
+        assertThat(rsmeta.getColumnName(4)).isEqualTo("TABLE_TYPE");
+        assertThat(rsmeta.getColumnName(5)).isEqualTo("REMARKS");
+        assertThat(rsmeta.getColumnName(6)).isEqualTo("TYPE_CAT");
+        assertThat(rsmeta.getColumnName(7)).isEqualTo("TYPE_SCHEM");
+        assertThat(rsmeta.getColumnName(8)).isEqualTo("TYPE_NAME");
+        assertThat(rsmeta.getColumnName(9)).isEqualTo("SELF_REFERENCING_COL_NAME");
+        assertThat(rsmeta.getColumnName(10)).isEqualTo("REF_GENERATION");
+
+
+        rs = meta.getColumns(null, "nonexistent", null, null);
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+        rsmeta = rs.getMetaData();
+        assertThat(rsmeta.getColumnCount()).isEqualTo(24);
+        assertThat(rsmeta.getColumnName(1)).isEqualTo("TABLE_CAT");
+        assertThat(rsmeta.getColumnName(2)).isEqualTo("TABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(3)).isEqualTo("TABLE_NAME");
+        assertThat(rsmeta.getColumnName(4)).isEqualTo("COLUMN_NAME");
+        assertThat(rsmeta.getColumnName(5)).isEqualTo("DATA_TYPE");
+        assertThat(rsmeta.getColumnName(6)).isEqualTo("TYPE_NAME");
+        assertThat(rsmeta.getColumnName(7)).isEqualTo("COLUMN_SIZE");
+        assertThat(rsmeta.getColumnName(8)).isEqualTo("BUFFER_LENGTH");
+        assertThat(rsmeta.getColumnName(9)).isEqualTo("DECIMAL_DIGITS");
+        assertThat(rsmeta.getColumnName(10)).isEqualTo("NUM_PREC_RADIX");
+        assertThat(rsmeta.getColumnName(11)).isEqualTo("NULLABLE");
+        assertThat(rsmeta.getColumnName(12)).isEqualTo("REMARKS");
+        assertThat(rsmeta.getColumnName(13)).isEqualTo("COLUMN_DEF");
+        assertThat(rsmeta.getColumnName(14)).isEqualTo("SQL_DATA_TYPE");
+        assertThat(rsmeta.getColumnName(15)).isEqualTo("SQL_DATETIME_SUB");
+        assertThat(rsmeta.getColumnName(16)).isEqualTo("CHAR_OCTET_LENGTH");
+        assertThat(rsmeta.getColumnName(17)).isEqualTo("ORDINAL_POSITION");
+        assertThat(rsmeta.getColumnName(18)).isEqualTo("IS_NULLABLE");
+        // should be SCOPE_CATALOG, but misspelt in the standard
+        assertThat(rsmeta.getColumnName(19)).isEqualTo("SCOPE_CATLOG");
+        assertThat(rsmeta.getColumnName(20)).isEqualTo("SCOPE_SCHEMA");
+        assertThat(rsmeta.getColumnName(21)).isEqualTo("SCOPE_TABLE");
+        assertThat(rsmeta.getColumnName(22)).isEqualTo("SOURCE_DATA_TYPE");
+        assertThat(rsmeta.getColumnName(23)).isEqualTo("IS_AUTOINCREMENT");
+        assertThat(rsmeta.getColumnName(24)).isEqualTo("IS_GENERATEDCOLUMN");
+
+        rs = meta.getExportedKeys(null, "nonexistent", null);
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+        rsmeta = rs.getMetaData();
+        assertThat(rsmeta.getColumnName(1)).isEqualTo("PKTABLE_CAT");
+        assertThat(rsmeta.getColumnName(2)).isEqualTo("PKTABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(3)).isEqualTo("PKTABLE_NAME");
+        assertThat(rsmeta.getColumnName(4)).isEqualTo("PKCOLUMN_NAME");
+        assertThat(rsmeta.getColumnName(5)).isEqualTo("FKTABLE_CAT");
+        assertThat(rsmeta.getColumnName(6)).isEqualTo("FKTABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(7)).isEqualTo("FKTABLE_NAME");
+        assertThat(rsmeta.getColumnName(8)).isEqualTo("FKCOLUMN_NAME");
+        assertThat(rsmeta.getColumnName(9)).isEqualTo("KEY_SEQ");
+        assertThat(rsmeta.getColumnName(10)).isEqualTo("UPDATE_RULE");
+        assertThat(rsmeta.getColumnName(11)).isEqualTo("DELETE_RULE");
+        assertThat(rsmeta.getColumnName(12)).isEqualTo("FK_NAME");
+        assertThat(rsmeta.getColumnName(13)).isEqualTo("PK_NAME");
+        assertThat(rsmeta.getColumnName(14)).isEqualTo("DEFERRABILITY");
+
+        rs = meta.getImportedKeys(null, "nonexistent", null);
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+        rsmeta = rs.getMetaData();
+        assertThat(rsmeta.getColumnName(1)).isEqualTo("PKTABLE_CAT");
+        assertThat(rsmeta.getColumnName(2)).isEqualTo("PKTABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(3)).isEqualTo("PKTABLE_NAME");
+        assertThat(rsmeta.getColumnName(4)).isEqualTo("PKCOLUMN_NAME");
+        assertThat(rsmeta.getColumnName(5)).isEqualTo("FKTABLE_CAT");
+        assertThat(rsmeta.getColumnName(6)).isEqualTo("FKTABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(7)).isEqualTo("FKTABLE_NAME");
+        assertThat(rsmeta.getColumnName(8)).isEqualTo("FKCOLUMN_NAME");
+        assertThat(rsmeta.getColumnName(9)).isEqualTo("KEY_SEQ");
+        assertThat(rsmeta.getColumnName(10)).isEqualTo("UPDATE_RULE");
+        assertThat(rsmeta.getColumnName(11)).isEqualTo("DELETE_RULE");
+        assertThat(rsmeta.getColumnName(12)).isEqualTo("FK_NAME");
+        assertThat(rsmeta.getColumnName(13)).isEqualTo("PK_NAME");
+        assertThat(rsmeta.getColumnName(14)).isEqualTo("DEFERRABILITY");
+
+
+        rs = meta.getPrimaryKeys(null, "nonexistent", null);
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+        rsmeta = rs.getMetaData();
+        assertThat(rsmeta.getColumnName(1)).isEqualTo("TABLE_CAT");
+        assertThat(rsmeta.getColumnName(2)).isEqualTo("TABLE_SCHEM");
+        assertThat(rsmeta.getColumnName(3)).isEqualTo("TABLE_NAME");
+        assertThat(rsmeta.getColumnName(4)).isEqualTo("COLUMN_NAME");
+        assertThat(rsmeta.getColumnName(5)).isEqualTo("KEY_SEQ");
+        assertThat(rsmeta.getColumnName(6)).isEqualTo("PK_NAME");
+
+    }
+
     @Nested
     class DBMetadataTestWithAttachedDatabases {
         File testDB;
@@ -1892,6 +2006,8 @@ public class DBMetaDataTest {
             assertThat(rs).isNotNull();
             assertThat(rsmd).isNotNull();
         }
+
+
 
         @Test
         public void getIndexInfoIndexedMultiForAttachedDatabase() throws SQLException {
