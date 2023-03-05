@@ -121,6 +121,9 @@ public class SQLiteConnectionConfig implements Cloneable {
 
     @SuppressWarnings("deprecation")
     public void setTransactionMode(SQLiteConfig.TransactionMode transactionMode) {
+        if (null == transactionMode) {
+          throw new NullPointerException("transactionMode must not be null");
+        }
         if (transactionMode == SQLiteConfig.TransactionMode.DEFFERED) {
             transactionMode = SQLiteConfig.TransactionMode.DEFERRED;
         }

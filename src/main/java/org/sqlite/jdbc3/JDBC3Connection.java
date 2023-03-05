@@ -48,9 +48,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
     @SuppressWarnings("deprecation")
     public void tryEnforceTransactionMode() throws SQLException {
         // important note: read-only mode is only supported when auto-commit is disabled
-        if (getDatabase().getConfig().isExplicitReadOnly()
-                && !this.getAutoCommit()
-                && this.getCurrentTransactionMode() != null) {
+        if (getDatabase().getConfig().isExplicitReadOnly() && !this.getAutoCommit()) {
             if (isReadOnly()) {
                 // this is a read-only transaction, make sure all writing operations are rejected by
                 // the DB

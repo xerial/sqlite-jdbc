@@ -64,9 +64,9 @@ public abstract class SQLiteConnection implements Connection {
         try {
             this.db = newDB = open(url, fileName, prop);
             SQLiteConfig config = this.db.getConfig();
-            this.connectionConfig = this.db.getConfig().newConnectionConfig();
+            this.connectionConfig = config.newConnectionConfig();
             config.apply(this);
-            this.currentTransactionMode = this.getDatabase().getConfig().getTransactionMode();
+            this.setCurrentTransactionMode(this.getConnectionConfig().getTransactionMode());
             // connection starts in "clean" state (even though some PRAGMA statements were executed)
             this.firstStatementExecuted = false;
         } catch (Throwable t) {
@@ -86,6 +86,9 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     public void setCurrentTransactionMode(final TransactionMode currentTransactionMode) {
+        if (null == currentTransactionMode) {
+          throw new NullPointerException("currentTransactionMode must not be null");
+        }
         this.currentTransactionMode = currentTransactionMode;
     }
 
@@ -355,15 +358,11 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit() == ac) return;
 
         connectionConfig.setAutoCommit(ac);
-        // db.exec(connectionConfig.isAutoCommit() ? "commit;" : this.transactionPrefix(), ac);
-
-        if (this.getConnectionConfig().isAutoCommit()) {
-            db.exec("commit;", ac);
-            this.currentTransactionMode = null;
-        } else {
-            db.exec(this.transactionPrefix(), ac);
-            this.currentTransactionMode = this.getConnectionConfig().getTransactionMode();
-        }
+        // from java.sql.Connection.setAutoCommit docs:
+        // "If this method is called during a transaction and the auto-commit mode is changed, the transaction is committed."
+        // otherwise, we start a new transaction in the mode specified by the connectionConfig
+        db.exec(connectionConfig.isAutoCommit() ? "commit;" : this.transactionPrefix(), ac);
+        this.setCurrentTransactionMode(this.getConnectionConfig().getTransactionMode());
     }
 
     /**
