@@ -173,7 +173,7 @@ public abstract class SQLiteConnection implements Connection {
      * @see <a
      *     href="https://www.sqlite.org/lang_transaction.html">https://www.sqlite.org/lang_transaction.html</a>
      */
-    protected void setTransactionMode(SQLiteConfig.TransactionMode mode) {
+    public void setTransactionMode(final TransactionMode mode) {
         connectionConfig.setTransactionMode(mode);
     }
 
