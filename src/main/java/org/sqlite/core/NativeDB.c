@@ -20,6 +20,10 @@
 #include "NativeDB.h"
 #include "sqlite3.h"
 
+#if SQLITE_VERSION_NUMBER < 3037000
+#error the sqlite version used must be 3.37.0 or newer
+#endif
+
 // Java class variables and method references initialized on library load.
 // These classes are weak references to that if the classloader is no longer referenced (garbage)
 // It can be garbage collected. The weak references are freed on unload.
@@ -1554,7 +1558,6 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
   jint pagesPerStep            /* number of DB pages to copy per step */
 )
 {
-#if SQLITE_VERSION_NUMBER >= 3006011
   int rc;                     /* Function return code */
   sqlite3* pDb;               /* Database to back up */
   sqlite3* pFile;             /* Database connection opened on zFilename */
@@ -1610,9 +1613,6 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_backup(
   freeUtf8Bytes(dFileName);
 
   return rc;
-#else
-  return SQLITE_INTERNAL;
-#endif
 } 
 
 JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
@@ -1625,7 +1625,6 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   jint pagesPerStep             /* number of DB pages to copy per step */
 )
 {
-#if SQLITE_VERSION_NUMBER >= 3006011
   int rc;                     /* Function return code */
   sqlite3* pDb;               /* Database to back up */
   sqlite3* pFile;             /* Database connection opened on zFilename */
@@ -1681,9 +1680,6 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
   freeUtf8Bytes(dFileName);
 
   return rc;
-#else
-  return SQLITE_INTERNAL;
-#endif
 }
 
 
@@ -1864,4 +1860,18 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1close(
         }
         sethandle(env, nativeDB, 0);
     }
+}
+
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_is_1read_1only(JNIEnv* env, jobject this, jstring database_name) {
+    sqlite3* db_connection = gethandle(env, this);
+    if (!db_connection) {
+        throwex_db_closed(env);
+        return -1;
+    }
+    const char* db_name = database_name ? (*env)->GetStringUTFChars(env, database_name, NULL) : NULL;
+    int result = sqlite3_db_readonly(db_connection, db_name);
+    if (db_name) {
+        (*env)->ReleaseStringUTFChars(env, database_name, db_name);
+    }
+    return result;
 }

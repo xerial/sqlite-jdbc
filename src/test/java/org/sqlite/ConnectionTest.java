@@ -50,13 +50,16 @@ public class ConnectionTest {
     }
 
     @Test
-    public void readOnly() throws SQLException {
-
+    public void readOnly() throws SQLException, IOException {
         // set read only mode
         SQLiteConfig config = new SQLiteConfig();
         config.setReadOnly(true);
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties())) {
+            assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("main")).isTrue();
+            assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly(null)).isTrue();
+            assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("temp")).isFalse();
+            assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("false")).isFalse();
             try (Statement stat = conn.createStatement()) {
                 assertThat(conn.isReadOnly()).isTrue();
 
@@ -76,6 +79,39 @@ public class ConnectionTest {
                     .isInstanceOf(SQLException.class)
                     .hasMessageContaining(
                             "Cannot change read-only flag after establishing a connection.");
+            assertThatThrownBy(() -> ((SQLiteConnection) conn).getDatabase().isReadOnly("main"))
+            .isInstanceOf(SQLException.class).hasMessageContaining("The database has been closed");
+        }
+
+        config = new SQLiteConfig();
+        config.setReadOnly(false);
+
+        try (final Connection conn = DriverManager.getConnection("jdbc:sqlite:", config.toProperties())) {
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("main")).isFalse();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly(null)).isFalse();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("temp")).isFalse();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("false")).isFalse();
+        }
+
+        config.setReadOnly(true);
+        try (final Connection conn = DriverManager.getConnection("jdbc:sqlite::memory:", config.toProperties())) {
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("main")).isTrue();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly(null)).isTrue();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("temp")).isFalse();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("false")).isFalse();
+        }
+
+        config.setReadOnly(false);
+
+        final File testDatabaseFile = copyToTemp("sample.db");
+        testDatabaseFile.setWritable(false); // overrides the SQLiteConfig. see SQLITE_OPEN_READWRITE https://www.sqlite.org/c3ref/open.html
+
+        try (final Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDatabaseFile.getCanonicalPath()), config.toProperties())) {
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("main")).isTrue();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly(null)).isTrue();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("temp")).isFalse();
+          assertThat(((SQLiteConnection) conn).getDatabase().isReadOnly("false")).isFalse();
+          assertThat(conn.isReadOnly()).isFalse(); // this read only check is not as comprehensive yet!
         }
     }
 

@@ -81,6 +81,16 @@ public abstract class DB implements Codes {
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
     /**
+     * Determines whether the database named databaseName of this connection is read-only.
+     *
+     * @param databaseName name of the database to inquire about (may be null)
+     * @throws SQLException if the connection is already closed
+     * @see <a href="https://www.sqlite.org/c3ref/db_readonly.html">https://www.sqlite.org/c3ref/db_readonly.html</a>
+     *      <a href="https://www.sqlite.org/c3ref/open.html">https://www.sqlite.org/c3ref/open.html</a>
+     */
+    public abstract boolean isReadOnly(final String databaseName) throws SQLException;
+
+    /**
      * Aborts any pending operation and returns at its earliest opportunity.
      *
      * @throws SQLException
