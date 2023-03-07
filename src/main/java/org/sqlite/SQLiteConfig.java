@@ -87,7 +87,8 @@ public class SQLiteConfig {
         // Enable URI filenames
         setOpenMode(SQLiteOpenMode.OPEN_URI);
 
-        setBusyTimeout(Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000")));
+        setBusyTimeout(
+                Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000")));
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
         this.explicitReadOnly =
                 Boolean.parseBoolean(
