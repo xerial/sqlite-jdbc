@@ -555,18 +555,25 @@ public final class NativeDB extends DB {
     }
 
     /**
-     * @param databaseName usually "main", but may be null to test the first database that the connection knows about
-     * @return 1 if databaseName of connection is read-only,
+     * @param databaseName name of a database to check on this connection.
+     *                     usually "main", but may be null to test the first database of the connection.
+     * @return 1 if database is read-only,
      *         0 if it is read/write,
-     *         or -1 if it is not the name of a database on the connection
+     *         -1 if it is not the name of a database on the connection
      * @throws SQLException if the connection is already closed
+     * @see <a href="https://www.sqlite.org/c3ref/db_readonly.html">https://www.sqlite.org/c3ref/db_readonly.html</a>
+     * @see <a href="https://www.sqlite.org/c3ref/open.html">https://www.sqlite.org/c3ref/open.html</a>
      * @see <a href="https://www.sqlite.org/lang_naming.html">https://www.sqlite.org/lang_naming.html</a>
      * @see <a href="https://www.sqlite.org/lang_attach.html">https://www.sqlite.org/lang_attach.html</a>
+     * @see <a href="https://www.sqlite.org/lang_createtable.html">https://www.sqlite.org/lang_createtable.html</a>
      */
     private synchronized native int is_read_only(final String databaseName) throws SQLException;
 
     @Override
-    public boolean isReadOnly(final String databaseName) throws SQLException {
-        return this.is_read_only(databaseName) == 1;
+    public DatabaseStatus getDatabaseStatus(final String databaseName) throws SQLException {
+        if (null == databaseName) {
+          throw new NullPointerException("databaseName must not be null");
+        }
+        return DatabaseStatus.fromInt(this.is_read_only(databaseName));
     }
 }

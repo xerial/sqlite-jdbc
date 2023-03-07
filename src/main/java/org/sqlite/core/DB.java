@@ -80,15 +80,44 @@ public abstract class DB implements Codes {
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
 
+    public enum DatabaseStatus {
+        /**
+         * database not found on this connection
+         */
+        NOT_FOUND,
+        /**
+         * database is read/write on this connection
+         */
+        RW,
+        /**
+         * database is read-only on this connection
+         */
+        RO;
+
+        public static DatabaseStatus fromInt(final int value) {
+            switch(value) {
+                case -1:
+                    return DatabaseStatus.NOT_FOUND;
+                case 0:
+                    return DatabaseStatus.RW;
+                case 1:
+                    return DatabaseStatus.RO;
+            }
+            return null;
+        }
+    }
+
     /**
-     * Determines whether the database named databaseName of this connection is read-only.
+     * Returns the status of a database on this connection.
      *
-     * @param databaseName name of the database to inquire about (may be null)
-     * @throws SQLException if the connection is already closed
-     * @see <a href="https://www.sqlite.org/c3ref/db_readonly.html">https://www.sqlite.org/c3ref/db_readonly.html</a>
-     *      <a href="https://www.sqlite.org/c3ref/open.html">https://www.sqlite.org/c3ref/open.html</a>
+     * @param databaseName name of the database to check.
+     *                     example valid values: main, temp, or the name of an attached database.
+     * @return DatabaseStatus, or null on error
+     * @throws java.lang.NullPointerException if databaseName is null
+     * @throws java.sql.SQLException if the connection is already closed
+     * @see <a href="https://www.sqlite.org/lang_naming.html">https://www.sqlite.org/lang_naming.html</a>
      */
-    public abstract boolean isReadOnly(final String databaseName) throws SQLException;
+    public abstract DatabaseStatus getDatabaseStatus(final String databaseName) throws SQLException;
 
     /**
      * Aborts any pending operation and returns at its earliest opportunity.
