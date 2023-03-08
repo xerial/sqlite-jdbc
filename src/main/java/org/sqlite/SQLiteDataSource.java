@@ -140,6 +140,17 @@ public class SQLiteDataSource implements DataSource {
     }
 
     /**
+     * Sets the amount of time that the connection's busy handler will wait when a table is locked.
+     *
+     * @param milliseconds The number of milliseconds to wait.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_busy_timeout">https://www.sqlite.org/pragma.html#pragma_busy_timeout</a>
+     */
+    public void setBusyTimeout(int milliseconds) {
+        config.setBusyTimeout(milliseconds);
+    }
+
+    /**
      * Sets the suggested maximum number of database disk pages that SQLite will hold in memory at
      * once per open database file.
      *

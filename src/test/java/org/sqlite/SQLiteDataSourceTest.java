@@ -80,4 +80,16 @@ public class SQLiteDataSourceTest {
             }
         }
     }
+
+    @Test
+    public void setBusyTimeout() {
+        final SQLiteDataSource ds = new SQLiteDataSource();
+        ds.setBusyTimeout(1234);
+        assertThat(
+                        ds.getConfig()
+                                .toProperties()
+                                .getProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.pragmaName))
+                .isEqualTo("1234");
+        assertThat(ds.getConfig().getBusyTimeout()).isEqualTo(1234);
+    }
 }
