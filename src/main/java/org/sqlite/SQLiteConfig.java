@@ -426,10 +426,7 @@ public class SQLiteConfig {
                 "Limit the size of rollback-journal and WAL files left in the file-system after transactions or checkpoints",
                 null),
         LEGACY_FILE_FORMAT("legacy_file_format", "No-op", OnOff),
-        LEGACY_ALTER_TABLE(
-                "legacy_alter_table",
-                "Use legacy alter table behavior",
-                OnOff),
+        LEGACY_ALTER_TABLE("legacy_alter_table", "Use legacy alter table behavior", OnOff),
         LOCKING_MODE(
                 "locking_mode",
                 "Set the database connection locking-mode",
@@ -864,9 +861,9 @@ public class SQLiteConfig {
      * command (for changing the name of a table) works as it did in SQLite 3.24.0 (2018-06-04) and
      * earlier.When the flag is off, using the ALTER TABLE RENAME command will mean that all
      * references to the table anywhere in the schema will be converted to the new name.
+     *
      * @param use True to turn on legacy alter table behaviour; false to turn off.
-     * @see <a
-     *     href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
+     * @see <a href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
      */
     public void setLegacyAlterTableFlag(boolean use) {
         set(Pragma.LEGACY_ALTER_TABLE, use);
