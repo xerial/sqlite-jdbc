@@ -289,11 +289,11 @@ public class SQLiteDataSource implements DataSource {
      * earlier.When the flag is off, using the ALTER TABLE RENAME command will mean that all
      * references to the table anywhere in the schema will be converted to the new name.
      *
-     * @param use True to turn on legacy alter table behaviour; false to turn off.
+     * @param flag True to turn on legacy alter table behaviour; false to turn off.
      * @see <a href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
      */
-    public void setLegacyAlterTableFlag(boolean use) {
-        config.setLegacyAlterTableFlag(use);
+    public void setLegacyAlterTableFlag(boolean flag) {
+        config.setLegacyAlterTableFlag(flag);
     }
 
     /**
