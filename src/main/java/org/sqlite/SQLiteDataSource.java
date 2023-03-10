@@ -292,8 +292,8 @@ public class SQLiteDataSource implements DataSource {
      * @param flag True to turn on legacy alter table behaviour; false to turn off.
      * @see <a href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
      */
-    public void setLegacyAlterTableFlag(boolean flag) {
-        config.setLegacyAlterTableFlag(flag);
+    public void setLegacyAlterTable(boolean flag) {
+        config.setLegacyAlterTable(flag);
     }
 
     /**

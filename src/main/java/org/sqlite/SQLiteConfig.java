@@ -865,7 +865,7 @@ public class SQLiteConfig {
      * @param flag True to turn on legacy alter table behaviour; false to turn off.
      * @see <a href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
      */
-    public void setLegacyAlterTableFlag(boolean flag) {
+    public void setLegacyAlterTable(boolean flag) {
         set(Pragma.LEGACY_ALTER_TABLE, flag);
     }
 
