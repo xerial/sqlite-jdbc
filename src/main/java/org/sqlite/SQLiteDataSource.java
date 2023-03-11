@@ -295,6 +295,19 @@ public class SQLiteDataSource implements DataSource {
     }
 
     /**
+     * Sets the value of the legacy_alter_table flag. When this flag is on, the ALTER TABLE RENAME
+     * command (for changing the name of a table) works as it did in SQLite 3.24.0 (2018-06-04) and
+     * earlier.When the flag is off, using the ALTER TABLE RENAME command will mean that all
+     * references to the table anywhere in the schema will be converted to the new name.
+     *
+     * @param flag True to turn on legacy alter table behaviour; false to turn off.
+     * @see <a href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
+     */
+    public void setLegacyAlterTable(boolean flag) {
+        config.setLegacyAlterTable(flag);
+    }
+
+    /**
      * Sets the database connection locking-mode.
      *
      * @param mode Either NORMAL or EXCLUSIVE.
