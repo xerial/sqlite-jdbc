@@ -91,7 +91,7 @@ id = 2
 
 # How does SQLiteJDBC work?
 Our SQLite JDBC driver package (i.e., `sqlite-jdbc-(VERSION).jar`) contains three
-types of native SQLite libraries (`sqlite-jdbc.dll`, `sqlite-jdbc.jnilib`, `sqlite-jdbc.so`),
+types of native SQLite libraries (`sqlitejdbc.dll`, `sqlitejdbc.jnilib`, `sqlitejdbc.so`),
 each of them is compiled for Windows, macOS and Linux. An appropriate native library
 file is automatically extracted into your OS's temporary folder, when your program
 loads `org.sqlite.JDBC` driver.
@@ -113,6 +113,40 @@ the following operating systems:
 In the other OSs not listed above, the pure-java SQLite is used. (Applies to versions before 3.7.15)
 
 If you want to use the native library for your OS, [build the source from scratch](./CONTRIBUTING.md).
+
+## GraalVM native-image support
+
+Sqlite JDBC supports [GraalVM native-image](https://www.graalvm.org/native-image/) out of the box starting from version 3.40.1.0.
+There has been rudimentary support for some versions before that, but this was not actively tested by the CI.
+
+By default, the `sqlitejdbc` library for the compilation target will be included in the native image, accompanied the required JNI configuration.
+At runtime, this library will be extracted to the temp folder be loaded from there.
+For the best startup performance however, it is recommended to set the `org.sqlite.lib.exportPath` property.
+This will export the `sqlitejdbc` library at build-time to the specified directory, after which the library will no longer be included as a resource.
+As a result, the native image itself will be slightly smaller, but you need to make sure the library can be found at runtime.
+The best way to do this is to simply place the library next to the executable.
+
+### CLI example
+```shell
+native-image -Dorg.sqlite.lib.exportPath=~/outDir -H:Path=~/outDir -cp foo.jar org.example.Main
+```
+This will place both the `sqlitejdbc` shared library and the native-image output in the `~/outDir` folder.
+
+### Maven example
+This example uses the [native-build-tools](https://graalvm.github.io/native-build-tools/latest/index.html) maven plugin:
+```xml
+<plugin>
+    <groupId>org.graalvm.buildtools</groupId>
+    <artifactId>native-maven-plugin</artifactId>
+    <configuration>
+        <buildArgs>
+            <buildArg>-Dorg.sqlite.lib.exportPath=${project.build.directory}</buildArg>
+        </buildArgs>
+    </configuration>
+</plugin>
+```
+This will automatically place the `sqlitejdbc` library in the `/target` folder of your project, creating a functional execution environment.
+When packaging the resulting app, simply include the library in the distribution bundle.
 
 # Download
 
