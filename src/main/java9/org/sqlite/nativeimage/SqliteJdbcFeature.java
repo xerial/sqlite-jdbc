@@ -1,6 +1,5 @@
 package org.sqlite.nativeimage;
 
-import org.graalvm.nativeimage.Platform;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeJNIAccess;
@@ -9,9 +8,17 @@ import org.sqlite.*;
 import org.sqlite.core.DB;
 import org.sqlite.core.NativeDB;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData;
+import org.sqlite.util.LibraryLoaderUtil;
+import org.sqlite.util.OSInfo;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class SqliteJdbcFeature implements Feature {
 
@@ -19,36 +26,43 @@ public class SqliteJdbcFeature implements Feature {
     public void beforeAnalysis(BeforeAnalysisAccess a) {
         RuntimeClassInitialization.initializeAtBuildTime(SQLiteJDBCLoader.VersionHolder.class);
         RuntimeClassInitialization.initializeAtBuildTime(JDBC3DatabaseMetaData.class);
+        RuntimeClassInitialization.initializeAtBuildTime(OSInfo.class);
+        RuntimeClassInitialization.initializeAtBuildTime(LibraryLoaderUtil.class);
         a.registerReachabilityHandler(
                 this::nativeDbReachable, method(SQLiteJDBCLoader.class, "initialize"));
     }
 
     private void nativeDbReachable(DuringAnalysisAccess a) {
-        registerResources(a);
+        handleLibraryResources();
         registerJNICalls();
     }
 
-    private void registerResources(DuringAnalysisAccess a) {
-        // TODO need a smarter way to get this resource location
-        String libraryResource;
-        if (Platform.includedIn(Platform.WINDOWS_AMD64.class)) {
-            libraryResource = "org/sqlite/native/Windows/x86_64/sqlitejdbc.dll";
-        } else if (Platform.includedIn(Platform.WINDOWS_AARCH64.class)) {
-            libraryResource = "org/sqlite/native/Windows/aarch64/sqlitejdbc.dll";
-        } else if (Platform.includedIn(Platform.MACOS_AMD64.class)) {
-            libraryResource = "org/sqlite/native/Mac/x86_64/libsqlitejdbc.jnilib";
-        } else if (Platform.includedIn(Platform.MACOS_AARCH64.class)) {
-            libraryResource = "org/sqlite/native/Mac/aarch64/libsqlitejdbc.jnilib";
-        } else if (Platform.includedIn(Platform.LINUX_AMD64.class)) {
-            libraryResource = "org/sqlite/native/Linux/x86_64/libsqlitejdbc.so";
-        } else if (Platform.includedIn(Platform.LINUX_AARCH64.class)) {
-            libraryResource = "org/sqlite/native/Linux/aarch64/libsqlitejdbc.so";
-        } else if (Platform.includedIn(Platform.ANDROID_AARCH64.class)) {
-            libraryResource = "org/sqlite/native/Linux-Android/aarch64/libsqlitejdbc.so";
-        } else {
-            throw new SqliteJdbcFeatureException("Unknown architecture");
+    private void handleLibraryResources() {
+        String libraryPath = LibraryLoaderUtil.getNativeLibResourcePath();
+        String libraryName = LibraryLoaderUtil.getNativeLibName();
+        // Sanity check
+        if (!LibraryLoaderUtil.hasNativeLib(libraryPath, libraryName)) {
+            throw new SqliteJdbcFeatureException(
+                    "Unable to locate the required native resources for native-image. Please contact the maintainers of sqlite-jdbc.");
         }
-        RuntimeResourceAccess.addResource(SQLiteJDBCLoader.class.getModule(), libraryResource);
+
+        // libraryResource always has a leading '/'
+        String libraryResource = libraryPath + "/" + libraryName;
+        String exportLocation = System.getProperty("org.sqlite.lib.exportPath", "");
+        if (exportLocation.isEmpty()) {
+            // Do not export the library and include it in native-image instead
+            RuntimeResourceAccess.addResource(
+                    SQLiteJDBCLoader.class.getModule(), libraryResource.substring(1));
+        } else {
+            // export the required library to the specified path,
+            // the user is responsible to make sure the created native-image can actually find it.
+            Path targetPath = Paths.get(exportLocation, libraryName);
+            try (InputStream in = SQLiteJDBCLoader.class.getResourceAsStream(libraryResource)) {
+                Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new SqliteJdbcFeatureException(e);
+            }
+        }
     }
 
     private void registerJNICalls() {
