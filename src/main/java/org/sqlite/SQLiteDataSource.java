@@ -140,6 +140,17 @@ public class SQLiteDataSource implements DataSource {
     }
 
     /**
+     * Sets the amount of time that the connection's busy handler will wait when a table is locked.
+     *
+     * @param milliseconds The number of milliseconds to wait.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_busy_timeout">https://www.sqlite.org/pragma.html#pragma_busy_timeout</a>
+     */
+    public void setBusyTimeout(int milliseconds) {
+        config.setBusyTimeout(milliseconds);
+    }
+
+    /**
      * Sets the suggested maximum number of database disk pages that SQLite will hold in memory at
      * once per open database file.
      *
@@ -281,6 +292,19 @@ public class SQLiteDataSource implements DataSource {
      */
     public void setLegacyFileFormat(boolean use) {
         config.useLegacyFileFormat(use);
+    }
+
+    /**
+     * Sets the value of the legacy_alter_table flag. When this flag is on, the ALTER TABLE RENAME
+     * command (for changing the name of a table) works as it did in SQLite 3.24.0 (2018-06-04) and
+     * earlier.When the flag is off, using the ALTER TABLE RENAME command will mean that all
+     * references to the table anywhere in the schema will be converted to the new name.
+     *
+     * @param flag True to turn on legacy alter table behaviour; false to turn off.
+     * @see <a href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
+     */
+    public void setLegacyAlterTable(boolean flag) {
+        config.setLegacyAlterTable(flag);
     }
 
     /**
