@@ -120,10 +120,11 @@ Sqlite JDBC supports [GraalVM native-image](https://www.graalvm.org/native-image
 There has been rudimentary support for some versions before that, but this was not actively tested by the CI.
 
 By default, the `sqlitejdbc` library for the compilation target will be included in the native image, accompanied the required JNI configuration.
-At runtime, this library will be extracted to the temp folder be loaded from there.
-For the best startup performance however, it is recommended to set the `org.sqlite.lib.exportPath` property.
+At runtime, this library will be extracted to the temp folder and be loaded from there.
+For the best startup performance however, it is recommended to set the `org.sqlite.lib.exportPath` property at build-time.
 This will export the `sqlitejdbc` library at build-time to the specified directory, after which the library will no longer be included as a resource.
-As a result, the native image itself will be slightly smaller, but you need to make sure the library can be found at runtime.
+As a result, the native image itself will be slightly smaller and the overhead of exporting the library at run-time is eliminated,
+but you need to make sure the library can be found at run-time.
 The best way to do this is to simply place the library next to the executable.
 
 ### CLI example
