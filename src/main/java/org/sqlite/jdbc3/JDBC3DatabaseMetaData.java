@@ -842,6 +842,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     protected static final Pattern TYPE_INTEGER = Pattern.compile(".*(INT|BOOL).*");
     protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
     protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
+    protected static final Pattern TYPE_WITH_SIZE = Pattern.compile("^(.*)\\(\\s*\\d+\\s*(\\s*,\\s*\\d+\\s*)?\\)$");
+
 
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
@@ -1070,6 +1072,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                     // just ignore invalid dimension formats here
                                 }
                             }
+                        }
+
+                        // remove (optional) length/ dimension of the column before returning result set
+                        Matcher regexMatcher = TYPE_WITH_SIZE.matcher(colType);
+                        if (regexMatcher.find()) {
+                            colType = regexMatcher.replaceFirst("$1").trim();
                         }
 
                         int colGenerated = "2".equals(colHidden) ? 1 : 0;
