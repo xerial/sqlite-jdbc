@@ -12,11 +12,13 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import org.sqlite.SQLiteConfig.TransactionMode;
 import org.sqlite.core.CoreDatabaseMetaData;
 import org.sqlite.core.DB;
+import org.sqlite.core.DB.DatabaseStatus;
 import org.sqlite.core.NativeDB;
 import org.sqlite.jdbc4.JDBC4DatabaseMetaData;
 
@@ -28,7 +30,7 @@ public abstract class SQLiteConnection implements Connection {
     private final SQLiteConnectionConfig connectionConfig;
 
     private TransactionMode currentTransactionMode;
-    private boolean firstStatementExecuted = false;
+    private boolean readOnly;
 
     /**
      * Connection constructor for reusing an existing DB handle
@@ -64,11 +66,18 @@ public abstract class SQLiteConnection implements Connection {
         try {
             this.db = newDB = open(url, fileName, prop);
             SQLiteConfig config = this.db.getConfig();
+            /*
+            // TODO: do we want to uncomment this. it is new functionality that may help avoid errors.
+            // if the user did not request read-only, but the database opened as read-only
+            // this can happen in situations like when the file permissions do not permit writing,
+            // or when the file is on a file system mounted as read-only
+            if (((config.getOpenModeFlags() & SQLiteOpenMode.READONLY.flag) == 0) && DatabaseStatus.RO.equals(this.db.getDatabaseStatus("main"))) {
+                throw new SQLException("open mode flag difference main database opened as read only");
+            }
+            */
             this.connectionConfig = this.db.getConfig().newConnectionConfig();
             config.apply(this);
             this.currentTransactionMode = this.getDatabase().getConfig().getTransactionMode();
-            // connection starts in "clean" state (even though some PRAGMA statements were executed)
-            this.firstStatementExecuted = false;
         } catch (Throwable t) {
             try {
                 if (newDB != null) {
@@ -87,14 +96,6 @@ public abstract class SQLiteConnection implements Connection {
 
     public void setCurrentTransactionMode(final TransactionMode currentTransactionMode) {
         this.currentTransactionMode = currentTransactionMode;
-    }
-
-    public void setFirstStatementExecuted(final boolean firstStatementExecuted) {
-        this.firstStatementExecuted = firstStatementExecuted;
-    }
-
-    public boolean isFirstStatementExecuted() {
-        return firstStatementExecuted;
     }
 
     public SQLiteConnectionConfig getConnectionConfig() {
@@ -443,7 +444,6 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("commit;", getAutoCommit());
         db.exec(this.transactionPrefix(), getAutoCommit());
-        this.firstStatementExecuted = false;
         this.setCurrentTransactionMode(this.getConnectionConfig().getTransactionMode());
     }
 
@@ -454,7 +454,6 @@ public abstract class SQLiteConnection implements Connection {
         if (connectionConfig.isAutoCommit()) throw new SQLException("database in auto-commit mode");
         db.exec("rollback;", getAutoCommit());
         db.exec(this.transactionPrefix(), getAutoCommit());
-        this.firstStatementExecuted = false;
         this.setCurrentTransactionMode(this.getConnectionConfig().getTransactionMode());
     }
 
@@ -563,5 +562,78 @@ public abstract class SQLiteConnection implements Connection {
 
     protected String transactionPrefix() {
         return this.connectionConfig.transactionPrefix();
+    }
+
+    /** @see java.sql.Connection#isReadOnly() */
+    public boolean isReadOnly() throws SQLException {
+        boolean result = this.readOnly || DatabaseStatus.RO.equals(this.getDatabase().getDatabaseStatus("main"));
+        // TODO: readOnlyConsiderAllDatabases is a new configuration option that needs to be wired up if the concept is accepted
+        if (!result /* TODO: && this.readOnlyConsiderAllDatabases */) {
+            try (final Statement s = this.createStatement()) {
+                // see https://www.sqlite.org/pragma.html section "PRAGMA functions"
+                // see https://www.sqlite.org/pragma.html#pragma_database_list
+                try (final ResultSet r = s.executeQuery("select name from pragma_database_list where name != 'main';")) {
+                    while (!result && r.next()) {
+                        result = DatabaseStatus.RO.equals(this.getDatabase().getDatabaseStatus(r.getString(1)));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * This method must be called before calling setAutoCommit.
+     * Otherwise, a transaction will have already been started and this method will throw an exception.
+     * When the connection was not created in read only mode, then there will be limitations on the read-only guarantees provided
+     * see https://www.sqlite.org/pragma.html#pragma_query_only
+     *
+     * A common calling sequence to prepare for a transaction containing writes is:
+     * connection.setReadOnly(false);
+     * connection.setTransactionMode(SQLiteConfig.TransactionMode.IMMEDIATE); // see https://github.com/xerial/sqlite-jdbc/pull/845
+     * connection.setAutoCommit(false);
+     *
+     * with the readOnlyTransactionModeOptimizations configuration option set, this common sequence can be reduced to the standard JDBC calls:
+     * connection.setReadOnly(false);
+     * connection.setAutoCommit(false);
+     *
+     * @param readOnly TODO: When true, the transaction mode of this connection will be set to DEFERRED. However, when false, the transaction mode of this
+     *                 connection will not be changed and it is up to the user to set the transaction mode to IMMEDIATE depending on whether write
+     *                 actions will be subsequently used on this connection.
+     * @throws java.sql.SQLException if the connection is not in auto commit mode (i.e.- it has a current transaction),
+     *                               if the connection is already closed,
+     *                               if the connection was created in read-only mode (i.e.- the main database is read-only)
+     * @see java.sql.Connection#setReadOnly(boolean)
+     */
+    public void setReadOnly(final boolean readOnly) throws SQLException {
+        if (!this.getAutoCommit()) {
+            throw new SQLException("cannot be called during a transaction"); // per java.sql.Connection#setReadOnly
+        }
+        if (!readOnly && DatabaseStatus.RO.equals(this.getDatabase().getDatabaseStatus("main"))) {
+            throw new SQLException("connection is permanently read-only");
+        }
+        try (final Statement s = this.createStatement()) {
+            // this pragma stays in effect for the connection, across transactions, until it is unset.
+            // when set on a connection, this pragma will cause a read only mode exception to be thrown
+            // if/when a "begin immediate" mode transaction statement is attempted.
+            s.executeUpdate(String.format("pragma query_only = %b;", readOnly));
+        }
+        this.readOnly = readOnly;
+        /*
+        // TODO: readOnlyTransactionModeOptimizations is a new configuration option that needs to be wired up if the concept is accepted
+        if (this.readOnlyTransactionModeOptimizations) {
+            // see https://www.sqlite.org/lang_transaction.html
+            // if readOnly is true, then we are sure that deferred mode is safe, and will maximize concurrency.
+            // we use a configuration switch because readOnly being false does not always mean that writes will be made.
+            // by setting immediate in that case, then we could be restricting concurrency needlessly sometimes.
+            // it is up to the user to know when to set the transaction mode to immediate and thus we give them the ability to
+            // configure this functionality via a switch. the benefit of setting immediate mode is that when you know you are going to
+            // write within a transaction, it's cleaner to fail with a busy error when trying to begin the transaction, than later
+            // when auto-upgrading a transaction that was started with the deferred mode.
+            // this configuration option will help users (perhaps ORM users) that only call the setReadOnly method
+            // and don't know to, or overlook setting the transaction mode to reduce the pain of handling busy errors.
+            this.setTransactionMode(readOnly ? SQLiteConfig.TransactionMode.DEFERRED : SQLiteConfig.TransactionMode.IMMEDIATE);
+        }
+        */
     }
 }

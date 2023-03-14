@@ -80,7 +80,7 @@ public class ConnectionTest {
             assertThatThrownBy(() -> conn.setReadOnly(false))
                     .isInstanceOf(SQLException.class)
                     .hasMessageContaining(
-                            "Cannot change read-only flag after establishing a connection.");
+                            "database connection closed");
             assertThatThrownBy(() -> ((SQLiteConnection) conn).getDatabase().getDatabaseStatus("main"))
             .isInstanceOf(SQLException.class).hasMessage("The database has been closed");
         }
@@ -113,7 +113,7 @@ public class ConnectionTest {
         try (final Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDatabaseFile.getCanonicalPath()), config.toProperties())) {
           assertThat(((SQLiteConnection) conn).getDatabase().getDatabaseStatus("main")).isEqualTo(DatabaseStatus.RO);
           assertThat(((SQLiteConnection) conn).getDatabase().getDatabaseStatus("temp")).isEqualTo(DatabaseStatus.NOT_FOUND);
-          assertThat(conn.isReadOnly()).isFalse(); // this read only check is not as comprehensive yet!
+          assertThat(conn.isReadOnly()).isTrue();
         }
     }
 

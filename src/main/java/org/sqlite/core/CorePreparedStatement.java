@@ -65,10 +65,6 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
             return new long[] {};
         }
 
-        if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
-        }
-
         return this.withConnectionTimeout(
                 () -> {
                     try {

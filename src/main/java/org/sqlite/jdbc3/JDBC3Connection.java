@@ -13,71 +13,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.sqlite.SQLiteConfig;
-import org.sqlite.SQLiteConfig.TransactionMode;
 import org.sqlite.SQLiteConnection;
-import org.sqlite.SQLiteOpenMode;
 
 public abstract class JDBC3Connection extends SQLiteConnection {
     private final AtomicInteger savePoint = new AtomicInteger(0);
     private Map<String, Class<?>> typeMap;
 
-    private boolean readOnly = false;
-
     protected JDBC3Connection(String url, String fileName, Properties prop) throws SQLException {
         super(url, fileName, prop);
-    }
-
-    /**
-     * This will try to enforce the transaction mode if SQLiteConfig#isExplicitReadOnly is true and
-     * auto commit is disabled.
-     *
-     * <ul>
-     *   <li>If this connection is read only, the PRAGMA query_only will be set
-     *   <li>If this connection is not read only:
-     *       <ul>
-     *         <li>if no statement has been executed, PRAGMA query_only will be set to false, and an
-     *             IMMEDIATE transaction will be started
-     *         <li>if a statement has already been executed, an exception is thrown
-     *       </ul>
-     * </ul>
-     *
-     * @throws SQLException if a statement has already been executed on this connection, then the
-     *     transaction cannot be upgraded to write
-     */
-    @SuppressWarnings("deprecation")
-    public void tryEnforceTransactionMode() throws SQLException {
-        // important note: read-only mode is only supported when auto-commit is disabled
-        if (getDatabase().getConfig().isExplicitReadOnly()
-                && !this.getAutoCommit()
-                && this.getCurrentTransactionMode() != null) {
-            if (isReadOnly()) {
-                // this is a read-only transaction, make sure all writing operations are rejected by
-                // the DB
-                // (note: this pragma is evaluated on a per-transaction basis by SQLite)
-                getDatabase()._exec("PRAGMA query_only = true;");
-            } else {
-                if (getCurrentTransactionMode() == TransactionMode.DEFERRED
-                        || this.getCurrentTransactionMode() == TransactionMode.DEFFERED) {
-                    if (isFirstStatementExecuted()) {
-                        // first statement was already executed; cannot upgrade to write
-                        // transaction!
-                        throw new SQLException(
-                                "A statement has already been executed on this connection; cannot upgrade to write transaction");
-                    } else {
-                        // this is the first statement in the transaction; close and create an
-                        // immediate one
-                        getDatabase()._exec("commit; /* need to explicitly upgrade transaction */");
-
-                        // start the write transaction
-                        getDatabase()._exec("PRAGMA query_only = false;");
-                        getDatabase()
-                                ._exec("BEGIN IMMEDIATE; /* explicitly upgrade transaction */");
-                        setCurrentTransactionMode(TransactionMode.IMMEDIATE);
-                    }
-                }
-            }
-        }
     }
 
     /** @see java.sql.Connection#getCatalog() */
@@ -121,35 +64,6 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         synchronized (this) {
             this.typeMap = map;
         }
-    }
-
-    /** @see java.sql.Connection#isReadOnly() */
-    public boolean isReadOnly() {
-        SQLiteConfig config = getDatabase().getConfig();
-        return (
-        // the entire database is read-only
-        ((config.getOpenModeFlags() & SQLiteOpenMode.READONLY.flag) != 0)
-                // the flag was set explicitly by the user on this connection
-                || (config.isExplicitReadOnly() && this.readOnly));
-    }
-
-    /** @see java.sql.Connection#setReadOnly(boolean) */
-    public void setReadOnly(boolean ro) throws SQLException {
-        if (getDatabase().getConfig().isExplicitReadOnly()) {
-            if (ro != readOnly && isFirstStatementExecuted()) {
-                throw new SQLException(
-                        "Cannot change Read-Only status of this connection: the first statement was"
-                                + " already executed and the transaction is open.");
-            }
-        } else {
-            // trying to change read-only flag
-            if (ro != isReadOnly()) {
-                throw new SQLException(
-                        "Cannot change read-only flag after establishing a connection."
-                                + " Use SQLiteConfig#setReadOnly and SQLiteConfig.createConnection().");
-            }
-        }
-        this.readOnly = ro;
     }
 
     /** @see java.sql.Connection#nativeSQL(java.lang.String) */

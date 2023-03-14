@@ -242,14 +242,6 @@ class SQLitePooledConnectionHandle extends SQLiteConnection {
     }
 
     @Override
-    public void setReadOnly(boolean readOnly) throws SQLException {}
-
-    @Override
-    public boolean isReadOnly() throws SQLException {
-        return false;
-    }
-
-    @Override
     public void setCatalog(String catalog) throws SQLException {}
 
     @Override
