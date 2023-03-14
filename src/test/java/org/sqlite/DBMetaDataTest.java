@@ -35,7 +35,7 @@ public class DBMetaDataTest {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
         stat.executeUpdate(
-                "create table test (id integer primary key, fn float default 0.0, sn not null, intvalue integer(5), realvalue real(8,3));");
+                "create table test (id integer primary key, fn float default 0.0, sn not null, intvalue integer(5), realvalue real(8,3), charvalue varchar(21));");
         stat.executeUpdate("create view testView as select * from test;");
         meta = conn.getMetaData();
     }
@@ -327,6 +327,17 @@ public class DBMetaDataTest {
         assertThat(rs.getString("COLUMN_DEF")).isNull();
         assertThat(rs.next()).isFalse();
 
+        rs = meta.getColumns(null, null, "test", "charvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
+        assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.VARCHAR);
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("VARCHAR");
+        assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
+        assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(21);
+        assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(0);
+        assertThat(rs.getString("COLUMN_DEF")).isNull();
+        assertThat(rs.next()).isFalse();
+
         rs = meta.getColumns(null, null, "test", "%");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
@@ -338,6 +349,8 @@ public class DBMetaDataTest {
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "test", "%n");
@@ -364,6 +377,9 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         // VIEW "testView"
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
@@ -380,6 +396,9 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "%", "%");
@@ -407,6 +426,8 @@ public class DBMetaDataTest {
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         // VIEW "testView"
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
@@ -419,6 +440,8 @@ public class DBMetaDataTest {
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "doesnotexist", "%");
