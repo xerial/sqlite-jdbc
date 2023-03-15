@@ -4,12 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -17,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteConfig.TransactionMode;
 
 /**
@@ -39,9 +35,8 @@ public class TransactionTest {
     }
 
     @BeforeEach
-    public void connect() throws Exception {
-        File tmpFile = File.createTempFile("test-trans", ".db");
-        // tmpFile.deleteOnExit();
+    public void connect(@TempDir File tempDir) throws Exception {
+        File tmpFile = File.createTempFile("test-trans", ".db", tempDir);
 
         Properties prop = new Properties();
         prop.setProperty("shared_cache", "false");
@@ -339,55 +334,59 @@ public class TransactionTest {
     }
 
     @Test
-    public void transactionModes() throws Exception {
-        File tmpFile = File.createTempFile("test-trans", ".db");
+    public void transactionModes(@TempDir File tempDir) throws Exception {
+        File tmpFile = File.createTempFile("test-trans", ".db", tempDir);
 
         SQLiteDataSource ds = new SQLiteDataSource();
         ds.setUrl("jdbc:sqlite:" + tmpFile.getAbsolutePath());
 
         // deferred
-        SQLiteConnection con = (SQLiteConnection) ds.getConnection();
-        assertThat(con.getConnectionConfig().getTransactionMode())
-                .isEqualTo(TransactionMode.DEFERRED);
-        assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
-        runUpdates(con, "tbl1");
+        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
+            assertThat(con.getConnectionConfig().getTransactionMode())
+                    .isEqualTo(TransactionMode.DEFERRED);
+            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
+            runUpdates(con, "tbl1");
+        }
 
         ds.setTransactionMode(TransactionMode.DEFERRED.name());
-        con = (SQLiteConnection) ds.getConnection();
-        assertThat(con.getConnectionConfig().getTransactionMode())
-                .isEqualTo(TransactionMode.DEFERRED);
-        assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
+        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
+            assertThat(con.getConnectionConfig().getTransactionMode())
+                    .isEqualTo(TransactionMode.DEFERRED);
+            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
+        }
 
         // Misspelled deferred should be accepted for backwards compatibility
         ds.setTransactionMode("DEFFERED");
-        con = (SQLiteConnection) ds.getConnection();
-        assertThat(con.getConnectionConfig().getTransactionMode())
-                .isEqualTo(TransactionMode.DEFERRED);
-        assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
+        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
+            assertThat(con.getConnectionConfig().getTransactionMode())
+                    .isEqualTo(TransactionMode.DEFERRED);
+            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
+        }
 
-        con = (SQLiteConnection) ds.getConnection();
-        con.getConnectionConfig().setTransactionMode(TransactionMode.valueOf("DEFFERED"));
-        assertThat(con.getConnectionConfig().getTransactionMode())
-                .isEqualTo(TransactionMode.DEFERRED);
-        assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
+        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
+            con.getConnectionConfig().setTransactionMode(TransactionMode.valueOf("DEFFERED"));
+            assertThat(con.getConnectionConfig().getTransactionMode())
+                    .isEqualTo(TransactionMode.DEFERRED);
+            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
+        }
 
         // immediate
         ds.setTransactionMode(TransactionMode.IMMEDIATE.name());
-        con = (SQLiteConnection) ds.getConnection();
-        assertThat(con.getConnectionConfig().getTransactionMode())
-                .isEqualTo(TransactionMode.IMMEDIATE);
-        assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin immediate;");
-        runUpdates(con, "tbl2");
+        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
+            assertThat(con.getConnectionConfig().getTransactionMode())
+                    .isEqualTo(TransactionMode.IMMEDIATE);
+            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin immediate;");
+            runUpdates(con, "tbl2");
+        }
 
         // exclusive
         ds.setTransactionMode(TransactionMode.EXCLUSIVE.name());
-        con = (SQLiteConnection) ds.getConnection();
-        assertThat(con.getConnectionConfig().getTransactionMode())
-                .isEqualTo(TransactionMode.EXCLUSIVE);
-        assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin exclusive;");
-        runUpdates(con, "tbl3");
-
-        tmpFile.delete();
+        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
+            assertThat(con.getConnectionConfig().getTransactionMode())
+                    .isEqualTo(TransactionMode.EXCLUSIVE);
+            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin exclusive;");
+            runUpdates(con, "tbl3");
+        }
     }
 
     public void runUpdates(Connection con, String table) throws SQLException {

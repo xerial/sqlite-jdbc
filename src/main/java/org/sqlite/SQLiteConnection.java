@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
@@ -330,7 +331,10 @@ public abstract class SQLiteConnection implements Connection {
             //            }
         }
 
-        try (InputStream reader = resourceAddr.openStream()) {
+        URLConnection conn = resourceAddr.openConnection();
+        // Disable caches to avoid keeping unnecessary file references after the single-use copy
+        conn.setUseCaches(false);
+        try (InputStream reader = conn.getInputStream()) {
             Files.copy(reader, dbFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return dbFile;
         }

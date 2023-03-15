@@ -1,20 +1,12 @@
 package org.sqlite;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -22,14 +14,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteConfig.JournalMode;
 import org.sqlite.SQLiteConfig.Pragma;
 import org.sqlite.SQLiteConfig.SynchronousMode;
 
 /**
- * These tests check whether access to files is woring correctly and some Connection.close() cases.
+ * These tests check whether access to files is working correctly and some Connection.close() cases.
  */
 public class ConnectionTest {
+
+    @TempDir static File tempDir;
 
     @Test
     public void isValid() throws SQLException {
@@ -226,12 +221,8 @@ public class ConnectionTest {
 
     public static File copyToTemp(String fileName) throws IOException {
         InputStream in = ConnectionTest.class.getResourceAsStream(fileName);
-        File dir = new File("target");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
 
-        File tmp = File.createTempFile(fileName, "", new File("target"));
+        File tmp = File.createTempFile(fileName, "", tempDir);
         tmp.deleteOnExit();
         FileOutputStream out = new FileOutputStream(tmp);
 
@@ -280,6 +271,10 @@ public class ConnectionTest {
         assertThat(rs.getInt(1)).isEqualTo(200);
         rs.close();
         stmt4.close();
+
+        conn1.close();
+        conn2.close();
+        conn3.close();
         conn4.close();
     }
 
@@ -325,6 +320,7 @@ public class ConnectionTest {
                 .isThrownBy(() -> stat.executeUpdate("ATTACH DATABASE attach_test.db AS attachDb"));
 
         stat.close();
+        conn.close();
     }
 
     @Test
