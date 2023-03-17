@@ -843,7 +843,6 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
     protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
 
-
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
      *     java.lang.String, java.lang.String)
