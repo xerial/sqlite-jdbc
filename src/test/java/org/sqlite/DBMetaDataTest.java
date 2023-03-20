@@ -279,6 +279,21 @@ public class DBMetaDataTest {
         assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(2000000000);
         assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(0);
         assertThat(rs.getString("IS_AUTOINCREMENT")).isEqualTo("NO");
+
+        // verify type of metadata columns
+        assertThat(rs.getObject("COLUMN_NAME")).isInstanceOf(String.class);
+        assertThat(rs.getObject("DATA_TYPE")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("TYPE_NAME")).isInstanceOf(String.class);
+        assertThat(rs.getObject("COLUMN_SIZE")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("DECIMAL_DIGITS")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("NUM_PREC_RADIX")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("NULLABLE")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("CHAR_OCTET_LENGTH")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("ORDINAL_POSITION")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("IS_NULLABLE")).isInstanceOf(String.class);
+        assertThat(rs.getObject("IS_AUTOINCREMENT")).isInstanceOf(String.class);
+        assertThat(rs.getObject("IS_GENERATEDCOLUMN")).isInstanceOf(String.class);
+
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "test", "fn");
