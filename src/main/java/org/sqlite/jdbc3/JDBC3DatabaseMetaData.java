@@ -1070,6 +1070,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                     // just ignore invalid dimension formats here
                                 }
                             }
+                            // "TYPE_NAME" (colType) is without the length/ dimension
+                            colType = colType.substring(0, iStartOfDimension).trim();
                         }
 
                         int colGenerated = "2".equals(colHidden) ? 1 : 0;
