@@ -14,23 +14,20 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.core.DB;
 
 public class BackupTest {
+    @TempDir File tempDir;
 
     @Test
     public void backupAndRestore() throws SQLException, IOException {
         // create a memory database
-        File tmpFile = File.createTempFile("backup-test", ".sqlite");
+        File tmpFile = File.createTempFile("backup-test", ".sqlite", tempDir);
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:")) {
             // memory DB to file
@@ -54,8 +51,6 @@ public class BackupTest {
                     }
                 }
             }
-        } finally {
-            Files.deleteIfExists(tmpFile.toPath());
         }
     }
 
@@ -67,7 +62,7 @@ public class BackupTest {
 
     @Test
     void testFailedBackupAndRestore() throws Exception {
-        File tmpFile = File.createTempFile("backup-test", ".sqlite");
+        File tmpFile = File.createTempFile("backup-test", ".sqlite", tempDir);
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:")) {
             // memory DB to file
@@ -92,37 +87,30 @@ public class BackupTest {
                                                         + "doesnotexist.sqlite"))
                         .isOfAnyClassIn(SQLiteException.class);
             }
-        } finally {
-            Files.deleteIfExists(tmpFile.toPath());
         }
     }
 
     @Test
     public void memoryToDisk() throws Exception {
-
         if (!SQLiteJDBCLoader.isNativeMode()) {
             return; // skip this test in pure-java mode
         }
 
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:");
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate("create table sample(id integer primary key autoincrement, name)");
-        for (int i = 0; i < 10000; i++) {
-            stmt.executeUpdate("insert into sample(name) values(\"leo\")");
-        }
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:");
+                Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("create table sample(id integer primary key autoincrement, name)");
+            for (int i = 0; i < 10000; i++) {
+                stmt.executeUpdate("insert into sample(name) values(\"leo\")");
+            }
 
-        File tmpFile = File.createTempFile("backup-test2", ".sqlite");
-        try {
+            File tmpFile = File.createTempFile("backup-test2", ".sqlite", tempDir);
             stmt.executeUpdate("backup to " + tmpFile.getAbsolutePath());
-            stmt.close();
-        } finally {
-            Files.deleteIfExists(tmpFile.toPath());
         }
     }
 
     @Test
     void testProgress() throws Exception {
-        File tmpFile = File.createTempFile("backup-test", ".sqlite");
+        File tmpFile = File.createTempFile("backup-test", ".sqlite", tempDir);
 
         try (SQLiteConnection conn = JDBC.createConnection("jdbc:sqlite:", new Properties())) {
             // memory DB to file
@@ -145,8 +133,6 @@ public class BackupTest {
             assertThat(rc).isEqualTo(SQLiteErrorCode.SQLITE_OK.code);
             assertThat(remainingStore.get()).isEqualTo(0);
             assertThat(pageCountStore.get()).isGreaterThan(0);
-        } finally {
-            Files.deleteIfExists(tmpFile.toPath());
         }
     }
 }

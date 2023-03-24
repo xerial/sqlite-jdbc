@@ -1070,6 +1070,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                     // just ignore invalid dimension formats here
                                 }
                             }
+                            // "TYPE_NAME" (colType) is without the length/ dimension
+                            colType = colType.substring(0, iStartOfDimension).trim();
                         }
 
                         int colGenerated = "2".equals(colHidden) ? 1 : 0;
@@ -1079,9 +1081,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                 .append(" as ordpos, ")
                                 .append(colNullable)
                                 .append(" as colnullable,")
-                                .append("'")
                                 .append(colJavaType)
-                                .append("' as ct, ")
+                                .append(" as ct, ")
                                 .append(iColumnSize)
                                 .append(" as colSize, ")
                                 .append(iDecimalDigits)
