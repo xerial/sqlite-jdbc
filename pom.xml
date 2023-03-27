@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.9.1</junit.version>
+        <junit.version>5.9.2</junit.version>
         <surefire.version>3.0.0</surefire.version>
         <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
     </properties>
