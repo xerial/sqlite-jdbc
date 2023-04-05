@@ -52,7 +52,7 @@ import org.sqlite.util.StringUtils;
  */
 public class SQLiteJDBCLoader {
 
-    private static final String LOCK_EXT = ".lck";
+    static final String LOCK_EXT = ".lck";
     private static boolean extracted = false;
 
     /**
@@ -162,7 +162,7 @@ public class SQLiteJDBCLoader {
         }
     }
 
-    private static boolean contentsEquals(InputStream in1, InputStream in2) throws IOException {
+    static boolean contentsEquals(InputStream in1, InputStream in2) throws IOException {
         if (!(in1 instanceof BufferedInputStream)) {
             in1 = new BufferedInputStream(in1);
         }
@@ -182,15 +182,8 @@ public class SQLiteJDBCLoader {
         return ch2 == -1;
     }
 
-    /**
-     * Extracts and loads the specified library file to the target folder
-     *
-     * @param libFolderForCurrentOS Library path.
-     * @param libraryFileName Library name.
-     * @param targetFolder Target folder.
-     * @return
-     */
-    private static boolean extractAndLoadLibraryFile(
+
+    /*private static boolean extractAndLoadLibraryFile(
             String libFolderForCurrentOS, String libraryFileName, String targetFolder) {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
         // Include architecture name in temporary filename in order to avoid conflicts
@@ -239,13 +232,13 @@ public class SQLiteJDBCLoader {
             e.printStackTrace();
             return false;
         }
-    }
+    }*/
 
     // Replacement of java.lang.Class#getResourceAsStream(String) to disable sharing the resource
     // stream
     // in multiple class loaders and specifically to avoid
     // https://bugs.openjdk.java.net/browse/JDK-8205976
-    private static InputStream getResourceAsStream(String name) {
+    static InputStream getResourceAsStream(String name) {
         // Remove leading '/' since all our resource paths include a leading directory
         // See:
         // https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/Class.java#L3054
@@ -272,7 +265,7 @@ public class SQLiteJDBCLoader {
      * @param name Name of the native library.
      * @return True for successfully loading; false otherwise.
      */
-    private static boolean loadNativeLibrary(String path, String name) {
+    static boolean loadNativeLibrary(String path, String name) {
         File libPath = new File(path, name);
         if (libPath.exists()) {
 
@@ -347,7 +340,7 @@ public class SQLiteJDBCLoader {
             // temporary library folder
             String tempFolder = getTempDir().getAbsolutePath();
             // Try extracting the library from jar
-            if (extractAndLoadLibraryFile(
+            if (ExtractAndLoadLibraryFile.extractLoadLibraryFile(
                     sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
                 extracted = true;
                 return;
