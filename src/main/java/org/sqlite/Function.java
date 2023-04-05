@@ -94,23 +94,32 @@ public abstract class Function {
      */
     public static void create(Connection conn, String name, Function f, int nArgs, int flags)
             throws SQLException {
-        if (!(conn instanceof SQLiteConnection)) {
+        boolean isSQLiteConnection = conn instanceof SQLiteConnection;
+        boolean isConnectionClosed = conn.isClosed();
+
+        if (!isSQLiteConnection) {
             throw new SQLException("connection must be to an SQLite db");
         }
-        if (conn.isClosed()) {
+        if (isConnectionClosed) {
             throw new SQLException("connection closed");
         }
 
-        f.conn = (SQLiteConnection) conn;
-        f.db = f.conn.getDatabase();
+        setupFunction(conn, f);
 
-        if (nArgs < -1 || nArgs > 127) {
+        boolean isValidArgument = nArgs >= -1 && nArgs <= 127;
+        if (!isValidArgument) {
             throw new SQLException("invalid args provided: " + nArgs);
         }
 
-        if (f.db.create_function(name, f, nArgs, flags) != Codes.SQLITE_OK) {
+        boolean isFunctionCreated = f.db.create_function(name, f, nArgs, flags) == Codes.SQLITE_OK;
+        if (!isFunctionCreated) {
             throw new SQLException("error creating function");
         }
+    }
+
+    private static void setupFunction(Connection conn, Function f) {
+        f.conn = (SQLiteConnection) conn;
+        f.db = f.conn.getDatabase();
     }
 
     /**

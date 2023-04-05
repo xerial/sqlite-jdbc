@@ -63,7 +63,7 @@ public abstract class SQLiteConnection implements Connection {
     public SQLiteConnection(String url, String fileName, Properties prop) throws SQLException {
         DB newDB = null;
         try {
-            this.db = newDB = open(url, fileName, prop);
+            this.db = newDB = openDBConnection(url, fileName, prop);
             SQLiteConfig config = this.db.getConfig();
             this.connectionConfig = this.db.getConfig().newConnectionConfig();
             config.apply(this);
@@ -215,7 +215,7 @@ public abstract class SQLiteConnection implements Connection {
      * @see <a
      *     href="https://www.sqlite.org/c3ref/c_open_autoproxy.html">https://www.sqlite.org/c3ref/c_open_autoproxy.html</a>
      */
-    private static DB open(String url, String origFileName, Properties props) throws SQLException {
+    private static DB openDBConnection(String url, String origFileName, Properties props) throws SQLException {
         // Create a copy of the given properties
         Properties newProps = new Properties();
         newProps.putAll(props);
@@ -229,48 +229,7 @@ public abstract class SQLiteConnection implements Connection {
                 && !":memory:".equals(fileName)
                 && !fileName.startsWith("file:")
                 && !fileName.contains("mode=memory")) {
-            if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
-                String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
-
-                // search the class path
-                ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
-                URL resourceAddr = contextCL.getResource(resourceName);
-                if (resourceAddr == null) {
-                    try {
-                        resourceAddr = new URL(resourceName);
-                    } catch (MalformedURLException e) {
-                        throw new SQLException(
-                                String.format("resource %s not found: %s", resourceName, e));
-                    }
-                }
-
-                try {
-                    fileName = extractResource(resourceAddr).getAbsolutePath();
-                } catch (IOException e) {
-                    throw new SQLException(String.format("failed to load %s: %s", resourceName, e));
-                }
-            } else {
-                File file = new File(fileName).getAbsoluteFile();
-                File parent = file.getParentFile();
-                if (parent != null && !parent.exists()) {
-                    for (File up = parent; up != null && !up.exists(); ) {
-                        parent = up;
-                        up = up.getParentFile();
-                    }
-                    throw new SQLException(
-                            "path to '" + fileName + "': '" + parent + "' does not exist");
-                }
-
-                // check write access if file does not exist
-                try {
-                    // The extra check to exists() is necessary as createNewFile()
-                    // does not follow the JavaDoc when used on read-only shares.
-                    if (!file.exists() && file.createNewFile()) file.delete();
-                } catch (Exception e) {
-                    throw new SQLException("opening db: '" + fileName + "': " + e.getMessage());
-                }
-                fileName = file.getAbsolutePath();
-            }
+            fileName = getAbsoluteDBFilePath(fileName);
         }
 
         // load the native DB
@@ -285,6 +244,52 @@ public abstract class SQLiteConnection implements Connection {
         }
         db.open(fileName, config.getOpenModeFlags());
         return db;
+    }
+
+    private static String getAbsoluteDBFilePath(String fileName) throws SQLException {
+        if (fileName.startsWith(RESOURCE_NAME_PREFIX)) {
+            String resourceName = fileName.substring(RESOURCE_NAME_PREFIX.length());
+
+            // search the class path
+            ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
+            URL resourceAddr = contextCL.getResource(resourceName);
+            if (resourceAddr == null) {
+                try {
+                    resourceAddr = new URL(resourceName);
+                } catch (MalformedURLException e) {
+                    throw new SQLException(
+                            String.format("resource %s not found: %s", resourceName, e));
+                }
+            }
+
+            try {
+                fileName = extractResource(resourceAddr).getAbsolutePath();
+            } catch (IOException e) {
+                throw new SQLException(String.format("failed to load %s: %s", resourceName, e));
+            }
+        } else {
+            File file = new File(fileName).getAbsoluteFile();
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                for (File up = parent; up != null && !up.exists(); ) {
+                    parent = up;
+                    up = up.getParentFile();
+                }
+                throw new SQLException(
+                        "path to '" + fileName + "': '" + parent + "' does not exist");
+            }
+
+            // check write access if file does not exist
+            try {
+                // The extra check to exists() is necessary as createNewFile()
+                // does not follow the JavaDoc when used on read-only shares.
+                if (!file.exists() && file.createNewFile()) file.delete();
+            } catch (Exception e) {
+                throw new SQLException("opening db: '" + fileName + "': " + e.getMessage());
+            }
+            fileName = file.getAbsolutePath();
+        }
+        return fileName;
     }
 
     /**

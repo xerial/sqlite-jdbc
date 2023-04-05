@@ -16,14 +16,18 @@ public abstract class ProgressHandler {
      */
     public static final void setHandler(
             Connection conn, int vmCalls, ProgressHandler progressHandler) throws SQLException {
+        validateConnection(conn);
+        SQLiteConnection sqliteConnection = (SQLiteConnection) conn;
+        sqliteConnection.getDatabase().register_progress_handler(vmCalls, progressHandler);
+    }
+
+    private static void validateConnection(Connection conn) throws SQLException {
         if (!(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
         if (conn.isClosed()) {
             throw new SQLException("connection closed");
         }
-        SQLiteConnection sqliteConnection = (SQLiteConnection) conn;
-        sqliteConnection.getDatabase().register_progress_handler(vmCalls, progressHandler);
     }
 
     /**

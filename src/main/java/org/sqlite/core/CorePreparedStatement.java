@@ -108,6 +108,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
     /** Store the date in the user's preferred format (text, int, or real) */
     protected void setDateByMilliseconds(int pos, Long value, Calendar calendar)
             throws SQLException {
+        float millisecondsInDay = 86400000.0f, julianDateBase = 2440587.5f;
         SQLiteConnectionConfig config = conn.getConnectionConfig();
         switch (config.getDateClass()) {
             case TEXT:
@@ -120,7 +121,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
 
             case REAL:
                 // long to Julian date
-                batch(pos, new Double((value / 86400000.0) + 2440587.5));
+                batch(pos, new Double((value / millisecondsInDay) + julianDateBase));
                 break;
 
             default: // INTEGER:
