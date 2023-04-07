@@ -866,18 +866,8 @@ public abstract class DB implements Codes {
         return names;
     }
 
-    /**
-     * Bind values to prepared statements
-     *
-     * @param stmt Pointer to the statement.
-     * @param pos Index of the SQL parameter to be set to NULL.
-     * @param v Value to bind to the parameter.
-     * @return <a href="https://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
-     * @throws SQLException
-     * @see <a
-     *     href="https://www.sqlite.org/c3ref/bind_blob.html">https://www.sqlite.org/c3ref/bind_blob.html</a>
-     */
-    final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
+
+    /*final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
         pos++;
         if (v == null) {
             return bind_null(stmt, pos);
@@ -898,7 +888,111 @@ public abstract class DB implements Codes {
         } else {
             throw new SQLException("unexpected param type: " + v.getClass());
         }
+    }*/
+
+    abstract class SqlBinder {
+        abstract int bind(long stmt, int pos, Object v) throws SQLException;
     }
+
+    class NullSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_null(stmt, pos);
+        }
+    }
+
+    class IntegerSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_int(stmt, pos, (Integer) v);
+        }
+    }
+
+    class ShortSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_int(stmt, pos, ((Short) v).intValue());
+        }
+    }
+
+    class LongSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_long(stmt, pos, (Long) v);
+        }
+    }
+
+    class FloatSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_double(stmt, pos, ((Float) v).doubleValue());
+        }
+    }
+
+    class DoubleSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_double(stmt, pos, (Double) v);
+        }
+    }
+
+    class StringSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_text(stmt, pos, (String) v);
+        }
+    }
+
+    class BlobSqlBinder extends SqlBinder {
+        @Override
+        int bind(long stmt, int pos, Object v) throws SQLException {
+            return bind_blob(stmt, pos, (byte[]) v);
+        }
+    }
+
+    SqlBinderFactory sqlBinderFactory = new SqlBinderFactory();
+    final class SqlBinderFactory {
+        private SqlBinderFactory() {}
+
+        private SqlBinder createSqlBinder(Object v) throws SQLException {
+            if (v == null) {
+                return new NullSqlBinder();
+            } else if (v instanceof Integer) {
+                return new IntegerSqlBinder();
+            } else if (v instanceof Short) {
+                return new ShortSqlBinder();
+            } else if (v instanceof Long) {
+                return new LongSqlBinder();
+            } else if (v instanceof Float) {
+                return new FloatSqlBinder();
+            } else if (v instanceof Double) {
+                return new DoubleSqlBinder();
+            } else if (v instanceof String) {
+                return new StringSqlBinder();
+            } else if (v instanceof byte[]) {
+                return new BlobSqlBinder();
+            } else {
+                throw new SQLException("unexpected param type: " + v.getClass());
+            }
+        }
+    }
+
+    /**
+     * Bind values to prepared statements
+     *
+     * @param stmt Pointer to the statement.
+     * @param pos Index of the SQL parameter to be set to NULL.
+     * @param v Value to bind to the parameter.
+     * @return <a href="https://www.sqlite.org/c3ref/c_abort.html">Result Codes</a>
+     * @throws SQLException
+     * @see <a
+     *     href="https://www.sqlite.org/c3ref/bind_blob.html">https://www.sqlite.org/c3ref/bind_blob.html</a>
+     */
+    final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
+        pos++;
+        return sqlBinderFactory.createSqlBinder(v).bind(stmt, pos, v);
+    }
+
 
     /**
      * Submits a batch of commands to the database for execution.

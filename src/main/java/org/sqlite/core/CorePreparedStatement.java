@@ -52,6 +52,7 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
         batchPos = 0;
     }
 
+    // Commented by GIRI SHARAN REDDY PUSULURU
     /** @see org.sqlite.jdbc3.JDBC3Statement#executeBatch() */
     /*@Override
     public int[] executeBatch() throws SQLException {

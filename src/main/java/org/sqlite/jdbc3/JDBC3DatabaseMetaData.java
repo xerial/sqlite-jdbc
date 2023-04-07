@@ -2229,13 +2229,17 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     private String unquoteIdentifier(String name) {
         if (name == null) return name;
         name = name.trim();
-        if (name.length() > 2
-                && ((name.startsWith("`") && name.endsWith("`"))
-                        || (name.startsWith("\"") && name.endsWith("\""))
-                        || (name.startsWith("[") && name.endsWith("]")))) {
+        if (checkNameLength(name)) {
             // unquote to be consistent with column names returned by getColumns()
             name = name.substring(1, name.length() - 1);
         }
         return name;
+    }
+
+    private Boolean checkNameLength(String name) {
+        return (name.length() > 2
+                && ((name.startsWith("`") && name.endsWith("`"))
+                || (name.startsWith("\"") && name.endsWith("\""))
+                || (name.startsWith("[") && name.endsWith("]"))));
     }
 }
