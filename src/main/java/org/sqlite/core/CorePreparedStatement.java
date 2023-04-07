@@ -53,10 +53,10 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
     }
 
     /** @see org.sqlite.jdbc3.JDBC3Statement#executeBatch() */
-    @Override
+    /*@Override
     public int[] executeBatch() throws SQLException {
         return Arrays.stream(executeLargeBatch()).mapToInt(l -> (int) l).toArray();
-    }
+    }*/
 
     /** @see org.sqlite.jdbc3.JDBC3Statement#executeLargeBatch() */
     @Override
