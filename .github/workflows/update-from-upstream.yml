@@ -1,0 +1,36 @@
+name: Update From Upstream
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  update-from-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Apache Maven Central
+        uses: actions/setup-java@v3
+        with: # running setup-java again overwrites the settings.xml
+          distribution: 'temurin'
+          java-version: '11'
+          java-package: jdk
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: ${{ secrets.OSSH_USERNAME }} # env variable for username in deploy (1)
+          server-password: ${{ secrets.OSSH_PASSWORD }} # env variable for token in deploy (2)
+          gpg-private-key: ${{ secrets.GPG_KEY_ID }} # Value of the GPG private key to import
+          gpg-passphrase: ${{ secrets.OSSH_GPG_PASSPHRASE }} # env variable for GPG private key passphrase (3)
+
+      - name: Install yq
+        run: sudo snap install yq --channel=v3/stable
+
+      - name: Add Upstream and Update
+        run: |
+          git remote add upstream https://github.com/xerial/sqlite-jdbc.git
+          git fetch upstream
+          git checkout upstream/master -- pom.xml
+          git reset pom.xml
+          git diff pom.xml
