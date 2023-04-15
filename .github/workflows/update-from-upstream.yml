@@ -27,8 +27,9 @@ jobs:
           gpg-passphrase: ${{ secrets.OSSH_GPG_PASSPHRASE }} # env variable for GPG private key passphrase (3)
 
       - name: Install yq
-        run: sudo snap install yq --channel=v3/stable
-
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew update && brew install yq
 
       - name: Setup git config
         run: |
@@ -49,6 +50,7 @@ jobs:
         run: |
           # set the distribution management url to ours
           set -e
+          
           yq eval -i -e '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
           # update connection
           yq eval -i -e '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
