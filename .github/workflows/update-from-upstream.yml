@@ -52,9 +52,9 @@ jobs:
           # update connection
           yq -i '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
           # update developer connection
-          yq -i 'project.scm.developerConnection = "scm:git:git@github.com:austinarbor/sqlite-jdbc.git"' pom.xml
+          yq -i '.project.scm.developerConnection = "scm:git:git@github.com:austinarbor/sqlite-jdbc.git"' pom.xml
           # update url
-          yq -i 'project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
+          yq -i '.project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
           # update nexus url
           yq -i '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
           # disable the auto release for now
