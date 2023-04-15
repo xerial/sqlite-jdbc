@@ -67,3 +67,19 @@ jobs:
           # disable the auto release for now
           yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
           git diff pom.xml
+
+      - name: Download and Update decimal.c
+        run: |
+          maven_version=$(yq '.project.version' pom.xml)
+          IFS=. read major minor patch build <<<"${maven_version}"
+          sqlite_version=$(printf "%d.%02d.%02d" "${major}" "${minor}" "${patch}")
+          echo "sqlite version: ${sqlite_version}"
+          download_version=$(printf "%d%02d%02d00" "${major}" "${minor}" "${patch}")
+          echo "download version: ${download_version}"
+          file_name="sqlite-src-${download_version}.zip"
+          download_url="https://www.sqlite.org/2023/${file_name}"
+          wget "${download_url}"
+          unzip "${file_name}"
+          dir_name="${file_name//.zip/}"
+          cp "${dir_name}/ext/misc/decimal.c" src/main/ext/decimal.c
+          rm -rf "${file_name}/"
