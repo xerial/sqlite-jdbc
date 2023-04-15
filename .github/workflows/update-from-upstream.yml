@@ -43,7 +43,7 @@ jobs:
           # overwrite our pom.xml with the upstream version
           git checkout upstream/master -- pom.xml
           git commit -m "update pom.xml from upstream"
-          git rebase tags/3.41.0.1
+          git rebase upstream/master
 
       - name: Modify pom.xml
         run: |
