@@ -27,13 +27,21 @@ jobs:
       - name: Install yq
         run: sudo snap install yq --channel=v3/stable
 
+
+      - name: Setup git config
+        run: |
+          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
       - name: Add Upstream and Update
         run: |
           git remote add upstream https://github.com/xerial/sqlite-jdbc.git
           git fetch upstream
+          # overwrite our pom.xml with the upstream version
           git checkout upstream/master -- pom.xml
-          git reset pom.xml
-          git diff pom.xml
+          git commit -m "update pom.xml from upstream"
+          git rebase upstream/master
 
       - name: Modify pom.xml
         run: |
