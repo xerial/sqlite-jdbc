@@ -48,15 +48,16 @@ jobs:
       - name: Modify pom.xml
         run: |
           # set the distribution management url to ours
-          yq -i '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
+          set -e
+          yq eval -i -e '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
           # update connection
-          yq -i '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
+          yq eval -i -e '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
           # update developer connection
-          yq -i '.project.scm.developerConnection = "scm:git:git@github.com:austinarbor/sqlite-jdbc.git"' pom.xml
+          yq eval -i -e '.project.scm.developerConnection = "scm:git:git@github.com:austinarbor/sqlite-jdbc.git"' pom.xml
           # update url
-          yq -i '.project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
+          yq eval -i -e '.project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
           # update nexus url
-          yq -i '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
+          yq eval -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
           # disable the auto release for now
-          yq -i '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
+          yq eval -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
           git diff pom.xml
