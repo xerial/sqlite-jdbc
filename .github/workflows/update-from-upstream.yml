@@ -26,11 +26,6 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_KEY_ID }} # Value of the GPG private key to import
           gpg-passphrase: ${{ secrets.OSSH_GPG_PASSPHRASE }} # env variable for GPG private key passphrase (3)
 
-      - name: Install yq
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew update && brew install yq
-
       - name: Setup git config
         run: |
           # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
@@ -83,3 +78,20 @@ jobs:
           dir_name="${file_name//.zip/}"
           cp "${dir_name}/ext/misc/decimal.c" src/main/ext/decimal.c
           rm -rf "${file_name}/"
+
+      - name: Update Makefile
+        run: |
+          set +e
+          grep SQLITE_EXTRA_INIT Makefile
+          if [[ "$?" == "0" ]]; then
+            echo "SQLITE_EXTRA_INIT found, failing"
+            exit 1
+          fi
+          set -e
+          prev_line_num=$(awk '/-DSQLITE_/ {print FNR}' Makefile | tail -n 1)
+          line_num=$((prev_line_num+1))
+          echo "inserting arg at line ${insertion_line_num}"
+          prev_line=$(sed "${prev_line_num}q;d" Makefile)
+          prefix=$(echo "$prev_line" | sed 's/-D.*//')
+          new_line="      -DSQLITE_EXTRA_INIT=core_init \\\\"
+          sed -i "${line_num}i ${new_line}" Makefile
