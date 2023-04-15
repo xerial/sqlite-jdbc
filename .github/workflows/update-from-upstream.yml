@@ -50,16 +50,20 @@ jobs:
         run: |
           # set the distribution management url to ours
           set -e
-          
-          yq eval -i -e '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
+          # update project url
+          yq -i -e '.project.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
+          # update groupId
+          yq -i -e '.project.groupId = "dev.aga"' pom.xml
+          # update snapshot repository url
+          yq -i -e '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
           # update connection
-          yq eval -i -e '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
+          yq -i -e '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
           # update developer connection
-          yq eval -i -e '.project.scm.developerConnection = "scm:git:git@github.com:austinarbor/sqlite-jdbc.git"' pom.xml
+          yq -i -e '.project.scm.developerConnection = "scm:git:git@github.com:austinarbor/sqlite-jdbc.git"' pom.xml
           # update url
-          yq eval -i -e '.project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
+          yq -i -e '.project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
           # update nexus url
-          yq eval -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
+          yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
           # disable the auto release for now
-          yq eval -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
+          yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
           git diff pom.xml
