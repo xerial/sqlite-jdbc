@@ -2,12 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.xerial</groupId>
+    <groupId>dev.aga</groupId>
     <artifactId>sqlite-jdbc</artifactId>
     <version>3.41.0.1</version>
     <name>SQLite JDBC</name>
     <description>SQLite JDBC library</description>
-    <url>https://github.com/xerial/sqlite-jdbc</url>
+    <url>https://github.com/austinarbor/sqlite-jdbc</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -258,7 +258,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
