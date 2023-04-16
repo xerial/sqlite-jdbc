@@ -1,0 +1,133 @@
+name: Update From Upstream
+on:
+  push:
+    branches:
+      - 'releases/**'
+    paths:
+      - '.fork-meta/upstream-version.txt'
+
+jobs:
+  update-from-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Apache Maven Central
+        uses: actions/setup-java@v3
+        with: # running setup-java again overwrites the settings.xml
+          distribution: 'temurin'
+          java-version: '11'
+          java-package: jdk
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: ${{ secrets.OSSH_USERNAME }} # env variable for username in deploy (1)
+          server-password: ${{ secrets.OSSH_PASSWORD }} # env variable for token in deploy (2)
+          gpg-private-key: ${{ secrets.GPG_KEY_ID }} # Value of the GPG private key to import
+          gpg-passphrase: ${{ secrets.OSSH_GPG_PASSPHRASE }} # env variable for GPG private key passphrase (3)
+
+      - name: Setup git config
+        run: |
+          # setup the username and email
+          git config user.name "Austin Arbor"
+          git config user.email "aarbor989@gmail.com"
+
+      - name: Add Upstream and Update
+        run: |
+          git remote add upstream https://github.com/xerial/sqlite-jdbc.git
+          git fetch upstream
+          # overwrite our pom.xml with the upstream version
+          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          git checkout "tags/${upstream_version}" -- pom.xml Makefile
+          git commit -m "update pom.xml and Makefile from ${upstream_version}"
+          git rebase "tags/${upstream_version}"
+
+      - name: Modify pom.xml
+        run: |
+          # set the distribution management url to ours
+          set -e
+          # update project url
+          yq -i -e '.project.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
+          # update groupId
+          yq -i -e '.project.groupId = "dev.aga"' pom.xml
+          # update snapshot repository url
+          yq -i -e '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
+          # update connection
+          yq -i -e '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
+          # update developer connection
+          yq -i -e '.project.scm.developerConnection = "scm:git:git@github.com:austinarbor/sqlite-jdbc.git"' pom.xml
+          # update url
+          yq -i -e '.project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
+          # update nexus url
+          yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
+          # disable the auto release for now
+          yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
+          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          git add pom.xml
+          git commit -m "update pom.xml for ${upstream_version}"
+
+      - name: Download and Update decimal.c
+        run: |
+          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          maven_version=$(yq '.project.version' pom.xml)
+          if [[ "${upstream_version}" != "${maven_version}" ]]; then
+            echo "version mismatch detected"
+            echo "maven: ${maven_version}"
+            echo "upstream: ${upstream_version}"
+            exit 1
+          fi
+          amalgamation_version=$(./amalgamation_version.sh "${upstream_version}")
+          echo "amalgamation version: ${amalgamation_version}"
+          file_name="sqlite-src-${amalgamation_version}.zip"
+          download_url="https://www.sqlite.org/2023/${file_name}"
+          wget "${download_url}"
+          unzip "${file_name}"
+          dir_name="${file_name//.zip/}"
+          cp "${dir_name}/ext/misc/decimal.c" src/main/ext/decimal.c
+          rm -rf "${file_name}/"
+          # if decimal.c was modified, commit it
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add src/main/ext/decimal.c
+            git commit -m "update decimal.c from amalgamation ${dir_name}"
+          fi
+
+      - name: Update Makefile
+        run: |
+          # disable exit on failure for the grep
+          set +e
+          grep SQLITE_EXTRA_INIT Makefile
+          if [[ "$?" == "0" ]]; then
+            echo "SQLITE_EXTRA_INIT found, failing"
+            exit 1
+          fi
+          set -e
+          # get the last line number that contains -DSQLITE_ , we will need to insert our custom line after
+          prev_line_num=$(awk '/-DSQLITE_/ {print FNR}' Makefile | tail -n 1)
+          line_num=$((prev_line_num+1))
+          new_line="      -DSQLITE_EXTRA_INIT=core_init \\\\"
+          sed -i "${line_num}i ${new_line}" Makefile
+          git add Makefile
+          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          git commit -m "update Makefile for ${upstream_version}"
+
+      - name: Check for Modified Files
+        run: |
+          # if we still have unchanged files, something is wrong
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "modified files leftover, exiting"
+            git status --porcelain
+            exit 1
+          fi
+
+      - name: Push and Open PR
+        run: |
+          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          git push
+          gh pr create \
+          --repo austinarbor:sqlite-jdbc \
+          --base master \
+          --title "Prepare ${upstream_version}" \
+          --body "Changes for ${upstream_version}" \
+          --no-maintainer-edit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
