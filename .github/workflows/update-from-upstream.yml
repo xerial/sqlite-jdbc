@@ -28,18 +28,19 @@ jobs:
 
       - name: Setup git config
         run: |
-          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
+          # setup the username and email
+          git config user.name "Austin Arbor"
+          git config user.email "aarbor989@gmail.com"
 
       - name: Add Upstream and Update
         run: |
           git remote add upstream https://github.com/xerial/sqlite-jdbc.git
           git fetch upstream
           # overwrite our pom.xml with the upstream version
-          git checkout upstream/master -- pom.xml Makefile
-          git commit -m "update pom.xml and Makefile from upstream"
-          git rebase upstream/master
+          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          git checkout "tags/${upstream_version}" -- pom.xml Makefile
+          git commit -m "update pom.xml and Makefile from ${upstream_version}"
+          git rebase "tags/${upstream_version}"
 
       - name: Modify pom.xml
         run: |
@@ -65,13 +66,17 @@ jobs:
 
       - name: Download and Update decimal.c
         run: |
+          upstream_version=$(cat .fork-meta/upstream-version.txt)
           maven_version=$(yq '.project.version' pom.xml)
-          IFS=. read major minor patch build <<<"${maven_version}"
-          sqlite_version=$(printf "%d.%02d.%02d" "${major}" "${minor}" "${patch}")
-          echo "sqlite version: ${sqlite_version}"
-          download_version=$(printf "%d%02d%02d00" "${major}" "${minor}" "${patch}")
-          echo "download version: ${download_version}"
-          file_name="sqlite-src-${download_version}.zip"
+          if [[ "${upstream_version}" != "${maven_version}" ]]; then
+            echo "version mismatch detected"
+            echo "maven: ${maven_version}"
+            echo "upstream: ${upstream_version}"
+            exit 1
+          fi
+          amalgamation_version=$(./amalgamation_version.sh "${upstream_version}")
+          echo "amalgamation version: ${amalgamation_version}"
+          file_name="sqlite-src-${amalgamation_version}.zip"
           download_url="https://www.sqlite.org/2023/${file_name}"
           wget "${download_url}"
           unzip "${file_name}"
