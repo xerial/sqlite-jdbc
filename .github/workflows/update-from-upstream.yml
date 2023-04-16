@@ -121,12 +121,20 @@ jobs:
             exit 1
           fi
 
-      - name: Push and Open PR
+      - name: Resolve Conflicts
+        run: |
+          git merge -s recursive -Xours origin/master
+
+      - name: Push Changes
+        run: |
+          git push --force
+
+      - name: Open PR
         run: |
           upstream_version=$(cat .fork-meta/upstream-version.txt)
-          git push
+          
           gh pr create \
-          --repo austinarbor:sqlite-jdbc \
+          --repo austinarbor/sqlite-jdbc \
           --base master \
           --title "Prepare ${upstream_version}" \
           --body "Changes for ${upstream_version}" \
