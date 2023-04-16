@@ -76,7 +76,9 @@ jobs:
             echo "upstream: ${upstream_version}"
             exit 1
           fi
-          amalgamation_version=$(./amalgamation_version.sh "${upstream_version}")
+          IFS=. read major minor patch build <<<"${maven_version}"
+          sqlite_version=$(printf "%d.%02d.%02d" "${major}" "${minor}" "${patch}")
+          amalgamation_version=$(printf "%d%02d%02d00" "${major}" "${minor}" "${patch}")
           echo "amalgamation version: ${amalgamation_version}"
           file_name="sqlite-src-${amalgamation_version}.zip"
           download_url="https://www.sqlite.org/2023/${file_name}"
