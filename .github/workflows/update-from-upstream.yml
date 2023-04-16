@@ -83,6 +83,17 @@ jobs:
           dir_name="${file_name//.zip/}"
           cp "${dir_name}/ext/misc/decimal.c" src/main/ext/decimal.c
           rm -rf "${file_name}/"
+          # if decimal.c was modified, commit it
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add src/main/ext/decimal.c
+            git commit -m "update decimal.c from amalgamation ${dir_name}"
+          fi
+          # if we still have unchanged files, something is wrong
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "modified files lefover, exiting"
+            git status --porcelain
+            exit 1
+          fi
 
       - name: Update Makefile
         run: |
