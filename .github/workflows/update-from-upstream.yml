@@ -95,3 +95,6 @@ jobs:
           prefix=$(echo "$prev_line" | sed 's/-D.*//')
           new_line="      -DSQLITE_EXTRA_INIT=core_init \\\\"
           sed -i "${line_num}i ${new_line}" Makefile
+
+      - name: Build Linux
+        run: make linux64
