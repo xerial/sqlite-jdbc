@@ -81,6 +81,7 @@ jobs:
 
       - name: Update Makefile
         run: |
+          # disable exit on failure for the grep
           set +e
           grep SQLITE_EXTRA_INIT Makefile
           if [[ "$?" == "0" ]]; then
@@ -88,11 +89,9 @@ jobs:
             exit 1
           fi
           set -e
+          # get the last line number that contains -DSQLITE_ , we will need to insert our custom line after
           prev_line_num=$(awk '/-DSQLITE_/ {print FNR}' Makefile | tail -n 1)
           line_num=$((prev_line_num+1))
-          echo "inserting arg at line ${insertion_line_num}"
-          prev_line=$(sed "${prev_line_num}q;d" Makefile)
-          prefix=$(echo "$prev_line" | sed 's/-D.*//')
           new_line="      -DSQLITE_EXTRA_INIT=core_init \\\\"
           sed -i "${line_num}i ${new_line}" Makefile
 
