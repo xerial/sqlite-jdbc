@@ -129,6 +129,10 @@ jobs:
         run: |
           git push --force
 
+      - name: Package
+        run: |
+          make package
+
       - name: Open PR
         run: |
           upstream_version=$(cat .fork-meta/upstream-version.txt)
