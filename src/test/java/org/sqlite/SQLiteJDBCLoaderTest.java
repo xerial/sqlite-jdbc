@@ -27,11 +27,8 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.nio.file.Path;
+import java.sql.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class SQLiteJDBCLoaderTest {
 
@@ -110,11 +108,11 @@ public class SQLiteJDBCLoaderTest {
     }
 
     @Test
-    public void test() throws Throwable {
+    public void test(@TempDir Path tmpDir) throws Throwable {
         final AtomicInteger completedThreads = new AtomicInteger(0);
         ExecutorService pool = Executors.newFixedThreadPool(32);
         for (int i = 0; i < 32; i++) {
-            final String connStr = "jdbc:sqlite:target/sample-" + i + ".db";
+            final String connStr = "jdbc:sqlite:" + tmpDir.resolve("sample-" + i + ".db");
             final int sleepMillis = i;
             pool.execute(
                     () -> {
@@ -129,6 +127,7 @@ public class SQLiteJDBCLoaderTest {
                                             // works.
                                             // synchronized (TestSqlite.class) {
                                             Connection conn = DriverManager.getConnection(connStr);
+                                            conn.close();
                                             // }
                                         });
                         completedThreads.incrementAndGet();

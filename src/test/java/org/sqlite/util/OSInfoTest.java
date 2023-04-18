@@ -20,12 +20,14 @@ import java.util.logging.Logger;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
 @DisabledIfEnvironmentVariable(
         named = "SKIP_TEST_OSINFO",
         matches = "true",
         disabledReason = "Those tests would fail when ran on a musl based Linux")
+@DisabledInNativeImage
 public class OSInfoTest {
     private static final Logger logger = Logger.getLogger(OSInfoTest.class.getName());
 

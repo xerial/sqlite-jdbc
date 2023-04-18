@@ -32,7 +32,7 @@ public class DBMetaDataTest {
         conn = DriverManager.getConnection("jdbc:sqlite:");
         stat = conn.createStatement();
         stat.executeUpdate(
-                "create table test (id integer primary key, fn float default 0.0, sn not null, intvalue integer(5), realvalue real(8,3));");
+                "create table test (id integer primary key, fn float default 0.0, sn not null, intvalue integer(5), realvalue real(8,3), charvalue varchar(21));");
         stat.executeUpdate("create view testView as select * from test;");
         meta = conn.getMetaData();
     }
@@ -141,8 +141,8 @@ public class DBMetaDataTest {
 
         testTypeInfo(
                 rs,
-                "BLOB",
-                Types.BLOB,
+                "NULL",
+                Types.NULL,
                 0,
                 null,
                 null,
@@ -175,23 +175,6 @@ public class DBMetaDataTest {
                 10);
         testTypeInfo(
                 rs,
-                "NULL",
-                Types.NULL,
-                0,
-                null,
-                null,
-                null,
-                DatabaseMetaData.typeNullable,
-                false,
-                DatabaseMetaData.typeSearchable,
-                true,
-                false,
-                false,
-                0,
-                0,
-                10);
-        testTypeInfo(
-                rs,
                 "REAL",
                 Types.REAL,
                 0,
@@ -217,6 +200,23 @@ public class DBMetaDataTest {
                 null,
                 DatabaseMetaData.typeNullable,
                 true,
+                DatabaseMetaData.typeSearchable,
+                true,
+                false,
+                false,
+                0,
+                0,
+                10);
+        testTypeInfo(
+                rs,
+                "BLOB",
+                Types.BLOB,
+                0,
+                null,
+                null,
+                null,
+                DatabaseMetaData.typeNullable,
+                false,
                 DatabaseMetaData.typeSearchable,
                 true,
                 false,
@@ -276,15 +276,32 @@ public class DBMetaDataTest {
         assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
         assertThat(rs.getString("COLUMN_DEF")).isNull();
         assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.INTEGER);
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("INTEGER");
         assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(2000000000);
         assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(0);
         assertThat(rs.getString("IS_AUTOINCREMENT")).isEqualTo("NO");
+
+        // verify type of metadata columns
+        assertThat(rs.getObject("COLUMN_NAME")).isInstanceOf(String.class);
+        assertThat(rs.getObject("DATA_TYPE")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("TYPE_NAME")).isInstanceOf(String.class);
+        assertThat(rs.getObject("COLUMN_SIZE")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("DECIMAL_DIGITS")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("NUM_PREC_RADIX")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("NULLABLE")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("CHAR_OCTET_LENGTH")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("ORDINAL_POSITION")).isInstanceOf(Integer.class);
+        assertThat(rs.getObject("IS_NULLABLE")).isInstanceOf(String.class);
+        assertThat(rs.getObject("IS_AUTOINCREMENT")).isInstanceOf(String.class);
+        assertThat(rs.getObject("IS_GENERATEDCOLUMN")).isInstanceOf(String.class);
+
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "test", "fn");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("fn");
         assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.FLOAT);
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("FLOAT");
         assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
         assertThat(rs.getString("COLUMN_DEF")).isEqualTo("0.0");
         assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(2000000000);
@@ -296,6 +313,8 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sn");
         assertThat(rs.getString("IS_NULLABLE")).isEqualTo("NO");
+        assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.VARCHAR);
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("");
         assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(2000000000);
         assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(10);
         assertThat(rs.getString("COLUMN_DEF")).isNull();
@@ -305,6 +324,7 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
         assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.INTEGER);
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("INTEGER");
         assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
         assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(5);
         assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(0);
@@ -315,9 +335,21 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
         assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.FLOAT);
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("REAL");
         assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
         assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(11);
         assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(3);
+        assertThat(rs.getString("COLUMN_DEF")).isNull();
+        assertThat(rs.next()).isFalse();
+
+        rs = meta.getColumns(null, null, "test", "charvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
+        assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.VARCHAR);
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("VARCHAR");
+        assertThat(rs.getString("IS_NULLABLE")).isEqualTo("YES");
+        assertThat(rs.getInt("COLUMN_SIZE")).isEqualTo(21);
+        assertThat(rs.getInt("DECIMAL_DIGITS")).isEqualTo(0);
         assertThat(rs.getString("COLUMN_DEF")).isNull();
         assertThat(rs.next()).isFalse();
 
@@ -332,6 +364,8 @@ public class DBMetaDataTest {
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "test", "%n");
@@ -358,6 +392,9 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         // VIEW "testView"
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
@@ -374,9 +411,24 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "%", "%");
+        // SYSTEM TABLE "sqlite_schema"
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("type");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("name");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("tbl_name");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("rootpage");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sql");
         // TABLE "test"
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
@@ -389,6 +441,8 @@ public class DBMetaDataTest {
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         // VIEW "testView"
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView");
@@ -401,11 +455,27 @@ public class DBMetaDataTest {
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "doesnotexist", "%");
         assertThat(rs.next()).isFalse();
         assertThat(rs.getMetaData().getColumnCount()).isEqualTo(24);
+
+        rs = meta.getColumns(null, null, "sqlite_schema", "%");
+        // SYSTEM TABLE "sqlite_schema"
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("type");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("name");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("tbl_name");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("rootpage");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sql");
     }
 
     @Test
@@ -1037,8 +1107,7 @@ public class DBMetaDataTest {
         assertThat(rsmeta.getColumnName(16)).isEqualTo("CHAR_OCTET_LENGTH");
         assertThat(rsmeta.getColumnName(17)).isEqualTo("ORDINAL_POSITION");
         assertThat(rsmeta.getColumnName(18)).isEqualTo("IS_NULLABLE");
-        // should be SCOPE_CATALOG, but misspelt in the standard
-        assertThat(rsmeta.getColumnName(19)).isEqualTo("SCOPE_CATLOG");
+        assertThat(rsmeta.getColumnName(19)).isEqualTo("SCOPE_CATALOG");
         assertThat(rsmeta.getColumnName(20)).isEqualTo("SCOPE_SCHEMA");
         assertThat(rsmeta.getColumnName(21)).isEqualTo("SCOPE_TABLE");
         assertThat(rsmeta.getColumnName(22)).isEqualTo("SOURCE_DATA_TYPE");
@@ -1541,6 +1610,7 @@ public class DBMetaDataTest {
     }
 
     @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
     public void version() throws Exception {
         assumeThat(Utils.getCompileOptions(conn))
                 .as("Can't check the version if not compiled by us")
@@ -1571,6 +1641,33 @@ public class DBMetaDataTest {
         assertThat(meta.getDatabaseMajorVersion()).as("db major version").isEqualTo(majorVersion);
         assertThat(meta.getDatabaseMinorVersion()).as("db minor version").isEqualTo(minorVersion);
         assertThat(meta.getUserName()).as("user name").isNull();
+    }
+
+    @Nested
+    class SqliteSchema {
+        @ParameterizedTest
+        @ValueSource(strings = {"sqlite_schema", "sqlite_master"})
+        public void getImportedKeys(String table) throws SQLException {
+            ResultSet importedKeys = meta.getImportedKeys(null, null, table);
+
+            assertThat(importedKeys.next()).isFalse();
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"sqlite_schema", "sqlite_master"})
+        public void getExportedKeys(String table) throws SQLException {
+            ResultSet exportedKeys = meta.getExportedKeys(null, null, table);
+
+            assertThat(exportedKeys.next()).isFalse();
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"sqlite_schema", "sqlite_master"})
+        public void getPrimaryKeys(String table) throws SQLException {
+            ResultSet primaryKeys = meta.getPrimaryKeys(null, null, table);
+
+            assertThat(primaryKeys.next()).isFalse();
+        }
     }
 
     @Test

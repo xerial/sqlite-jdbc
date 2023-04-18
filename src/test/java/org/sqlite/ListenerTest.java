@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.core.DB;
 import org.sqlite.core.NativeDBHelper;
 
@@ -21,9 +23,8 @@ public class ListenerTest {
     private SQLiteConnection connectionOne, connectionTwo;
 
     @BeforeEach
-    public void connect() throws Exception {
-        File tmpFile = File.createTempFile("test-listeners", ".db");
-        tmpFile.deleteOnExit();
+    public void connect(@TempDir File tempDir) throws Exception {
+        File tmpFile = File.createTempFile("test-listeners", ".db", tempDir);
 
         connectionOne =
                 (SQLiteConnection)
@@ -35,6 +36,12 @@ public class ListenerTest {
         Statement create = connectionOne.createStatement();
         create.execute(
                 "CREATE TABLE IF NOT EXISTS sample (id INTEGER PRIMARY KEY AUTOINCREMENT, description TEXT);");
+    }
+
+    @AfterEach
+    public void close() throws Exception {
+        connectionOne.close();
+        connectionTwo.close();
     }
 
     @Test

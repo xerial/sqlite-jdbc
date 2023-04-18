@@ -11,61 +11,61 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.core.DB;
 
+@DisabledInNativeImage // assertj Assumptions do not work in native-image tests
 public class ErrorMessageTest {
+    @TempDir File tempDir;
+
     @Test
     public void moved() throws SQLException, IOException {
-        File from = File.createTempFile("error-message-test-moved-from", ".sqlite");
-        from.deleteOnExit();
+        File from = File.createTempFile("error-message-test-moved-from", ".sqlite", tempDir);
 
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + from.getAbsolutePath());
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate("create table sample(id, name)");
-        stmt.executeUpdate("insert into sample values(1, 'foo')");
+        try (Connection conn =
+                        DriverManager.getConnection("jdbc:sqlite:" + from.getAbsolutePath());
+                Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("create table sample(id, name)");
+            stmt.executeUpdate("insert into sample values(1, 'foo')");
 
-        File to = File.createTempFile("error-message-test-moved-from", ".sqlite");
-        assumeThat(to.delete()).isTrue();
-        assumeThat(from.renameTo(to)).isTrue();
+            File to = File.createTempFile("error-message-test-moved-from", ".sqlite", tempDir);
+            assumeThat(to.delete()).isTrue();
+            assumeThat(from.renameTo(to)).isTrue();
 
-        assertThatThrownBy(() -> stmt.executeUpdate("insert into sample values(2, 'bar')"))
-                .isInstanceOf(SQLException.class)
-                .hasMessageStartingWith("[SQLITE_READONLY_DBMOVED]");
-
-        stmt.close();
-        conn.close();
+            assertThatThrownBy(() -> stmt.executeUpdate("insert into sample values(2, 'bar')"))
+                    .isInstanceOf(SQLException.class)
+                    .hasMessageStartingWith("[SQLITE_READONLY_DBMOVED]");
+        }
     }
 
     @Test
     public void writeProtected() throws SQLException, IOException {
-        File file = File.createTempFile("error-message-test-write-protected", ".sqlite");
-        file.deleteOnExit();
+        File file = File.createTempFile("error-message-test-write-protected", ".sqlite", tempDir);
 
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate("create table sample(id, name)");
-        stmt.executeUpdate("insert into sample values(1, 'foo')");
-        stmt.close();
-        conn.close();
+        try (Connection conn =
+                        DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+                Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("create table sample(id, name)");
+            stmt.executeUpdate("insert into sample values(1, 'foo')");
+        }
 
         assumeThat(file.setReadOnly()).isTrue();
 
-        conn = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
-        stmt = conn.createStatement();
-        Statement finalStmt = stmt;
-        assertThatThrownBy(() -> finalStmt.executeUpdate("insert into sample values(2, 'bar')"))
-                .isInstanceOf(SQLException.class)
-                .hasMessageStartingWith("[SQLITE_READONLY]");
-        stmt.close();
-        conn.close();
+        try (Connection conn =
+                        DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+                Statement stmt = conn.createStatement()) {
+            assertThatThrownBy(() -> stmt.executeUpdate("insert into sample values(2, 'bar')"))
+                    .isInstanceOf(SQLException.class)
+                    .hasMessageStartingWith("[SQLITE_READONLY]");
+        }
     }
 
     @Test
     public void cantOpenDir() throws IOException {
-        File dir = File.createTempFile("error-message-test-cant-open-dir", "");
+        File dir = File.createTempFile("error-message-test-cant-open-dir", "", tempDir);
         assumeThat(dir.delete()).isTrue();
         assumeThat(dir.mkdir()).isTrue();
-        dir.deleteOnExit();
 
         assertThatThrownBy(
                         () -> DriverManager.getConnection("jdbc:sqlite:" + dir.getAbsolutePath()))
@@ -76,31 +76,29 @@ public class ErrorMessageTest {
     @Test
     public void shouldUsePlainErrorCodeAsVendorCodeAndExtendedAsResultCode()
             throws SQLException, IOException {
-        File from = File.createTempFile("error-message-test-plain-1", ".sqlite");
-        from.deleteOnExit();
+        File from = File.createTempFile("error-message-test-plain-1", ".sqlite", tempDir);
 
-        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + from.getAbsolutePath());
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate("create table sample(id, name)");
-        stmt.executeUpdate("insert into sample values(1, 'foo')");
+        try (Connection conn =
+                        DriverManager.getConnection("jdbc:sqlite:" + from.getAbsolutePath());
+                Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("create table sample(id, name)");
+            stmt.executeUpdate("insert into sample values(1, 'foo')");
 
-        File to = File.createTempFile("error-message-test-plain-2", ".sqlite");
-        assumeThat(to.delete()).isTrue();
-        assumeThat(from.renameTo(to)).isTrue();
+            File to = File.createTempFile("error-message-test-plain-2", ".sqlite", tempDir);
+            assumeThat(to.delete()).isTrue();
+            assumeThat(from.renameTo(to)).isTrue();
 
-        assertThatThrownBy(() -> stmt.executeUpdate("insert into sample values(2, 'bar')"))
-                .isInstanceOfSatisfying(
-                        SQLiteException.class,
-                        (ex) -> {
-                            assertThat(SQLiteErrorCode.getErrorCode(ex.getErrorCode()))
-                                    .isEqualTo(SQLiteErrorCode.SQLITE_READONLY);
-                            assertThat(ex.getResultCode())
-                                    .isEqualTo(SQLiteErrorCode.SQLITE_READONLY_DBMOVED);
-                        })
-                .hasMessageStartingWith("[SQLITE_READONLY_DBMOVED]");
-
-        stmt.close();
-        conn.close();
+            assertThatThrownBy(() -> stmt.executeUpdate("insert into sample values(2, 'bar')"))
+                    .isInstanceOfSatisfying(
+                            SQLiteException.class,
+                            (ex) -> {
+                                assertThat(SQLiteErrorCode.getErrorCode(ex.getErrorCode()))
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_READONLY);
+                                assertThat(ex.getResultCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_READONLY_DBMOVED);
+                            })
+                    .hasMessageStartingWith("[SQLITE_READONLY_DBMOVED]");
+        }
     }
 
     @Test

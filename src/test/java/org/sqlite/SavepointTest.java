@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * These tests assume that Statements and PreparedStatements are working as per normal and test the
@@ -34,9 +35,8 @@ public class SavepointTest {
     }
 
     @BeforeEach
-    public void connect() throws Exception {
-        File tmpFile = File.createTempFile("test-trans", ".db");
-        // tmpFile.deleteOnExit();
+    public void connect(@TempDir File tempDir) throws Exception {
+        File tmpFile = File.createTempFile("test-trans", ".db", tempDir);
 
         Properties prop = new Properties();
         prop.setProperty("shared_cache", "false");

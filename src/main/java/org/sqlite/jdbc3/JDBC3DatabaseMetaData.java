@@ -976,7 +976,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         "0    as SQL_DATA_TYPE, 0    as SQL_DATETIME_SUB, 2000000000 as CHAR_OCTET_LENGTH, ")
                 .append(
                         "ordpos as ORDINAL_POSITION, (case colnullable when 0 then 'NO' when 1 then 'YES' else '' end)")
-                .append("    as IS_NULLABLE, null as SCOPE_CATLOG, null as SCOPE_SCHEMA, ")
+                .append("    as IS_NULLABLE, null as SCOPE_CATALOG, null as SCOPE_SCHEMA, ")
                 .append("null as SCOPE_TABLE, null as SOURCE_DATA_TYPE, ")
                 .append(
                         "(case colautoincrement when 0 then 'NO' when 1 then 'YES' else '' end) as IS_AUTOINCREMENT, ")
@@ -988,8 +988,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         ResultSet rs = null;
         try {
             // Get all tables implied by the input
-            final String[] types = new String[] {"TABLE", "VIEW"};
-            rs = getTables(c, s, tblNamePattern, types);
+            rs = getTables(c, s, tblNamePattern, null);
             while (rs.next()) {
                 String tableName = rs.getString(3);
 
@@ -1002,7 +1001,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     rsColAutoinc =
                             statColAutoinc.executeQuery(
                                     "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM "
-                                            + prependSchemaPrefix(s, "sqlite_master WHERE LOWER(name) = LOWER('")
+                                            + prependSchemaPrefix(s, "sqlite_schema WHERE LOWER(name) = LOWER('")
                                             + escape(tableName)
                                             + "') AND TYPE IN ('table', 'view')");
                     rsColAutoinc.next();
@@ -1124,6 +1123,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                     // just ignore invalid dimension formats here
                                 }
                             }
+                            // "TYPE_NAME" (colType) is without the length/ dimension
+                            colType = colType.substring(0, iStartOfDimension).trim();
                         }
 
                         int colGenerated = "2".equals(colHidden) ? 1 : 0;
@@ -1133,9 +1134,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                 .append(" as ordpos, ")
                                 .append(colNullable)
                                 .append(" as colnullable,")
-                                .append("'")
                                 .append(colJavaType)
-                                .append("' as ct, ")
+                                .append(" as ct, ")
                                 .append(iColumnSize)
                                 .append(" as colSize, ")
                                 .append(iDecimalDigits)
@@ -1368,7 +1368,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     stat.executeQuery(
                         "select name from "
                             + prependSchemaPrefix(
-                            schema, "sqlite_master where type = " + "'table'"))) {
+                            schema, "sqlite_schema where type = " + "'table'"))) {
                     tableList = new ArrayList<>();
 
                     while (rs.next()) {
@@ -1909,7 +1909,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("      UPPER(TYPE) AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
         sql.append("      ");
-        prependSchemaPrefix(sql, s, "sqlite_master\n");
+        prependSchemaPrefix(sql, s, "sqlite_schema\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME NOT LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("      AND UPPER(TYPE) IN ('TABLE', 'VIEW')").append("\n");
@@ -1925,7 +1925,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         sql.append("      'SYSTEM TABLE' AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
         sql.append("      ");
-        prependSchemaPrefix(sql, s, "sqlite_master\n");
+        prependSchemaPrefix(sql, s, "sqlite_schema\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("  )").append("\n");
@@ -2086,7 +2086,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                                     0,
                                                     0,
                                                     10)))
-                            + " order by TYPE_NAME";
+                            + " order by DATA_TYPE";
             getTypeInfo = conn.prepareStatement(sql);
         }
 
@@ -2163,7 +2163,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     ".*CONSTRAINT\\s*(.*?)\\s*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    /** Parses the sqlite_master table for a table's primary key */
+    /** Parses the sqlite_schema table for a table's primary key */
     class PrimaryKeyFinder {
         String schema;
         /** The table name. */
@@ -2189,6 +2189,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         public PrimaryKeyFinder(String table, String schema) throws SQLException {
             this.table = table;
             this.schema = schema;
+
+            // specific handling for sqlite_schema and synonyms, so that
+            // getExportedKeys/getPrimaryKeys return an empty ResultSet instead of throwing an
+            // exception
+            if ("sqlite_schema".equals(table) || "sqlite_master".equals(table)) return;
+
             if (table == null || table.trim().length() == 0) {
                 throw new SQLException("Invalid table name: '" + this.table + "'");
             }
@@ -2200,7 +2206,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                     "select sql from "
                                             + prependSchemaPrefix(
                                                     schema,
-                                                    "sqlite_master where"
+                                                    "sqlite_schema where"
                                                             + " lower(name) = lower('"
                                                             + escape(table)
                                                             + "') and type in ('table', 'view')"))) {
@@ -2331,7 +2337,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                     "select sql from "
                                             + prependSchemaPrefix(
                                                     schema,
-                                                    "sqlite_master where"
+                                                    "sqlite_schema where"
                                                             + " lower(name) = lower('"
                                                             + escape(tbl)
                                                             + "')"))) {

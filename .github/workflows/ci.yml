@@ -64,24 +64,23 @@ jobs:
       - name: Test
         run: mvn --batch-mode --no-transfer-progress test
 
-#  test_graalvm:
-#    name: test ubuntu-latest jdk11 GraalVM native-image
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: DeLaGuardo/setup-graalvm@master
-#        with:
-#          # GraalVM version, no pattern syntax available atm
-#          graalvm: '21.0.0.2'
-#          # Java version, optional, defaults to 'java8'. Available options are 'java8' and 'java11'.
-#          java: 'java11'
-#          # Architecture flag, optional, defaults to 'amd64'. Available options are 'amd64' and 'aarch64'. Later is available only for linux runners.
-#          arch: 'amd64'
-#      - name: Install native-image component
-#        run: |
-#          gu install native-image
-#      - name: Test
-#        run: mvn --batch-mode --no-transfer-progress -P native test
+  test_graalvm:
+    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        java: [ 11, 17 ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: '22.3.0'
+          java-version: ${{ matrix.java }}
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test
+        run: mvn --batch-mode --no-transfer-progress -P native test
 
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
@@ -175,7 +174,7 @@ jobs:
 
   release:
     name: Deploy
-    needs: [ lint, test, test_multiarch, test_external_amalgamation ]
+    needs: [ lint, test, test_multiarch, test_external_amalgamation, test_graalvm ]
     if: github.repository_owner == 'xerial' && github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
