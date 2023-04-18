@@ -106,11 +106,34 @@ jobs:
           # get the last line number that contains -DSQLITE_ , we will need to insert our custom line after
           prev_line_num=$(awk '/-DSQLITE_/ {print FNR}' Makefile | tail -n 1)
           line_num=$((prev_line_num+1))
-          new_line="      -DSQLITE_EXTRA_INIT=core_init \\\\"
+          # need \ to make the spacing work
+          new_line="\      -DSQLITE_EXTRA_INIT=core_init \\\\"
           sed -i "${line_num}i ${new_line}" Makefile
           git add Makefile
           upstream_version=$(cat .fork-meta/upstream-version.txt)
           git commit -m "update Makefile for ${upstream_version}"
+
+      - name: Update callable-build-native.yml
+        run: |
+          cp .github/workflows/build-native.yml .github/workflows/callable-build-native.yml
+          # disable exit on failure for the grep
+          set +e
+          grep workflow_call .github/workflows/callable-build-native.yml
+          if [[ "$?" == "0" ]]; then
+            echo "workflow_call already found, no changes required"
+            exit 0
+          fi
+          set -e
+          prev_line_num=$(awk '/^on:$/ {print FNR}' .github/workflows/build-native.yml | tail -n 1)
+          line_num=$((prev_line_num+1))
+          # need \ to make the spacing work
+          new_line="\  workflow_call:"
+          sed -i "${line_num}i ${new_line}" .github/workflows/callable-build-native.yml
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add .github/workflows/callable-build-native.yml
+            upstream_version=$(cat .fork-meta/upstream-version.txt)
+            git commit -m "update callable-build-native.yml for ${upstream_version}"
+          fi
 
       - name: Check for Modified Files
         run: |
