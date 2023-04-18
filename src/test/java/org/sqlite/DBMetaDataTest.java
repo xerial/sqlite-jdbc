@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** These tests are designed to stress Statements on memory databases. */
 public class DBMetaDataTest {
@@ -417,18 +420,13 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isFalse();
 
         rs = meta.getColumns(null, null, "%", "%");
-        // SYSTEM TABLE "sqlite_schema"
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
-        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("type");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("name");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("tbl_name");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("rootpage");
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sql");
+
+        // SYSTEM TABLE "sqlite_schema" for main
+        assertSystemSchema(rs);
+
+        // SYSTEM TABLE "sqlite_schema" for temp
+        assertSystemSchema(rs);
+
         // TABLE "test"
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
@@ -2041,8 +2039,9 @@ public class DBMetaDataTest {
             assertThat(rs.next()).isFalse();
             rs.close();
 
-
             rs = meta.getColumns(null, "db2", "%", "%");
+            assertSystemSchema(rs);
+
             // TABLE "test2"
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
@@ -2077,14 +2076,18 @@ public class DBMetaDataTest {
 
 
             rs = meta.getColumns(null, null, "%", "%");
-            assertReadsAllColumns(rs);
+            assertReadsAllColumns(rs, 3);
             rs = meta.getColumns(null, "%", "%", "%");
-            assertReadsAllColumns(rs);
+            assertReadsAllColumns(rs, 3);
             rs = meta.getColumns(null, "\\%", "%", "%");
             assertThat(rs.next()).isFalse();
         }
 
-        private void assertReadsAllColumns(ResultSet rs) throws SQLException {
+        private void assertReadsAllColumns(ResultSet rs, int schemasNumber) throws SQLException {
+            for (int i = 0; i < schemasNumber; i++) {
+                // When full pattern used we acquire system table for each individual schema
+                assertSystemSchema(rs);
+            }
             // TABLE "test"
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("test");
@@ -2097,6 +2100,8 @@ public class DBMetaDataTest {
             assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
             // TABLE "test2"
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("test2");
@@ -2121,6 +2126,8 @@ public class DBMetaDataTest {
             assertThat(rs.getString("COLUMN_NAME")).isEqualTo("intvalue");
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("COLUMN_NAME")).isEqualTo("realvalue");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("COLUMN_NAME")).isEqualTo("charvalue");
             // VIEW "testView2"
             assertThat(rs.next()).isTrue();
             assertThat(rs.getString("TABLE_NAME")).isEqualTo("testView2");
@@ -2240,5 +2247,19 @@ public class DBMetaDataTest {
             stat.executeUpdate("Detach database db2;");
             testDB.deleteOnExit();
         }
+    }
+
+    private void assertSystemSchema(ResultSet rs) throws SQLException {
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("type");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("name");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("tbl_name");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("rootpage");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("sql");
     }
 }
