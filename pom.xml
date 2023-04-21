@@ -341,11 +341,27 @@
                         <extensions>true</extensions>
                         <executions>
                             <execution>
-                                <id>test-native</id>
+                                <id>test-native-default</id>
                                 <goals>
                                     <goal>test</goal>
                                 </goals>
                                 <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <!-- the exported flow should run last, because the presence of the sqlitejdbc library
+                                     in the target folder will hide potential problems in the non-exported flow -->
+                                <id>test-native-exported</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <buildArgs combine.children="append">
+                                        <buildArg>
+                                            -Dorg.sqlite.lib.exportPath=${project.build.directory}
+                                        </buildArg>
+                                    </buildArgs>
+                                </configuration>
                             </execution>
                         </executions>
                         <configuration>

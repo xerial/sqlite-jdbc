@@ -331,15 +331,6 @@ public class SQLiteJDBCLoader {
         boolean hasNativeLib =
                 LibraryLoaderUtil.hasNativeLib(sqliteNativeLibraryPath, sqliteNativeLibraryName);
 
-        if (!hasNativeLib && OSInfo.getOSName().equals("Mac")) {
-            // Fix for openjdk7 for Mac
-            String altName = "libsqlitejdbc.jnilib";
-            if (LibraryLoaderUtil.hasNativeLib(sqliteNativeLibraryPath, altName)) {
-                sqliteNativeLibraryName = altName;
-                hasNativeLib = true;
-            }
-        }
-
         if (hasNativeLib) {
             // temporary library folder
             String tempFolder = getTempDir().getAbsolutePath();
