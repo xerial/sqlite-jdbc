@@ -65,7 +65,7 @@ jobs:
         run: mvn --batch-mode --no-transfer-progress test
 
   test_graalvm:
-    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image
+    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image - ${{ matrix.profiles }}
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
@@ -84,7 +84,7 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test
-        run: mvn --batch-mode --no-transfer-progress -P {{ matrix.profiles }} verify
+        run: mvn --batch-mode --no-transfer-progress -P ${{ matrix.profiles }} verify
 
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
