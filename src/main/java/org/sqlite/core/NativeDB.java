@@ -36,8 +36,20 @@ public final class NativeDB extends DB {
     /** SQLite connection handle. */
     private long pointer = 0;
 
-    private static boolean isLoaded = false;
-    private static boolean loadSucceeded = false;
+    private static boolean isLoaded;
+    private static boolean loadSucceeded;
+
+    static {
+        if ("The Android Project".equals(System.getProperty("java.vm.vendor"))) {
+            System.loadLibrary("sqlitejdbc");
+            isLoaded = true;
+            loadSucceeded = true;
+        } else {
+            // continue with non Android execution path
+            isLoaded = false;
+            loadSucceeded = false;
+        }
+    }
 
     public NativeDB(String url, String fileName, SQLiteConfig config) throws SQLException {
         super(url, fileName, config);
