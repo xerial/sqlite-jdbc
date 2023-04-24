@@ -347,22 +347,6 @@
                                 </goals>
                                 <phase>integration-test</phase>
                             </execution>
-                            <execution>
-                                <!-- the exported flow should run last, because the presence of the sqlitejdbc library
-                                     in the target folder will hide potential problems in the non-exported flow -->
-                                <id>test-native-exported</id>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <phase>integration-test</phase>
-                                <configuration>
-                                    <buildArgs combine.children="append">
-                                        <buildArg>
-                                            -Dorg.sqlite.lib.exportPath=${project.build.directory}
-                                        </buildArg>
-                                    </buildArgs>
-                                </configuration>
-                            </execution>
                         </executions>
                         <configuration>
                             <fallback>false</fallback>
@@ -390,6 +374,24 @@
                                 <!--  Not needed  -->
                                 <exclude>**/architecture/*.java</exclude>
                             </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>native-exported</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <configuration>
+                            <buildArgs combine.children="append">
+                                <buildArg>
+                                    -Dorg.sqlite.lib.exportPath=${project.build.directory}
+                                </buildArg>
+                            </buildArgs>
                         </configuration>
                     </plugin>
                 </plugins>

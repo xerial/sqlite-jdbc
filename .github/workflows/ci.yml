@@ -70,6 +70,10 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         java: [ 11, 17 ]
+        profiles: ['native', 'native,native-exported']
+        exclude: # Exclusions can be removed from GraalVM 23.0: https://github.com/oracle/graal/pull/5932
+          - os: ubuntu-latest
+            profiles: 'native,native-exported'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -80,7 +84,7 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test
-        run: mvn --batch-mode --no-transfer-progress -P native verify
+        run: mvn --batch-mode --no-transfer-progress -P {{ matrix.profiles }} verify
 
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
