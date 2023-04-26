@@ -1,5 +1,8 @@
 package org.sqlite.jdbc4;
 
+import org.sqlite.core.CoreStatement;
+import org.sqlite.jdbc3.JDBC3ResultSet;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,9 +26,10 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
-import org.sqlite.core.CoreStatement;
-import org.sqlite.jdbc3.JDBC3ResultSet;
 
 public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultSetMetaData {
 
@@ -310,8 +314,10 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         throw new SQLFeatureNotSupportedException();
     }
 
+    @SuppressWarnings("deprecation")
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         if (type == null) throw new SQLException("requested type cannot be null");
+
         if (type == String.class) return type.cast(getString(columnIndex));
         if (type == Boolean.class) return type.cast(getBoolean(columnIndex));
         if (type == BigDecimal.class) return type.cast(getBigDecimal(columnIndex));
@@ -319,6 +325,41 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == Date.class) return type.cast(getDate(columnIndex));
         if (type == Time.class) return type.cast(getTime(columnIndex));
         if (type == Timestamp.class) return type.cast(getTimestamp(columnIndex));
+
+        if (type == LocalDate.class) {
+            Date date = getDate(columnIndex);
+
+            int year = date.getYear() + 1900;
+            int month = date.getMonth() + 1;
+            int day = date.getDate();
+
+            return type.cast(LocalDate.of(year, month, day));
+        }
+
+        if (type == LocalTime.class) {
+            Time time = getTime(columnIndex);
+
+            int hour = time.getHours();
+            int minute = time.getMinutes();
+            int second = time.getSeconds();
+
+            return type.cast(LocalTime.of(hour, minute, second));
+        }
+
+        if (type == LocalDateTime.class) {
+            Date date = getDate(columnIndex);
+            Time time = getTime(columnIndex);
+
+            int year = date.getYear() + 1900;
+            int month = date.getMonth() + 1;
+            int day = date.getDate();
+
+            int hour = time.getHours();
+            int minute = time.getMinutes();
+            int second = time.getSeconds();
+
+            return type.cast(LocalDateTime.of(year, month, day, hour, minute, second));
+        }
 
         int columnType = safeGetColumnType(markCol(columnIndex));
         if (type == Double.class) {
