@@ -14,11 +14,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ResultSetTest {
+class ResultSetTest {
 
     private Connection conn;
     private Statement stat;
@@ -39,70 +42,70 @@ public class ResultSetTest {
     }
 
     @Test
-    public void testTableColumnLowerNowFindLowerCaseColumn() throws SQLException {
+    void testTableColumnLowerNowFindLowerCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("id")).isEqualTo(1);
     }
 
     @Test
-    public void testTableColumnLowerNowFindUpperCaseColumn() throws SQLException {
+    void testTableColumnLowerNowFindUpperCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("ID")).isEqualTo(1);
     }
 
     @Test
-    public void testTableColumnLowerNowFindMixedCaseColumn() throws SQLException {
+    void testTableColumnLowerNowFindMixedCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("Id")).isEqualTo(1);
     }
 
     @Test
-    public void testTableColumnUpperNowFindLowerCaseColumn() throws SQLException {
+    void testTableColumnUpperNowFindLowerCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("description")).isEqualTo(2);
     }
 
     @Test
-    public void testTableColumnUpperNowFindUpperCaseColumn() throws SQLException {
+    void testTableColumnUpperNowFindUpperCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("DESCRIPTION")).isEqualTo(2);
     }
 
     @Test
-    public void testTableColumnUpperNowFindMixedCaseColumn() throws SQLException {
+    void testTableColumnUpperNowFindMixedCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("Description")).isEqualTo(2);
     }
 
     @Test
-    public void testTableColumnMixedNowFindLowerCaseColumn() throws SQLException {
+    void testTableColumnMixedNowFindLowerCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("foo")).isEqualTo(3);
     }
 
     @Test
-    public void testTableColumnMixedNowFindUpperCaseColumn() throws SQLException {
+    void testTableColumnMixedNowFindUpperCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("FOO")).isEqualTo(3);
     }
 
     @Test
-    public void testTableColumnMixedNowFindMixedCaseColumn() throws SQLException {
+    void testTableColumnMixedNowFindMixedCaseColumn() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("fOo")).isEqualTo(3);
     }
 
     @Test
-    public void testSelectWithTableNameAliasNowFindWithoutTableNameAlias() throws SQLException {
+    void testSelectWithTableNameAliasNowFindWithoutTableNameAlias() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select t.id from test as t");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("id")).isEqualTo(1);
@@ -114,7 +117,7 @@ public class ResultSetTest {
      * the column is unspecified"
      */
     @Test
-    public void testSelectWithTableNameAliasNowNotFindWithTableNameAlias() throws SQLException {
+    void testSelectWithTableNameAliasNowNotFindWithTableNameAlias() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select t.id from test as t");
         assertThat(resultSet.next()).isTrue();
         assertThatExceptionOfType(SQLException.class)
@@ -122,14 +125,14 @@ public class ResultSetTest {
     }
 
     @Test
-    public void testSelectWithTableNameNowFindWithoutTableName() throws SQLException {
+    void testSelectWithTableNameNowFindWithoutTableName() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
         assertThat(resultSet.next()).isTrue();
         assertThat(resultSet.findColumn("id")).isEqualTo(1);
     }
 
     @Test
-    public void testSelectWithTableNameNowNotFindWithTableName() throws SQLException {
+    void testSelectWithTableNameNowNotFindWithTableName() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
         assertThat(resultSet.next()).isTrue();
         assertThatExceptionOfType(SQLException.class)
@@ -137,7 +140,7 @@ public class ResultSetTest {
     }
 
     @Test
-    public void testCloseStatement() throws SQLException {
+    void testCloseStatement() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select test.id from test");
 
         stat.close();
@@ -151,7 +154,7 @@ public class ResultSetTest {
     }
 
     @Test
-    public void testReturnsNonAsciiCodepoints() throws SQLException {
+    void testReturnsNonAsciiCodepoints() throws SQLException {
         String nonAsciiString = "국정의 중요한 사항에 관한";
         PreparedStatement pstat = conn.prepareStatement("select ?");
         pstat.setString(1, nonAsciiString);
@@ -164,14 +167,14 @@ public class ResultSetTest {
     }
 
     @Test
-    public void testFindColumnOnEmptyResultSet() throws SQLException {
+    void testFindColumnOnEmptyResultSet() throws SQLException {
         ResultSet resultSet = stat.executeQuery("select * from test where id = 0");
         assertThat(resultSet.next()).isFalse();
         assertThat(resultSet.findColumn("id")).isEqualTo(1);
     }
 
     @Test
-    public void testNumericTypes() throws SQLException {
+    void testNumericTypes() throws SQLException {
         stat.executeUpdate("create table numeric(c1, c2, c3)");
         stat.executeUpdate("insert into numeric values (1, 1.1, null)");
 
@@ -196,7 +199,7 @@ public class ResultSetTest {
     }
 
     @Test
-    public void testGetBigDecimal() throws SQLException {
+    void testGetBigDecimal() throws SQLException {
         stat.executeUpdate(
                 "create table bigdecimal(c1, c2 integer, c3 real, c4 double, c5 decimal, c6 numeric, c7 float)");
         stat.executeUpdate("insert into bigdecimal values (1, 2, 3, 4, 5, 6, 7)");
@@ -324,6 +327,28 @@ public class ResultSetTest {
                 .withMessageContaining("Bad value for type Integer");
 
         assertThat(rs.next()).isFalse();
+    }
+
+    @Test
+    void testJdk8AddedDateTimeObjects() throws SQLException {
+        stat.executeUpdate("create table datetime_test(c1)");
+        stat.executeUpdate("insert into datetime_test values ('2021-11-09 11:20:58')");
+        stat.executeUpdate("insert into datetime_test values ('2021-11-09')");
+        stat.executeUpdate("insert into datetime_test values ('11:20:58')");
+
+        ResultSet rs = stat.executeQuery("select * from datetime_test");
+
+        rs.next();
+        assertThat(rs.getObject(1, LocalDate.class)).isEqualTo(LocalDate.of(2021, 11, 9));
+        assertThat(rs.getObject(1, LocalTime.class)).isEqualTo(LocalTime.of(11, 20, 58));
+        assertThat(rs.getObject(1, LocalDateTime.class))
+                .isEqualTo(LocalDateTime.of(2021, 11, 9, 11, 20, 58));
+
+        rs.next();
+        assertThat(rs.getObject(1, LocalDate.class)).isEqualTo(LocalDate.of(2021, 11, 9));
+
+        rs.next();
+        assertThat(rs.getObject(1, LocalTime.class)).isEqualTo(LocalTime.of(11, 20, 58));
     }
 
     @Test
