@@ -164,8 +164,8 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
     }
 
     /**
-     * Escapes all wildcards, to prevent pattern matching for
-     * functions which should not support it
+     * Escapes all wildcards, to prevent pattern matching for functions which should not support it
+     *
      * @param val The string to escape
      * @return The string with escaped wildcards
      */

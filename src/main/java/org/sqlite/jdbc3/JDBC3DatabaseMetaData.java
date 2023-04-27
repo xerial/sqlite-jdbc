@@ -920,7 +920,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             if (i == 0) {
                 sql.append("SELECT * FROM (");
             }
-            appendGetSchemaColumns(sql ,c, schemasNames.get(i), tblNamePattern, colNamePattern);
+            appendGetSchemaColumns(sql, c, schemasNames.get(i), tblNamePattern, colNamePattern);
             if (i != schemasNames.size() - 1) {
                 sql.append(" UNION ALL ");
             } else {
@@ -930,39 +930,38 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         if (schemasNames.size() == 0) {
             sql.append("select ");
             sql.append("\tnull as TABLE_CAT,\n")
-                .append("\tnull as TABLE_SCHEM,\n")
-                .append("\tnull as TABLE_NAME,\n")
-                .append("\tnull as COLUMN_NAME,\n")
-                .append("\tnull as DATA_TYPE,\n")
-                .append("\tnull as TYPE_NAME,\n")
-                .append("\tnull as COLUMN_SIZE,\n")
-                .append("\tnull as BUFFER_LENGTH,\n")
-                .append("\tnull as DECIMAL_DIGITS,\n")
-                .append("\tnull as NUM_PREC_RADIX,\n")
-                .append("\tnull as NULLABLE,\n")
-                .append("\tnull as REMARKS,\n")
-                .append("\tnull as COLUMN_DEF,\n")
-                .append("\tnull as SQL_DATA_TYPE,\n")
-                .append("\tnull as SQL_DATETIME_SUB,\n")
-                .append("\tnull as CHAR_OCTET_LENGTH,\n")
-                .append("\tnull as ORDINAL_POSITION,\n")
-                .append("\tnull as IS_NULLABLE,\n")
-                .append("\tnull as SCOPE_CATLOG,\n")
-                .append("\tnull as SCOPE_SCHEMA,\n")
-                .append("\tnull as SCOPE_TABLE,\n")
-                .append("\tnull as SOURCE_DATA_TYPE,\n")
-                .append("\tnull as IS_AUTOINCREMENT,\n")
-                .append("\tnull as IS_GENERATEDCOLUMN\n")
-                .append("\t limit 0");
+                    .append("\tnull as TABLE_SCHEM,\n")
+                    .append("\tnull as TABLE_NAME,\n")
+                    .append("\tnull as COLUMN_NAME,\n")
+                    .append("\tnull as DATA_TYPE,\n")
+                    .append("\tnull as TYPE_NAME,\n")
+                    .append("\tnull as COLUMN_SIZE,\n")
+                    .append("\tnull as BUFFER_LENGTH,\n")
+                    .append("\tnull as DECIMAL_DIGITS,\n")
+                    .append("\tnull as NUM_PREC_RADIX,\n")
+                    .append("\tnull as NULLABLE,\n")
+                    .append("\tnull as REMARKS,\n")
+                    .append("\tnull as COLUMN_DEF,\n")
+                    .append("\tnull as SQL_DATA_TYPE,\n")
+                    .append("\tnull as SQL_DATETIME_SUB,\n")
+                    .append("\tnull as CHAR_OCTET_LENGTH,\n")
+                    .append("\tnull as ORDINAL_POSITION,\n")
+                    .append("\tnull as IS_NULLABLE,\n")
+                    .append("\tnull as SCOPE_CATLOG,\n")
+                    .append("\tnull as SCOPE_SCHEMA,\n")
+                    .append("\tnull as SCOPE_TABLE,\n")
+                    .append("\tnull as SOURCE_DATA_TYPE,\n")
+                    .append("\tnull as IS_AUTOINCREMENT,\n")
+                    .append("\tnull as IS_GENERATEDCOLUMN\n")
+                    .append("\t limit 0");
         }
         Statement stat = conn.createStatement();
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
 
     private StringBuilder appendGetSchemaColumns(
-        StringBuilder sql, String c, String s, String tblNamePattern, String colNamePattern
-    )
-    throws SQLException {
+            StringBuilder sql, String c, String s, String tblNamePattern, String colNamePattern)
+            throws SQLException {
 
         sql.append("select null as TABLE_CAT, ")
                 .append(quote(s == null ? "main" : s))
@@ -1001,7 +1000,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                     rsColAutoinc =
                             statColAutoinc.executeQuery(
                                     "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM "
-                                            + prependSchemaPrefix(s, "sqlite_schema WHERE LOWER(name) = LOWER('")
+                                            + prependSchemaPrefix(
+                                                    s, "sqlite_schema WHERE LOWER(name) = LOWER('")
                                             + escape(tableName)
                                             + "') AND TYPE IN ('table', 'view')");
                     rsColAutoinc.next();
@@ -1026,7 +1026,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 // For each table, get the column info and build into overall SQL
                 String pragmaStatement =
                         "PRAGMA "
-                                + prependSchemaPrefix(s, "table_xinfo('" + escape(tableName) + "')");
+                                + prependSchemaPrefix(
+                                        s, "table_xinfo('" + escape(tableName) + "')");
                 try (Statement colstat = conn.createStatement();
                         ResultSet rscol = colstat.executeQuery(pragmaStatement)) {
 
@@ -1181,8 +1182,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         } else {
             sql.append(
                     "select null as ordpos, null as colnullable, null as ct, null as colsize, null as "
-                        + "colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as "
-                        + "colautoincrement, null as colgenerated limit 0)");
+                            + "colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as "
+                            + "colautoincrement, null as colgenerated limit 0)");
         }
         return sql;
     }
@@ -1229,7 +1230,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             getSchemas =
                     conn.prepareStatement(
                             "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list order by "
-                                + "TABLE_SCHEM;");
+                                    + "TABLE_SCHEM;");
         }
 
         return getSchemas.executeQuery();
@@ -1244,9 +1245,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             schemaPattern = "main";
         }
         Statement stat = conn.createStatement();
-        String sql = "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list\n"
-            + "where TABLE_SCHEM like '" + schemaPattern + "' escape '" + getSearchStringEscape() + "' order by "
-            + "TABLE_SCHEM;";
+        String sql =
+                "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list\n"
+                        + "where TABLE_SCHEM like '"
+                        + schemaPattern
+                        + "' escape '"
+                        + getSearchStringEscape()
+                        + "' order by "
+                        + "TABLE_SCHEM;";
         return stat.executeQuery(sql);
     }
 
@@ -1279,10 +1285,11 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         }
         if (schemaNames.size() == 0) {
             sql.append("select null as TABLE_CAT, ")
-                .append("null")
-                .append(" as TABLE_SCHEM, '")
-                .append("null")
-                .append("' as TABLE_NAME, null as COLUMN_NAME, null as KEY_SEQ, null as PK_NAME limit 0;");
+                    .append("null")
+                    .append(" as TABLE_SCHEM, '")
+                    .append("null")
+                    .append(
+                            "' as TABLE_NAME, null as COLUMN_NAME, null as KEY_SEQ, null as PK_NAME limit 0;");
         }
 
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
@@ -1296,7 +1303,8 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         return schemaNames;
     }
 
-    private void createSchemaPrimaryKeysQuery(String s, String table, StringBuilder sql) throws SQLException {
+    private void createSchemaPrimaryKeysQuery(String s, String table, StringBuilder sql)
+            throws SQLException {
         PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table, s);
         String[] columns = pkFinder.getColumns();
         sql.append("select null as TABLE_CAT, ")
@@ -1365,10 +1373,11 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 // retrieve table list
                 ArrayList<String> tableList;
                 try (ResultSet rs =
-                    stat.executeQuery(
-                        "select name from "
-                            + prependSchemaPrefix(
-                            schema, "sqlite_schema where type = " + "'table'"))) {
+                        stat.executeQuery(
+                                "select name from "
+                                        + prependSchemaPrefix(
+                                                schema,
+                                                "sqlite_schema where type = " + "'table'"))) {
                     tableList = new ArrayList<>();
 
                     while (rs.next()) {
@@ -1410,29 +1419,34 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                                 }
                             }
                             String pkName =
-                                (usePkName && pkFinder.getName() != null) ? pkFinder.getName() : "";
+                                    (usePkName && pkFinder.getName() != null)
+                                            ? pkFinder.getName()
+                                            : "";
 
                             exportedKeysQuery
-                                .append(count > 0 ? " union all select " : "select ")
-                                .append(keySeq)
-                                .append(" as ks, '")
-                                .append(escape(tbl))
-                                .append("' as fkt, '")
-                                .append(escape(FKColName))
-                                .append("' as fcn, '")
-                                .append(escape(PKColName))
-                                .append("' as pcn, '")
-                                .append(escape(pkName))
-                                .append("' as pkn, ")
-                                .append(RULE_MAP.get(foreignKey.getOnUpdate()))
-                                .append(" as ur, ")
-                                .append(RULE_MAP.get(foreignKey.getOnDelete()))
-                                .append(" as dr, ");
+                                    .append(count > 0 ? " union all select " : "select ")
+                                    .append(keySeq)
+                                    .append(" as ks, '")
+                                    .append(escape(tbl))
+                                    .append("' as fkt, '")
+                                    .append(escape(FKColName))
+                                    .append("' as fcn, '")
+                                    .append(escape(PKColName))
+                                    .append("' as pcn, '")
+                                    .append(escape(pkName))
+                                    .append("' as pkn, ")
+                                    .append(RULE_MAP.get(foreignKey.getOnUpdate()))
+                                    .append(" as ur, ")
+                                    .append(RULE_MAP.get(foreignKey.getOnDelete()))
+                                    .append(" as dr, ");
 
                             String fkName = foreignKey.getFkName();
 
                             if (fkName != null) {
-                                exportedKeysQuery.append("'").append(escape(fkName)).append("' as fkn");
+                                exportedKeysQuery
+                                        .append("'")
+                                        .append(escape(fkName))
+                                        .append("' as fkn");
                             } else {
                                 exportedKeysQuery.append("'' as fkn");
                             }
@@ -1445,40 +1459,42 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
             boolean hasImportedKey = (count > 0);
             sql.append("select ")
-                .append(catalog)
-                .append(" as PKTABLE_CAT, ")
-                .append(quotedSchema)
-                .append(" as PKTABLE_SCHEM, ")
-                .append(quote(target))
-                .append(" as PKTABLE_NAME, ")
-                .append(hasImportedKey ? "pcn" : "''")
-                .append(" as PKCOLUMN_NAME, ")
-                .append(catalog)
-                .append(" as FKTABLE_CAT, ")
-                .append(quotedSchema)
-                .append(" as FKTABLE_SCHEM, ")
-                .append(hasImportedKey ? "fkt" : "''")
-                .append(" as FKTABLE_NAME, ")
-                .append(hasImportedKey ? "fcn" : "''")
-                .append(" as FKCOLUMN_NAME, ")
-                .append(hasImportedKey ? "ks" : "-1")
-                .append(" as KEY_SEQ, ")
-                .append(hasImportedKey ? "ur" : "3")
-                .append(" as UPDATE_RULE, ")
-                .append(hasImportedKey ? "dr" : "3")
-                .append(" as DELETE_RULE, ")
-                .append(hasImportedKey ? "fkn" : "''")
-                .append(" as FK_NAME, ")
-                .append(hasImportedKey ? "pkn" : "''")
-                .append(" as PK_NAME, ")
-                .append(DatabaseMetaData.importedKeyInitiallyDeferred) // FIXME: Check for pragma
-                // foreign_keys = true ?
-                .append(" as DEFERRABILITY ");
+                    .append(catalog)
+                    .append(" as PKTABLE_CAT, ")
+                    .append(quotedSchema)
+                    .append(" as PKTABLE_SCHEM, ")
+                    .append(quote(target))
+                    .append(" as PKTABLE_NAME, ")
+                    .append(hasImportedKey ? "pcn" : "''")
+                    .append(" as PKCOLUMN_NAME, ")
+                    .append(catalog)
+                    .append(" as FKTABLE_CAT, ")
+                    .append(quotedSchema)
+                    .append(" as FKTABLE_SCHEM, ")
+                    .append(hasImportedKey ? "fkt" : "''")
+                    .append(" as FKTABLE_NAME, ")
+                    .append(hasImportedKey ? "fcn" : "''")
+                    .append(" as FKCOLUMN_NAME, ")
+                    .append(hasImportedKey ? "ks" : "-1")
+                    .append(" as KEY_SEQ, ")
+                    .append(hasImportedKey ? "ur" : "3")
+                    .append(" as UPDATE_RULE, ")
+                    .append(hasImportedKey ? "dr" : "3")
+                    .append(" as DELETE_RULE, ")
+                    .append(hasImportedKey ? "fkn" : "''")
+                    .append(" as FK_NAME, ")
+                    .append(hasImportedKey ? "pkn" : "''")
+                    .append(" as PK_NAME, ")
+                    .append(
+                            DatabaseMetaData
+                                    .importedKeyInitiallyDeferred) // FIXME: Check for pragma
+                    // foreign_keys = true ?
+                    .append(" as DEFERRABILITY ");
 
             if (hasImportedKey) {
                 sql.append("from (")
-                    .append(exportedKeysQuery)
-                    .append(") ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
+                        .append(exportedKeysQuery)
+                        .append(") ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
             } else {
                 sql.append("limit 0");
             }
@@ -1490,21 +1506,21 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         }
         if (schemasNames.size() == 0) {
             sql.append("select\n")
-                .append("\tnull as PKTABLE_CAT,\n")
-                .append("\tnull as PKTABLE_SCHEM,\n")
-                .append("\tnull as PKTABLE_NAME,\n")
-                .append("\tnull as PKCOLUMN_NAME,\n")
-                .append("\tnull as FKTABLE_CAT,\n")
-                .append("\tnull as FKTABLE_SCHEM,\n")
-                .append("\t'null' as FKTABLE_NAME,\n")
-                .append("\tnull as FKCOLUMN_NAME,\n")
-                .append("\tnull as KEY_SEQ,\n")
-                .append("\tnull as UPDATE_RULE,\n")
-                .append("\tnull as DELETE_RULE,\n")
-                .append("\tnull as FK_NAME,\n")
-                .append("\tnull as PK_NAME,\n")
-                .append("\tnull as DEFERRABILITY\n")
-                .append("limit 0;");
+                    .append("\tnull as PKTABLE_CAT,\n")
+                    .append("\tnull as PKTABLE_SCHEM,\n")
+                    .append("\tnull as PKTABLE_NAME,\n")
+                    .append("\tnull as PKCOLUMN_NAME,\n")
+                    .append("\tnull as FKTABLE_CAT,\n")
+                    .append("\tnull as FKTABLE_SCHEM,\n")
+                    .append("\t'null' as FKTABLE_NAME,\n")
+                    .append("\tnull as FKCOLUMN_NAME,\n")
+                    .append("\tnull as KEY_SEQ,\n")
+                    .append("\tnull as UPDATE_RULE,\n")
+                    .append("\tnull as DELETE_RULE,\n")
+                    .append("\tnull as FK_NAME,\n")
+                    .append("\tnull as PK_NAME,\n")
+                    .append("\tnull as DEFERRABILITY\n")
+                    .append("limit 0;");
         }
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
@@ -1535,21 +1551,21 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         for (int i = 0; i < schemasNames.size(); i++) {
             String schemaName = schemasNames.get(i);
             sql.append("select ")
-                .append(quote(catalog))
-                .append(" as PKTABLE_CAT, ")
-                .append(quote(schemaName))
-                .append(" as PKTABLE_SCHEM, ")
-                .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
-                .append(quote(catalog))
-                .append(" as FKTABLE_CAT, ")
-                .append(quote(schemaName))
-                .append(" as FKTABLE_SCHEM, ")
-                .append(quote(table))
-                .append(" as FKTABLE_NAME, ")
-                .append(
-                    "fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, pkn as PK_NAME, ")
-                .append(DatabaseMetaData.importedKeyInitiallyDeferred)
-                .append(" as DEFERRABILITY from (");
+                    .append(quote(catalog))
+                    .append(" as PKTABLE_CAT, ")
+                    .append(quote(schemaName))
+                    .append(" as PKTABLE_SCHEM, ")
+                    .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
+                    .append(quote(catalog))
+                    .append(" as FKTABLE_CAT, ")
+                    .append(quote(schemaName))
+                    .append(" as FKTABLE_SCHEM, ")
+                    .append(quote(table))
+                    .append(" as FKTABLE_NAME, ")
+                    .append(
+                            "fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, pkn as PK_NAME, ")
+                    .append(DatabaseMetaData.importedKeyInitiallyDeferred)
+                    .append(" as DEFERRABILITY from (");
 
             // Use a try catch block to avoid "query does not return ResultSet" error
             try {
@@ -1596,47 +1612,47 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 if (fkNames.size() > keyId) fkName = fkNames.get(keyId).getFkName();
 
                 sql.append("select ")
-                    .append(keySeq)
-                    .append(" as ks,")
-                    .append("'")
-                    .append(escape(PKTabName))
-                    .append("' as ptn, '")
-                    .append(escape(FKColName))
-                    .append("' as fcn, '")
-                    .append(escape(PKColName))
-                    .append("' as pcn,")
-                    .append("case '")
-                    .append(escape(updateRule))
-                    .append("'")
-                    .append(" when 'NO ACTION' then ")
-                    .append(DatabaseMetaData.importedKeyNoAction)
-                    .append(" when 'CASCADE' then ")
-                    .append(DatabaseMetaData.importedKeyCascade)
-                    .append(" when 'RESTRICT' then ")
-                    .append(DatabaseMetaData.importedKeyRestrict)
-                    .append(" when 'SET NULL' then ")
-                    .append(DatabaseMetaData.importedKeySetNull)
-                    .append(" when 'SET DEFAULT' then ")
-                    .append(DatabaseMetaData.importedKeySetDefault)
-                    .append(" end as ur, ")
-                    .append("case '")
-                    .append(escape(deleteRule))
-                    .append("'")
-                    .append(" when 'NO ACTION' then ")
-                    .append(DatabaseMetaData.importedKeyNoAction)
-                    .append(" when 'CASCADE' then ")
-                    .append(DatabaseMetaData.importedKeyCascade)
-                    .append(" when 'RESTRICT' then ")
-                    .append(DatabaseMetaData.importedKeyRestrict)
-                    .append(" when 'SET NULL' then ")
-                    .append(DatabaseMetaData.importedKeySetNull)
-                    .append(" when 'SET DEFAULT' then ")
-                    .append(DatabaseMetaData.importedKeySetDefault)
-                    .append(" end as dr, ")
-                    .append(fkName == null ? "''" : quote(fkName))
-                    .append(" as fkn, ")
-                    .append(pkName == null ? "''" : quote(pkName))
-                    .append(" as pkn");
+                        .append(keySeq)
+                        .append(" as ks,")
+                        .append("'")
+                        .append(escape(PKTabName))
+                        .append("' as ptn, '")
+                        .append(escape(FKColName))
+                        .append("' as fcn, '")
+                        .append(escape(PKColName))
+                        .append("' as pcn,")
+                        .append("case '")
+                        .append(escape(updateRule))
+                        .append("'")
+                        .append(" when 'NO ACTION' then ")
+                        .append(DatabaseMetaData.importedKeyNoAction)
+                        .append(" when 'CASCADE' then ")
+                        .append(DatabaseMetaData.importedKeyCascade)
+                        .append(" when 'RESTRICT' then ")
+                        .append(DatabaseMetaData.importedKeyRestrict)
+                        .append(" when 'SET NULL' then ")
+                        .append(DatabaseMetaData.importedKeySetNull)
+                        .append(" when 'SET DEFAULT' then ")
+                        .append(DatabaseMetaData.importedKeySetDefault)
+                        .append(" end as ur, ")
+                        .append("case '")
+                        .append(escape(deleteRule))
+                        .append("'")
+                        .append(" when 'NO ACTION' then ")
+                        .append(DatabaseMetaData.importedKeyNoAction)
+                        .append(" when 'CASCADE' then ")
+                        .append(DatabaseMetaData.importedKeyCascade)
+                        .append(" when 'RESTRICT' then ")
+                        .append(DatabaseMetaData.importedKeyRestrict)
+                        .append(" when 'SET NULL' then ")
+                        .append(DatabaseMetaData.importedKeySetNull)
+                        .append(" when 'SET DEFAULT' then ")
+                        .append(DatabaseMetaData.importedKeySetDefault)
+                        .append(" end as dr, ")
+                        .append(fkName == null ? "''" : quote(fkName))
+                        .append(" as fkn, ")
+                        .append(pkName == null ? "''" : quote(pkName))
+                        .append(" as pkn");
             }
             rs.close();
 
@@ -1651,21 +1667,20 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         }
         if (schemasNames.size() == 0) {
             sql.append("select\n")
-                .append("\tnull as PKTABLE_CAT,\n")
-                .append("\tnull as PKTABLE_SCHEM,\n")
-                .append("\tnull as PKTABLE_NAME,\n")
-                .append("\tnull as PKCOLUMN_NAME,\n")
-                .append("\tnull as FKTABLE_CAT,\n")
-                .append("\tnull as FKTABLE_SCHEM,\n")
-                .append("\tnull as FKTABLE_NAME,\n")
-                .append("\tnull as FKCOLUMN_NAME,\n")
-                .append("\tnull as KEY_SEQ,\n")
-                .append("\tnull as UPDATE_RULE,\n")
-                .append("\tnull as DELETE_RULE,\n")
-                .append("\tnull as FK_NAME,\n")
-                .append("\tnull as PK_NAME,\n")
-                .append("\tnull as DEFERRABILITY limit 0;");
-
+                    .append("\tnull as PKTABLE_CAT,\n")
+                    .append("\tnull as PKTABLE_SCHEM,\n")
+                    .append("\tnull as PKTABLE_NAME,\n")
+                    .append("\tnull as PKCOLUMN_NAME,\n")
+                    .append("\tnull as FKTABLE_CAT,\n")
+                    .append("\tnull as FKTABLE_SCHEM,\n")
+                    .append("\tnull as FKTABLE_NAME,\n")
+                    .append("\tnull as FKCOLUMN_NAME,\n")
+                    .append("\tnull as KEY_SEQ,\n")
+                    .append("\tnull as UPDATE_RULE,\n")
+                    .append("\tnull as DELETE_RULE,\n")
+                    .append("\tnull as FK_NAME,\n")
+                    .append("\tnull as PK_NAME,\n")
+                    .append("\tnull as DEFERRABILITY limit 0;");
         }
 
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
@@ -1686,18 +1701,23 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             // define the column header
             // this is from the JDBC spec, it is part of the driver protocol
             sql.append("select null as TABLE_CAT,'")
-                .append(escape(schemasNames.get(i)))
-                .append("' as TABLE_SCHEM, '")
-                .append(escape(table))
-                .append("' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
-                .append(Integer.toString(DatabaseMetaData.tableIndexOther))
-                .append(" as TYPE, op as ORDINAL_POSITION, ")
-                .append(
-                    "cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
+                    .append(escape(schemasNames.get(i)))
+                    .append("' as TABLE_SCHEM, '")
+                    .append(escape(table))
+                    .append(
+                            "' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
+                    .append(Integer.toString(DatabaseMetaData.tableIndexOther))
+                    .append(" as TYPE, op as ORDINAL_POSITION, ")
+                    .append(
+                            "cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
 
             // this always returns a result set now, previously threw exception
-            rs = stat.executeQuery("pragma " + prependSchemaPrefix(s, "index_list('" + escape(schemasNames.get(i)) +
-                "');"));
+            rs =
+                    stat.executeQuery(
+                            "pragma "
+                                    + prependSchemaPrefix(
+                                            s,
+                                            "index_list('" + escape(schemasNames.get(i)) + "');"));
 
             ArrayList<ArrayList<Object>> indexList = new ArrayList<>();
             while (rs.next()) {
@@ -1720,8 +1740,11 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 while (indexIterator.hasNext()) {
                     currentIndex = indexIterator.next();
                     String indexName = currentIndex.get(0).toString();
-                    rs = stat.executeQuery(
-                        "pragma " + prependSchemaPrefix(s, "index_info('" + escape(indexName) + "');"));
+                    rs =
+                            stat.executeQuery(
+                                    "pragma "
+                                            + prependSchemaPrefix(
+                                                    s, "index_info('" + escape(indexName) + "');"));
 
                     while (rs.next()) {
 
@@ -1729,12 +1752,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
                         String colName = rs.getString(3);
                         sqlRow.append("select ")
-                            .append(1 - (Integer) currentIndex.get(1))
-                            .append(" as un,'")
-                            .append(escape(indexName))
-                            .append("' as n,")
-                            .append(rs.getInt(1) + 1)
-                            .append(" as op,");
+                                .append(1 - (Integer) currentIndex.get(1))
+                                .append(" as un,'")
+                                .append(escape(indexName))
+                                .append("' as n,")
+                                .append(rs.getInt(1) + 1)
+                                .append(" as op,");
                         if (colName == null) { // expression index
                             sqlRow.append("null");
                         } else {
@@ -1753,15 +1776,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             }
             if (i != schemasNames.size() - 1) {
                 sql.append(") union all ");
-            }  else {
+            } else {
                 sql.append(");");
             }
         }
         if (schemasNames.size() == 0) {
             sql.append("select null as un, null as n, null as op, null as cn limit 0");
         }
-        return ((CoreStatement) stat)
-            .executeQuery(sql.toString(), true);
+        return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
 
     /**
@@ -1852,7 +1874,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
         ArrayList<String> schemasNames = getSchemasNames(getSchemas(c, s));
         StringBuilder sql = new StringBuilder();
         for (int i = 0; i < schemasNames.size(); i++) {
-             appendSchemaTablesRequests(sql, schemasNames.get(i), tblNamePattern, types);
+            appendSchemaTablesRequests(sql, schemasNames.get(i), tblNamePattern, types);
             if (i != schemasNames.size() - 1) {
                 sql.append("\nUNION ALL\n");
             } else {
@@ -1878,18 +1900,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     }
 
     private StringBuilder appendSchemaTablesRequests(
-        StringBuilder sql, String s, String tblNamePattern, String[] types
-    ) {
+            StringBuilder sql, String s, String tblNamePattern, String[] types) {
         tblNamePattern =
                 (tblNamePattern == null || "".equals(tblNamePattern))
                         ? "%"
                         : escape(tblNamePattern);
         sql.append("SELECT").append("\n");
         sql.append("  NULL AS TABLE_CAT,").append("\n");
-        sql.append("  ")
-                .append(quote(s))
-                .append(" AS TABLE_SCHEM,")
-                .append("\n");
+        sql.append("  ").append(quote(s)).append(" AS TABLE_SCHEM,").append("\n");
         sql.append("  NAME AS TABLE_NAME,").append("\n");
         sql.append("  TYPE AS TABLE_TYPE,").append("\n");
         sql.append("  NULL AS REMARKS,").append("\n");

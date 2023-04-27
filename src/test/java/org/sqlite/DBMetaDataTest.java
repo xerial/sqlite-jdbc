@@ -95,9 +95,9 @@ public class DBMetaDataTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
         assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("main");
-//        assertThat(rs.next()).isTrue();
-//        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
-//        assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("temp");
+        //        assertThat(rs.next()).isTrue();
+        //        assertThat(rs.getString("TABLE_NAME")).isEqualTo("sqlite_schema");
+        //        assertThat(rs.getString("TABLE_SCHEM")).isEqualTo("temp");
         rs.close();
     }
 
@@ -1698,7 +1698,6 @@ public class DBMetaDataTest {
         assertThat(rsmeta.getColumnName(9)).isEqualTo("SELF_REFERENCING_COL_NAME");
         assertThat(rsmeta.getColumnName(10)).isEqualTo("REF_GENERATION");
 
-
         rs = meta.getColumns(null, "nonexistent", null, null);
         assertThat(rs).isNotNull();
         assertThat(rs.next()).isFalse();
@@ -1768,7 +1767,6 @@ public class DBMetaDataTest {
         assertThat(rsmeta.getColumnName(13)).isEqualTo("PK_NAME");
         assertThat(rsmeta.getColumnName(14)).isEqualTo("DEFERRABILITY");
 
-
         rs = meta.getPrimaryKeys(null, "nonexistent", null);
         assertThat(rs).isNotNull();
         assertThat(rs.next()).isFalse();
@@ -1779,7 +1777,6 @@ public class DBMetaDataTest {
         assertThat(rsmeta.getColumnName(4)).isEqualTo("COLUMN_NAME");
         assertThat(rsmeta.getColumnName(5)).isEqualTo("KEY_SEQ");
         assertThat(rsmeta.getColumnName(6)).isEqualTo("PK_NAME");
-
     }
 
     @Nested
@@ -2074,7 +2071,6 @@ public class DBMetaDataTest {
             assertThat(rs.getMetaData().getColumnCount()).isEqualTo(24);
             rs.close();
 
-
             rs = meta.getColumns(null, null, "%", "%");
             assertReadsAllColumns(rs, 3);
             rs = meta.getColumns(null, "%", "%", "%");
@@ -2225,8 +2221,6 @@ public class DBMetaDataTest {
             assertThat(rs).isNotNull();
             assertThat(rsmd).isNotNull();
         }
-
-
 
         @Test
         public void getIndexInfoIndexedMultiForAttachedDatabase() throws SQLException {
