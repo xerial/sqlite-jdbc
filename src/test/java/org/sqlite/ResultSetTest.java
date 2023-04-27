@@ -1,9 +1,7 @@
 package org.sqlite;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -19,10 +17,9 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Objects;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class ResultSetTest {
 
@@ -344,7 +341,8 @@ class ResultSetTest {
         rs.next();
         assertThat(rs.getObject(1, LocalDate.class)).isEqualTo(LocalDate.of(2021, 11, 9));
         assertThat(rs.getObject(1, LocalTime.class)).isEqualTo(LocalTime.of(11, 20, 58));
-        assertThat(rs.getObject(1, LocalDateTime.class)).isEqualTo(LocalDateTime.of(2021, 11, 9, 11, 20, 58));
+        assertThat(rs.getObject(1, LocalDateTime.class))
+                .isEqualTo(LocalDateTime.of(2021, 11, 9, 11, 20, 58));
 
         rs.next();
         assertThat(rs.getObject(1, LocalDate.class)).isEqualTo(LocalDate.of(2021, 11, 9));
