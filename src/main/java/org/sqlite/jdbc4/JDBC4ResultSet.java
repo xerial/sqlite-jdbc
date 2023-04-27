@@ -327,13 +327,8 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
 
         if (type == LocalDate.class) {
             try {
-                Date date = getDate(columnIndex);
 
-                int year = date.getYear() + 1900;
-                int month = date.getMonth() + 1;
-                int day = date.getDate();
-
-                return type.cast(LocalDate.of(year, month, day));
+                return type.cast(getDate(columnIndex).toLocalDate());
             } catch (SQLException sqlException) {
                 // If the FastDateParser failed, try parse it with LocalDate.
                 // It's a workaround for a value like '2022-12-1' (i.e no time presents).
@@ -344,13 +339,8 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
 
         if (type == LocalTime.class) {
             try {
-                Time time = getTime(columnIndex);
 
-                int hour = time.getHours();
-                int minute = time.getMinutes();
-                int second = time.getSeconds();
-
-                return type.cast(LocalTime.of(hour, minute, second));
+                return type.cast(getTime(columnIndex).toLocalTime());
             } catch (SQLException sqlException) {
                 // If the FastDateParser failed, try parse it with LocalTime.
                 // It's a workaround for a value like '11:22:22' (i.e no date presents).
@@ -360,18 +350,9 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         }
 
         if (type == LocalDateTime.class) {
-            Date date = getDate(columnIndex);
-            Time time = getTime(columnIndex);
+            Timestamp timestamp = getTimestamp(columnIndex);
 
-            int year = date.getYear() + 1900;
-            int month = date.getMonth() + 1;
-            int day = date.getDate();
-
-            int hour = time.getHours();
-            int minute = time.getMinutes();
-            int second = time.getSeconds();
-
-            return type.cast(LocalDateTime.of(year, month, day, hour, minute, second));
+            return type.cast(timestamp.toLocalDateTime());
         }
 
         int columnType = safeGetColumnType(markCol(columnIndex));
