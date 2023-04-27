@@ -350,9 +350,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         }
 
         if (type == LocalDateTime.class) {
-            Timestamp timestamp = getTimestamp(columnIndex);
-
-            return type.cast(timestamp.toLocalDateTime());
+            return type.cast(getTimestamp(columnIndex).toLocalDateTime());
         }
 
         int columnType = safeGetColumnType(markCol(columnIndex));
