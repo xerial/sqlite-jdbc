@@ -315,7 +315,6 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
 
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         if (type == null) throw new SQLException("requested type cannot be null");
-
         if (type == String.class) return type.cast(getString(columnIndex));
         if (type == Boolean.class) return type.cast(getBoolean(columnIndex));
         if (type == BigDecimal.class) return type.cast(getBigDecimal(columnIndex));
@@ -323,7 +322,6 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == Date.class) return type.cast(getDate(columnIndex));
         if (type == Time.class) return type.cast(getTime(columnIndex));
         if (type == Timestamp.class) return type.cast(getTimestamp(columnIndex));
-
         if (type == LocalDate.class) {
             try {
 
@@ -335,7 +333,6 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
                 return type.cast(LocalDate.parse(getString(columnIndex)));
             }
         }
-
         if (type == LocalTime.class) {
             try {
 
@@ -347,7 +344,6 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
                 return type.cast(LocalTime.parse(getString(columnIndex)));
             }
         }
-
         if (type == LocalDateTime.class) {
             return type.cast(getTimestamp(columnIndex).toLocalDateTime());
         }
