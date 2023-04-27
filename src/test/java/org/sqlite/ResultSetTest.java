@@ -19,6 +19,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -335,22 +336,21 @@ class ResultSetTest {
     void testJdk8AddedDateTimeObjects() throws SQLException {
         stat.executeUpdate("create table datetime_test(c1)");
         stat.executeUpdate("insert into datetime_test values ('2021-11-09 11:20:58')");
+        stat.executeUpdate("insert into datetime_test values ('2021-11-09')");
+        stat.executeUpdate("insert into datetime_test values ('11:20:58')");
 
         ResultSet rs = stat.executeQuery("select * from datetime_test");
 
         rs.next();
+        assertThat(rs.getObject(1, LocalDate.class)).isEqualTo(LocalDate.of(2021, 11, 9));
+        assertThat(rs.getObject(1, LocalTime.class)).isEqualTo(LocalTime.of(11, 20, 58));
+        assertThat(rs.getObject(1, LocalDateTime.class)).isEqualTo(LocalDateTime.of(2021, 11, 9, 11, 20, 58));
 
-        Assertions.assertEquals(
-                LocalDate.of(2021, 11, 9),
-                rs.getObject(1, LocalDate.class));
+        rs.next();
+        assertThat(rs.getObject(1, LocalDate.class)).isEqualTo(LocalDate.of(2021, 11, 9));
 
-        Assertions.assertEquals(
-                LocalTime.of(11, 20, 58),
-                rs.getObject(1, LocalTime.class));
-
-        Assertions.assertEquals(
-                LocalDateTime.of(2021, 11, 9, 11, 20, 58),
-                rs.getObject(1, LocalDateTime.class));
+        rs.next();
+        assertThat(rs.getObject(1, LocalTime.class)).isEqualTo(LocalTime.of(11, 20, 58));
     }
 
     @Test

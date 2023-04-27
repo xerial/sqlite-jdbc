@@ -327,23 +327,37 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == Timestamp.class) return type.cast(getTimestamp(columnIndex));
 
         if (type == LocalDate.class) {
-            Date date = getDate(columnIndex);
+            try {
+                Date date = getDate(columnIndex);
 
-            int year = date.getYear() + 1900;
-            int month = date.getMonth() + 1;
-            int day = date.getDate();
+                int year = date.getYear() + 1900;
+                int month = date.getMonth() + 1;
+                int day = date.getDate();
 
-            return type.cast(LocalDate.of(year, month, day));
+                return type.cast(LocalDate.of(year, month, day));
+            } catch (SQLException sqlException) {
+                // If the FastDateParser failed, try parse it with LocalDate.
+                // It's a workaround for a value like '2022-12-1' (i.e no time presents).
+
+                return type.cast(LocalDate.parse(getString(columnIndex)));
+            }
         }
 
         if (type == LocalTime.class) {
-            Time time = getTime(columnIndex);
+            try {
+                Time time = getTime(columnIndex);
 
-            int hour = time.getHours();
-            int minute = time.getMinutes();
-            int second = time.getSeconds();
+                int hour = time.getHours();
+                int minute = time.getMinutes();
+                int second = time.getSeconds();
 
-            return type.cast(LocalTime.of(hour, minute, second));
+                return type.cast(LocalTime.of(hour, minute, second));
+            } catch (SQLException sqlException) {
+                // If the FastDateParser failed, try parse it with LocalTime.
+                // It's a workaround for a value like '11:22:22' (i.e no date presents).
+
+                return type.cast(LocalTime.parse(getString(columnIndex)));
+            }
         }
 
         if (type == LocalDateTime.class) {
