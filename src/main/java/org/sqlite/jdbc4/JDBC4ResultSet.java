@@ -313,7 +313,6 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         throw new SQLFeatureNotSupportedException();
     }
 
-    @SuppressWarnings("deprecation")
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         if (type == null) throw new SQLException("requested type cannot be null");
 
