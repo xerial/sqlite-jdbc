@@ -27,7 +27,10 @@ package org.sqlite;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +39,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.sqlite.util.LibraryLoaderUtil;
 import org.sqlite.util.OSInfo;
 import org.sqlite.util.StringUtils;
 
@@ -310,10 +314,7 @@ public class SQLiteJDBCLoader {
         String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
         String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
         if (sqliteNativeLibraryName == null) {
-            sqliteNativeLibraryName = System.mapLibraryName("sqlitejdbc");
-            if (sqliteNativeLibraryName != null && sqliteNativeLibraryName.endsWith(".dylib")) {
-                sqliteNativeLibraryName = sqliteNativeLibraryName.replace(".dylib", ".jnilib");
-            }
+            sqliteNativeLibraryName = LibraryLoaderUtil.getNativeLibName();
         }
 
         if (sqliteNativeLibraryPath != null) {
@@ -326,22 +327,9 @@ public class SQLiteJDBCLoader {
         }
 
         // Load the os-dependent library from the jar file
-        String packagePath = SQLiteJDBCLoader.class.getPackage().getName().replaceAll("\\.", "/");
-        sqliteNativeLibraryPath =
-                String.format(
-                        "/%s/native/%s", packagePath, OSInfo.getNativeLibFolderPathForCurrentOS());
-        boolean hasNativeLib = hasResource(sqliteNativeLibraryPath + "/" + sqliteNativeLibraryName);
-
-        if (!hasNativeLib) {
-            if (OSInfo.getOSName().equals("Mac")) {
-                // Fix for openjdk7 for Mac
-                String altName = "libsqlitejdbc.jnilib";
-                if (hasResource(sqliteNativeLibraryPath + "/" + altName)) {
-                    sqliteNativeLibraryName = altName;
-                    hasNativeLib = true;
-                }
-            }
-        }
+        sqliteNativeLibraryPath = LibraryLoaderUtil.getNativeLibResourcePath();
+        boolean hasNativeLib =
+                LibraryLoaderUtil.hasNativeLib(sqliteNativeLibraryPath, sqliteNativeLibraryName);
 
         if (hasNativeLib) {
             // temporary library folder
@@ -379,10 +367,6 @@ public class SQLiteJDBCLoader {
                         StringUtils.join(triedPaths, File.pathSeparator)));
     }
 
-    private static boolean hasResource(String path) {
-        return SQLiteJDBCLoader.class.getResource(path) != null;
-    }
-
     @SuppressWarnings("unused")
     private static void getNativeLibraryFolderForTheCurrentOS() {
         String osName = OSInfo.getOSName();
@@ -403,27 +387,39 @@ public class SQLiteJDBCLoader {
 
     /** @return The version of the SQLite JDBC driver. */
     public static String getVersion() {
+        return VersionHolder.VERSION;
+    }
 
-        URL versionFile =
-                SQLiteJDBCLoader.class.getResource(
-                        "/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
-        if (versionFile == null) {
-            versionFile =
-                    SQLiteJDBCLoader.class.getResource(
-                            "/META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
-        }
+    /**
+     * This class will load the version from resources during <clinit>. By initializing this at
+     * build-time in native-image, the resources do not need to be included in the native
+     * executable, and we're eliminating the IO operations as well.
+     */
+    public static final class VersionHolder {
+        private static final String VERSION;
 
-        String version = "unknown";
-        try {
-            if (versionFile != null) {
-                Properties versionData = new Properties();
-                versionData.load(versionFile.openStream());
-                version = versionData.getProperty("version", version);
-                version = version.trim().replaceAll("[^0-9\\.]", "");
+        static {
+            URL versionFile =
+                    VersionHolder.class.getResource(
+                            "/META-INF/maven/org.xerial/sqlite-jdbc/pom.properties");
+            if (versionFile == null) {
+                versionFile =
+                        VersionHolder.class.getResource(
+                                "/META-INF/maven/org.xerial/sqlite-jdbc/VERSION");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            String version = "unknown";
+            try {
+                if (versionFile != null) {
+                    Properties versionData = new Properties();
+                    versionData.load(versionFile.openStream());
+                    version = versionData.getProperty("version", version);
+                    version = version.trim().replaceAll("[^0-9\\.]", "");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            VERSION = version;
         }
-        return version;
     }
 }

@@ -104,7 +104,7 @@ public class SQLiteJDBCLoaderTest {
 
     @Test
     public void version() {
-        // System.out.println(SQLiteJDBCLoader.getVersion());
+        assertThat(SQLiteJDBCLoader.getVersion()).isNotEqualTo("unknown");
     }
 
     @Test
