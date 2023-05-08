@@ -219,7 +219,7 @@ jobs:
           gh pr create \
           --repo austinarbor/sqlite-jdbc \
           --base master \
-          --title "Prepare ${{ env.UPSTREAM_VERSION }}" \
+          --title "Prepare ${upstream_version}" \
           --body "Changes for ${upstream_version}" \
           --no-maintainer-edit
         env:
