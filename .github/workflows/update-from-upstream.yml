@@ -91,6 +91,8 @@ jobs:
           unzip "${file_name}"
           dir_name="${file_name//.zip/}"
           cp "${dir_name}/ext/misc/decimal.c" src/main/ext/decimal.c
+          # remove the ifdef block(s)
+          perl -i -p0e 's/#ifdef _WIN32.*#endif//gms' src/main/ext/decimal.c
           rm -rf "${file_name}/"
           # if decimal.c was modified, commit it
           if [[ -n "$(git status --porcelain)" ]]; then
