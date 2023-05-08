@@ -40,6 +40,7 @@ jobs:
           git fetch upstream
           # overwrite our pom.xml with the upstream version
           upstream_version=$(cat .fork-meta/upstream-version.txt)
+          echo "UPSTREAM_VERSION=${upstream_version}" >> "$GITHUB_ENV"
           git checkout "tags/${upstream_version}" -- pom.xml Makefile
           git commit -m "update pom.xml and Makefile from ${upstream_version}"
           git rebase "tags/${upstream_version}"
@@ -64,15 +65,17 @@ jobs:
           yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
           # disable the auto release for now
           yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
-          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          # yq seems to maybe have a bug with this? not sure of a better way to insert the developer
+          yq -i '.project.developers += {"+developer" : {"id": "austinarbor", "name": "Austin G. Arbor", "email": "aarbor989@gmail.com"}}' pom.xml -p=xml -o=xml
+          # remove the + from the developer tag
+          sed -i 's/+developer/developer/g' pom.xml
           git add pom.xml
-          git commit -m "update pom.xml for ${upstream_version}"
+          git commit -m "update pom.xml for ${{ env.UPSTREAM_VERSION }}"
 
       - name: Download and Update decimal.c
         run: |
-          upstream_version=$(cat .fork-meta/upstream-version.txt)
           maven_version=$(yq '.project.version' pom.xml)
-          if [[ "${upstream_version}" != "${maven_version}" ]]; then
+          if [[ "${{ env.UPSTREAM_VERSION }}" != "${maven_version}" ]]; then
             echo "version mismatch detected"
             echo "maven: ${maven_version}"
             echo "upstream: ${upstream_version}"
@@ -112,8 +115,7 @@ jobs:
           new_line="\      -DSQLITE_EXTRA_INIT=core_init \\\\"
           sed -i "${line_num}i ${new_line}" Makefile
           git add Makefile
-          upstream_version=$(cat .fork-meta/upstream-version.txt)
-          git commit -m "update Makefile for ${upstream_version}"
+          git commit -m "update Makefile for ${{ env.UPSTREAM_VERSION }}"
 
       - name: Check for Modified Files
         run: |
@@ -211,11 +213,11 @@ jobs:
       - name: Open PR
         run: |
           upstream_version=$(cat .fork-meta/upstream-version.txt)
-
+          
           gh pr create \
           --repo austinarbor/sqlite-jdbc \
           --base master \
-          --title "Prepare ${upstream_version}" \
+          --title "Prepare ${{ env.UPSTREAM_VERSION }}" \
           --body "Changes for ${upstream_version}" \
           --no-maintainer-edit
         env:
