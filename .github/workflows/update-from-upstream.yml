@@ -38,11 +38,13 @@ jobs:
         run: |
           git remote add upstream https://github.com/xerial/sqlite-jdbc.git
           git fetch upstream
-          # overwrite our pom.xml with the upstream version
+          
           upstream_version=$(cat .fork-meta/upstream-version.txt)
           echo "UPSTREAM_VERSION=${upstream_version}" >> "$GITHUB_ENV"
-          git checkout "tags/${upstream_version}" -- pom.xml Makefile
-          git commit -m "update pom.xml and Makefile from ${upstream_version}"
+          
+          # overwrite our pom.xml, Makefile, and README.md with the upstream version
+          git checkout "tags/${upstream_version}" -- pom.xml Makefile README.md
+          git commit -m "update pom.xml, Makefile, and README.md from ${upstream_version}"
           git rebase "tags/${upstream_version}"
 
       - name: Modify pom.xml
@@ -118,6 +120,14 @@ jobs:
           sed -i "${line_num}i ${new_line}" Makefile
           git add Makefile
           git commit -m "update Makefile for ${{ env.UPSTREAM_VERSION }}"
+
+      - name: Update README.md
+        run: |
+          # insert our "header" into the readme
+          set +e
+          sed -i '1i # SQLite JDBC Driver Fork\nThis repo is a fork of [xerial/sqlite-jdbc](https://github.com/xerial/sqlite-jdbc), the only difference being the inclusion of the `decimal.c` extension in the jar.\n\n[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.aga/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.aga/sqlite-jdbc/)\n\n_Everything below this line comes from the original repository._\n' README.md
+          git add README.md
+          git commit -m "update README.md for ${{ env.UPSTREAM_VERSION }}"
 
       - name: Check for Modified Files
         run: |
