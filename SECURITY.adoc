@@ -1,0 +1,15 @@
+= Security Policy
+:sqlite-version: 3.41.2
+
+== Supported Versions
+
+|===
+|Version |Supported
+
+|{sqlite-version}.x |:white_check_mark:
+|&lt; {sqlite-version}.x |:x:
+|===
+
+== Reporting a Vulnerability
+
+See https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability#privately-reporting-a-security-vulnerability
