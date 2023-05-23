@@ -10,24 +10,21 @@
 package org.sqlite;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class InsertQueryTest {
     String dbName;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        File tmpFile = File.createTempFile("tmp-sqlite", ".db");
-        tmpFile.deleteOnExit();
+    public void setUp(@TempDir File tempDir) throws Exception {
+        File tmpFile = File.createTempFile("tmp-sqlite", ".db", tempDir);
         dbName = tmpFile.getAbsolutePath();
     }
 
@@ -41,11 +38,21 @@ public class InsertQueryTest {
     }
 
     class IndependentConnectionFactory implements ConnectionFactory {
+        // Internal bookkeeping so connections are still closed in the end.
+        private final List<Connection> connections = new ArrayList<>();
+
         public Connection getConnection() throws SQLException {
-            return DriverManager.getConnection("jdbc:sqlite:" + dbName);
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbName);
+            connections.add(conn);
+            return conn;
         }
 
-        public void dispose() throws SQLException {}
+        public void dispose() throws SQLException {
+            for (Connection connection : connections) {
+                connection.close();
+            }
+            connections.clear();
+        }
     }
 
     class SharedConnectionFactory implements ConnectionFactory {

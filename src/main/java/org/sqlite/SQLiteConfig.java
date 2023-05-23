@@ -54,7 +54,7 @@ public class SQLiteConfig {
     private final Properties pragmaTable;
     private int openModeFlag = 0x00;
 
-    private final int busyTimeout;
+    private int busyTimeout;
     private boolean explicitReadOnly;
 
     private final SQLiteConnectionConfig defaultConnectionConfig;
@@ -87,8 +87,8 @@ public class SQLiteConfig {
         // Enable URI filenames
         setOpenMode(SQLiteOpenMode.OPEN_URI);
 
-        this.busyTimeout =
-                Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000"));
+        setBusyTimeout(
+                Integer.parseInt(pragmaTable.getProperty(Pragma.BUSY_TIMEOUT.pragmaName, "3000")));
         this.defaultConnectionConfig = SQLiteConnectionConfig.fromPragmaTable(pragmaTable);
         this.explicitReadOnly =
                 Boolean.parseBoolean(
@@ -425,6 +425,7 @@ public class SQLiteConfig {
                 "journal_size_limit",
                 "Limit the size of rollback-journal and WAL files left in the file-system after transactions or checkpoints",
                 null),
+        LEGACY_ALTER_TABLE("legacy_alter_table", "Use legacy alter table behavior", OnOff),
         LEGACY_FILE_FORMAT("legacy_file_format", "No-op", OnOff),
         LOCKING_MODE(
                 "locking_mode",
@@ -855,6 +856,19 @@ public class SQLiteConfig {
         set(Pragma.LEGACY_FILE_FORMAT, use);
     }
 
+    /**
+     * Sets the value of the legacy_alter_table flag. When this flag is on, the ALTER TABLE RENAME
+     * command (for changing the name of a table) works as it did in SQLite 3.24.0 (2018-06-04) and
+     * earlier.When the flag is off, using the ALTER TABLE RENAME command will mean that all
+     * references to the table anywhere in the schema will be converted to the new name.
+     *
+     * @param flag True to turn on legacy alter table behaviour; false to turn off.
+     * @see <a href="https://www.sqlite.org/pragma.html#pragma_legacy_alter_table</a>
+     */
+    public void setLegacyAlterTable(boolean flag) {
+        set(Pragma.LEGACY_ALTER_TABLE, flag);
+    }
+
     public enum LockingMode implements PragmaValue {
         NORMAL,
         EXCLUSIVE;
@@ -1162,6 +1176,7 @@ public class SQLiteConfig {
     /** @param milliseconds Connect to DB timeout in milliseconds */
     public void setBusyTimeout(int milliseconds) {
         setPragma(Pragma.BUSY_TIMEOUT, Integer.toString(milliseconds));
+        busyTimeout = milliseconds;
     }
 
     public int getBusyTimeout() {

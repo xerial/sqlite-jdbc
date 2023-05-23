@@ -17,6 +17,9 @@ release:
         - label: 'chore'
           title: '[maven-release-plugin] prepare'
           order: 1
+        - label: 'perf'
+          title: 'regex:^(?:perf(?:\(.*\))?!?):\s.*'
+          order: 120
       categories:
         - title: '🏎 Perf'
           key: 'perf'
