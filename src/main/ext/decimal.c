@@ -141,7 +141,7 @@ static Decimal *decimal_new(
         p->nFrac = 0;
       }
     }
-    if( iExp>0 ){
+    if( iExp>0 ){   
       p->a = sqlite3_realloc64(p->a, p->nDigit + iExp + 1 );
       if( p->a==0 ) goto new_no_mem;
       memset(p->a+p->nDigit, 0, iExp);
@@ -549,7 +549,7 @@ static void decimalMulFunc(
   int minFrac;
   UNUSED_PARAMETER(argc);
   if( pA==0 || pA->oom || pA->isNull
-   || pB==0 || pB->oom || pB->isNull
+   || pB==0 || pB->oom || pB->isNull 
   ){
     goto mul_end;
   }
@@ -591,9 +591,10 @@ mul_end:
   decimal_free(pB);
 }
 
+
 int sqlite3_decimal_init(
-  sqlite3 *db,
-  char **pzErrMsg,
+  sqlite3 *db, 
+  char **pzErrMsg, 
   const sqlite3_api_routines *pApi
 ){
   int rc = SQLITE_OK;
@@ -613,7 +614,7 @@ int sqlite3_decimal_init(
 
   SQLITE_EXTENSION_INIT2(pApi);
 
-  for(i=0; i<sizeof(aFunc)/sizeof(aFunc[0]) && rc==SQLITE_OK; i++){
+  for(i=0; i<(int)(sizeof(aFunc)/sizeof(aFunc[0])) && rc==SQLITE_OK; i++){
     rc = sqlite3_create_function(db, aFunc[i].zFuncName, aFunc[i].nArg,
                    SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
                    0, aFunc[i].xFunc, 0, 0);
