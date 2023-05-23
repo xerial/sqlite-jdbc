@@ -1,10 +1,3 @@
-# SQLite JDBC Driver Fork
-This repo is a fork of [xerial/sqlite-jdbc](https://github.com/xerial/sqlite-jdbc), the only difference being the inclusion of the `decimal.c` extension in the jar.
-
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/)
-
-_Everything below this line comes from the original repository._
-
 # SQLite JDBC Driver
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master)](https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster)
 [![Join the chat at https://gitter.im/xerial/sqlite-jdbc](https://badges.gitter.im/xerial/sqlite-jdbc.svg)](https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
