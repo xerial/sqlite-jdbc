@@ -54,7 +54,7 @@ jobs:
           # update project url
           yq -i -e '.project.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
           # update groupId
-          yq -i -e '.project.groupId = "dev.aga"' pom.xml
+          yq -i -e '.project.groupId = "dev.aga.sqlite"' pom.xml
           # update snapshot repository url
           yq -i -e '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
           # update connection
@@ -125,7 +125,7 @@ jobs:
         run: |
           # insert our "header" into the readme
           set +e
-          sed -i '1i # SQLite JDBC Driver Fork\nThis repo is a fork of [xerial/sqlite-jdbc](https://github.com/xerial/sqlite-jdbc), the only difference being the inclusion of the `decimal.c` extension in the jar.\n\n[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.aga/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.aga/sqlite-jdbc/)\n\n_Everything below this line comes from the original repository._\n' README.md
+          sed -i '1i # SQLite JDBC Driver Fork\nThis repo is a fork of [xerial/sqlite-jdbc](https://github.com/xerial/sqlite-jdbc), the only difference being the inclusion of the `decimal.c` extension in the jar.\n\n[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/)\n\n_Everything below this line comes from the original repository._\n' README.md
           git add README.md
           git commit -m "update README.md for ${{ env.UPSTREAM_VERSION }}"
 
