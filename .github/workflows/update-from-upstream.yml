@@ -45,7 +45,8 @@ jobs:
           # overwrite our pom.xml, Makefile, and README.md with the upstream version
           git checkout "tags/${upstream_version}" -- pom.xml Makefile README.md
           git commit -m "update pom.xml, Makefile, and README.md from ${upstream_version}"
-          git rebase "tags/${upstream_version}"
+          # note: when rebasing, ours and theirs is flipped
+          git rebase --strategy recursive --strategy-option ours "tags/${upstream_version}"
 
       - name: Modify pom.xml
         run: |
