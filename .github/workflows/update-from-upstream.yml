@@ -46,7 +46,7 @@ jobs:
           git checkout "tags/${upstream_version}" -- pom.xml Makefile README.md
           git commit -m "update pom.xml, Makefile, and README.md from ${upstream_version}"
           # note: when rebasing, ours and theirs is flipped
-          git rebase --strategy recursive --strategy-option ours "tags/${upstream_version}"
+          git merge --strategy=ort --strategy-option=theirs "tags/${upstream_version}"
 
       - name: Modify pom.xml
         run: |
@@ -141,7 +141,7 @@ jobs:
 
       - name: Resolve Conflicts
         run: |
-          git merge -s recursive -Xours origin/master
+          git merge --strategy=ort --strategy-option=ours origin/master
 
       - name: Push Changes
         run: |
