@@ -2,12 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>dev.aga.sqlite</groupId>
+    <groupId>org.xerial</groupId>
     <artifactId>sqlite-jdbc</artifactId>
     <version>3.41.0.1</version>
     <name>SQLite JDBC</name>
     <description>SQLite JDBC library</description>
-    <url>https://github.com/austinarbor/sqlite-jdbc</url>
+    <url>https://github.com/xerial/sqlite-jdbc</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -182,7 +182,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
@@ -250,15 +250,15 @@
     </build>
 
     <scm>
-        <connection>scm:git:git://github.com/austinarbor/sqlite-jdbc.git</connection>
-        <developerConnection>scm:git:git@github.com:austinarbor/sqlite-jdbc.git</developerConnection>
-        <url>https://github.com/austinarbor/sqlite-jdbc</url>
+        <connection>scm:git:git://github.com/xerial/sqlite-jdbc.git</connection>
+        <developerConnection>scm:git:git@github.com:xerial/sqlite-jdbc.git</developerConnection>
+        <url>https://github.com/xerial/sqlite-jdbc</url>
     </scm>
 
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
