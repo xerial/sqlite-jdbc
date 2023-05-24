@@ -127,7 +127,7 @@ jobs:
         run: |
           # insert our "header" into the readme
           set +e
-          sed -i '1i == SQLite JDBC Driver Fork\n\nThis repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.\n\nimage:https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/badge.svg[Maven Central,link=https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/]\n\n_Everything below this line comes from the original repository._\n' README.adoc
+          sed -i '1i == SQLite JDBC Driver Fork\n\nThis repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.\n\nimage:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&label=maven%20central[Maven Central,link=https://search.maven.org/search?q=g:%22dev.aga.sqlite%22%20AND%20a:%22sqlite-jdbc%22]\n\n_Everything below this line comes from the original repository._\n' README.adoc
           git add README.adoc
           git commit -m "update README.adoc for ${{ env.UPSTREAM_VERSION }}"
 
