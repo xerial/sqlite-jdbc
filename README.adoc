@@ -2,7 +2,7 @@
 
 This repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.
 
-image:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&label=maven%20central[Maven Central,link=https://search.maven.org/search?q=g:%22dev.aga.sqlite%22%20AND%20a:%22sqlite-jdbc%22]
+image:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&label=maven%20central[Maven Central,link=https://central.sonatype.com/search?q=g%3Adev.aga.sqlite+a%3Asqlite-jdbc]
 
 _Everything below this line comes from the original repository._
 
