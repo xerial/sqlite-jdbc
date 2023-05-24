@@ -9,6 +9,8 @@ on:
 jobs:
   update-from-upstream:
     runs-on: ubuntu-latest
+    outputs:
+      upstream_version: ${{ steps.add-upstream-and-update.outputs.upstream_version }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -17,18 +19,6 @@ jobs:
 
       - run: git status
 
-      - name: Set up Apache Maven Central
-        uses: actions/setup-java@v3
-        with: # running setup-java again overwrites the settings.xml
-          distribution: 'temurin'
-          java-version: '11'
-          java-package: jdk
-          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
-          server-username: ${{ secrets.OSSH_USERNAME }} # env variable for username in deploy (1)
-          server-password: ${{ secrets.OSSH_PASSWORD }} # env variable for token in deploy (2)
-          gpg-private-key: ${{ secrets.GPG_KEY_ID }} # Value of the GPG private key to import
-          gpg-passphrase: ${{ secrets.OSSH_GPG_PASSPHRASE }} # env variable for GPG private key passphrase (3)
-
       - name: Setup git config
         run: |
           # setup the username and email
@@ -36,12 +26,13 @@ jobs:
           git config user.email "aarbor989@gmail.com"
 
       - name: Add Upstream and Update
+        id: add-upstream-and-update
         run: |
           git remote add upstream https://github.com/xerial/sqlite-jdbc.git
           git fetch upstream
           
           upstream_version=$(cat .fork-meta/upstream-version.txt)
-          echo "UPSTREAM_VERSION=${upstream_version}" >> "$GITHUB_ENV"
+          echo "upstream_version=${upstream_version}" >> "$GITHUB_OUTPUT"
           
           # overwrite our pom.xml, Makefile, and README.adoc with the upstream version
           git checkout "tags/${upstream_version}" -- pom.xml Makefile README.adoc
@@ -74,12 +65,12 @@ jobs:
           # remove the + from the developer tag
           sed -i 's/+developer/developer/g' pom.xml
           git add pom.xml
-          git commit -m "update pom.xml for ${{ env.UPSTREAM_VERSION }}"
+          git commit -m "update pom.xml for ${{ steps.add-upstream-and-update.outputs.upstream_version }}"
 
       - name: Download and Update decimal.c
         run: |
           maven_version=$(yq '.project.version' pom.xml)
-          if [[ "${{ env.UPSTREAM_VERSION }}" != "${maven_version}" ]]; then
+          if [[ "${{ steps.add-upstream-and-update.outputs.upstream_version }}" != "${maven_version}" ]]; then
             echo "version mismatch detected"
             echo "maven: ${maven_version}"
             echo "upstream: ${upstream_version}"
@@ -121,7 +112,7 @@ jobs:
           new_line="\      -DSQLITE_EXTRA_INIT=core_init \\\\"
           sed -i "${line_num}i ${new_line}" Makefile
           git add Makefile
-          git commit -m "update Makefile for ${{ env.UPSTREAM_VERSION }}"
+          git commit -m "update Makefile for ${{ steps.add-upstream-and-update.outputs.upstream_version }}"
 
       - name: Update README.adoc
         run: |
@@ -129,7 +120,7 @@ jobs:
           set +e
           sed -i '1i == SQLite JDBC Driver Fork\n\nThis repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.\n\nimage:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&label=maven%20central[Maven Central,link=https://central.sonatype.com/search?q=g%3Adev.aga.sqlite+a%3Asqlite-jdbc]\n\n_Everything below this line comes from the original repository._\n' README.adoc
           git add README.adoc
-          git commit -m "update README.adoc for ${{ env.UPSTREAM_VERSION }}"
+          git commit -m "update README.adoc for ${{ steps.add-upstream-and-update.outputs.upstream_version }}"
 
       - name: Check for Modified Files
         run: |
@@ -194,7 +185,7 @@ jobs:
   test:
     name: Test latest build
     runs-on: ubuntu-latest
-    needs: [ build ]
+    needs: [ update-from-upstream, build ]
     steps:
 
       - name: setup java
@@ -226,8 +217,7 @@ jobs:
 
       - name: copy jar into test project
         run: |
-          version=$(cat .fork-meta/upstream-version.txt)
-          cp "target/sqlite-jdbc-${version}.jar" sqlite-jdbc-decimal-test/libs/
+          cp "target/sqlite-jdbc-${{ needs.update-from-upstream.outputs.upstream_version }}.jar" sqlite-jdbc-decimal-test/libs/
 
       - name: run tests
         run: |
@@ -241,6 +231,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0
 
       - run: git pull --rebase
@@ -263,13 +254,13 @@ jobs:
   open-pr:
     name: Open PR
     runs-on: ubuntu-latest
-    needs: [ push ]
+    needs: [ update-from-upstream, push ]
     steps:
       - uses: actions/checkout@v3
 
       - name: Open PR
         run: |
-          upstream_version=$(cat .fork-meta/upstream-version.txt)
+          upstream_version="${{ needs.update-from-upstream.outputs.upstream_version }}"
           
           gh pr create \
           --repo austinarbor/sqlite-jdbc \
@@ -278,4 +269,4 @@ jobs:
           --body "Changes for ${upstream_version}" \
           --no-maintainer-edit
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
