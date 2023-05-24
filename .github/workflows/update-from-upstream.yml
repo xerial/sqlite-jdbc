@@ -22,8 +22,8 @@ jobs:
       - name: Setup git config
         run: |
           # setup the username and email
-          git config user.name "Austin Arbor"
-          git config user.email "aarbor989@gmail.com"
+          git config user.name "Austin G. Arbor"
+          git config user.email "${{ vars.GIT_COMMIT_EMAIL }}"
 
       - name: Add Upstream and Update
         id: add-upstream-and-update
@@ -248,7 +248,8 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: 'chore: update native libraries'
-          default_author: user_info
+          author_name: 'Austin G. Arbor'
+          author_email: '${{ vars.GIT_COMMIT_EMAIL }}'
 
 
   open-pr:
