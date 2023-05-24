@@ -1,0 +1,51 @@
+name: Get latest release version from upstream
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+jobs:
+  get-latest-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: fetch upstream release version
+        id: fetch-upstream-version
+        run: |
+          curl -sL https://api.github.com/repos/xerial/sqlite-jdbc/releases/latest | \
+          jq -r ".tag_name" > .fork-meta/upstream-version.txt
+          
+          upstream_version="$(cat .fork-meta/upstream-version.txt)"
+          echo "latest release from upstream is: ${upstream_version}"
+          echo "upstream_version=${upstream_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Check for modified files
+        id: git-check
+        run: |
+          updated=false
+          if [ -n "$(git status --porcelain)" ]; then
+            # see if remote branch already exists
+            set +e
+            git ls-remote --exit-code --heads origin "releases/${{ steps.fetch-upstream-version.outputs.upstream_version }}"
+            # if return value is not 0 then the branch does not exist
+            if [ $? -ne 0 ]; then
+              updated=true
+            else
+              echo "remote branch releases/${{ steps.fetch-upstream-version.outputs.upstream_version }} already exists"
+            fi
+          fi
+          set -e
+          
+          echo "updated=${updated}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit latest release version
+        if: steps.git-check.outputs.updated == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: '.fork-meta/upstream-version.txt'
+          message: 'bump upstream version to ${{ steps.fetch-upstream-version.outputs.upstream_version }}'
+          author_name: 'Austin G. Arbor'
+          author_email: '${{ vars.GIT_COMMIT_EMAIL }}'
+          new_branch: 'releases/${{ steps.fetch-upstream-version.outputs.upstream_version }}'
+          pathspec_error_handling: exitAtEnd
