@@ -140,4 +140,10 @@ public abstract class CoreStatement implements Codes {
     }
 
     public abstract ResultSet executeQuery(String sql, boolean closeStmt) throws SQLException;
+
+    protected void checkIndex(int index) throws SQLException {
+        if (index < 1 || index > batch.length) {
+            throw new SQLException("Parameter index is invalid");
+        }
+    }
 }

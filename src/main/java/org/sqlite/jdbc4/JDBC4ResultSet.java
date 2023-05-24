@@ -23,6 +23,9 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.jdbc3.JDBC3ResultSet;
@@ -319,6 +322,27 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == Date.class) return type.cast(getDate(columnIndex));
         if (type == Time.class) return type.cast(getTime(columnIndex));
         if (type == Timestamp.class) return type.cast(getTimestamp(columnIndex));
+        if (type == LocalDate.class) {
+            try {
+                return type.cast(getDate(columnIndex).toLocalDate());
+            } catch (SQLException sqlException) {
+                // If the FastDateParser failed, try parse it with LocalDate.
+                // It's a workaround for a value like '2022-12-1' (i.e no time presents).
+                return type.cast(LocalDate.parse(getString(columnIndex)));
+            }
+        }
+        if (type == LocalTime.class) {
+            try {
+                return type.cast(getTime(columnIndex).toLocalTime());
+            } catch (SQLException sqlException) {
+                // If the FastDateParser failed, try parse it with LocalTime.
+                // It's a workaround for a value like '11:22:22' (i.e no date presents).
+                return type.cast(LocalTime.parse(getString(columnIndex)));
+            }
+        }
+        if (type == LocalDateTime.class) {
+            return type.cast(getTimestamp(columnIndex).toLocalDateTime());
+        }
 
         int columnType = safeGetColumnType(markCol(columnIndex));
         if (type == Double.class) {

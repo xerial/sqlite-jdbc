@@ -46,12 +46,12 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        java: [ 11, 17, 19 ]
+        java: [ 11, 17, 20 ]
         include:
           - os: windows-latest
-            java: 19
+            java: 20
           - os: macos-latest
-            java: 19
+            java: 20
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -65,11 +65,17 @@ jobs:
         run: mvn --batch-mode --no-transfer-progress test
 
   test_graalvm:
-    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image
+    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image - ${{ matrix.profiles }}
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         java: [ 11, 17 ]
+        profiles: ['native', 'native,native-exported']
+        exclude: # Exclusions can be removed from GraalVM 23.0: https://github.com/oracle/graal/pull/5932
+          - os: ubuntu-latest
+            profiles: 'native,native-exported'
+          - os: macos-latest
+            profiles: 'native,native-exported'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -80,7 +86,7 @@ jobs:
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test
-        run: mvn --batch-mode --no-transfer-progress -P native test
+        run: mvn --batch-mode --no-transfer-progress -P ${{ matrix.profiles }} integration-test
 
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
@@ -158,7 +164,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 19
+          java-version: 20
           java-package: jdk
           cache: 'maven'
       - run: brew install sqlite3
@@ -211,6 +217,7 @@ jobs:
         run: |
           mvn --no-transfer-progress versions:set -DremoveSnapshot -DgenerateBackupPoms=false
           echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
+          sed -i -e "s/^\:project-version\:\ .*/:project-version: ${{ env.RELEASE_VERSION }}/g" README.adoc
       # The sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
       - name: Publish to Apache Maven Central
         run: mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests
