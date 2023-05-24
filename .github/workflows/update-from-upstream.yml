@@ -42,9 +42,9 @@ jobs:
           upstream_version=$(cat .fork-meta/upstream-version.txt)
           echo "UPSTREAM_VERSION=${upstream_version}" >> "$GITHUB_ENV"
           
-          # overwrite our pom.xml, Makefile, and README.md with the upstream version
-          git checkout "tags/${upstream_version}" -- pom.xml Makefile README.md
-          git commit -m "update pom.xml, Makefile, and README.md from ${upstream_version}"
+          # overwrite our pom.xml, Makefile, and README.adoc with the upstream version
+          git checkout "tags/${upstream_version}" -- pom.xml Makefile README.adoc
+          git commit -m "update pom.xml, Makefile, and README.adoc from ${upstream_version}"
           # note: when rebasing, ours and theirs is flipped
           git merge --strategy=ort --strategy-option=theirs "tags/${upstream_version}"
 
@@ -122,13 +122,13 @@ jobs:
           git add Makefile
           git commit -m "update Makefile for ${{ env.UPSTREAM_VERSION }}"
 
-      - name: Update README.md
+      - name: Update README.adoc
         run: |
           # insert our "header" into the readme
           set +e
-          sed -i '1i # SQLite JDBC Driver Fork\nThis repo is a fork of [xerial/sqlite-jdbc](https://github.com/xerial/sqlite-jdbc), the only difference being the inclusion of the `decimal.c` extension in the jar.\n\n[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/)\n\n_Everything below this line comes from the original repository._\n' README.md
-          git add README.md
-          git commit -m "update README.md for ${{ env.UPSTREAM_VERSION }}"
+          sed -i '1i == SQLite JDBC Driver Fork\n\nThis repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.\n\nimage:https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/badge.svg[Maven Central,link=https://maven-badges.herokuapp.com/maven-central/dev.aga.sqlite/sqlite-jdbc/]\n\n_Everything below this line comes from the original repository._\n' README.adoc
+          git add README.adoc
+          git commit -m "update README.adoc for ${{ env.UPSTREAM_VERSION }}"
 
       - name: Check for Modified Files
         run: |
