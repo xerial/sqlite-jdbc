@@ -64,8 +64,6 @@ jobs:
           yq -i '.project.developers += {"+developer" : {"id": "austinarbor", "name": "Austin G. Arbor", "email": "aarbor989@gmail.com"}}' pom.xml -p=xml -o=xml
           # remove the + from the developer tag
           sed -i 's/+developer/developer/g' pom.xml
-          git add pom.xml
-          git commit -m "update pom.xml for ${{ steps.add-upstream-and-update.outputs.upstream_version }}"
 
       - name: Download and Update decimal.c
         run: |
@@ -89,11 +87,6 @@ jobs:
           # remove the ifdef block(s)
           perl -i -p0e 's/#ifdef _WIN32.*#endif//gms' src/main/ext/decimal.c
           rm -rf "${file_name}/"
-          # if decimal.c was modified, commit it
-          if [[ -n "$(git status --porcelain)" ]]; then
-            git add src/main/ext/decimal.c
-            git commit -m "update decimal.c from amalgamation ${dir_name}"
-          fi
 
       - name: Update Makefile
         run: |
@@ -111,16 +104,34 @@ jobs:
           # need \ to make the spacing work
           new_line="\      -DSQLITE_EXTRA_INIT=core_init \\\\"
           sed -i "${line_num}i ${new_line}" Makefile
-          git add Makefile
-          git commit -m "update Makefile for ${{ steps.add-upstream-and-update.outputs.upstream_version }}"
 
       - name: Update README.adoc
         run: |
           # insert our "header" into the readme
           set +e
           sed -i '1i == SQLite JDBC Driver Fork\n\nThis repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.\n\nimage:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&label=maven%20central[Maven Central,link=https://central.sonatype.com/search?q=g%3Adev.aga.sqlite+a%3Asqlite-jdbc]\n\n_Everything below this line comes from the original repository._\n' README.adoc
-          git add README.adoc
-          git commit -m "update README.adoc for ${{ steps.add-upstream-and-update.outputs.upstream_version }}"
+
+      - name: Create commit message
+        id: create-commit-message
+        run: |
+          message="update pom.xml, Makefile, decimal.c, and README.adoc for ${{ steps.add-upstream-and-update.outputs.upstream_version }}"
+          set +e
+          # if decimal.c wasn't updated, remove it from the commit message
+          git diff --exit-code src/main/ext/decimal.c
+          if [ $? -eq 0 ]; then
+            message="${message/decimal.c, /}"
+          fi
+          set -e
+          echo "commit_message=${message}" >> $GITHUB_OUTPUT
+
+      - name: Commit modified files
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: '[ "pom.xml", "README.adoc", "Makefile", "src/main/ext/decimal.c" ]'
+          message: ${{ steps.create-commit-message.outputs.commit_message }}
+          author_name: 'Austin G. Arbor'
+          author_email: '${{ vars.GIT_COMMIT_EMAIL }}'
+          push: false
 
       - name: Check for Modified Files
         run: |
