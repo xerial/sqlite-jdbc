@@ -217,7 +217,7 @@ jobs:
         run: |
           mvn --no-transfer-progress versions:set -DremoveSnapshot -DgenerateBackupPoms=false
           echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
-          sed -i -e "s/^\:project-version\:\ .*/:project-version: ${{ env.RELEASE_VERSION }}/g" README.adoc
+          sed -i -e "s/^\:project-version\:\ .*/:project-version: ${RELEASE_VERSION}/g" README.adoc
       # The sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
       - name: Publish to Apache Maven Central
         run: mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests

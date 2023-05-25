@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.aga.sqlite</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.41.2.2</version>
+  <version>3.42.0.0</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
   <url>https://github.com/austinarbor/sqlite-jdbc</url>
