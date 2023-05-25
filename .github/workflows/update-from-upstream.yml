@@ -184,7 +184,10 @@ jobs:
 
   test:
     name: Test latest build
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
     needs: [ update-from-upstream, build ]
     steps:
 
@@ -220,9 +223,11 @@ jobs:
           cp "target/sqlite-jdbc-${{ needs.update-from-upstream.outputs.upstream_version }}.jar" sqlite-jdbc-decimal-test/libs/
 
       - name: run tests
-        run: |
-          cd sqlite-jdbc-decimal-test
-          ./gradlew test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
+          build-root-directory: sqlite-jdbc-decimal-test
+          cache-read-only: ${{ github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/heads/releases/') }}
 
   push:
     name: Push new native libraries to branch
