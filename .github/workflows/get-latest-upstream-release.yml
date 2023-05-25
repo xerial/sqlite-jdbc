@@ -18,6 +18,12 @@ jobs:
           
           upstream_version="$(cat .fork-meta/upstream-version.txt)"
           echo "latest release from upstream is: ${upstream_version}"
+          
+          if [[ "${upstream_version}" == "null" ]]; then
+            echo "::error::upstream version not found!"
+            exit 1
+          fi
+          
           echo "upstream_version=${upstream_version}" >> "$GITHUB_OUTPUT"
 
       - name: Check for modified files
