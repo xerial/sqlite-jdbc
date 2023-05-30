@@ -1,6 +1,9 @@
 package org.sqlite;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import java.io.ByteArrayInputStream;
@@ -797,6 +800,20 @@ public class PrepStmtTest {
             assertThat(ps.getParameterMetaData().getParameterTypeName(1)).isEqualTo("REAL");
             assertThat(ps.getParameterMetaData().getParameterType(2)).isEqualTo(Types.REAL);
             assertThat(ps.getParameterMetaData().getParameterTypeName(2)).isEqualTo("REAL");
+        }
+    }
+
+    @Test
+    void getParameterTypeTest_when_no_parameter_set() throws SQLException {
+        stat.executeUpdate("create table t_int(i INT)");
+
+        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO t_int VALUES(?)")) {
+            assertThatThrownBy(() -> ps.getParameterMetaData().getParameterType(1))
+                    .isInstanceOf(SQLException.class)
+                    .hasMessage("No parameter has been set yet");
+            assertThatThrownBy(() -> ps.getParameterMetaData().getParameterTypeName(1))
+                    .isInstanceOf(SQLException.class)
+                    .hasMessage("No parameter has been set yet");
         }
     }
 }
