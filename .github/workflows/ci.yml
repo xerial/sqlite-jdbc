@@ -69,16 +69,15 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        java: [ 17, 20 ]
+        java: [ '17.0.7', '20.0.1' ]
         profiles: ['native', 'native,native-exported']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: '23.0.0'
           java-version: ${{ matrix.java }}
-          components: 'native-image'
+          distribution: 'graalvm-community'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test
         run: mvn --batch-mode --no-transfer-progress -P ${{ matrix.profiles }} integration-test
