@@ -345,9 +345,14 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
             }
         }
         if (type == LocalDateTime.class) {
-            Timestamp timestamp = getTimestamp(columnIndex);
-            if (timestamp != null) return type.cast(timestamp.toLocalDateTime());
-            else return null;
+            try {
+                Timestamp timestamp = getTimestamp(columnIndex);
+                if (timestamp != null) return type.cast(timestamp.toLocalDateTime());
+                else return null;
+            } catch (SQLException e) {
+                // If the FastDateParser failed, try parse it with LocalDateTime.
+                return type.cast(LocalDateTime.parse(getString(columnIndex)));
+            }
         }
 
         int columnType = safeGetColumnType(markCol(columnIndex));

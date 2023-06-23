@@ -20,6 +20,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -101,6 +104,28 @@ public class QueryTest {
 
         PreparedStatement stmt = conn.prepareStatement("insert into sample values(?)");
         stmt.setDate(1, new java.sql.Date(now.getTime()));
+    }
+
+    @Test
+    public void jdk8LocalDateTimeTest() throws Exception {
+        Connection conn = getConnection();
+
+        conn.createStatement().execute("create table sample (d1 date, d2 time, d3 datetime)");
+
+        LocalDateTime dateTime = LocalDateTime.of(2022, 1, 1, 12, 25, 15);
+        try (PreparedStatement stmt = conn.prepareStatement("insert into sample values(?, ?, ?)")) {
+            stmt.setObject(1, dateTime.toLocalDate());
+            stmt.setObject(2, dateTime.toLocalTime());
+            stmt.setObject(3, dateTime);
+            stmt.executeUpdate();
+        }
+
+        try (ResultSet rs = conn.createStatement().executeQuery("select * from sample")) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getObject(1, LocalDate.class)).isEqualTo(dateTime.toLocalDate());
+            assertThat(rs.getObject(2, LocalTime.class)).isEqualTo(dateTime.toLocalTime());
+            assertThat(rs.getObject(3, LocalDateTime.class)).isEqualTo(dateTime);
+        }
     }
 
     @Test
