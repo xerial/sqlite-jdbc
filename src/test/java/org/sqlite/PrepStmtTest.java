@@ -816,4 +816,18 @@ public class PrepStmtTest {
                     .hasMessage("No parameter has been set yet");
         }
     }
+
+    @Test
+    public void gh914_reuseExecute() throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT 1")) {
+            assertThat(ps.execute()).isTrue();
+            ResultSet rs = ps.getResultSet();
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.next()).isFalse();
+            assertThat(ps.getMoreResults()).isFalse();
+
+            ResultSet rs2 = ps.executeQuery();
+            assertThat(rs2).isNotNull();
+        }
+    }
 }
