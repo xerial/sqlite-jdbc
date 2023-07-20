@@ -10,7 +10,7 @@ Our SQLiteJDBC library, developed as a part of [http://www.xerial.org Xerial pro
 
 The original Zentus's SQLite JDBC driver http://www.zentus.com/sqlitejdbc/ itself is an excellent utility for using [https://www.sqlite.org SQLite] databases from Java language, and our SQLiteJDBC library also relies on its implementation. However, its pure-java version, which totally translates c/c++ codes of SQLite into Java, is significantly slower compared to its native version, which uses SQLite binaries compiled for each OS (win, mac, linux). 
 
-To use the native version of sqlite-jdbc, user had to set a path to the native codes (dll, jnilib, so files, which are JNDI C programs) by using command-line arguments, e.g., -Djava.library.path=(path to the dll, jnilib, etc.), or -Dorg.sqlite.lib.path, etc. This process was error-prone and bothersome to tell every user to set these variables. Our SQLiteJDBC library completely does away these inconveniences. 
+To use the native version of sqlite-jdbc, user had to set a path to the native codes (dll, dylib, so files, which are JNDI C programs) by using command-line arguments, e.g., -Djava.library.path=(path to the dll, dylib, etc.), or -Dorg.sqlite.lib.path, etc. This process was error-prone and bothersome to tell every user to set these variables. Our SQLiteJDBC library completely does away these inconveniences.
 
 Another difference is that we are keeping this SQLiteJDBC libray up-to-date to the newest version of SQLite engine, because we are one of the hottest users of this library. For example, SQLite JDBC is a core component of [http://utgenome.org/ UTGB (University of Tokyo Genome Browser) Toolkit], which is our utility to create personalized genome browsers.
 
@@ -254,7 +254,7 @@ Another sample code is [http://code.google.com/p/xerial/source/browse/src/test/j
 
 == How does SQLiteJDBC work? ==
 
-Our SQLite JDBC driver package (i.e., sqlite-jdbc-(VERSION).jar) contains three types of native SQLite libraries (sqlite-jdbc.dll, sqlite-jdbc.jnilib, sqlite-jdbc.so), each of them is compiled for Windows, Mac OS and Linux. An appropriate native library file is automatically extracted into your OS's temporary folder, when your program loads "org.sqlite.JDBC" driver.  
+Our SQLite JDBC driver package (i.e., sqlite-jdbc-(VERSION).jar) contains three types of native SQLite libraries (sqlite-jdbc.dll, sqlite-jdbc.dylib, sqlite-jdbc.so), each of them is compiled for Windows, Mac OS and Linux. An appropriate native library file is automatically extracted into your OS's temporary folder, when your program loads "org.sqlite.JDBC" driver.
 
 == Source Codes ==
  * Mercurial Repository: http://code.google.com/p/xerial/source/checkout?repo=sqlite 
@@ -308,7 +308,7 @@ If you are familier with [http://maven.apache.org Maven2], add the following XML
 == Using SQLiteJDBC with Tomcat6 Web Server ==
 Do not include sqlite-jdbc-(version).jar in WEB-INF/lib folder of your web application package, since multiple web applications hosted by the same Tomcat server cannot load the sqlite-jdbc native library more than once. That is the specification of JNI (Java Native Interface). You will observe UnsatisfiedLinkError exception with the message "no SQLite library found".
 
-Work-around of this problem is to put sqlite-jdbc-(version).jar file into (TOMCAT_HOME)/lib direcotry, in which multiple web applications can share the same native library file (.dll, .jnilib, .so) extracted from this sqlite-jdbc jar file. 
+Work-around of this problem is to put sqlite-jdbc-(version).jar file into (TOMCAT_HOME)/lib directory, in which multiple web applications can share the same native library file (.dll, .dylib, .so) extracted from this sqlite-jdbc jar file.
 
 If you are using Maven for your web application, set the dependency scope as 'provided', and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
 {{{
@@ -360,9 +360,9 @@ export PATH=$MAVEN_HOME/bin:$PATH
  * Mac OS X (10.4.10 Tiger ~ 10.5 Leopard)
    * dependency check
 {{{
-> otool -L libsqlitejdbc.jnilib  
-libsqlitejdbc.jnilib:
-        build/Darwin-i386/libsqlitejdbc.jnilib (compatibility version 0.0.0, current version 0.0.0)
+> otool -L libsqlitejdbc.dylib
+libsqlitejdbc.dylib:
+        build/Darwin-i386/libsqlitejdbc.dylib (compatibility version 0.0.0, current version 0.0.0)
         /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 88.3.9)
 }}}
  * Linux (glibc-2.5.12)

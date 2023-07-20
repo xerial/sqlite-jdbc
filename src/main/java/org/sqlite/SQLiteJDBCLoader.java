@@ -45,7 +45,7 @@ import org.sqlite.util.StringUtils;
 
 /**
  * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name, appropriately so that the
- * SQLite JDBC driver can find *.dll, *.jnilib and *.so files, according to the current OS (win,
+ * SQLite JDBC driver can find *.dll, *.dylib and *.so files, according to the current OS (win,
  * linux, mac).
  *
  * <p>The library files are automatically extracted from this project's package (JAR).

@@ -15,11 +15,7 @@ public class LibraryLoaderUtil {
 
     /** Get the OS-specific name of the sqlitejdbc native library. */
     public static String getNativeLibName() {
-        String nativeLibName = System.mapLibraryName("sqlitejdbc");
-        if (nativeLibName != null && nativeLibName.endsWith(".dylib")) {
-            nativeLibName = nativeLibName.replace(".dylib", ".jnilib");
-        }
-        return nativeLibName;
+        return System.mapLibraryName("sqlitejdbc");
     }
 
     public static boolean hasNativeLib(String path, String libraryName) {

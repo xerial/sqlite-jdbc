@@ -183,7 +183,7 @@ Mac-x86_CC        := gcc
 Mac-x86_STRIP     := strip -x
 Mac-x86_CCFLAGS    := -I$(JAVA_HOME)/include -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.4 -fvisibility=hidden
 Mac-x86_LINKFLAGS := -dynamiclib
-Mac-x86_LIBNAME   := libsqlitejdbc.jnilib
+Mac-x86_LIBNAME   := libsqlitejdbc.dylib
 Mac-x86_SQLITE_FLAGS  := -DSQLITE_ENABLE_LOCKING_STYLE=0
 
 HPUX-ia64_32_CC			:= cc
@@ -201,7 +201,7 @@ ifeq ($(wildcard MAC_SDK),)
 endif
 Mac-x86_64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.6 -fvisibility=hidden -Wno-implicit-function-declaration
 Mac-x86_64_LINKFLAGS := -dynamiclib 
-Mac-x86_64_LIBNAME   := libsqlitejdbc.jnilib
+Mac-x86_64_LIBNAME   := libsqlitejdbc.dylib
 Mac-x86_64_SQLITE_FLAGS  := 
 
 # Use a CROSS_PREFIX as the cross-triple clang is not available in crossbuild, see https://github.com/multiarch/crossbuild/blob/ad79cc84b6fb3fb1d09bc4a78719ef26f23bab85/Dockerfile#L134
@@ -211,7 +211,7 @@ Mac-aarch64_STRIP     := $(CROSS_PREFIX)strip -x
 MAC_SDK := /usr/osxcross/SDK/MacOSX11.3.sdk
 Mac-aarch64_CCFLAGS    := -I$(MAC_SDK)/System/Library/Frameworks/JavaVM.framework/Headers -Ilib/inc_mac -Os -fPIC -mmacosx-version-min=10.9 -fvisibility=hidden -Wno-implicit-function-declaration
 Mac-aarch64_LINKFLAGS  := -dynamiclib
-Mac-aarch64_LIBNAME    := libsqlitejdbc.jnilib
+Mac-aarch64_LIBNAME    := libsqlitejdbc.dylib
 Mac-aarch64_SQLITE_FLAGS := 
 
 Windows-x86_CC           := $(CROSS_PREFIX)gcc

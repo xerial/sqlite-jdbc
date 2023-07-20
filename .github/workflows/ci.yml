@@ -12,7 +12,7 @@ on:
       - '**.java'
       - '**.xml'
       - '**.so'
-      - '**.jnilib'
+      - '**.dylib'
       - '**.dll'
       - '.github/workflows/*.yml'
   push:
@@ -22,7 +22,7 @@ on:
       - '**.java'
       - '**.xml'
       - '**.so'
-      - '**.jnilib'
+      - '**.dylib'
       - '**.dll'
       - '.github/workflows/*.yml'
 
