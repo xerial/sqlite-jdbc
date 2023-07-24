@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.3</junit.version>
         <surefire.version>3.1.2</surefire.version>
-        <graalvm.version>22.3.2</graalvm.version>
+        <graalvm.version>23.0.1</graalvm.version>
         <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
     </properties>
 
