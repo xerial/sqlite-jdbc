@@ -98,7 +98,7 @@ id = 2
 == How does SQLiteJDBC work?
 
 Our SQLite JDBC driver package (i.e., `sqlite-jdbc-{project-version}.jar`) contains three
-types of native SQLite libraries (`sqlitejdbc.dll`, `sqlitejdbc.jnilib`, `sqlitejdbc.so`),
+types of native SQLite libraries (`sqlitejdbc.dll`, `sqlitejdbc.dylib`, `sqlitejdbc.so`),
 each of them is compiled for Windows, macOS and Linux. An appropriate native library
 file is automatically extracted into your OS's temporary folder, when your program
 loads `org.sqlite.JDBC` driver.
