@@ -122,7 +122,7 @@ public class SQLiteJDBCLoader {
      * Checks if the SQLite JDBC driver is set to pure Java mode.
      *
      * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
-     * @deprecated Pure Java nolonger supported
+     * @deprecated Pure Java no longer supported
      */
     @Deprecated
     public static boolean isPureJavaMode() {

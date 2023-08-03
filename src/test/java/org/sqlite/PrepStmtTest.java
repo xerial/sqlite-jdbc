@@ -310,7 +310,7 @@ public class PrepStmtTest {
     @Test
     public void tokens() throws SQLException {
         /* checks for a bug where a substring is read by the driver as the
-         * full original string, caused by my idiocyin assuming the
+         * full original string, caused by my idiocy in assuming the
          * pascal-style string was null terminated. Thanks Oliver Randschau. */
         StringTokenizer st = new StringTokenizer("one two three");
         st.nextToken();

@@ -55,7 +55,7 @@ public interface DatePrinter {
     String format(Calendar calendar);
 
     /**
-     * Formats a milliseond {@code long} value into the supplied {@code StringBuffer}.
+     * Formats a millisecond {@code long} value into the supplied {@code StringBuffer}.
      *
      * @param millis the millisecond value to format
      * @param buf the buffer to format into
