@@ -92,10 +92,6 @@ public class BackupTest {
 
     @Test
     public void memoryToDisk() throws Exception {
-        if (!SQLiteJDBCLoader.isNativeMode()) {
-            return; // skip this test in pure-java mode
-        }
-
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:");
                 Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("create table sample(id integer primary key autoincrement, name)");

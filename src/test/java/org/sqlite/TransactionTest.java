@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,14 +24,6 @@ public class TransactionTest {
     private Statement stat1, stat2, stat3;
 
     boolean done = false;
-
-    @BeforeAll
-    public static void forName() throws Exception {
-        System.out.println(
-                "running in "
-                        + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java")
-                        + " mode");
-    }
 
     @BeforeEach
     public void connect(@TempDir File tempDir) throws Exception {
