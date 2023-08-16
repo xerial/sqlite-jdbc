@@ -355,21 +355,6 @@ public class TransactionTest {
             assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
         }
 
-        // Misspelled deferred should be accepted for backwards compatibility
-        ds.setTransactionMode("DEFFERED");
-        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
-            assertThat(con.getConnectionConfig().getTransactionMode())
-                    .isEqualTo(TransactionMode.DEFERRED);
-            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
-        }
-
-        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
-            con.getConnectionConfig().setTransactionMode(TransactionMode.valueOf("DEFFERED"));
-            assertThat(con.getConnectionConfig().getTransactionMode())
-                    .isEqualTo(TransactionMode.DEFERRED);
-            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
-        }
-
         // immediate
         ds.setTransactionMode(TransactionMode.IMMEDIATE.name());
         try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
