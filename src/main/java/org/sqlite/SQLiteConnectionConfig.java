@@ -121,7 +121,7 @@ public class SQLiteConnectionConfig implements Cloneable {
 
     @SuppressWarnings("deprecation")
     public void setTransactionMode(SQLiteConfig.TransactionMode transactionMode) {
-        if (transactionMode == SQLiteConfig.TransactionMode.DEFFERED) {
+        if (transactionMode == SQLiteConfig.TransactionMode.DEFFERED) { // cspell:disable-line
             transactionMode = SQLiteConfig.TransactionMode.DEFERRED;
         }
         this.transactionMode = transactionMode;

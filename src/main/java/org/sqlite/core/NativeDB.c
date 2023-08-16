@@ -273,7 +273,7 @@ static sqlite3_value * tovalue(JNIEnv *env, jobject function, jint arg)
 
     // check we have any business being here
     if (arg  < 0) { throwex_msg(env, "negative arg out of range"); return 0; }
-    if (!function) { throwex_msg(env, "inconstent function"); return 0; }
+    if (!function) { throwex_msg(env, "inconsistent function"); return 0; }
 
     value_pntr = (*env)->GetLongField(env, function, func_value);
     numArgs = (*env)->GetIntField(env, function, func_args);
@@ -284,7 +284,7 @@ static sqlite3_value * tovalue(JNIEnv *env, jobject function, jint arg)
     return ((sqlite3_value**)toref(value_pntr))[arg];
 }
 
-/* called if an exception occured processing xFunc */
+/* called if an exception occurred processing xFunc */
 static void xFunc_error(sqlite3_context *context, JNIEnv *env)
 {
     jstring msg = 0;

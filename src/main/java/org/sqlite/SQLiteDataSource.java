@@ -277,7 +277,7 @@ public class SQLiteDataSource implements DataSource {
      *     https://www.sqlite.org/pragma.html#pragma_journal_size_limit</a>
      */
     public void setJournalSizeLimit(int limit) {
-        config.setJounalSizeLimit(limit);
+        config.setJournalSizeLimit(limit);
     }
 
     /**
@@ -343,12 +343,12 @@ public class SQLiteDataSource implements DataSource {
     /**
      * Set READ UNCOMMITTED isolation
      *
-     * @param useReadUncommitedIsolationMode True to turn on; false to turn off.
+     * @param useReadUncommittedIsolationMode True to turn on; false to turn off.
      * @see <a
      *     href="https://www.sqlite.org/pragma.html#pragma_read_uncommitted">https://www.sqlite.org/pragma.html#pragma_read_uncommitted</a>
      */
-    public void setReadUncommited(boolean useReadUncommitedIsolationMode) {
-        config.setReadUncommited(useReadUncommitedIsolationMode);
+    public void setReadUncommitted(boolean useReadUncommittedIsolationMode) {
+        config.setReadUncommitted(useReadUncommittedIsolationMode);
     }
 
     /**
@@ -356,7 +356,7 @@ public class SQLiteDataSource implements DataSource {
      * affects the execution of all statements prepared using the database connection, including
      * those prepared before the setting was changed.
      *
-     * @param enable True to enable; fase to disable.
+     * @param enable True to enable; false to disable.
      * @see <a
      *     href="https://www.sqlite.org/pragma.html#pragma_recursive_triggers">https://www.sqlite.org/pragma.html#pragma_recursive_triggers</a>
      */
@@ -369,7 +369,7 @@ public class SQLiteDataSource implements DataSource {
      * statements without an ORDER BY clause to emit their results in the reverse order of what they
      * normally would.
      *
-     * @param enable True to enable; fase to disable.
+     * @param enable True to enable; false to disable.
      * @see <a
      *     href="https://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects">https://www.sqlite.org/pragma.html#pragma_reverse_unordered_selects</a>
      */
@@ -381,7 +381,7 @@ public class SQLiteDataSource implements DataSource {
      * Enables or disables the short_column_names flag. This flag affects the way SQLite names
      * columns of data returned by SELECT statements.
      *
-     * @param enable True to enable; fase to disable.
+     * @param enable True to enable; false to disable.
      * @see <a
      *     href="https://www.sqlite.org/pragma.html#pragma_short_column_names">https://www.sqlite.org/pragma.html#pragma_short_column_names</a>
      * @see <a
