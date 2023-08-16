@@ -306,23 +306,9 @@ public class StatementTest {
         ResultSet rs;
         stat.executeUpdate("create table t1 (c1 integer primary key, v);");
         stat.executeUpdate("insert into t1 (v) values ('red');");
-        rs = stat.getGeneratedKeys();
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getInt(1)).isEqualTo(1);
-        rs.close();
-        stat.executeUpdate("insert into t1 (v) values ('blue');");
-        rs = stat.getGeneratedKeys();
-        assertThat(rs.next()).isTrue();
-        assertThat(rs.getInt(1)).isEqualTo(2);
-        rs.close();
 
-        // closing one statement shouldn't close shared db metadata object.
-        stat.close();
-        Statement stat2 = conn.createStatement();
-        rs = stat2.getGeneratedKeys();
-        assertThat(rs).isNotNull();
-        rs.close();
-        stat2.close();
+        assertThatExceptionOfType(SQLFeatureNotSupportedException.class)
+                .isThrownBy(() -> stat.getGeneratedKeys());
     }
 
     @Test
