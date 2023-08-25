@@ -66,7 +66,7 @@ public class SavepointTest {
 
         assertThat(stat1.executeUpdate("insert into trans values (4);")).isEqualTo(1);
 
-        // transaction not yet commited, conn1 can see, conn2 can not
+        // transaction not yet committed, conn1 can see, conn2 can not
         rs = stat1.executeQuery(countSql);
         assertThat(rs.next()).isTrue();
         assertThat(rs.getInt(1)).isEqualTo(1);

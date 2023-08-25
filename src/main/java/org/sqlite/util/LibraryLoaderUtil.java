@@ -3,6 +3,9 @@ package org.sqlite.util;
 import org.sqlite.SQLiteJDBCLoader;
 
 public class LibraryLoaderUtil {
+
+    public static final String NATIVE_LIB_BASE_NAME = "sqlitejdbc";
+
     /**
      * Get the OS-specific resource directory within the jar, where the relevant sqlitejdbc native
      * library is located.
@@ -15,11 +18,7 @@ public class LibraryLoaderUtil {
 
     /** Get the OS-specific name of the sqlitejdbc native library. */
     public static String getNativeLibName() {
-        String nativeLibName = System.mapLibraryName("sqlitejdbc");
-        if (nativeLibName != null && nativeLibName.endsWith(".dylib")) {
-            nativeLibName = nativeLibName.replace(".dylib", ".jnilib");
-        }
-        return nativeLibName;
+        return System.mapLibraryName(NATIVE_LIB_BASE_NAME);
     }
 
     public static boolean hasNativeLib(String path, String libraryName) {

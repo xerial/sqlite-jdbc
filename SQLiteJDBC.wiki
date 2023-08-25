@@ -4,15 +4,15 @@
 
 SQLite JDBC driver developed by [wiki:leo Taro L. Saito] is an extension of [http://www.zentus.com/sqlitejdbc Zentus's SQLite JDBC driver] that enables Java to access [https://www.sqlite.org SQLite] database files.
 
-Our SQLiteJDBC library, developed as a part of [http://www.xerial.org Xerial project], requires no configuration since all native libraries for Windows, Mac OS X, Linux and pure-java SQLite, which works in any OS enviroment, are assembled into a single JAR (Java Archive) file. The usage is quite simple; [#Download Download] our sqlite-jdbc library, then append the library (JAR file) to your class path. See [#Usage the sample code]. 
+Our SQLiteJDBC library, developed as a part of [http://www.xerial.org Xerial project], requires no configuration since all native libraries for Windows, Mac OS X, Linux and pure-java SQLite, which works in any OS environment, are assembled into a single JAR (Java Archive) file. The usage is quite simple; [#Download Download] our sqlite-jdbc library, then append the library (JAR file) to your class path. See [#Usage the sample code]. 
 
 == What is different from Zentus's SQLite JDBC? ==
 
 The original Zentus's SQLite JDBC driver http://www.zentus.com/sqlitejdbc/ itself is an excellent utility for using [https://www.sqlite.org SQLite] databases from Java language, and our SQLiteJDBC library also relies on its implementation. However, its pure-java version, which totally translates c/c++ codes of SQLite into Java, is significantly slower compared to its native version, which uses SQLite binaries compiled for each OS (win, mac, linux). 
 
-To use the native version of sqlite-jdbc, user had to set a path to the native codes (dll, jnilib, so files, which are JNDI C programs) by using command-line arguments, e.g., -Djava.library.path=(path to the dll, jnilib, etc.), or -Dorg.sqlite.lib.path, etc. This process was error-prone and bothersome to tell every user to set these variables. Our SQLiteJDBC library completely does away these inconveniences. 
+To use the native version of sqlite-jdbc, user had to set a path to the native codes (dll, dylib, so files, which are JNDI C programs) by using command-line arguments, e.g., -Djava.library.path=(path to the dll, dylib, etc.), or -Dorg.sqlite.lib.path, etc. This process was error-prone and bothersome to tell every user to set these variables. Our SQLiteJDBC library completely does away these inconveniences.
 
-Another difference is that we are keeping this SQLiteJDBC libray up-to-date to the newest version of SQLite engine, because we are one of the hottest users of this library. For example, SQLite JDBC is a core component of [http://utgenome.org/ UTGB (University of Tokyo Genome Browser) Toolkit], which is our utility to create personalized genome browsers.
+Another difference is that we are keeping this SQLiteJDBC library up-to-date to the newest version of SQLite engine, because we are one of the hottest users of this library. For example, SQLite JDBC is a core component of [http://utgenome.org/ UTGB (University of Tokyo Genome Browser) Toolkit], which is our utility to create personalized genome browsers.
 
 == Public Discussion Forum == 
  * Post bug reports or feature requests to [http://groups.google.com/group/xerial?hl=en Xerial Public Discussion Group] 
@@ -22,7 +22,7 @@ Another difference is that we are keeping this SQLiteJDBC libray up-to-date to t
   * 2010 April 3rd: beta release of sqlite-jdbc-3.6.23.1-SNAPSHOT: http://www.xerial.org/maven/repository/snapshot/org/xerial/sqlite-jdbc/
     * Added online backup/restore functions. Syntax: backup to (file name),  restore from (file name).
   * 2009 December 10th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.20.1/ sqlite-jdbc-3.6.20.1] release. 
-    * Read-only conection, recursive trigger, foreign key validation support etc. using SQLiteConfig class.
+    * Read-only connection, recursive trigger, foreign key validation support etc. using SQLiteConfig class.
 {{{
 #!java
 SQLiteConfig config = new SQLiteConfig();
@@ -37,7 +37,7 @@ Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.to
   * 2009 August 19th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.17.1/ sqlite-jdbc-3.6.17.1] released. 
   * 2009 July 2nd: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.16/ sqlite-jdbc-3.6.16] release. 
   * 2009 June 4th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.2/ sqlite-jdbc-3.6.14.2] released. 
-  * 2009 May 19th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.1/ sqlite-jdbc-3.6.14.1] released. This version supports "jdbc:sqlite::resource:" syntax to access read-only DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the [http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76 detailes]) 
+  * 2009 May 19th: [http://www.xerial.org/maven/repository/artifact/org/xerial/sqlite-jdbc/3.6.14.1/ sqlite-jdbc-3.6.14.1] released. This version supports "jdbc:sqlite::resource:" syntax to access read-only DB files contained in JAR archives, or external resources specified via URL, local files address etc. (see also the [http://groups.google.com/group/xerial/browse_thread/thread/39acb38f99eb2469/fc6afceabeaa0f76?lnk=gst&q=resource#fc6afceabeaa0f76 details]) 
 
   * 2009 February 18th: sqlite-jdbc-3.6.11 released. 
     * Fixed a bug in !PrepStmt, which does not clear the batch contents after executeBatch(). [http://groups.google.com/group/xerial/browse_thread/thread/1fa83eb36f6d5dab Discussion].
@@ -71,7 +71,7 @@ Connection conn = DriverManager.getConnection("jdbc:sqlite:sample.db", config.to
  * 2008 Mar. 18th: sqlite-jdbc-3.5.7 released. This version corresponds to [https://www.sqlite.org/releaselog/3_5_7.html SQLite 3.5.7].
 
  * 2008 Mar. 10th: sqlite-jdbc-v042 released. Corresponding to SQLite 3.5.6, which integrates FTS3 (full text search). 
- * 2008 Jan. 31st: sqlite-jdbc-v038.4 released.   SQLiteJDBCLoder.initialize() is no longer requried. 
+ * 2008 Jan. 31st: sqlite-jdbc-v038.4 released.   SQLiteJDBCLoder.initialize() is no longer required. 
  * 2008 Jan. 11th: The Jar files for Windows, Mac OS X and Linux are packed into a single Jar file! So, no longer need to use an OS-specific jar file.
  * 2007 Dec. 31th: Upgraded to sqlitejdbc-v038
 
@@ -254,7 +254,7 @@ Another sample code is [http://code.google.com/p/xerial/source/browse/src/test/j
 
 == How does SQLiteJDBC work? ==
 
-Our SQLite JDBC driver package (i.e., sqlite-jdbc-(VERSION).jar) contains three types of native SQLite libraries (sqlite-jdbc.dll, sqlite-jdbc.jnilib, sqlite-jdbc.so), each of them is compiled for Windows, Mac OS and Linux. An appropriate native library file is automatically extracted into your OS's temporary folder, when your program loads "org.sqlite.JDBC" driver.  
+Our SQLite JDBC driver package (i.e., sqlite-jdbc-(VERSION).jar) contains three types of native SQLite libraries (sqlite-jdbc.dll, sqlite-jdbc.dylib, sqlite-jdbc.so), each of them is compiled for Windows, Mac OS and Linux. An appropriate native library file is automatically extracted into your OS's temporary folder, when your program loads "org.sqlite.JDBC" driver.
 
 == Source Codes ==
  * Mercurial Repository: http://code.google.com/p/xerial/source/checkout?repo=sqlite 
@@ -292,7 +292,7 @@ It does not require you to:
 See License FAQ http://www.apache.org/foundation/licence-FAQ.html for more details.
 
 == Using SQLiteJDBC with Maven2 ==
-If you are familier with [http://maven.apache.org Maven2], add the following XML fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/ Maven's central repository]. 
+If you are familiar with [http://maven.apache.org Maven2], add the following XML fragments into your pom.xml file. With those settings, your Maven will automatically download our SQLiteJDBC library into your local Maven repository, since our sqlite-jdbc libraries are synchronized with the [http://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/ Maven's central repository]. 
 
 {{{
 #!xml
@@ -308,7 +308,7 @@ If you are familier with [http://maven.apache.org Maven2], add the following XML
 == Using SQLiteJDBC with Tomcat6 Web Server ==
 Do not include sqlite-jdbc-(version).jar in WEB-INF/lib folder of your web application package, since multiple web applications hosted by the same Tomcat server cannot load the sqlite-jdbc native library more than once. That is the specification of JNI (Java Native Interface). You will observe UnsatisfiedLinkError exception with the message "no SQLite library found".
 
-Work-around of this problem is to put sqlite-jdbc-(version).jar file into (TOMCAT_HOME)/lib direcotry, in which multiple web applications can share the same native library file (.dll, .jnilib, .so) extracted from this sqlite-jdbc jar file. 
+Work-around of this problem is to put sqlite-jdbc-(version).jar file into (TOMCAT_HOME)/lib directory, in which multiple web applications can share the same native library file (.dll, .dylib, .so) extracted from this sqlite-jdbc jar file.
 
 If you are using Maven for your web application, set the dependency scope as 'provided', and manually put the SQLite JDBC jar file into (TOMCAT_HOME)/lib folder.
 {{{
@@ -360,9 +360,9 @@ export PATH=$MAVEN_HOME/bin:$PATH
  * Mac OS X (10.4.10 Tiger ~ 10.5 Leopard)
    * dependency check
 {{{
-> otool -L libsqlitejdbc.jnilib  
-libsqlitejdbc.jnilib:
-        build/Darwin-i386/libsqlitejdbc.jnilib (compatibility version 0.0.0, current version 0.0.0)
+> otool -L libsqlitejdbc.dylib
+libsqlitejdbc.dylib:
+        build/Darwin-i386/libsqlitejdbc.dylib (compatibility version 0.0.0, current version 0.0.0)
         /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 88.3.9)
 }}}
  * Linux (glibc-2.5.12)

@@ -45,7 +45,7 @@ import org.sqlite.util.StringUtils;
 
 /**
  * Set the system properties, org.sqlite.lib.path, org.sqlite.lib.name, appropriately so that the
- * SQLite JDBC driver can find *.dll, *.jnilib and *.so files, according to the current OS (win,
+ * SQLite JDBC driver can find *.dll, *.dylib and *.so files, according to the current OS (win,
  * linux, mac).
  *
  * <p>The library files are automatically extracted from this project's package (JAR).
@@ -122,7 +122,7 @@ public class SQLiteJDBCLoader {
      * Checks if the SQLite JDBC driver is set to pure Java mode.
      *
      * @return True if the SQLite JDBC driver is set to pure Java mode; false otherwise.
-     * @deprecated Pure Java nolonger supported
+     * @deprecated Pure Java no longer supported
      */
     @Deprecated
     public static boolean isPureJavaMode() {
@@ -298,6 +298,17 @@ public class SQLiteJDBCLoader {
         }
     }
 
+    private static boolean loadNativeLibraryJdk() {
+        try {
+            System.loadLibrary(LibraryLoaderUtil.NATIVE_LIB_BASE_NAME);
+            return true;
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("Failed to load native library through System.loadLibrary");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     /**
      * Loads SQLite native library using given path and name of the library.
      *
@@ -356,6 +367,12 @@ public class SQLiteJDBCLoader {
             } else {
                 triedPaths.add(ldPath);
             }
+        }
+
+        // As an ultimate last resort, try loading through System.loadLibrary
+        if (loadNativeLibraryJdk()) {
+            extracted = true;
+            return;
         }
 
         extracted = false;

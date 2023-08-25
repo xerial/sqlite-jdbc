@@ -335,6 +335,7 @@ class ResultSetTest {
         stat.executeUpdate("insert into datetime_test values ('2021-11-09 11:20:58')");
         stat.executeUpdate("insert into datetime_test values ('2021-11-09')");
         stat.executeUpdate("insert into datetime_test values ('11:20:58')");
+        stat.executeUpdate("insert into datetime_test values (NULL)");
 
         ResultSet rs = stat.executeQuery("select * from datetime_test");
 
@@ -349,6 +350,11 @@ class ResultSetTest {
 
         rs.next();
         assertThat(rs.getObject(1, LocalTime.class)).isEqualTo(LocalTime.of(11, 20, 58));
+
+        rs.next();
+        assertThat(rs.getObject(1, LocalDate.class)).isNull();
+        assertThat(rs.getObject(1, LocalTime.class)).isNull();
+        assertThat(rs.getObject(1, LocalDateTime.class)).isNull();
     }
 
     @Test

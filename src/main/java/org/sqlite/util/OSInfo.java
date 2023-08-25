@@ -63,11 +63,11 @@ public class OSInfo {
         archMapping.put("em64t", X86_64);
         archMapping.put("universal", X86_64); // Needed for openjdk7 in Mac
 
-        // Itenium 64-bit mappings
+        // Itanium 64-bit mappings
         archMapping.put(IA64, IA64);
         archMapping.put("ia64w", IA64);
 
-        // Itenium 32-bit mappings, usually an HP-UX construct
+        // Itanium 32-bit mappings, usually an HP-UX construct
         archMapping.put(IA64_32, IA64_32);
         archMapping.put("ia64n", IA64_32);
 
@@ -200,7 +200,7 @@ public class OSInfo {
                 return "armv7";
             }
 
-            // For java7, we stil need to if run some shell commands to determine ABI of JVM
+            // For java7, we still need to run some shell commands to determine ABI of JVM
             String javaHome = System.getProperty("java.home");
             try {
                 // determine if first JVM found uses ARM hard-float ABI

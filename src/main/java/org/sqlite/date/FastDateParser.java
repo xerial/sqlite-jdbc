@@ -322,7 +322,7 @@ public class FastDateParser implements DateParser, Serializable {
     }
 
     /**
-     * This implementation updates the ParsePosition if the parse succeeeds. However, unlike the
+     * This implementation updates the ParsePosition if the parse succeeds. However, unlike the
      * method {@link java.text.SimpleDateFormat#parse(String, ParsePosition)} it is not able to set
      * the error Index - i.e. {@link ParsePosition#getErrorIndex()} - if the parse fails.
      *
