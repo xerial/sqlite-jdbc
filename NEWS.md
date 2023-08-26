@@ -11,7 +11,7 @@
         * Bring back Linux armv6 support (#628)
         * FreeBSD x86 and x86_64 (#639)
         * Dropped DragonFlyBSD support (#641)
-    * Other Intenal Fixes
+    * Other Internal Fixes
         * Add reflect-config, jni-config and native-image.properties to graalvm native image compilation (#631)
         * Fix multipleClassLoader test when directory is renamed (#647)
         * CI tests for Windows and MacOS (#645)
@@ -40,7 +40,7 @@
     * Enable SQLITE_MAX_MMAP_SIZE compile option again.
     * Fixes issues when using Arm Cortex A8, A9 (32-bit architecture)
 *   2020-07-15: sqlite-jdbc-3.32.3.1
-    * Remove SQLITE_MAX_MMAP_SIZE compile option, which might be causing performance issuess.
+    * Remove SQLITE_MAX_MMAP_SIZE compile option, which might be causing performance issues.
 *   2020-06-18: sqlite-jdbc-3.32.3
     * Fix multiple CVE reported issues https://github.com/xerial/sqlite-jdbc/issues/501
 *   2020-05-04: sqlite-jdbc-3.31.1
@@ -183,7 +183,7 @@
         If you have already downloaded 3.6.4, please obtain the latest one on the download page.
 *   2008 October 16th: sqlite-jdbc-3.6.4 released.
     *   Changes from SQLite 3.6.3: <https://www.sqlite.org/releaselog/3_6_4.html>
-    *   `R*-Tree` index and `UPDATE/DELTE` syntax with `LIMIT` clause are available from this build.
+    *   `R*-Tree` index and `UPDATE/DELETE` syntax with `LIMIT` clause are available from this build.
 *   2008 October 14th: sqlite-jdbc-3.6.3 released. Compatible with SQLite 3.6.3.
 *   2008 September 18th: sqlite-jdbc-3.6.2 released. Compatible with SQLite 3.6.2
     and contains pure-java and native versions.

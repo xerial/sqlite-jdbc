@@ -58,7 +58,8 @@ public abstract class JDBC3Connection extends SQLiteConnection {
                 getDatabase()._exec("PRAGMA query_only = true;");
             } else {
                 if (getCurrentTransactionMode() == TransactionMode.DEFERRED
-                        || this.getCurrentTransactionMode() == TransactionMode.DEFFERED) {
+                        || this.getCurrentTransactionMode()
+                                == TransactionMode.DEFFERED) { // cspell:disable-line
                     if (isFirstStatementExecuted()) {
                         // first statement was already executed; cannot upgrade to write
                         // transaction!

@@ -103,7 +103,7 @@ public class ExtendedCommand {
             int rc = db.backup(srcDB, destFile, null);
 
             if (rc != SQLiteErrorCode.SQLITE_OK.code) {
-                throw DB.newSQLException(rc, "Restore failed");
+                throw DB.newSQLException(rc, "Backup failed");
             }
         }
     }

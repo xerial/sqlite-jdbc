@@ -12,7 +12,7 @@ on:
       - '**.java'
       - '**.xml'
       - '**.so'
-      - '**.jnilib'
+      - '**.dylib'
       - '**.dll'
       - '.github/workflows/*.yml'
   push:
@@ -22,7 +22,7 @@ on:
       - '**.java'
       - '**.xml'
       - '**.so'
-      - '**.jnilib'
+      - '**.dylib'
       - '**.dll'
       - '.github/workflows/*.yml'
 
@@ -69,21 +69,15 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        java: [ 11, 17 ]
+        java: [ '17', '20' ]
         profiles: ['native', 'native,native-exported']
-        exclude: # Exclusions can be removed from GraalVM 23.0: https://github.com/oracle/graal/pull/5932
-          - os: ubuntu-latest
-            profiles: 'native,native-exported'
-          - os: macos-latest
-            profiles: 'native,native-exported'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: '22.3.0'
           java-version: ${{ matrix.java }}
-          components: 'native-image'
+          distribution: 'graalvm-community'
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test
         run: mvn --batch-mode --no-transfer-progress -P ${{ matrix.profiles }} integration-test
@@ -216,7 +210,8 @@ jobs:
         if: inputs.perform_release
         run: |
           mvn --no-transfer-progress versions:set -DremoveSnapshot -DgenerateBackupPoms=false
-          echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
+          RELEASE_VERSION=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" | tee -a $GITHUB_ENV
           sed -i -e "s/^\:project-version\:\ .*/:project-version: ${RELEASE_VERSION}/g" README.adoc
       # The sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
       - name: Publish to Apache Maven Central

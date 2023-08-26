@@ -324,7 +324,9 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == Timestamp.class) return type.cast(getTimestamp(columnIndex));
         if (type == LocalDate.class) {
             try {
-                return type.cast(getDate(columnIndex).toLocalDate());
+                Date date = getDate(columnIndex);
+                if (date != null) return type.cast(date.toLocalDate());
+                else return null;
             } catch (SQLException sqlException) {
                 // If the FastDateParser failed, try parse it with LocalDate.
                 // It's a workaround for a value like '2022-12-1' (i.e no time presents).
@@ -333,7 +335,9 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         }
         if (type == LocalTime.class) {
             try {
-                return type.cast(getTime(columnIndex).toLocalTime());
+                Time time = getTime(columnIndex);
+                if (time != null) return type.cast(time.toLocalTime());
+                else return null;
             } catch (SQLException sqlException) {
                 // If the FastDateParser failed, try parse it with LocalTime.
                 // It's a workaround for a value like '11:22:22' (i.e no date presents).
@@ -341,7 +345,14 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
             }
         }
         if (type == LocalDateTime.class) {
-            return type.cast(getTimestamp(columnIndex).toLocalDateTime());
+            try {
+                Timestamp timestamp = getTimestamp(columnIndex);
+                if (timestamp != null) return type.cast(timestamp.toLocalDateTime());
+                else return null;
+            } catch (SQLException e) {
+                // If the FastDateParser failed, try parse it with LocalDateTime.
+                return type.cast(LocalDateTime.parse(getString(columnIndex)));
+            }
         }
 
         int columnType = safeGetColumnType(markCol(columnIndex));

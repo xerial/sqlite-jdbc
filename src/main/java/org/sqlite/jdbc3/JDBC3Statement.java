@@ -19,7 +19,7 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     private int queryTimeout; // in seconds, as per the JDBC spec
     protected long updateCount;
-    private boolean exhaustedResults = false;
+    protected boolean exhaustedResults = false;
 
     // PUBLIC INTERFACE /////////////////////////////////////////////
 

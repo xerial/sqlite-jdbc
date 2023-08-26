@@ -44,6 +44,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         checkOpen();
         rs.close();
         pointer.safeRunConsume(DB::reset);
+        exhaustedResults = false;
 
         if (this.conn instanceof JDBC3Connection) {
             ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
@@ -74,6 +75,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
         rs.close();
         pointer.safeRunConsume(DB::reset);
+        exhaustedResults = false;
 
         if (this.conn instanceof JDBC3Connection) {
             ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
@@ -110,6 +112,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
         rs.close();
         pointer.safeRunConsume(DB::reset);
+        exhaustedResults = false;
 
         if (this.conn instanceof JDBC3Connection) {
             ((JDBC3Connection) this.conn).tryEnforceTransactionMode();

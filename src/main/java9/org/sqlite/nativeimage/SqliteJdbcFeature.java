@@ -58,6 +58,7 @@ public class SqliteJdbcFeature implements Feature {
             // the user is responsible to make sure the created native-image can actually find it.
             Path targetPath = Paths.get(exportLocation, libraryName);
             try (InputStream in = SQLiteJDBCLoader.class.getResourceAsStream(libraryResource)) {
+                Files.createDirectories(targetPath.getParent());
                 Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new SqliteJdbcFeatureException(e);
