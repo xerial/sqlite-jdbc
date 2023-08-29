@@ -43,9 +43,6 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
             getVersionColumns = null,
             getColumnPrivileges = null;
 
-    /** Used to save generating a new statement every call. */
-    protected PreparedStatement getGeneratedKeys = null;
-
     /**
      * Constructor that applies the Connection object.
      *
@@ -55,6 +52,11 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
         this.conn = conn;
     }
 
+    /**
+     * @deprecated Not exactly sure what this function does, as it is not implementing any
+     *     interface, and is not used anywhere in the code. Deprecated since 3.43.0.0.
+     */
+    @Deprecated
     public abstract ResultSet getGeneratedKeys() throws SQLException;
 
     /** @throws SQLException */
@@ -122,9 +124,6 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
             if (getColumnPrivileges != null) {
                 getColumnPrivileges.close();
             }
-            if (getGeneratedKeys != null) {
-                getGeneratedKeys.close();
-            }
 
             getTables = null;
             getTableTypes = null;
@@ -143,7 +142,6 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
             getBestRowIdentifier = null;
             getVersionColumns = null;
             getColumnPrivileges = null;
-            getGeneratedKeys = null;
         } finally {
             conn = null;
         }

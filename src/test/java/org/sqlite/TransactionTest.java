@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,14 +24,6 @@ public class TransactionTest {
     private Statement stat1, stat2, stat3;
 
     boolean done = false;
-
-    @BeforeAll
-    public static void forName() throws Exception {
-        System.out.println(
-                "running in "
-                        + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java")
-                        + " mode");
-    }
 
     @BeforeEach
     public void connect(@TempDir File tempDir) throws Exception {
@@ -350,21 +341,6 @@ public class TransactionTest {
 
         ds.setTransactionMode(TransactionMode.DEFERRED.name());
         try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
-            assertThat(con.getConnectionConfig().getTransactionMode())
-                    .isEqualTo(TransactionMode.DEFERRED);
-            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
-        }
-
-        // Misspelled deferred should be accepted for backwards compatibility
-        ds.setTransactionMode("DEFFERED");
-        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
-            assertThat(con.getConnectionConfig().getTransactionMode())
-                    .isEqualTo(TransactionMode.DEFERRED);
-            assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");
-        }
-
-        try (SQLiteConnection con = (SQLiteConnection) ds.getConnection()) {
-            con.getConnectionConfig().setTransactionMode(TransactionMode.valueOf("DEFFERED"));
             assertThat(con.getConnectionConfig().getTransactionMode())
                     .isEqualTo(TransactionMode.DEFERRED);
             assertThat(con.getConnectionConfig().transactionPrefix()).isEqualTo("begin;");

@@ -52,7 +52,6 @@ public class DBMetaDataTest {
         ResultSet rs = meta.getTables(null, null, null, null);
         assertThat(rs).isNotNull();
 
-        stat.getGeneratedKeys().close();
         stat.close();
 
         assertThat(rs.next()).isTrue();
