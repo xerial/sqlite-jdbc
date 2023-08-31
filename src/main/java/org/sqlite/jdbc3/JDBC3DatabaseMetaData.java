@@ -556,7 +556,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
 
     /** @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys() */
     public boolean supportsGetGeneratedKeys() {
-        return true;
+        return false;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsGroupBy() */
@@ -1926,15 +1926,12 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
     }
 
     /**
-     * @return Generated row id of the last INSERT command.
-     * @throws SQLException
+     * @deprecated Not exactly sure what this function does, as it is not implementing any
+     *     interface, and is not used anywhere in the code. Deprecated since 3.43.0.0.
      */
+    @Deprecated
     public ResultSet getGeneratedKeys() throws SQLException {
-        if (getGeneratedKeys == null) {
-            getGeneratedKeys = conn.prepareStatement("select last_insert_rowid();");
-        }
-
-        return getGeneratedKeys.executeQuery();
+        throw new SQLFeatureNotSupportedException("not implemented by SQLite JDBC driver");
     }
 
     /** Not implemented yet. */

@@ -12,7 +12,6 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,14 +24,6 @@ import org.junit.jupiter.api.io.TempDir;
 public class SavepointTest {
     private Connection conn1, conn2;
     private Statement stat1, stat2;
-
-    @BeforeAll
-    public static void forName() throws Exception {
-        System.out.println(
-                "running in "
-                        + (SQLiteJDBCLoader.isNativeMode() ? "native" : "pure-java")
-                        + " mode");
-    }
 
     @BeforeEach
     public void connect(@TempDir File tempDir) throws Exception {

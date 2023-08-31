@@ -1084,9 +1084,6 @@ public class SQLiteConfig {
     }
 
     public enum TransactionMode implements PragmaValue {
-        /** @deprecated Use {@code DEFERRED} instead. */
-        @Deprecated
-        DEFFERED, // cspell:disable-line
         DEFERRED,
         IMMEDIATE,
         EXCLUSIVE;
@@ -1096,9 +1093,6 @@ public class SQLiteConfig {
         }
 
         public static TransactionMode getMode(String mode) {
-            if ("DEFFERED".equalsIgnoreCase(mode)) { // cspell:disable-line
-                return DEFERRED;
-            }
             return TransactionMode.valueOf(mode.toUpperCase());
         }
     }
