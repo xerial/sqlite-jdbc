@@ -69,7 +69,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        java: [ '17', '20' ]
+        java: [ '17', '21' ]
         profiles: ['native', 'native,native-exported']
     runs-on: ${{ matrix.os }}
     steps:
