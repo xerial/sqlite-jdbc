@@ -8,6 +8,8 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
 import org.sqlite.SQLiteConnection;
@@ -92,8 +94,10 @@ public abstract class JDBC3Statement extends CoreStatement {
     }
 
     static class BackupObserver implements ProgressObserver {
+        private static final Logger logger = LoggerFactory.getLogger(BackupObserver.class);
+
         public void progress(int remaining, int pageCount) {
-            System.out.printf("remaining:%d, page count:%d%n", remaining, pageCount);
+            logger.atInfo().log("remaining:{}, page count:{}", remaining, pageCount);
         }
     }
 

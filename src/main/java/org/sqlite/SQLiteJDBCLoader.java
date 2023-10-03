@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sqlite.util.LibraryLoaderUtil;
 import org.sqlite.util.OSInfo;
 import org.sqlite.util.StringUtils;
@@ -55,6 +57,7 @@ import org.sqlite.util.StringUtils;
  * @author leo
  */
 public class SQLiteJDBCLoader {
+    private static final Logger logger = LoggerFactory.getLogger(SQLiteJDBCLoader.class);
 
     private static final String LOCK_EXT = ".lck";
     private static boolean extracted = false;
@@ -98,14 +101,14 @@ public class SQLiteJDBCLoader {
                                     try {
                                         Files.delete(nativeLib);
                                     } catch (Exception e) {
-                                        System.err.println(
-                                                "Failed to delete old native lib: "
-                                                        + e.getMessage());
+                                        logger.atError()
+                                                .setCause(e)
+                                                .log("Failed to delete old native lib");
                                     }
                                 }
                             });
         } catch (IOException e) {
-            System.err.println("Failed to open directory: " + e.getMessage());
+            logger.atError().setCause(e).log("Failed to open directory");
         }
     }
 
@@ -220,7 +223,7 @@ public class SQLiteJDBCLoader {
             }
             return loadNativeLibrary(targetFolder, extractedLibFileName);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.atError().setCause(e).log();
             return false;
         }
     }
@@ -244,7 +247,7 @@ public class SQLiteJDBCLoader {
             connection.setUseCaches(false);
             return connection.getInputStream();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.atError().setCause(e).log();
             return null;
         }
     }
@@ -264,12 +267,12 @@ public class SQLiteJDBCLoader {
                 System.load(new File(path, name).getAbsolutePath());
                 return true;
             } catch (UnsatisfiedLinkError e) {
-                System.err.println(
-                        "Failed to load native library:"
-                                + name
-                                + ". osinfo: "
-                                + OSInfo.getNativeLibFolderPathForCurrentOS());
-                e.printStackTrace();
+                logger.atError()
+                        .setCause(e)
+                        .setMessage("Failed to load native library: {}. osinfo: {}")
+                        .addArgument(name)
+                        .addArgument(OSInfo::getNativeLibFolderPathForCurrentOS)
+                        .log();
                 return false;
             }
 
@@ -283,8 +286,9 @@ public class SQLiteJDBCLoader {
             System.loadLibrary(LibraryLoaderUtil.NATIVE_LIB_BASE_NAME);
             return true;
         } catch (UnsatisfiedLinkError e) {
-            System.err.println("Failed to load native library through System.loadLibrary");
-            e.printStackTrace();
+            logger.atError()
+                    .setCause(e)
+                    .log("Failed to load native library through System.loadLibrary");
             return false;
         }
     }
@@ -393,6 +397,7 @@ public class SQLiteJDBCLoader {
      * executable, and we're eliminating the IO operations as well.
      */
     public static final class VersionHolder {
+        private static final Logger logger = LoggerFactory.getLogger(VersionHolder.class);
         private static final String VERSION;
 
         static {
@@ -414,7 +419,9 @@ public class SQLiteJDBCLoader {
                     version = version.trim().replaceAll("[^0-9\\.]", "");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.atError()
+                        .setCause(e)
+                        .log("Could not read version from file: {}", versionFile);
             }
             VERSION = version;
         }

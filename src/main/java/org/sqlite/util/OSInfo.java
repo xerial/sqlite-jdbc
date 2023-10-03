@@ -31,6 +31,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides OS name and architecture name.
@@ -38,6 +40,7 @@ import java.util.stream.Stream;
  * @author leo
  */
 public class OSInfo {
+    private static final Logger logger = LoggerFactory.getLogger(OSInfo.class);
     protected static ProcessRunner processRunner = new ProcessRunner();
     private static final HashMap<String, String> archMapping = new HashMap<>();
 
@@ -158,7 +161,7 @@ public class OSInfo {
         try {
             return processRunner.runAndWaitFor("uname -m");
         } catch (Throwable e) {
-            System.err.println("Error while running uname -m: " + e.getMessage());
+            logger.atError().setCause(e).log("Error while running uname -m");
             return "unknown";
         }
     }
@@ -219,8 +222,9 @@ public class OSInfo {
                         return "armv7";
                     }
                 } else {
-                    System.err.println(
-                            "WARNING! readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed.");
+                    logger.atWarn()
+                            .log(
+                                    "readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed");
                 }
             } catch (IOException | InterruptedException e) {
                 // ignored: fall back to "arm" arch (soft-float ABI)

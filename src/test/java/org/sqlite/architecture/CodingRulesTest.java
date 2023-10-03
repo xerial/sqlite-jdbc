@@ -1,21 +1,27 @@
 package org.sqlite.architecture;
 
+import static com.tngtech.archunit.base.DescribedPredicate.not;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.equivalentTo;
+import static com.tngtech.archunit.lang.conditions.ArchPredicates.are;
 import static com.tngtech.archunit.library.GeneralCodingRules.*;
 
+import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import org.sqlite.util.OSInfo;
 
 @AnalyzeClasses(
         packages = "org.sqlite",
         importOptions = {ImportOption.DoNotIncludeTests.class})
 class CodingRulesTest {
 
-    //    Disabled for now, see https://github.com/xerial/sqlite-jdbc/issues/802
-    //    @ArchTest
-    private final ArchRule no_access_to_standard_streams =
-            NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;
+    @ArchTest
+    void no_access_to_standard_streams(JavaClasses importedClasses) {
+        NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS.check(
+                importedClasses.that(are(not(equivalentTo(OSInfo.class)))));
+    }
 
     //    Disabled for now
     //    @ArchTest
