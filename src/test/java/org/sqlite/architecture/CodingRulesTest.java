@@ -30,8 +30,7 @@ class CodingRulesTest {
                 importedClasses.that(are(not(equivalentTo(OSInfo.class)))));
     }
 
-    //    Disabled for now
-    //    @ArchTest
+    @ArchTest
     private final ArchRule no_generic_exceptions = NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS;
 
     @ArchTest private final ArchRule no_jodatime = NO_CLASSES_SHOULD_USE_JODATIME;

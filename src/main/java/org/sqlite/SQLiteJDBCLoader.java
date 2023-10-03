@@ -178,7 +178,8 @@ public class SQLiteJDBCLoader {
      * @return
      */
     private static boolean extractAndLoadLibraryFile(
-            String libFolderForCurrentOS, String libraryFileName, String targetFolder) {
+            String libFolderForCurrentOS, String libraryFileName, String targetFolder)
+            throws FileException {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
         // Include architecture name in temporary filename in order to avoid conflicts
         // when multiple JVMs with different architectures running at the same time
@@ -214,7 +215,7 @@ public class SQLiteJDBCLoader {
                 try (InputStream nativeIn = getResourceAsStream(nativeLibraryFilePath);
                         InputStream extractedLibIn = Files.newInputStream(extractedLibFile)) {
                     if (!contentsEquals(nativeIn, extractedLibIn)) {
-                        throw new RuntimeException(
+                        throw new FileException(
                                 String.format(
                                         "Failed to write a native library file at %s",
                                         extractedLibFile));
@@ -360,7 +361,7 @@ public class SQLiteJDBCLoader {
         }
 
         extracted = false;
-        throw new Exception(
+        throw new NativeLibraryNotFoundException(
                 String.format(
                         "No native library found for os.name=%s, os.arch=%s, paths=[%s]",
                         OSInfo.getOSName(),
