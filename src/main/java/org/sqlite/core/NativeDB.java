@@ -18,8 +18,9 @@ package org.sqlite.core;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
 import org.sqlite.Function;
@@ -29,6 +30,7 @@ import org.sqlite.SQLiteJDBCLoader;
 
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 public final class NativeDB extends DB {
+    private static final Logger logger = LoggerFactory.getLogger(NativeDB.class);
     private static final int DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS = 100;
     private static final int DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL = 3;
     private static final int DEFAULT_PAGES_PER_BACKUP_STEP = 100;
@@ -88,8 +90,11 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#_exec(java.lang.String) */
     @Override
     public synchronized int _exec(String sql) throws SQLException {
-        DriverManager.println(
-                "DriverManager [" + Thread.currentThread().getName() + "] [SQLite EXEC] " + sql);
+        logger.atTrace()
+                .setMessage("DriverManager [{}] [SQLite EXEC] {}")
+                .addArgument(() -> Thread.currentThread().getName())
+                .addArgument(sql)
+                .log();
         return _exec_utf8(stringToUtf8ByteArray(sql));
     }
 
@@ -121,8 +126,11 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#prepare(java.lang.String) */
     @Override
     protected synchronized SafeStmtPtr prepare(String sql) throws SQLException {
-        DriverManager.println(
-                "DriverManager [" + Thread.currentThread().getName() + "] [SQLite PREP] " + sql);
+        logger.atTrace()
+                .setMessage("DriverManager [{}] [SQLite EXEC] {}")
+                .addArgument(() -> Thread.currentThread().getName())
+                .addArgument(sql)
+                .log();
         return new SafeStmtPtr(this, prepare_utf8(stringToUtf8ByteArray(sql)));
     }
 
