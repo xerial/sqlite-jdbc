@@ -90,9 +90,10 @@ public class MultipleClassLoaderTest {
         }
 
         // find the slf4j-api jar
+        String targetSlf4j = Paths.get("org", "slf4j", "slf4j-api").toString();
         Optional<String> slf4jApi =
                 Arrays.stream(stringUrls)
-                        .filter(s -> s.contains("org/slf4j/slf4j-api/"))
+                        .filter(s -> s.contains(targetSlf4j))
                         .findFirst();
         if (!slf4jApi.isPresent()) fail("Couldn't find slf4j-api");
 
