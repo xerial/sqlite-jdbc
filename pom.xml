@@ -365,6 +365,7 @@
                                 -->
                                 <buildArg>
                                     -H:ServiceLoaderFeatureExcludeServiceProviders=com.tngtech.archunit.junit.internal.ArchUnitTestEngine
+                                    --initialize-at-build-time=ch.qos.logback
                                 </buildArg>
                             </buildArgs>
                         </configuration>
@@ -407,6 +408,11 @@
     </profiles>
 
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.9</version>
+        </dependency>
         <!--
         This dependency makes compilation on non-GraalVM versions possible.
         The dependency should however never actually be required by end-users because if they require

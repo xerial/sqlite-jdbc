@@ -9,20 +9,24 @@ JAVAC := "$$JAVA_HOME/bin/javac"
 JAVAH := "$$JAVA_HOME/bin/javah"
 
 TARGET := target
+SRC:=src/main/java
 OSINFO_CLASS := org.sqlite.util.OSInfo
 OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
+JAVA_CLASSPATH:=$(TARGET)/classpath/slf4j-api.jar
 
 ## building OSInfo.java
 ifeq ("$(wildcard $(OSINFO_PROG))","")
 $(info Building OSInfo tool)
-$(shell $(JAVAC) -cp src/main/java -d lib src/main/java/org/sqlite/util/OSInfo.java)
+$(shell mkdir -p $(TARGET)/classpath)
+$(shell curl -L -f -o$(JAVA_CLASSPATH) https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar)
+$(shell $(JAVAC) -cp $(JAVA_CLASSPATH) -sourcepath $(SRC) -d lib src/main/java/org/sqlite/util/OSInfo.java)
 endif
 
 ifndef OS_NAME
-OS_NAME := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --os)
+OS_NAME := $(shell $(JAVA) -cp lib:$(JAVA_CLASSPATH) $(OSINFO_CLASS) --os)
 endif
 ifndef OS_ARCH
-OS_ARCH := $(shell $(JAVA) -cp lib $(OSINFO_CLASS) --arch)
+OS_ARCH := $(shell $(JAVA) -cp lib:$(JAVA_CLASSPATH) $(OSINFO_CLASS) --arch)
 endif
 
 # Windows uses different path separators
@@ -55,7 +59,7 @@ ifeq (,$(findstring $(strip $(target)),$(known_targets)))
   target := Default
 endif
 
-$(info Will build using target: $(target) (detected os: $(OS_NAME) arch: $(OS_ARCH)))
+$(info Will build using target: $(target) (detected os: $(OS_NAME), arch: $(OS_ARCH)))
 
 # cross-compilation toolchain prefix (e.g. "arm-linux-gnueabi-")
 CROSS_PREFIX :=
