@@ -365,6 +365,7 @@
                                 -->
                                 <buildArg>
                                     -H:ServiceLoaderFeatureExcludeServiceProviders=com.tngtech.archunit.junit.internal.ArchUnitTestEngine
+                                    --initialize-at-build-time=ch.qos.logback
                                 </buildArg>
                             </buildArgs>
                         </configuration>
