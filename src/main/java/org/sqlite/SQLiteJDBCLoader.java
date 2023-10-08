@@ -398,7 +398,6 @@ public class SQLiteJDBCLoader {
      * executable, and we're eliminating the IO operations as well.
      */
     public static final class VersionHolder {
-        private static final Logger logger = LoggerFactory.getLogger(VersionHolder.class);
         private static final String VERSION;
 
         static {
@@ -420,7 +419,10 @@ public class SQLiteJDBCLoader {
                     version = version.trim().replaceAll("[^0-9\\.]", "");
                 }
             } catch (IOException e) {
-                logger.atError()
+                // inline creation of logger to avoid build-time initialization of the logging
+                // framework in native-image
+                LoggerFactory.getLogger(VersionHolder.class)
+                        .atError()
                         .setCause(e)
                         .log("Could not read version from file: {}", versionFile);
             }

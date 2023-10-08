@@ -31,7 +31,6 @@ import org.sqlite.util.QueryUtils;
 import org.sqlite.util.StringUtils;
 
 public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
-    private static final Logger logger = LoggerFactory.getLogger(JDBC3DatabaseMetaData.class);
 
     private static String driverName;
     private static String driverVersion;
@@ -965,14 +964,14 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                         try {
                             rsColAutoinc.close();
                         } catch (Exception e) {
-                            logger.atError().setCause(e).log();
+                            LogHolder.logger.atError().setCause(e).log();
                         }
                     }
                     if (statColAutoinc != null) {
                         try {
                             statColAutoinc.close();
                         } catch (Exception e) {
-                            logger.atError().setCause(e).log();
+                            LogHolder.logger.atError().setCause(e).log();
                         }
                     }
                 }
@@ -1123,7 +1122,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                 try {
                     rs.close();
                 } catch (Exception e) {
-                    logger.atError().setCause(e).log();
+                    LogHolder.logger.atError().setCause(e).log();
                 }
             }
         }
@@ -2239,5 +2238,13 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
             name = name.substring(1, name.length() - 1);
         }
         return name;
+    }
+
+    /**
+     * Class-wrapper around the logger object to avoid build-time initialization of the logging
+     * framework in native-image
+     */
+    private static class LogHolder {
+        private static final Logger logger = LoggerFactory.getLogger(JDBC3DatabaseMetaData.class);
     }
 }

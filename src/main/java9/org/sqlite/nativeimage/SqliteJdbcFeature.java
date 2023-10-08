@@ -4,7 +4,6 @@ import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeJNIAccess;
 import org.graalvm.nativeimage.hosted.RuntimeResourceAccess;
-import org.slf4j.LoggerFactory;
 import org.sqlite.*;
 import org.sqlite.core.DB;
 import org.sqlite.core.NativeDB;
@@ -29,7 +28,6 @@ public class SqliteJdbcFeature implements Feature {
         RuntimeClassInitialization.initializeAtBuildTime(JDBC3DatabaseMetaData.class);
         RuntimeClassInitialization.initializeAtBuildTime(OSInfo.class);
         RuntimeClassInitialization.initializeAtBuildTime(LibraryLoaderUtil.class);
-        RuntimeClassInitialization.initializeAtBuildTime(LoggerFactory.class);
         a.registerReachabilityHandler(
                 this::nativeDbReachable, method(SQLiteJDBCLoader.class, "initialize"));
     }

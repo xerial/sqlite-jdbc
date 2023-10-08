@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
  * @author leo
  */
 public class OSInfo {
-    private static final Logger logger = LoggerFactory.getLogger(OSInfo.class);
     protected static ProcessRunner processRunner = new ProcessRunner();
     private static final HashMap<String, String> archMapping = new HashMap<>();
 
@@ -161,7 +160,7 @@ public class OSInfo {
         try {
             return processRunner.runAndWaitFor("uname -m");
         } catch (Throwable e) {
-            logger.atError().setCause(e).log("Error while running uname -m");
+            LogHolder.logger.atError().setCause(e).log("Error while running uname -m");
             return "unknown";
         }
     }
@@ -222,7 +221,8 @@ public class OSInfo {
                         return "armv7";
                     }
                 } else {
-                    logger.atWarn()
+                    LogHolder.logger
+                            .atWarn()
                             .log(
                                     "readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed");
                 }
@@ -271,5 +271,13 @@ public class OSInfo {
 
     static String translateArchNameToFolderName(String archName) {
         return archName.replaceAll("\\W", "");
+    }
+
+    /**
+     * Class-wrapper around the logger object to avoid build-time initialization of the logging
+     * framework in native-image
+     */
+    private static class LogHolder {
+        private static final Logger logger = LoggerFactory.getLogger(OSInfo.class);
     }
 }
