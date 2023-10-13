@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sqlite.util.LibraryLoaderUtil;
 import org.sqlite.util.OSInfo;
 import org.sqlite.util.StringUtils;
@@ -55,6 +57,7 @@ import org.sqlite.util.StringUtils;
  * @author leo
  */
 public class SQLiteJDBCLoader {
+    private static final Logger logger = LoggerFactory.getLogger(SQLiteJDBCLoader.class);
 
     private static final String LOCK_EXT = ".lck";
     private static boolean extracted = false;
@@ -98,14 +101,14 @@ public class SQLiteJDBCLoader {
                                     try {
                                         Files.delete(nativeLib);
                                     } catch (Exception e) {
-                                        System.err.println(
-                                                "Failed to delete old native lib: "
-                                                        + e.getMessage());
+                                        logger.atError()
+                                                .setCause(e)
+                                                .log("Failed to delete old native lib");
                                     }
                                 }
                             });
         } catch (IOException e) {
-            System.err.println("Failed to open directory: " + e.getMessage());
+            logger.atError().setCause(e).log("Failed to open directory");
         }
     }
 
@@ -175,7 +178,8 @@ public class SQLiteJDBCLoader {
      * @return
      */
     private static boolean extractAndLoadLibraryFile(
-            String libFolderForCurrentOS, String libraryFileName, String targetFolder) {
+            String libFolderForCurrentOS, String libraryFileName, String targetFolder)
+            throws FileException {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
         // Include architecture name in temporary filename in order to avoid conflicts
         // when multiple JVMs with different architectures running at the same time
@@ -211,7 +215,7 @@ public class SQLiteJDBCLoader {
                 try (InputStream nativeIn = getResourceAsStream(nativeLibraryFilePath);
                         InputStream extractedLibIn = Files.newInputStream(extractedLibFile)) {
                     if (!contentsEquals(nativeIn, extractedLibIn)) {
-                        throw new RuntimeException(
+                        throw new FileException(
                                 String.format(
                                         "Failed to write a native library file at %s",
                                         extractedLibFile));
@@ -220,7 +224,7 @@ public class SQLiteJDBCLoader {
             }
             return loadNativeLibrary(targetFolder, extractedLibFileName);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.atError().setCause(e).log();
             return false;
         }
     }
@@ -244,7 +248,7 @@ public class SQLiteJDBCLoader {
             connection.setUseCaches(false);
             return connection.getInputStream();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.atError().setCause(e).log();
             return null;
         }
     }
@@ -264,12 +268,12 @@ public class SQLiteJDBCLoader {
                 System.load(new File(path, name).getAbsolutePath());
                 return true;
             } catch (UnsatisfiedLinkError e) {
-                System.err.println(
-                        "Failed to load native library:"
-                                + name
-                                + ". osinfo: "
-                                + OSInfo.getNativeLibFolderPathForCurrentOS());
-                e.printStackTrace();
+                logger.atError()
+                        .setCause(e)
+                        .setMessage("Failed to load native library: {}. osinfo: {}")
+                        .addArgument(name)
+                        .addArgument(OSInfo::getNativeLibFolderPathForCurrentOS)
+                        .log();
                 return false;
             }
 
@@ -283,8 +287,9 @@ public class SQLiteJDBCLoader {
             System.loadLibrary(LibraryLoaderUtil.NATIVE_LIB_BASE_NAME);
             return true;
         } catch (UnsatisfiedLinkError e) {
-            System.err.println("Failed to load native library through System.loadLibrary");
-            e.printStackTrace();
+            logger.atError()
+                    .setCause(e)
+                    .log("Failed to load native library through System.loadLibrary");
             return false;
         }
     }
@@ -356,7 +361,7 @@ public class SQLiteJDBCLoader {
         }
 
         extracted = false;
-        throw new Exception(
+        throw new NativeLibraryNotFoundException(
                 String.format(
                         "No native library found for os.name=%s, os.arch=%s, paths=[%s]",
                         OSInfo.getOSName(),
@@ -414,7 +419,12 @@ public class SQLiteJDBCLoader {
                     version = version.trim().replaceAll("[^0-9\\.]", "");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                // inline creation of logger to avoid build-time initialization of the logging
+                // framework in native-image
+                LoggerFactory.getLogger(VersionHolder.class)
+                        .atError()
+                        .setCause(e)
+                        .log("Could not read version from file: {}", versionFile);
             }
             VERSION = version;
         }
