@@ -101,14 +101,12 @@ public class SQLiteJDBCLoader {
                                     try {
                                         Files.delete(nativeLib);
                                     } catch (Exception e) {
-                                        logger.atError()
-                                                .setCause(e)
-                                                .log("Failed to delete old native lib");
+                                        logger.error("Failed to delete old native lib", e);
                                     }
                                 }
                             });
         } catch (IOException e) {
-            logger.atError().setCause(e).log("Failed to open directory");
+            logger.error("Failed to open directory", e);
         }
     }
 
@@ -224,7 +222,7 @@ public class SQLiteJDBCLoader {
             }
             return loadNativeLibrary(targetFolder, extractedLibFileName);
         } catch (IOException e) {
-            logger.atError().setCause(e).log();
+            logger.error("Unexpected IOException", e);
             return false;
         }
     }
@@ -248,7 +246,7 @@ public class SQLiteJDBCLoader {
             connection.setUseCaches(false);
             return connection.getInputStream();
         } catch (IOException e) {
-            logger.atError().setCause(e).log();
+            logger.error("Could not connect", e);
             return null;
         }
     }
@@ -268,12 +266,12 @@ public class SQLiteJDBCLoader {
                 System.load(new File(path, name).getAbsolutePath());
                 return true;
             } catch (UnsatisfiedLinkError e) {
-                logger.atError()
-                        .setCause(e)
-                        .setMessage("Failed to load native library: {}. osinfo: {}")
-                        .addArgument(name)
-                        .addArgument(OSInfo::getNativeLibFolderPathForCurrentOS)
-                        .log();
+
+                logger.error(
+                        "Failed to load native library: {}. osinfo: {}",
+                        name,
+                        OSInfo.getNativeLibFolderPathForCurrentOS(),
+                        e);
                 return false;
             }
 
@@ -287,9 +285,7 @@ public class SQLiteJDBCLoader {
             System.loadLibrary(LibraryLoaderUtil.NATIVE_LIB_BASE_NAME);
             return true;
         } catch (UnsatisfiedLinkError e) {
-            logger.atError()
-                    .setCause(e)
-                    .log("Failed to load native library through System.loadLibrary");
+            logger.error("Failed to load native library through System.loadLibrary", e);
             return false;
         }
     }
@@ -422,9 +418,7 @@ public class SQLiteJDBCLoader {
                 // inline creation of logger to avoid build-time initialization of the logging
                 // framework in native-image
                 LoggerFactory.getLogger(VersionHolder.class)
-                        .atError()
-                        .setCause(e)
-                        .log("Could not read version from file: {}", versionFile);
+                        .error("Could not read version from file: {}", versionFile, e);
             }
             VERSION = version;
         }

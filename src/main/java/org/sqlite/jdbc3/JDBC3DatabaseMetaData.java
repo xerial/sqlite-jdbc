@@ -964,14 +964,14 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                         try {
                             rsColAutoinc.close();
                         } catch (Exception e) {
-                            LogHolder.logger.atError().setCause(e).log();
+                            LogHolder.logger.error("Could not close ResultSet", e);
                         }
                     }
                     if (statColAutoinc != null) {
                         try {
                             statColAutoinc.close();
                         } catch (Exception e) {
-                            LogHolder.logger.atError().setCause(e).log();
+                            LogHolder.logger.error("Could not close statement", e);
                         }
                     }
                 }
@@ -1122,7 +1122,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                 try {
                     rs.close();
                 } catch (Exception e) {
-                    LogHolder.logger.atError().setCause(e).log();
+                    LogHolder.logger.error("Could not close ResultSet", e);
                 }
             }
         }

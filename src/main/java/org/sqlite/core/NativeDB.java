@@ -90,11 +90,10 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#_exec(java.lang.String) */
     @Override
     public synchronized int _exec(String sql) throws SQLException {
-        logger.atTrace()
-                .setMessage("DriverManager [{}] [SQLite EXEC] {}")
-                .addArgument(() -> Thread.currentThread().getName())
-                .addArgument(sql)
-                .log();
+        if (logger.isTraceEnabled()) {
+            logger.trace(
+                    "DriverManager [{}] [SQLite EXEC] {}", Thread.currentThread().getName(), sql);
+        }
         return _exec_utf8(stringToUtf8ByteArray(sql));
     }
 
@@ -126,11 +125,10 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#prepare(java.lang.String) */
     @Override
     protected synchronized SafeStmtPtr prepare(String sql) throws SQLException {
-        logger.atTrace()
-                .setMessage("DriverManager [{}] [SQLite EXEC] {}")
-                .addArgument(() -> Thread.currentThread().getName())
-                .addArgument(sql)
-                .log();
+        if (logger.isTraceEnabled()) {
+            logger.trace(
+                    "DriverManager [{}] [SQLite EXEC] {}", Thread.currentThread().getName(), sql);
+        }
         return new SafeStmtPtr(this, prepare_utf8(stringToUtf8ByteArray(sql)));
     }
 
