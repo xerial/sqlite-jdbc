@@ -31,6 +31,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides OS name and architecture name.
@@ -158,7 +160,7 @@ public class OSInfo {
         try {
             return processRunner.runAndWaitFor("uname -m");
         } catch (Throwable e) {
-            System.err.println("Error while running uname -m: " + e.getMessage());
+            LogHolder.logger.atError().setCause(e).log("Error while running uname -m");
             return "unknown";
         }
     }
@@ -219,8 +221,10 @@ public class OSInfo {
                         return "armv7";
                     }
                 } else {
-                    System.err.println(
-                            "WARNING! readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed.");
+                    LogHolder.logger
+                            .atWarn()
+                            .log(
+                                    "readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed");
                 }
             } catch (IOException | InterruptedException e) {
                 // ignored: fall back to "arm" arch (soft-float ABI)
@@ -267,5 +271,13 @@ public class OSInfo {
 
     static String translateArchNameToFolderName(String archName) {
         return archName.replaceAll("\\W", "");
+    }
+
+    /**
+     * Class-wrapper around the logger object to avoid build-time initialization of the logging
+     * framework in native-image
+     */
+    private static class LogHolder {
+        private static final Logger logger = LoggerFactory.getLogger(OSInfo.class);
     }
 }

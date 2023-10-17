@@ -21,13 +21,16 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sqlite.SQLiteConnection;
+import org.sqlite.core.CoreDatabaseMetaData;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData.ImportedKeyFinder.ForeignKey;
 import org.sqlite.util.QueryUtils;
 import org.sqlite.util.StringUtils;
 
-public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabaseMetaData {
+public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
     private static String driverName;
     private static String driverVersion;
@@ -961,14 +964,14 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                         try {
                             rsColAutoinc.close();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            LogHolder.logger.atError().setCause(e).log();
                         }
                     }
                     if (statColAutoinc != null) {
                         try {
                             statColAutoinc.close();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            LogHolder.logger.atError().setCause(e).log();
                         }
                     }
                 }
@@ -1119,7 +1122,7 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
                 try {
                     rs.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LogHolder.logger.atError().setCause(e).log();
                 }
             }
         }
@@ -2235,5 +2238,13 @@ public abstract class JDBC3DatabaseMetaData extends org.sqlite.core.CoreDatabase
             name = name.substring(1, name.length() - 1);
         }
         return name;
+    }
+
+    /**
+     * Class-wrapper around the logger object to avoid build-time initialization of the logging
+     * framework in native-image
+     */
+    private static class LogHolder {
+        private static final Logger logger = LoggerFactory.getLogger(JDBC3DatabaseMetaData.class);
     }
 }
