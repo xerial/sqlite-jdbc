@@ -30,7 +30,7 @@ public class JDBC implements Driver {
         try {
             DriverManager.registerDriver(new JDBC());
         } catch (SQLException e) {
-            logger.atError().setCause(e).log();
+            logger.error("Could not register driver", e);
         }
     }
 
