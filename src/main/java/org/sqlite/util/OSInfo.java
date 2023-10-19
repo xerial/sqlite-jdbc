@@ -160,7 +160,7 @@ public class OSInfo {
         try {
             return processRunner.runAndWaitFor("uname -m");
         } catch (Throwable e) {
-            LogHolder.logger.atError().setCause(e).log("Error while running uname -m");
+            LogHolder.logger.error("Error while running uname -m", e);
             return "unknown";
         }
     }
@@ -221,10 +221,8 @@ public class OSInfo {
                         return "armv7";
                     }
                 } else {
-                    LogHolder.logger
-                            .atWarn()
-                            .log(
-                                    "readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed");
+                    LogHolder.logger.warn(
+                            "readelf not found. Cannot check if running on an armhf system, armel architecture will be presumed");
                 }
             } catch (IOException | InterruptedException e) {
                 // ignored: fall back to "arm" arch (soft-float ABI)

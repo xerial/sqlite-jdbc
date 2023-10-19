@@ -7,6 +7,10 @@ on:
         description: 'Perform release'
         default: false
         type: boolean
+      push_maven:
+        description: 'Push to maven Central'
+        default: true
+        type: boolean
   pull_request:
     paths:
       - '**.java'
@@ -215,6 +219,7 @@ jobs:
           sed -i -e "s/^\:project-version\:\ .*/:project-version: ${RELEASE_VERSION}/g" README.adoc
       # The sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
       - name: Publish to Apache Maven Central
+        if: github.event_name == 'push' || inputs.push_maven
         run: mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.SONATYPE_USERNAME }} # must be the same env variable name as (1)
