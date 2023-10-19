@@ -45,7 +45,7 @@ $(SQLITE_UNPACKED): $(SQLITE_ARCHIVE)
 
 $(JAVA_CLASSPATH):
 	@mkdir -p $(@D)
-	curl -L -f -o$@ https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar
+	curl -L -f -o$@ https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
 
 $(TARGET)/common-lib/org/sqlite/%.class: src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
@@ -100,7 +100,6 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    -DSQLITE_MAX_FUNCTION_ARG=127 \
 	    -DSQLITE_MAX_ATTACHED=125 \
 	    -DSQLITE_MAX_PAGE_COUNT=4294967294 \
-      -DSQLITE_EXTRA_INIT=core_init \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3.c
 
