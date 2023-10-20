@@ -97,7 +97,7 @@ public abstract class JDBC3Statement extends CoreStatement {
         private static final Logger logger = LoggerFactory.getLogger(BackupObserver.class);
 
         public void progress(int remaining, int pageCount) {
-            logger.atInfo().log("remaining:{}, page count:{}", remaining, pageCount);
+            logger.info("remaining:{}, page count:{}", remaining, pageCount);
         }
     }
 
