@@ -845,4 +845,32 @@ public class PrepStmtTest {
         ResultSet rs = stat.executeQuery("select nr from gh1002");
         assertThat(rs.getBigDecimal(1)).isEqualTo(pi);
     }
+
+    @Test
+    public void gh1002_pi_real() throws SQLException {
+        BigDecimal pi = new BigDecimal("3.14");
+        stat.executeUpdate("create table gh1002(nr REAL)");
+
+        try (PreparedStatement ps = conn.prepareStatement("insert into gh1002 values (?)")) {
+            ps.setBigDecimal(1, pi);
+            ps.execute();
+        }
+
+        ResultSet rs = stat.executeQuery("select nr from gh1002");
+        assertThat(rs.getBigDecimal(1)).isEqualTo(pi);
+    }
+
+    @Test
+    public void gh1002_pi_text() throws SQLException {
+        BigDecimal pi = new BigDecimal("3.14");
+        stat.executeUpdate("create table gh1002(nr TEXT)");
+
+        try (PreparedStatement ps = conn.prepareStatement("insert into gh1002 values (?)")) {
+            ps.setBigDecimal(1, pi);
+            ps.execute();
+        }
+
+        ResultSet rs = stat.executeQuery("select nr from gh1002");
+        assertThat(rs.getBigDecimal(1)).isEqualTo(pi);
+    }
 }
