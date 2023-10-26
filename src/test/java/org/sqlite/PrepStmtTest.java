@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
@@ -829,5 +830,19 @@ public class PrepStmtTest {
             ResultSet rs2 = ps.executeQuery();
             assertThat(rs2).isNotNull();
         }
+    }
+
+    @Test
+    public void gh1002_pi() throws SQLException {
+        BigDecimal pi = new BigDecimal("3.14");
+        stat.executeUpdate("create table gh1002(nr number(10,2))");
+
+        try (PreparedStatement ps = conn.prepareStatement("insert into gh1002 values (?)")) {
+            ps.setBigDecimal(1, pi);
+            ps.execute();
+        }
+
+        ResultSet rs = stat.executeQuery("select nr from gh1002");
+        assertThat(rs.getBigDecimal(1)).isEqualTo(pi);
     }
 }
