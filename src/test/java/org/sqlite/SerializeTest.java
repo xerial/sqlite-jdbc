@@ -79,6 +79,13 @@ public class SerializeTest {
     }
 
     @Test
+    public void testMultiFirstTimeSerialize() throws SQLException {
+        for (int i=0;i<1_000;++i) {
+            serialize();
+        }
+    }
+
+    @Test
     public void testErrorCorrupt() {
         ByteBuffer bb = ByteBuffer.allocateDirect(3);
         bb.put((byte)1);
@@ -122,12 +129,23 @@ public class SerializeTest {
         }
     }
 
-
     @Test
     public void testUseSeveralTimes() throws SQLException {
         ByteBuffer bb = serialize();
         for (int i=0;i<10;++i) {
             deserializeAndAssert(bb);
+        }
+    }
+
+    @Test
+    public void testSize() throws SQLException {
+        try (SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
+            execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
+            execute(connection, "CREATE TABLE a_schema.a_table (x integer)");
+            execute(connection, "INSERT INTO a_schema.a_table (x) values (?)", 1007);
+            int pageSize = fetch(connection, "pragma a_schema.page_size");
+            int pageCount = fetch(connection, "pragma a_schema.page_count");
+            assertThat(connection.serializeSize("a_schema")).isEqualTo((long)pageSize * pageCount);
         }
     }
 

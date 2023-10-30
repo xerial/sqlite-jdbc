@@ -582,6 +582,16 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     /**
+     * Return the size of the serialized representation of the schema
+     *
+     * @param schema The schema to serialize
+     * @return The size in bytes of the serialized schema size
+     */
+    public long serializeSize(String schema) {
+        return db.serializeSize(schema);
+    }
+
+    /**
      * Deserialize the schema using the given ByteBuffer.
      * ByteBuffer has to be a DirectBuffer (ByteBuffer.allocateDirect)
      *

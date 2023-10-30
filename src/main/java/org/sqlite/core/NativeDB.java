@@ -560,11 +560,23 @@ public final class NativeDB extends DB {
         return progressHandler;
     }
 
+    @Override
+    public native synchronized long serializeSize(String schema);
 
     @Override
-    public native synchronized ByteBuffer serialize(String schema);
+    public synchronized ByteBuffer serialize(String schema) {
+        long size = serializeSize(schema);
+        if (size > Integer.MAX_VALUE) {
+            throw new IllegalStateException("Database is bigger than max integer ("+size+")");
+        }
+        ByteBuffer buff = ByteBuffer.allocateDirect((int) size);
+        serialize(schema, buff);
+        return buff;
+    }
+
+    private native void serialize(String schema, ByteBuffer buff);
 
     @Override
-    public native  synchronized void deserialize(String schema, ByteBuffer buff);
+    public native synchronized void deserialize(String schema, ByteBuffer buff);
 
 }
