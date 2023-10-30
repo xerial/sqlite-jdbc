@@ -15,6 +15,7 @@
  */
 package org.sqlite.core;
 
+import java.nio.ByteBuffer;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -1260,4 +1261,7 @@ public abstract class DB implements Codes {
             reset(commitPtr);
         }
     }
+
+    public abstract ByteBuffer serialize(String schema);
+    public abstract void deserialize(String schema, ByteBuffer buff);
 }

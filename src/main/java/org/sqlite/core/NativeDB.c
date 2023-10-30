@@ -1865,3 +1865,72 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1close(
         sethandle(env, nativeDB, 0);
     }
 }
+
+JNIEXPORT jobject JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobject this, jstring jschema)
+{
+
+   sqlite3 *db = gethandle(env, this);
+   if (!db)
+   {
+        throwex_db_closed(env);
+        return NULL;
+   }
+
+   const char* schema = (*env)->GetStringUTFChars(env, jschema, 0);
+
+   sqlite3_int64 size;
+   int need_free=0;
+   unsigned char *buff = sqlite3_serialize(db, schema, &size, SQLITE_SERIALIZE_NOCOPY);
+   if (buff==NULL)
+   {
+      buff = sqlite3_serialize(db, schema, &size, 0);
+      if (buff==NULL)
+      {
+         throwex_msg(env, "Serialization failed, allocation failed");
+         (*env)->ReleaseStringUTFChars(env, jschema, schema);
+	 return NULL;
+      }
+   }
+
+  jobject jbuff = (*env)->NewDirectByteBuffer(env, buff, size);
+
+   if (need_free)
+   {
+      sqlite3_free(buff);
+   }
+
+   (*env)->ReleaseStringUTFChars(env, jschema, schema);
+   return jbuff;
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_deserialize (JNIEnv *env, jobject this, jstring jschema, jobject jbuff)
+{
+   sqlite3 *db = gethandle(env, this);
+   if (!db)
+   {
+        throwex_db_closed(env);
+        return;
+   }
+
+   void *buff = (*env)->GetDirectBufferAddress(env, jbuff);
+   if (buff==NULL) 
+   {
+      throwex_msg(env, "Failed to get direct buffer address");
+      return;
+   }
+
+   jlong size = (*env)->GetDirectBufferCapacity(env, jbuff);
+   
+   const char* schema = (*env)->GetStringUTFChars(env, jschema, 0);
+
+   unsigned char *sqlite_buff = sqlite3_malloc(size);
+   memcpy(sqlite_buff, buff, size);
+
+   int ret = sqlite3_deserialize(db, schema, sqlite_buff, size, size, SQLITE_DESERIALIZE_FREEONCLOSE | SQLITE_DESERIALIZE_RESIZEABLE);
+   if (ret!=SQLITE_OK) 
+   {
+        throwex_errorcode(env, this, ret);
+   }
+   (*env)->ReleaseStringUTFChars(env, jschema, schema);
+}
+

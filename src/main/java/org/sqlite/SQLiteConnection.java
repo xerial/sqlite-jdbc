@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
@@ -568,5 +569,29 @@ public abstract class SQLiteConnection implements Connection {
 
     protected String transactionPrefix() {
         return this.connectionConfig.transactionPrefix();
+    }
+
+    /**
+     * Returns a ByteBuffer representing the schema content.
+     *
+     * @param schema The schema to serialize
+     * @return A ByteBuffer holding the database content
+     */
+    public ByteBuffer serialize(String schema) {
+        return db.serialize(schema);
+    }
+
+    /**
+     * Deserialize the schema using the given ByteBuffer.
+     * ByteBuffer has to be a DirectBuffer (ByteBuffer.allocateDirect)
+     *
+     * @param schema The schema to serialize
+     * @param buff The buffer to deserialize
+     */
+    public void deserialize(String schema, ByteBuffer buff) {
+        if (!buff.isDirect()) {
+            throw new IllegalArgumentException("Buffer has to be a direct buffer");
+        }
+        db.deserialize(schema, buff);
     }
 }

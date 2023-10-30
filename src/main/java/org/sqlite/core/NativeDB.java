@@ -559,4 +559,12 @@ public final class NativeDB extends DB {
     long getProgressHandler() {
         return progressHandler;
     }
+
+
+    @Override
+    public native synchronized ByteBuffer serialize(String schema);
+
+    @Override
+    public native  synchronized void deserialize(String schema, ByteBuffer buff);
+
 }
