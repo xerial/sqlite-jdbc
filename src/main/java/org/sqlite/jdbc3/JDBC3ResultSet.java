@@ -160,7 +160,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
             case SQLITE_INTEGER:
                 return BigDecimal.valueOf(safeGetLongCol(col));
             case SQLITE_FLOAT:
-            //avoid double precision
+                // avoid double precision
             default:
                 final String stringValue = safeGetColumnText(col);
                 try {
