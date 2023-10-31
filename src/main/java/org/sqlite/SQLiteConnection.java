@@ -577,7 +577,7 @@ public abstract class SQLiteConnection implements Connection {
      * @param schema The schema to serialize
      * @return A ByteBuffer holding the database content
      */
-    public ByteBuffer serialize(String schema) {
+    public byte[] serialize(String schema) {
         return db.serialize(schema);
     }
 
@@ -598,10 +598,7 @@ public abstract class SQLiteConnection implements Connection {
      * @param schema The schema to serialize
      * @param buff The buffer to deserialize
      */
-    public void deserialize(String schema, ByteBuffer buff) {
-        if (!buff.isDirect()) {
-            throw new IllegalArgumentException("Buffer has to be a direct buffer");
-        }
+    public void deserialize(String schema, byte[]buff) {
         db.deserialize(schema, buff);
     }
 }

@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 public class SerializeTest {
 
-    private ByteBuffer serialize() throws SQLException {
+    private byte[] serialize() throws SQLException {
         try (SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
             execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
             execute(connection, "CREATE TABLE a_schema.a_table (x integer)");
@@ -22,11 +22,11 @@ public class SerializeTest {
 
     @Test
     public void testSerializeDeserialize() throws SQLException {
-        ByteBuffer bb = serialize();
+        byte[] bb = serialize();
         deserializeAndAssert(bb);
     }
 
-    private void deserializeAndAssert(ByteBuffer bb) throws SQLException {
+    private void deserializeAndAssert(byte[] bb) throws SQLException {
         try (SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
             execute(connection, "ATTACH ? AS ?", ":memory:", "another_schema");
             connection.deserialize("another_schema", bb);
@@ -35,27 +35,9 @@ public class SerializeTest {
     }
 
     @Test
-    public void testSerializeByteArrayDeserialize() throws SQLException {
-        ByteBuffer bb = serialize();
-        assertThat(bb.isDirect()).isTrue();
-        byte[] buff = new byte[bb.remaining()];
-        bb.get(buff);
-        try {
-            deserializeAndAssert(ByteBuffer.wrap(buff));
-            fail("exception expected");
-        } catch (IllegalArgumentException ignore) {
-            // has to be a direct buffer
-        }
-
-        bb = ByteBuffer.allocateDirect(buff.length);
-        bb.put(buff);
-        deserializeAndAssert(bb);
-    }
-
-    @Test
     public void testGrow() throws SQLException {
-        ByteBuffer bb = serialize();
-        int size = bb.remaining();
+        byte[] bb = serialize();
+        int size = bb.length;
         try (SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
             execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
             connection.deserialize("a_schema", bb);
@@ -67,7 +49,7 @@ public class SerializeTest {
             }
             connection.commit();
             bb = connection.serialize("a_schema");
-            int newSize = bb.remaining();
+            int newSize = bb.length;
             assertThat(newSize).isGreaterThan(size);
         }
 
@@ -87,10 +69,7 @@ public class SerializeTest {
 
     @Test
     public void testErrorCorrupt() {
-        ByteBuffer bb = ByteBuffer.allocateDirect(3);
-        bb.put((byte)1);
-        bb.put((byte)2);
-        bb.put((byte)3);
+        byte [] bb = {1,2,3};
         try {
             deserializeAndAssert(bb);
             fail("exception expected");
@@ -101,7 +80,7 @@ public class SerializeTest {
 
     @Test
     public void testMultiDeserialize() throws SQLException {
-        ByteBuffer bb = serialize();
+        byte[] bb = serialize();
         try (SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
             execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
             connection.deserialize("a_schema", bb);
@@ -120,7 +99,7 @@ public class SerializeTest {
 
     @Test
     public void testErrorNoSuchSchema() throws SQLException {
-        ByteBuffer bb = serialize();
+        byte[] bb = serialize();
         try (SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
             connection.deserialize("a_schema", bb);
             fail("exception expected");
@@ -131,7 +110,7 @@ public class SerializeTest {
 
     @Test
     public void testUseSeveralTimes() throws SQLException {
-        ByteBuffer bb = serialize();
+        byte[] bb = serialize();
         for (int i=0;i<10;++i) {
             deserializeAndAssert(bb);
         }

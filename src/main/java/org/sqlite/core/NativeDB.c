@@ -1894,17 +1894,18 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobj
       need_free = 1;
    }
    
-   jlong jsize = (*env)->GetDirectBufferCapacity(env, jbuff);
+   jlong jsize = (*env)->GetArrayLength(env, jbuff);
    if (jsize==size) 
    {
-      void *jbuff_pointer = (*env)->GetDirectBufferAddress(env, jbuff);
+      void *jbuff_pointer = (*env)->GetPrimitiveArrayCritical(env, jbuff, NULL);
       if (jbuff_pointer!=NULL)
       {
          memcpy(jbuff_pointer, buff, size);
+         (*env)->ReleasePrimitiveArrayCritical(env, jbuff, buff, 0);
       }
       else
       {
-         throwex_msg(env, "Failed to get direct buffer address");
+         throwex_msg(env, "Failed to get byte[] address");
       }
    }
    else
@@ -1920,7 +1921,7 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobj
    (*env)->ReleaseStringUTFChars(env, jschema, schema);
 }
 
-JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_deserialize(JNIEnv *env, jobject this, jstring jschema, jobject jbuff)
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_deserialize(JNIEnv *env, jobject this, jstring jschema, jbyteArray jbuff)
 {
    sqlite3 *db = gethandle(env, this);
    if (!db)
@@ -1929,26 +1930,33 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_deserialize(JNIEnv *env, jo
         return;
    }
 
-   void *buff = (*env)->GetDirectBufferAddress(env, jbuff);
-   if (buff==NULL) 
-   {
-      throwex_msg(env, "Failed to get direct buffer address");
+   jlong size = (*env)->GetArrayLength(env, jbuff);
+   unsigned char *sqlite_buff = sqlite3_malloc64(size);
+   if (sqlite_buff==NULL)
+   {  
+      throwex_msg(env, "Failed to allocate native memory for database");
       return;
    }
 
-   jlong size = (*env)->GetDirectBufferCapacity(env, jbuff);
-   
-   const char* schema = (*env)->GetStringUTFChars(env, jschema, 0);
-
-   unsigned char *sqlite_buff = sqlite3_malloc(size);
+   void *buff = (*env)->GetPrimitiveArrayCritical(env, jbuff, NULL);
+   if (buff==NULL) 
+   {
+      throwex_msg(env, "Failed to get byte[] address");
+      sqlite3_free(sqlite_buff);
+      return;
+   }
    memcpy(sqlite_buff, buff, size);
+   (*env)->ReleasePrimitiveArrayCritical(env, jbuff, buff, JNI_ABORT);
 
+   const char* schema = (*env)->GetStringUTFChars(env, jschema, 0);
    int ret = sqlite3_deserialize(db, schema, sqlite_buff, size, size, SQLITE_DESERIALIZE_FREEONCLOSE | SQLITE_DESERIALIZE_RESIZEABLE);
    if (ret!=SQLITE_OK) 
    {
-        throwex_errorcode(env, this, ret);
+      throwex_errorcode(env, this, ret);
    }
    (*env)->ReleaseStringUTFChars(env, jschema, schema);
+   sqlite3_int64 maxSize = 1024L * 1024L * 1000L * 2L;//~2gb, bigger values will result in sqlite malloc error
+   sqlite3_file_control(db, schema, SQLITE_FCNTL_SIZE_LIMIT, &maxSize);
 }
 
 JNIEXPORT jlong JNICALL Java_org_sqlite_core_NativeDB_serializeSize(JNIEnv *env, jobject this, jstring jschema)
