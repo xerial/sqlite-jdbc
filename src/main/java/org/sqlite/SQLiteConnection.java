@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
@@ -572,10 +571,11 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     /**
-     * Returns a ByteBuffer representing the schema content.
+     * Returns a byte array representing the schema content.
+     * This method is intended for in-memory schemas.
      *
      * @param schema The schema to serialize
-     * @return A ByteBuffer holding the database content
+     * @return A byte[] holding the database content
      */
     public byte[] serialize(String schema) {
         return db.serialize(schema);
@@ -592,8 +592,10 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     /**
-     * Deserialize the schema using the given ByteBuffer.
-     * ByteBuffer has to be a DirectBuffer (ByteBuffer.allocateDirect)
+     * Deserialize the schema using the given byte array.
+     * This method is intended for in-memory database.
+     * The call will replace the content of an existing schema.
+     * To make sure there is an existing schema, first execute ATTACH ':memory:'  AS schema_name
      *
      * @param schema The schema to serialize
      * @param buff The buffer to deserialize

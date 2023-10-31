@@ -2,11 +2,10 @@ package org.sqlite;
 
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
 import java.sql.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class SerializeTest {
@@ -70,12 +69,9 @@ public class SerializeTest {
     @Test
     public void testErrorCorrupt() {
         byte [] bb = {1,2,3};
-        try {
-            deserializeAndAssert(bb);
-            fail("exception expected");
-        } catch (SQLException e) {
-            assertThat(e.getErrorCode()).isEqualTo(SQLiteErrorCode.SQLITE_NOTADB.code);
-        }
+        assertThatThrownBy(()->deserializeAndAssert(bb))
+                .isInstanceOf(SQLException.class)
+                .hasFieldOrPropertyWithValue("errorCode", SQLiteErrorCode.SQLITE_NOTADB.code);
     }
 
     @Test
@@ -101,10 +97,9 @@ public class SerializeTest {
     public void testErrorNoSuchSchema() throws SQLException {
         byte[] bb = serialize();
         try (SQLiteConnection connection = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
-            connection.deserialize("a_schema", bb);
-            fail("exception expected");
-        } catch (SQLiteException e) {
-            assertThat(e.getResultCode()).isEqualTo(SQLiteErrorCode.SQLITE_ERROR);
+            assertThatThrownBy(() -> connection.deserialize("a_schema", bb))
+                    .isInstanceOf(SQLiteException.class)
+                    .hasFieldOrPropertyWithValue("resultCode", SQLiteErrorCode.SQLITE_ERROR);
         }
     }
 
