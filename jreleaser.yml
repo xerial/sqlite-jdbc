@@ -3,6 +3,7 @@ project:
   copyright: Taro L. Saito
 release:
   github:
+    owner: xerial
     discussionCategoryName: Announcements
     tagName: '{{projectVersion}}'
     changelog:

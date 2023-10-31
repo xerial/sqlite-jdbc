@@ -157,10 +157,10 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         switch (safeGetColumnType(checkCol(col))) {
             case SQLITE_NULL:
                 return null;
-            case SQLITE_FLOAT:
-                return BigDecimal.valueOf(safeGetDoubleCol(col));
             case SQLITE_INTEGER:
                 return BigDecimal.valueOf(safeGetLongCol(col));
+            case SQLITE_FLOAT:
+                // avoid double precision
             default:
                 final String stringValue = safeGetColumnText(col);
                 try {

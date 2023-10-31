@@ -217,6 +217,10 @@ jobs:
           RELEASE_VERSION=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
           echo "RELEASE_VERSION=${RELEASE_VERSION}" | tee -a $GITHUB_ENV
           sed -i -e "s/^\:project-version\:\ .*/:project-version: ${RELEASE_VERSION}/g" README.adoc
+
+      - name: Build
+        run: mvn --batch-mode --no-transfer-progress package -P release -DskipTests
+
       # The sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
       - name: Publish to Apache Maven Central
         if: github.event_name == 'push' || inputs.push_maven
