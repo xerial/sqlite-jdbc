@@ -15,7 +15,6 @@
  */
 package org.sqlite.core;
 
-import java.nio.ByteBuffer;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.HashSet;
