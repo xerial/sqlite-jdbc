@@ -61,8 +61,13 @@ public class SerializeTest {
 
     @Test
     public void testMultiFirstTimeSerialize() throws SQLException {
+        int size = -1;
         for (int i=0;i<1_000;++i) {
-            serialize();
+            byte [] b = serialize();
+            if (size!=-1) {
+                assertThat(b.length).isEqualTo(size);
+            }
+            size = b.length;
         }
     }
 
