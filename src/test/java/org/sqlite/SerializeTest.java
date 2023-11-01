@@ -3,6 +3,9 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.*;
 import org.junit.jupiter.api.Test;
 
@@ -133,6 +136,34 @@ public class SerializeTest {
             int pageCount = fetch(connection, "pragma a_schema.page_count");
             assertThat(connection.serializeSize("a_schema")).isEqualTo((long) pageSize * pageCount);
         }
+    }
+
+    @Test
+    public void testBufferIsFileCompatible() throws SQLException, IOException {
+
+        byte[] buff = serialize();
+        File tmp = File.createTempFile("sqlite_test", ".db");
+        Files.write(tmp.toPath(), buff);
+        try (SQLiteConnection connection =
+                (SQLiteConnection)
+                        DriverManager.getConnection("jdbc:sqlite:" + tmp.getAbsolutePath())) {
+            assertThat(fetch(connection, "SELECT * FROM main.a_table")).isEqualTo(1007);
+        }
+        assertThat(tmp.delete()).isTrue();
+    }
+
+    @Test
+    public void testFileIsBufferCompatible() throws SQLException, IOException {
+        File tmp = File.createTempFile("sqlite_test", ".db");
+        try (SQLiteConnection connection =
+                (SQLiteConnection)
+                        DriverManager.getConnection("jdbc:sqlite:" + tmp.getAbsolutePath())) {
+            execute(connection, "CREATE TABLE a_table (x integer)");
+            execute(connection, "INSERT INTO a_table (x) values (?)", 1007);
+        }
+        byte[] buff = Files.readAllBytes(tmp.toPath());
+        deserializeAndAssert(buff);
+        assertThat(tmp.delete()).isTrue();
     }
 
     private void execute(Connection connection, String sql, Object... params) throws SQLException {
