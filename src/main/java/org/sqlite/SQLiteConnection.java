@@ -571,8 +571,8 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     /**
-     * Returns a byte array representing the schema content.
-     * This method is intended for in-memory schemas.
+     * Returns a byte array representing the schema content. This method is intended for in-memory
+     * schemas.
      *
      * @param schema The schema to serialize
      * @return A byte[] holding the database content
@@ -592,15 +592,14 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     /**
-     * Deserialize the schema using the given byte array.
-     * This method is intended for in-memory database.
-     * The call will replace the content of an existing schema.
-     * To make sure there is an existing schema, first execute ATTACH ':memory:'  AS schema_name
+     * Deserialize the schema using the given byte array. This method is intended for in-memory
+     * database. The call will replace the content of an existing schema. To make sure there is an
+     * existing schema, first execute ATTACH ':memory:' AS schema_name
      *
      * @param schema The schema to serialize
      * @param buff The buffer to deserialize
      */
-    public void deserialize(String schema, byte[]buff) {
+    public void deserialize(String schema, byte[] buff) {
         db.deserialize(schema, buff);
     }
 }
