@@ -26,7 +26,10 @@ package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.concurrent.ExecutorService;
@@ -136,5 +139,16 @@ public class SQLiteJDBCLoaderTest {
         pool.shutdown();
         pool.awaitTermination(3, TimeUnit.SECONDS);
         assertThat(completedThreads.get()).isEqualTo(32);
+    }
+
+        @Test
+        public void testMd5sum() throws Exception {
+        // Create a mock InputStream with a known content
+        String content = "Unnati";
+        InputStream mockInputStream = new ByteArrayInputStream(content.getBytes());
+
+        // Check the result
+        assertEquals("��S��V6��HV��#j", SQLiteJDBCLoader.md5sum(mockInputStream));
+
     }
 }
