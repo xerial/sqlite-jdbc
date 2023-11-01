@@ -1261,9 +1261,9 @@ public abstract class DB implements Codes {
         }
     }
 
-    public abstract byte[] serialize(String schema);
+    public abstract byte[] serialize(String schema) throws SQLException;
 
-    public abstract void deserialize(String schema, byte[] buff);
+    public abstract void deserialize(String schema, byte[] buff) throws SQLException;
 
-    public abstract long serializeSize(String schema);
+    public abstract long serializeSize(String schema) throws SQLException;
 }

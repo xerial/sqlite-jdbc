@@ -577,7 +577,7 @@ public abstract class SQLiteConnection implements Connection {
      * @param schema The schema to serialize
      * @return A byte[] holding the database content
      */
-    public byte[] serialize(String schema) {
+    public byte[] serialize(String schema) throws SQLException {
         return db.serialize(schema);
     }
 
@@ -587,7 +587,7 @@ public abstract class SQLiteConnection implements Connection {
      * @param schema The schema to serialize
      * @return The size in bytes of the serialized schema size
      */
-    public long serializeSize(String schema) {
+    public long serializeSize(String schema) throws SQLException {
         return db.serializeSize(schema);
     }
 
@@ -599,7 +599,7 @@ public abstract class SQLiteConnection implements Connection {
      * @param schema The schema to serialize
      * @param buff The buffer to deserialize
      */
-    public void deserialize(String schema, byte[] buff) {
+    public void deserialize(String schema, byte[] buff) throws SQLException {
         db.deserialize(schema, buff);
     }
 }

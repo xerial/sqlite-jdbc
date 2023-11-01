@@ -561,10 +561,10 @@ public final class NativeDB extends DB {
     }
 
     @Override
-    public synchronized native long serializeSize(String schema);
+    public synchronized native long serializeSize(String schema) throws SQLException;
 
     @Override
-    public synchronized byte[] serialize(String schema) {
+    public synchronized byte[] serialize(String schema) throws SQLException {
         long size = serializeSize(schema);
         if (size > Integer.MAX_VALUE) {
             throw new IllegalStateException("Database is bigger than max integer (" + size + ")");
@@ -574,8 +574,8 @@ public final class NativeDB extends DB {
         return buff;
     }
 
-    private native void serialize(String schema, byte[] buff);
+    private native void serialize(String schema, byte[] buff) throws SQLException;
 
     @Override
-    public synchronized native void deserialize(String schema, byte[] buff);
+    public synchronized native void deserialize(String schema, byte[] buff) throws SQLException;
 }
