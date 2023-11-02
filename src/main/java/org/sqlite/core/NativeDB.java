@@ -567,7 +567,8 @@ public final class NativeDB extends DB {
     public synchronized byte[] serialize(String schema) throws SQLException {
         long size = serializeSize(schema);
         if (size > Integer.MAX_VALUE) {
-            throw new IllegalStateException("Database is bigger than max integer (" + size + ")");
+            // Extra precaution as the sqlite side is also limited to 2gb.
+            throw new IllegalStateException("Database is bigger than byte[] max size: " + size);
         }
         byte[] buff = new byte[(int) size];
         serialize(schema, buff);

@@ -572,7 +572,7 @@ public abstract class SQLiteConnection implements Connection {
 
     /**
      * Returns a byte array representing the schema content. This method is intended for in-memory
-     * schemas.
+     * schemas. Serialized databases are limited to 2gb.
      *
      * @param schema The schema to serialize
      * @return A byte[] holding the database content
@@ -582,7 +582,8 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     /**
-     * Return the size of the serialized representation of the schema
+     * Return the size of the serialized representation of the schema. Serialized databases are
+     * limited to 2gb.
      *
      * @param schema The schema to serialize
      * @return The size in bytes of the serialized schema size
