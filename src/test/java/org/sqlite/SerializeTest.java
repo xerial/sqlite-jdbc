@@ -83,7 +83,10 @@ public class SerializeTest {
         byte[] bb = {1, 2, 3};
         assertThatThrownBy(() -> deserializeAndAssert(bb))
                 .isInstanceOf(SQLException.class)
-                .hasFieldOrPropertyWithValue("errorCode", SQLiteErrorCode.SQLITE_NOTADB.code);
+                .satisfies(
+                        ex ->
+                                assertThat(((SQLiteException) ex).getResultCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_NOTADB));
     }
 
     @Test
@@ -114,7 +117,10 @@ public class SerializeTest {
                 (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
             assertThatThrownBy(() -> connection.deserialize("a_schema", bb))
                     .isInstanceOf(SQLiteException.class)
-                    .hasFieldOrPropertyWithValue("resultCode", SQLiteErrorCode.SQLITE_ERROR);
+                    .satisfies(
+                            ex ->
+                                    assertThat(((SQLiteException) ex).getResultCode())
+                                            .isEqualTo(SQLiteErrorCode.SQLITE_ERROR));
         }
     }
 
@@ -181,7 +187,10 @@ public class SerializeTest {
                                 }
                             })
                     .isInstanceOf(SQLException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", SQLiteErrorCode.SQLITE_FULL.code);
+                    .satisfies(
+                            ex ->
+                                    assertThat(((SQLiteException) ex).getResultCode())
+                                            .isEqualTo(SQLiteErrorCode.SQLITE_FULL));
 
             int pageSize = fetch(connection, "pragma a_schema.page_size");
             int pageCount = fetch(connection, "pragma a_schema.page_count");
