@@ -82,7 +82,7 @@ public class SerializeTest {
     public void testErrorCorrupt() {
         byte[] bb = {1, 2, 3};
         assertThatThrownBy(() -> deserializeAndAssert(bb))
-                .isInstanceOf(SQLException.class)
+                .isInstanceOf(SQLiteException.class)
                 .satisfies(
                         ex ->
                                 assertThat(((SQLiteException) ex).getResultCode())
@@ -186,7 +186,7 @@ public class SerializeTest {
                                             s);
                                 }
                             })
-                    .isInstanceOf(SQLException.class)
+                    .isInstanceOf(SQLiteException.class)
                     .satisfies(
                             ex ->
                                     assertThat(((SQLiteException) ex).getResultCode())
