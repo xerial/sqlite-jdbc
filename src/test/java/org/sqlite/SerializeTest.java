@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class SerializeTest {
@@ -164,6 +165,56 @@ public class SerializeTest {
         byte[] buff = Files.readAllBytes(tmp.toPath());
         deserializeAndAssert(buff);
         assertThat(tmp.delete()).isTrue();
+    }
+
+    @Disabled("This takes around 15 seconds on a fast machine and consumes 4gb of memory")
+    @Test
+    public void testVeryLarge() throws SQLException {
+        byte[] large;
+        int rowCount;
+
+        try (SQLiteConnection connection =
+                (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
+            execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
+            connection.deserialize("a_schema", serialize());
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 500; ++i) { // we want this to be well withing a page
+                sb.append("a");
+            }
+            String s = sb.toString();
+            assertThatThrownBy(
+                            () -> {
+                                //noinspection InfiniteLoopStatement
+                                while (true) {
+                                    execute(
+                                            connection,
+                                            "INSERT INTO a_schema.a_table (x) values (?)",
+                                            s);
+                                }
+                            })
+                    .isInstanceOf(SQLException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", SQLiteErrorCode.SQLITE_FULL.code);
+
+            int pageSize = fetch(connection, "pragma a_schema.page_size");
+            int pageCount = fetch(connection, "pragma a_schema.page_count");
+            rowCount = fetch(connection, "SELECT COUNT(1) FROM a_schema.a_table");
+            large = connection.serialize("a_schema");
+            assertThat(large.length).isEqualTo(pageCount * pageSize);
+            assertThat(large.length)
+                    .isGreaterThan(2_000_000_000); // Too accurate, we risk pagesize change
+        }
+
+        try (SQLiteConnection connection =
+                (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
+            execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
+            connection.deserialize("a_schema", large);
+            int pageSize = fetch(connection, "pragma a_schema.page_size");
+            int pageCount = fetch(connection, "pragma a_schema.page_count");
+            assertThat(pageSize * pageCount).isEqualTo(large.length);
+            assertThat(fetch(connection, "SELECT COUNT(1) FROM a_schema.a_table"))
+                    .isEqualTo(rowCount);
+        }
     }
 
     private void execute(Connection connection, String sql, Object... params) throws SQLException {
