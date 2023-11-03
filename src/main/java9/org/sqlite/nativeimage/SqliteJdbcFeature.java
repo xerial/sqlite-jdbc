@@ -124,7 +124,6 @@ public class SqliteJdbcFeature implements Feature {
 
         // Other JNI calls
         RuntimeJNIAccess.register(boolean[].class);
-        RuntimeJNIAccess.register(byte[].class);
     }
 
     private Method method(Class<?> clazz, String methodName, Class<?>... args) {
