@@ -127,19 +127,6 @@ public class SerializeTest {
     }
 
     @Test
-    public void testSize() throws SQLException {
-        try (SQLiteConnection connection =
-                (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
-            execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
-            execute(connection, "CREATE TABLE a_schema.a_table (x integer)");
-            execute(connection, "INSERT INTO a_schema.a_table (x) values (?)", 1007);
-            int pageSize = fetch(connection, "pragma a_schema.page_size");
-            int pageCount = fetch(connection, "pragma a_schema.page_count");
-            assertThat(connection.serializeSize("a_schema")).isEqualTo((long) pageSize * pageCount);
-        }
-    }
-
-    @Test
     public void testBufferIsFileCompatible() throws SQLException, IOException {
 
         byte[] buff = serialize();
@@ -167,7 +154,7 @@ public class SerializeTest {
         assertThat(tmp.delete()).isTrue();
     }
 
-    @Disabled("This takes around 15 seconds on a fast machine and consumes 4gb of memory")
+    @Disabled("This takes around 15 seconds on a fast (2023) machine and consumes 4gb of memory")
     @Test
     public void testVeryLarge() throws SQLException {
         byte[] large;
@@ -214,6 +201,20 @@ public class SerializeTest {
             assertThat(pageSize * pageCount).isEqualTo(large.length);
             assertThat(fetch(connection, "SELECT COUNT(1) FROM a_schema.a_table"))
                     .isEqualTo(rowCount);
+        }
+    }
+
+    @Disabled("Use this for performance comparison and leak checks")
+    @Test
+    public void testPerformance() throws SQLException {
+        byte[] buff = serialize();
+        try (SQLiteConnection connection =
+                (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:")) {
+            execute(connection, "ATTACH ? AS ?", ":memory:", "a_schema");
+            for (int i = 0; i < 3_000_000; ++i) {
+                connection.deserialize("a_schema", buff);
+                buff = connection.serialize("a_schema");
+            }
         }
     }
 

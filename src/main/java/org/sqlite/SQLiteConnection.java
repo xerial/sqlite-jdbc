@@ -582,17 +582,6 @@ public abstract class SQLiteConnection implements Connection {
     }
 
     /**
-     * Return the size of the serialized representation of the schema. Serialized databases are
-     * limited to 2gb.
-     *
-     * @param schema The schema to serialize
-     * @return The size in bytes of the serialized schema size
-     */
-    public long serializeSize(String schema) throws SQLException {
-        return db.serializeSize(schema);
-    }
-
-    /**
      * Deserialize the schema using the given byte array. This method is intended for in-memory
      * database. The call will replace the content of an existing schema. To make sure there is an
      * existing schema, first execute ATTACH ':memory:' AS schema_name

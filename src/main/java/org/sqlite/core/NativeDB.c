@@ -1866,14 +1866,14 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1close(
     }
 }
 
-JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobject this, jstring jschema, jobject jbuff)
+JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobject this, jstring jschema)
 {
 
    sqlite3 *db = gethandle(env, this);
    if (!db)
    {
         throwex_db_closed(env);
-        return;
+        return NULL;
    }
 
    const char* schema = (*env)->GetStringUTFChars(env, jschema, 0);
@@ -1887,15 +1887,16 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobj
       buff = sqlite3_serialize(db, schema, &size, 0);
       if (buff==NULL)
       {
-         throwex_msg(env, "Serialization failed, allocation failed");
          (*env)->ReleaseStringUTFChars(env, jschema, schema);
-	 return;
+         throwex_msg(env, "Serialization failed, allocation failed");
+	 return NULL;
       }
       need_free = 1;
    }
-   
-   jlong jsize = (*env)->GetArrayLength(env, jbuff);
-   if (jsize==size) 
+   (*env)->ReleaseStringUTFChars(env, jschema, schema);
+
+   jbyteArray jbuff =  (*env)->NewByteArray(env, size);
+   if (jbuff!=NULL) 
    {
       void *jbuff_pointer = (*env)->GetPrimitiveArrayCritical(env, jbuff, NULL);
       if (jbuff_pointer!=NULL)
@@ -1906,11 +1907,13 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobj
       else
       {
          throwex_msg(env, "Failed to get byte[] address");
+         (*env)->DeleteLocalRef(env, jbuff);
+	 jbuff = NULL;
       }
    }
    else
    {
-      throwex_msg(env, "Size mismatch");
+      throwex_msg(env, "Failed to allocate java byte[]");
    }
 
 
@@ -1918,7 +1921,7 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env, jobj
    {
       sqlite3_free(buff);
    }
-   (*env)->ReleaseStringUTFChars(env, jschema, schema);
+   return jbuff;
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_deserialize(JNIEnv *env, jobject this, jstring jschema, jbyteArray jbuff)
@@ -1961,27 +1964,3 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_deserialize(JNIEnv *env, jo
    }
    (*env)->ReleaseStringUTFChars(env, jschema, schema);
 }
-
-JNIEXPORT jlong JNICALL Java_org_sqlite_core_NativeDB_serializeSize(JNIEnv *env, jobject this, jstring jschema)
-{
-   sqlite3 *db = gethandle(env, this);
-   if (!db)
-   {
-        throwex_db_closed(env);
-        return -1;
-   }
-
-   const char* schema = (*env)->GetStringUTFChars(env, jschema, 0);
-
-   sqlite3_int64 size;
-
-   // this is just for size which should always be set
-   sqlite3_serialize(db, schema, &size, SQLITE_SERIALIZE_NOCOPY);
-
-   (*env)->ReleaseStringUTFChars(env, jschema, schema);
-   return size;  
-}
-
-
-
-
