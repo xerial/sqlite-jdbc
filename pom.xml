@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.aga.sqlite</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.43.2.2</version>
+  <version>3.44.0.0</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
   <url>https://github.com/austinarbor/sqlite-jdbc</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>5.10.0</junit.version>
-    <surefire.version>3.2.1</surefire.version>
+    <junit.version>5.10.1</junit.version>
+    <surefire.version>3.2.2</surefire.version>
     <graalvm.version>23.1.1</graalvm.version>
     <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
   </properties>
@@ -283,7 +283,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.6.0</version>
+            <version>3.6.2</version>
             <configuration>
               <sourcepath>src/main/java</sourcepath>
               <additionalOptions>-Xdoclint:none</additionalOptions>
@@ -422,13 +422,13 @@
     <dependency>
       <groupId>com.tngtech.archunit</groupId>
       <artifactId>archunit-junit5</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.4.11</version>
+      <version>1.2.12</version>
       <scope>test</scope>
     </dependency><!--   Required by archunit -->
   </dependencies>

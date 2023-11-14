@@ -569,4 +569,27 @@ public abstract class SQLiteConnection implements Connection {
     protected String transactionPrefix() {
         return this.connectionConfig.transactionPrefix();
     }
+
+    /**
+     * Returns a byte array representing the schema content. This method is intended for in-memory
+     * schemas. Serialized databases are limited to 2gb.
+     *
+     * @param schema The schema to serialize
+     * @return A byte[] holding the database content
+     */
+    public byte[] serialize(String schema) throws SQLException {
+        return db.serialize(schema);
+    }
+
+    /**
+     * Deserialize the schema using the given byte array. This method is intended for in-memory
+     * database. The call will replace the content of an existing schema. To make sure there is an
+     * existing schema, first execute ATTACH ':memory:' AS schema_name
+     *
+     * @param schema The schema to serialize
+     * @param buff The buffer to deserialize
+     */
+    public void deserialize(String schema, byte[] buff) throws SQLException {
+        db.deserialize(schema, buff);
+    }
 }
