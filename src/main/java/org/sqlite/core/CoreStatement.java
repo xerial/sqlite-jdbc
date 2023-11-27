@@ -90,7 +90,8 @@ public abstract class CoreStatement implements Codes {
         return pointer.safeRunInt(DB::column_count) != 0;
     }
 
-    /*----Unnati--- */
+   
+    /*-------Refactored Code------*/ 
     protected Set<SafeStmtPtr> stmts;
 
     public synchronized void prepare(DB db) throws SQLException {

@@ -19,7 +19,6 @@ import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteOpenMode;
 
 public abstract class JDBC3Connection extends SQLiteConnection {
-    private final AtomicInteger savePoint = new AtomicInteger(0);
     private Map<String, Class<?>> typeMap;
 
     private boolean readOnly = false;
@@ -254,64 +253,11 @@ public abstract class JDBC3Connection extends SQLiteConnection {
     public abstract PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh)
             throws SQLException;
 
-    // /** @see java.sql.Connection#setSavepoint() */
-    //  public Savepoint setSavepoint() throws SQLException {
-    //     checkOpen();
-    //     if (getAutoCommit()) {
-    //         // when a SAVEPOINT is the outermost savepoint and not
-    //         // with a BEGIN...COMMIT then the behavior is the same
-    //         // as BEGIN DEFERRED TRANSACTION
-    //         // https://www.sqlite.org/lang_savepoint.html
-    //         getConnectionConfig().setAutoCommit(false);
-    //     }
-    //     Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
-    //     getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
-    //     return sp;
-    // }
-
-    // /** @see java.sql.Connection#setSavepoint(java.lang.String) */
-    // public Savepoint setSavepoint(String name) throws SQLException {
-    //     checkOpen();
-    //     if (getAutoCommit()) {
-    //         // when a SAVEPOINT is the outermost savepoint and not
-    //         // with a BEGIN...COMMIT then the behavior is the same
-    //         // as BEGIN DEFERRED TRANSACTION
-    //         // https://www.sqlite.org/lang_savepoint.html
-    //         getConnectionConfig().setAutoCommit(false);
-    //     }
-    //     Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);
-    //     getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
-    //     return sp;
-    // }
-
-    // /** @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint) */
-    // public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-    //     checkOpen();
-    //     if (getAutoCommit()) {
-    //         throw new SQLException("database in auto-commit mode");
-    //     }
-    //     getDatabase()
-    //             .exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()),
-    // false);
-    // }
-
-    // /** @see java.sql.Connection#rollback(java.sql.Savepoint) */
-    // public void rollback(Savepoint savepoint) throws SQLException {
-    //     checkOpen();
-    //     if (getAutoCommit()) {
-    //         throw new SQLException("database in auto-commit mode");
-    //     }
-    //     getDatabase()
-    //             .exec(
-    //                     String.format("ROLLBACK TO SAVEPOINT %s", savepoint.getSavepointName()),
-    //                     getAutoCommit());
-    // }
-
     public Struct createStruct(String t, Object[] attr) throws SQLException {
         throw new SQLFeatureNotSupportedException("not implemented by SQLite JDBC driver");
     }
 
-    /*-------Unnati------*/ 
+    /*-------Refactored Code------*/ 
 
     public class SavepointHandler {
         private final JDBC3Connection connection;

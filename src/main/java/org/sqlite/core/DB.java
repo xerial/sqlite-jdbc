@@ -869,29 +869,8 @@ public abstract class DB implements Codes {
      * @see <a
      *     href="https://www.sqlite.org/c3ref/bind_blob.html">https://www.sqlite.org/c3ref/bind_blob.html</a>
      */
-    // final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
-    //     pos++;
-    //     if (v == null) {
-    //         return bind_null(stmt, pos);
-    //     } else if (v instanceof Integer) {
-    //         return bind_int(stmt, pos, (Integer) v);
-    //     } else if (v instanceof Short) {
-    //         return bind_int(stmt, pos, ((Short) v).intValue());
-    //     } else if (v instanceof Long) {
-    //         return bind_long(stmt, pos, (Long) v);
-    //     } else if (v instanceof Float) {
-    //         return bind_double(stmt, pos, ((Float) v).doubleValue());
-    //     } else if (v instanceof Double) {
-    //         return bind_double(stmt, pos, (Double) v);
-    //     } else if (v instanceof String) {
-    //         return bind_text(stmt, pos, (String) v);
-    //     } else if (v instanceof byte[]) {
-    //         return bind_blob(stmt, pos, (byte[]) v);
-    //     } else {
-    //         throw new SQLException("unexpected param type: " + v.getClass());
-    //     }
-    // }
-    /*---Unnati---- */
+
+    /*-------Refactored Code------*/ 
     public interface Binder {
         int bind(long stmt, int pos, Object v) throws SQLException;
     }
