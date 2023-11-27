@@ -17,6 +17,7 @@ package org.sqlite.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Set;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc3.JDBC3Connection;
@@ -87,6 +88,23 @@ public abstract class CoreStatement implements Codes {
         }
 
         return pointer.safeRunInt(DB::column_count) != 0;
+    }
+
+    /*----Unnati--- */
+    protected Set<SafeStmtPtr> stmts;
+
+    public synchronized void prepare(DB db) throws SQLException {
+        if (this.sql == null) {
+            throw new NullPointerException();
+        }
+        if (this.pointer != null) {
+            this.pointer.close();
+        }
+        this.pointer = db.prepare(this.sql);
+        final boolean added = this.stmts.add(this.pointer);
+        if (!added) {
+            throw new IllegalStateException("Already added pointer to statements set");
+        }
     }
 
     /**

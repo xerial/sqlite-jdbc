@@ -34,15 +34,33 @@ public class ExtendedCommand {
      *     the argument is a restore command;
      * @throws SQLException
      */
+  
     public static SQLExtension parse(String sql) throws SQLException {
-        if (sql == null) return null;
-        if (sql.length() > 5 && sql.substring(0, 6).toLowerCase().equals("backup"))
+        if (sql == null) {
+            return null;
+        }
+    
+        final String backupKeyword = "backup";
+        final String restoreKeyword = "restore";
+    
+        int backupKeywordLength = backupKeyword.length();
+        int restoreKeywordLength = restoreKeyword.length();
+    
+        boolean isBackupCommand = sql.length() > backupKeywordLength &&
+                sql.substring(0, backupKeywordLength).equalsIgnoreCase(backupKeyword);
+    
+        boolean isRestoreCommand = sql.length() > restoreKeywordLength &&
+                sql.substring(0, restoreKeywordLength).equalsIgnoreCase(restoreKeyword);
+    
+        if (isBackupCommand) {
             return BackupCommand.parse(sql);
-        else if (sql.length() > 6 && sql.substring(0, 7).toLowerCase().equals("restore"))
+        } else if (isRestoreCommand) {
             return RestoreCommand.parse(sql);
-
+        }
+    
         return null;
     }
+    
 
     /**
      * Remove the quotation mark from string.
@@ -50,13 +68,24 @@ public class ExtendedCommand {
      * @param s String with quotation mark.
      * @return String with quotation mark removed.
      */
-    public static String removeQuotation(String s) {
-        if (s == null) return s;
 
-        if ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))
+    public static String removeQuotation(String s) {
+        if (s == null) {
+            return s;
+        }
+    
+        if (isQuotedWith(s, "\"") || isQuotedWith(s, "'")) {
             return s.substring(1, s.length() - 1);
-        else return s;
+        } else {
+            return s;
+        }
     }
+    
+    private static boolean isQuotedWith(String s, String quote) {
+        return s.startsWith(quote) && s.endsWith(quote);
+    }
+    
+    
 
     public static class BackupCommand implements SQLExtension {
         public final String srcDB;
@@ -85,18 +114,20 @@ public class ExtendedCommand {
          * @return BackupCommand object.
          * @throws SQLException
          */
-        public static BackupCommand parse(String sql) throws SQLException {
-            if (sql != null) {
-                Matcher m = backupCmd.matcher(sql);
-                if (m.matches()) {
-                    String dbName = removeQuotation(m.group(2));
-                    String dest = removeQuotation(m.group(3));
-                    if (dbName == null || dbName.length() == 0) dbName = "main";
+        public static BackupCommand parse(String sqlCommand) throws SQLException {
+            if (sqlCommand != null) {
+                Matcher matcher = backupCmd.matcher(sqlCommand);
+                if (matcher.matches()) {
+                    String databaseName = removeQuotation(matcher.group(2));
+                    String destination = removeQuotation(matcher.group(3));
+                    if (databaseName == null || databaseName.isEmpty()) {
+                        databaseName = "main";
+                    }
 
-                    return new BackupCommand(dbName, dest);
+                    return new BackupCommand(databaseName, destination);
                 }
             }
-            throw new SQLException("syntax error: " + sql);
+            throw new SQLException("Syntax error: " + sqlCommand);
         }
 
         public void execute(DB db) throws SQLException {

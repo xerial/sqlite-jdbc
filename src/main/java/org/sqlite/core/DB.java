@@ -48,6 +48,7 @@ public abstract class DB implements Codes {
     private final String fileName;
     private final SQLiteConfig config;
     private final AtomicBoolean closed = new AtomicBoolean(true);
+    DB db;
 
     /** The "begin;"and "commit;" statement handles. */
     volatile SafeStmtPtr begin;
@@ -254,18 +255,9 @@ public abstract class DB implements Codes {
      * @see <a
      *     href="https://www.sqlite.org/c3ref/prepare.html">https://www.sqlite.org/c3ref/prepare.html</a>
      */
+
     public final synchronized void prepare(CoreStatement stmt) throws SQLException {
-        if (stmt.sql == null) {
-            throw new NullPointerException();
-        }
-        if (stmt.pointer != null) {
-            stmt.pointer.close();
-        }
-        stmt.pointer = prepare(stmt.sql);
-        final boolean added = stmts.add(stmt.pointer);
-        if (!added) {
-            throw new IllegalStateException("Already added pointer to statements set");
-        }
+        stmt.prepare(db);
     }
 
     /**
@@ -877,26 +869,121 @@ public abstract class DB implements Codes {
      * @see <a
      *     href="https://www.sqlite.org/c3ref/bind_blob.html">https://www.sqlite.org/c3ref/bind_blob.html</a>
      */
-    final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
-        pos++;
-        if (v == null) {
+    // final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
+    //     pos++;
+    //     if (v == null) {
+    //         return bind_null(stmt, pos);
+    //     } else if (v instanceof Integer) {
+    //         return bind_int(stmt, pos, (Integer) v);
+    //     } else if (v instanceof Short) {
+    //         return bind_int(stmt, pos, ((Short) v).intValue());
+    //     } else if (v instanceof Long) {
+    //         return bind_long(stmt, pos, (Long) v);
+    //     } else if (v instanceof Float) {
+    //         return bind_double(stmt, pos, ((Float) v).doubleValue());
+    //     } else if (v instanceof Double) {
+    //         return bind_double(stmt, pos, (Double) v);
+    //     } else if (v instanceof String) {
+    //         return bind_text(stmt, pos, (String) v);
+    //     } else if (v instanceof byte[]) {
+    //         return bind_blob(stmt, pos, (byte[]) v);
+    //     } else {
+    //         throw new SQLException("unexpected param type: " + v.getClass());
+    //     }
+    // }
+    /*---Unnati---- */
+    public interface Binder {
+        int bind(long stmt, int pos, Object v) throws SQLException;
+    }
+
+    public class NullBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_null(stmt, pos);
-        } else if (v instanceof Integer) {
+        }
+    }
+
+    public class IntegerBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_int(stmt, pos, (Integer) v);
-        } else if (v instanceof Short) {
+        }
+    }
+
+    public class ShortBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_int(stmt, pos, ((Short) v).intValue());
-        } else if (v instanceof Long) {
+        }
+    }
+
+    public class LongBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_long(stmt, pos, (Long) v);
-        } else if (v instanceof Float) {
+        }
+    }
+
+    public class FloatBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_double(stmt, pos, ((Float) v).doubleValue());
-        } else if (v instanceof Double) {
+        }
+    }
+
+    public class DoubleBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_double(stmt, pos, (Double) v);
-        } else if (v instanceof String) {
+        }
+    }
+
+    public class StringBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_text(stmt, pos, (String) v);
-        } else if (v instanceof byte[]) {
+        }
+    }
+
+    public class BlobBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             return bind_blob(stmt, pos, (byte[]) v);
-        } else {
+        }
+    }
+
+    public class DefaultBinder implements Binder {
+        @Override
+        public int bind(long stmt, int pos, Object v) throws SQLException {
             throw new SQLException("unexpected param type: " + v.getClass());
+        }
+    }
+
+    public final synchronized int sqlbind(long stmt, int pos, Object v) throws SQLException {
+        pos++;
+        Binder binder = getBinder(v);
+        return binder.bind(stmt, pos, v);
+    }
+
+    private Binder getBinder(Object v) {
+        if (v == null) {
+            return new NullBinder();
+        } else if (v instanceof Integer) {
+            return new IntegerBinder();
+        } else if (v instanceof Short) {
+            return new ShortBinder();
+        } else if (v instanceof Long) {
+            return new LongBinder();
+        } else if (v instanceof Float) {
+            return new FloatBinder();
+        } else if (v instanceof Double) {
+            return new DoubleBinder();
+        } else if (v instanceof String) {
+            return new StringBinder();
+        } else if (v instanceof byte[]) {
+            return new BlobBinder();
+        } else {
+            return new DefaultBinder();
         }
     }
 
