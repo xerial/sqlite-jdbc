@@ -68,21 +68,21 @@ public class ExtendedCommand {
      * @param s String with quotation mark.
      * @return String with quotation mark removed.
      */
-
-    public static String removeQuotation(String s) {
-        if (s == null) {
-            return s;
+    /*Refactored Code */
+    public static String removeQuotation(String input) {
+        if (input == null) {
+            return input;
         }
     
-        if (isQuotedWith(s, "\"") || isQuotedWith(s, "'")) {
-            return s.substring(1, s.length() - 1);
+        if (isQuotedWith(input, "\"") || isQuotedWith(input, "'")) {
+            return input.substring(1, input.length() - 1);
         } else {
-            return s;
+            return input;
         }
     }
     
-    private static boolean isQuotedWith(String s, String quote) {
-        return s.startsWith(quote) && s.endsWith(quote);
+    private static boolean isQuotedWith(String input, String quote) {
+        return input.startsWith(quote) && input.endsWith(quote);
     }
     
     
