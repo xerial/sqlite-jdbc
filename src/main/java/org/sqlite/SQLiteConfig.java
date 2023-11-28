@@ -535,7 +535,9 @@ public class SQLiteConfig {
 
         // extensions: "fake" pragmas to allow conformance with JDBC
         JDBC_AUTO_COMMIT(
-                "jdbc.auto_commit", "Configure explicit read only transactions", new String[] {"true", "false"}),
+                "jdbc.auto_commit",
+                "Configure explicit read only transactions",
+                new String[] {"true", "false"}),
         JDBC_EXPLICIT_READONLY(
                 "jdbc.explicit_readonly", "Set explicit read only transactions", null);
 
