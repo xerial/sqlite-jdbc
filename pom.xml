@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.aga.sqlite</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.44.0.0</version>
+  <version>3.44.1.0</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
   <url>https://github.com/austinarbor/sqlite-jdbc</url>
@@ -184,7 +184,7 @@
       <plugin>
         <groupId>org.jreleaser</groupId>
         <artifactId>jreleaser-maven-plugin</artifactId>
-        <version>1.8.0</version>
+        <version>1.9.0</version>
         <configuration>
           <configFile>jreleaser.yml</configFile>
         </configuration>
@@ -192,7 +192,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.16.1</version>
+        <version>2.16.2</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -410,13 +410,13 @@
     <dependency>
       <groupId>org.junit-pioneer</groupId>
       <artifactId>junit-pioneer</artifactId>
-      <version>2.1.0</version>
+      <version>2.2.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.6.0</version>
+      <version>5.7.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
