@@ -38,8 +38,8 @@ public class SQLiteConnectionConfig implements Cloneable {
                         pragmaTable.getProperty(
                                 SQLiteConfig.Pragma.TRANSACTION_MODE.pragmaName,
                                 SQLiteConfig.TransactionMode.DEFERRED.name())),
-                pragmaTable.getProperty(
-                        SQLiteConfig.Pragma.JDBC_AUTO_COMMIT.pragmaName, "true")
+                pragmaTable
+                        .getProperty(SQLiteConfig.Pragma.JDBC_AUTO_COMMIT.pragmaName, "true")
                         .equals("true"));
     }
 
