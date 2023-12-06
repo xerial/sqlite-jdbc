@@ -559,7 +559,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
     /** @see java.sql.DatabaseMetaData#supportsGetGeneratedKeys() */
     public boolean supportsGetGeneratedKeys() {
-        return false;
+        return true;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsGroupBy() */
