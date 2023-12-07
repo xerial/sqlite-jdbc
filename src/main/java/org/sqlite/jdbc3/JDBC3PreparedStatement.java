@@ -124,7 +124,9 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         return this.withConnectionTimeout(
                 () -> {
                     synchronized (conn) {
-                        long rc = conn.getDatabase().executeUpdate(JDBC3PreparedStatement.this, batch);
+                        long rc =
+                                conn.getDatabase()
+                                        .executeUpdate(JDBC3PreparedStatement.this, batch);
                         updateGeneratedKeys();
                         return rc;
                     }

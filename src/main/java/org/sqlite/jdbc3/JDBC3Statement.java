@@ -133,7 +133,8 @@ public abstract class JDBC3Statement extends CoreStatement {
                                 changes = db.total_changes();
                                 // directly invokes the exec API to support multiple SQL statements
                                 int statusCode = db._exec(sql);
-                                if (statusCode != SQLITE_OK) throw DB.newSQLException(statusCode, "");
+                                if (statusCode != SQLITE_OK)
+                                    throw DB.newSQLException(statusCode, "");
                                 updateGeneratedKeys();
                                 changes = db.total_changes() - changes;
                             }

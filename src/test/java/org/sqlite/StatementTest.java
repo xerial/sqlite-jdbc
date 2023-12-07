@@ -330,15 +330,15 @@ public class StatementTest {
     @Test
     public void getGeneratedKeysIsStatementSpecific() throws SQLException {
         /* this test ensures that the results of getGeneratedKeys are tied to
-           a specific statement. To verify this, we create two separate Statement
-           objects and then execute inserts on both. We then make getGeneratedKeys()
-           calls and verify that the two separate expected values are returned.
+          a specific statement. To verify this, we create two separate Statement
+          objects and then execute inserts on both. We then make getGeneratedKeys()
+          calls and verify that the two separate expected values are returned.
 
-           Note that the old implementation of getGeneratedKeys was called lazily, so
-           the result of both getGeneratedKeys calls would be the same value, the row ID
-           of the last insert on the connection. As a result it was unsafe to use
-           with multiple statements or in a multithreaded application.
-         */
+          Note that the old implementation of getGeneratedKeys was called lazily, so
+          the result of both getGeneratedKeys calls would be the same value, the row ID
+          of the last insert on the connection. As a result it was unsafe to use
+          with multiple statements or in a multithreaded application.
+        */
         stat.executeUpdate("create table t1 (c1 integer primary key, v);");
 
         ResultSet rs1;

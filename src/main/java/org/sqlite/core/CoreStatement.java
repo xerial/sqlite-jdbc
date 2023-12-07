@@ -18,7 +18,6 @@ package org.sqlite.core;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc3.JDBC3Connection;
@@ -156,7 +155,7 @@ public abstract class CoreStatement implements Codes {
     }
 
     protected void clearGeneratedKeys() throws SQLException {
-        if(generatedKeysRs != null && !generatedKeysRs.isClosed()) {
+        if (generatedKeysRs != null && !generatedKeysRs.isClosed()) {
             generatedKeysRs.close();
         }
         generatedKeysRs = null;
@@ -167,20 +166,19 @@ public abstract class CoreStatement implements Codes {
     }
 
     /**
-     * SQLite's last_insert_rowid() function is DB-specific. However, in this implementation
-     * we ensure the Generated Key result set is statement-specific by executing the query
-     * immediately after an insert operation is performed. The caller is simply responsible for
-     * calling updateGeneratedKeys on the statement object right after execute in
-     * a synchronized(connection) block.
+     * SQLite's last_insert_rowid() function is DB-specific. However, in this implementation we
+     * ensure the Generated Key result set is statement-specific by executing the query immediately
+     * after an insert operation is performed. The caller is simply responsible for calling
+     * updateGeneratedKeys on the statement object right after execute in a synchronized(connection)
+     * block.
      */
     public void updateGeneratedKeys() throws SQLException {
         clearGeneratedKeys();
-        if(sql != null && sql.toLowerCase().startsWith("insert")) {
+        if (sql != null && sql.toLowerCase().startsWith("insert")) {
             generatedKeysStat = conn.createStatement();
             generatedKeysRs = generatedKeysStat.executeQuery("SELECT last_insert_rowid();");
         }
     }
-
 
     /**
      * This implementation uses SQLite's last_insert_rowid function to obtain the row ID. It cannot
@@ -193,9 +191,10 @@ public abstract class CoreStatement implements Codes {
         // getGeneratedKeys is required to return an EmptyResult set if the statement
         // did not generate any keys. Thus, if the generateKeysResultSet is NULL, spin
         // up a new result set without any contents by issuing a query with a false where condition
-        if(generatedKeysRs == null) {
+        if (generatedKeysRs == null) {
             generatedKeysStat = conn.createStatement();
-            generatedKeysRs = generatedKeysStat.executeQuery("SELECT last_insert_rowid() WHERE 0 <> 0;");
+            generatedKeysRs =
+                    generatedKeysStat.executeQuery("SELECT last_insert_rowid() WHERE 0 <> 0;");
         }
         return generatedKeysRs;
     }
