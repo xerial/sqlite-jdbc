@@ -93,7 +93,7 @@ jobs:
         env:
           OCI_EXE: docker
       - name: Upload native libraries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: native-libs
           path: src/main/resources/org/sqlite/native/
