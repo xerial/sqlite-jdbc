@@ -95,7 +95,7 @@ jobs:
       - name: Upload native libraries
         uses: actions/upload-artifact@v4
         with:
-          name: native-libs
+          name: native-libs-${{ matrix.target }}
           path: src/main/resources/org/sqlite/native/
 
   push:
@@ -111,7 +111,8 @@ jobs:
       - name: Download native libraries
         uses: actions/download-artifact@v4
         with:
-          name: native-libs
+          pattern: native-libs-*
+          merge-multiple: true
           path: src/main/resources/org/sqlite/native/
 
       - run: git status
