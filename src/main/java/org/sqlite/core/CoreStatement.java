@@ -194,7 +194,7 @@ public abstract class CoreStatement implements Codes {
         if (generatedKeysRs == null) {
             generatedKeysStat = conn.createStatement();
             generatedKeysRs =
-                    generatedKeysStat.executeQuery("SELECT last_insert_rowid() WHERE 0 <> 0;");
+                    generatedKeysStat.executeQuery("SELECT 1 WHERE 1 = 2;");
         }
         return generatedKeysRs;
     }
