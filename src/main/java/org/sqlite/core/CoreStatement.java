@@ -193,8 +193,7 @@ public abstract class CoreStatement implements Codes {
         // up a new result set without any contents by issuing a query with a false where condition
         if (generatedKeysRs == null) {
             generatedKeysStat = conn.createStatement();
-            generatedKeysRs =
-                    generatedKeysStat.executeQuery("SELECT 1 WHERE 1 = 2;");
+            generatedKeysRs = generatedKeysStat.executeQuery("SELECT 1 WHERE 1 = 2;");
         }
         return generatedKeysRs;
     }
