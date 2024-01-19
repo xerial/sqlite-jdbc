@@ -32,6 +32,7 @@ public abstract class JDBC3Statement extends CoreStatement {
 
     /** @see java.sql.Statement#close() */
     public void close() throws SQLException {
+        clearGeneratedKeys();
         internalClose();
     }
 
@@ -49,12 +50,14 @@ public abstract class JDBC3Statement extends CoreStatement {
                     }
 
                     JDBC3Statement.this.sql = sql;
-
-                    conn.getDatabase().prepare(JDBC3Statement.this);
-                    boolean result = exec();
-                    updateCount = getDatabase().changes();
-                    exhaustedResults = false;
-                    return result;
+                    synchronized (conn) {
+                        conn.getDatabase().prepare(JDBC3Statement.this);
+                        boolean result = exec();
+                        updateGeneratedKeys();
+                        updateCount = getDatabase().changes();
+                        exhaustedResults = false;
+                        return result;
+                    }
                 });
     }
 
@@ -126,13 +129,16 @@ public abstract class JDBC3Statement extends CoreStatement {
                         ext.execute(db);
                     } else {
                         try {
-                            changes = db.total_changes();
+                            synchronized (db) {
+                                changes = db.total_changes();
+                                // directly invokes the exec API to support multiple SQL statements
+                                int statusCode = db._exec(sql);
+                                if (statusCode != SQLITE_OK)
+                                    throw DB.newSQLException(statusCode, "");
+                                updateGeneratedKeys();
+                                changes = db.total_changes() - changes;
+                            }
 
-                            // directly invokes the exec API to support multiple SQL statements
-                            int statusCode = db._exec(sql);
-                            if (statusCode != SQLITE_OK) throw DB.newSQLException(statusCode, "");
-
-                            changes = db.total_changes() - changes;
                         } finally {
                             internalClose();
                         }
@@ -348,17 +354,6 @@ public abstract class JDBC3Statement extends CoreStatement {
                                 + ". "
                                 + "Must be one of FETCH_FORWARD, FETCH_REVERSE, or FETCH_UNKNOWN in java.sql.ResultSet");
         }
-    }
-
-    /**
-     * SQLite's last_insert_rowid() function is DB-specific, not statement specific, and cannot
-     * provide multiple values when inserting multiple rows. Suggestion is to use a <a
-     * href=https://www.sqlite.org/lang_returning.html>RETURNING</a> clause instead.
-     *
-     * @see java.sql.Statement#getGeneratedKeys()
-     */
-    public ResultSet getGeneratedKeys() throws SQLException {
-        throw unsupported();
     }
 
     /**

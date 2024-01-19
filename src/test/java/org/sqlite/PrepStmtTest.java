@@ -67,8 +67,13 @@ public class PrepStmtTest {
         assertThat(prep.executeUpdate()).isEqualTo(1);
         prep.setInt(1, 7);
         assertThat(prep.executeUpdate()).isEqualTo(1);
-        prep.close();
 
+        ResultSet rsgk = prep.getGeneratedKeys();
+        assertThat(rsgk.next()).isTrue();
+        assertThat(rsgk.getInt(1)).isEqualTo(3);
+        rsgk.close();
+
+        prep.close();
         // check results with normal statement
         ResultSet rs = stat.executeQuery("select sum(c1) from s1;");
         assertThat(rs.next()).isTrue();
