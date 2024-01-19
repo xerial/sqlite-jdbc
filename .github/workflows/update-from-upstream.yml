@@ -79,7 +79,7 @@ jobs:
           amalgamation_version=$(printf "%d%02d%02d00" "${major}" "${minor}" "${patch}")
           echo "amalgamation version: ${amalgamation_version}"
           file_name="sqlite-src-${amalgamation_version}.zip"
-          download_url="https://www.sqlite.org/2023/${file_name}"
+          download_url="https://www.sqlite.org/2024/${file_name}"
           wget "${download_url}"
           unzip "${file_name}"
           dir_name="${file_name//.zip/}"
