@@ -307,8 +307,61 @@ public class StatementTest {
         stat.executeUpdate("create table t1 (c1 integer primary key, v);");
         stat.executeUpdate("insert into t1 (v) values ('red');");
 
-        assertThatExceptionOfType(SQLFeatureNotSupportedException.class)
-                .isThrownBy(() -> stat.getGeneratedKeys());
+        rs = stat.getGeneratedKeys();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
+        rs.close();
+        stat.executeUpdate("insert into t1 (v) values ('blue');");
+        rs = stat.getGeneratedKeys();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(2);
+        rs.close();
+
+        // generated keys are now attached to the statement. calling getGeneratedKeys
+        // on a statement that has not generated any should return an empty result set
+        stat.close();
+        Statement stat2 = conn.createStatement();
+        rs = stat2.getGeneratedKeys();
+        assertThat(rs).isNotNull();
+        assertThat(rs.next()).isFalse();
+        stat2.close();
+    }
+
+    @Test
+    public void getGeneratedKeysIsStatementSpecific() throws SQLException {
+        /* this test ensures that the results of getGeneratedKeys are tied to
+          a specific statement. To verify this, we create two separate Statement
+          objects and then execute inserts on both. We then make getGeneratedKeys()
+          calls and verify that the two separate expected values are returned.
+
+          Note that the old implementation of getGeneratedKeys was called lazily, so
+          the result of both getGeneratedKeys calls would be the same value, the row ID
+          of the last insert on the connection. As a result it was unsafe to use
+          with multiple statements or in a multithreaded application.
+        */
+        stat.executeUpdate("create table t1 (c1 integer primary key, v);");
+
+        ResultSet rs1;
+        Statement stat1 = conn.createStatement();
+        ResultSet rs2;
+        Statement stat2 = conn.createStatement();
+
+        stat1.executeUpdate("insert into t1 (v) values ('red');");
+        stat2.executeUpdate("insert into t1 (v) values ('blue');");
+
+        rs2 = stat2.getGeneratedKeys();
+        rs1 = stat1.getGeneratedKeys();
+
+        assertThat(rs1.next()).isTrue();
+        assertThat(rs1.getInt(1)).isEqualTo(1);
+        rs1.close();
+
+        assertThat(rs2.next()).isTrue();
+        assertThat(rs2.getInt(1)).isEqualTo(2);
+        rs2.close();
+
+        stat1.close();
+        stat2.close();
     }
 
     @Test
