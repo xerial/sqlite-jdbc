@@ -54,10 +54,13 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
                 () -> {
                     boolean success = false;
                     try {
-                        resultsWaiting =
-                                conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
-                        success = true;
-                        updateCount = getDatabase().changes();
+                        synchronized (conn) {
+                            resultsWaiting =
+                                    conn.getDatabase().execute(JDBC3PreparedStatement.this, batch);
+                            updateGeneratedKeys();
+                            success = true;
+                            updateCount = getDatabase().changes();
+                        }
                         return 0 != columnCount;
                     } finally {
                         if (!success && !pointer.isClosed()) pointer.safeRunConsume(DB::reset);
@@ -119,7 +122,15 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         }
 
         return this.withConnectionTimeout(
-                () -> conn.getDatabase().executeUpdate(JDBC3PreparedStatement.this, batch));
+                () -> {
+                    synchronized (conn) {
+                        long rc =
+                                conn.getDatabase()
+                                        .executeUpdate(JDBC3PreparedStatement.this, batch);
+                        updateGeneratedKeys();
+                        return rc;
+                    }
+                });
     }
 
     /** @see java.sql.PreparedStatement#addBatch() */
