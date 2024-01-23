@@ -305,22 +305,48 @@ public class StatementTest {
     public void getGeneratedKeys() throws SQLException {
         ResultSet rs;
         stat.executeUpdate("create table t1 (c1 integer primary key, v);");
-        stat.executeUpdate("insert into t1 (v) values ('red');");
 
+        // test standard insert operation
+        stat.executeUpdate("insert into t1 (v) values ('red');");
         rs = stat.getGeneratedKeys();
         assertThat(rs.next()).isTrue();
         assertThat(rs.getInt(1)).isEqualTo(1);
         rs.close();
+
         stat.executeUpdate("insert into t1 (v) values ('blue');");
         rs = stat.getGeneratedKeys();
         assertThat(rs.next()).isTrue();
         assertThat(rs.getInt(1)).isEqualTo(2);
         rs.close();
 
+        // test INSERT ith special replace keyword. This will trigger a primary key conflict on the
+        // first
+        // inserted row ('red') and replace the record with a value of 'yellow' with the same
+        // primary
+        // key. The value returned from getGeneratedKeys should be primary key of the replaced
+        // record
+        stat.executeUpdate("replace into t1 (c1, v) values (1, 'yellow');");
+        rs = stat.getGeneratedKeys();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1);
+        rs.close();
+
+        // test INSERT with common table expression
+        stat.executeUpdate(
+                "with colors as (select 'green' as color)\n"
+                        + "insert into t1 (v) select color from colors;");
+        rs = stat.getGeneratedKeys();
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(3);
+        rs.close();
+
+        stat.close();
+
         // generated keys are now attached to the statement. calling getGeneratedKeys
         // on a statement that has not generated any should return an empty result set
-        stat.close();
         Statement stat2 = conn.createStatement();
+        stat.executeUpdate(
+                "with colors as (select 'insert' as color) update t1 set v = (select color from colors);");
         rs = stat2.getGeneratedKeys();
         assertThat(rs).isNotNull();
         assertThat(rs.next()).isFalse();
