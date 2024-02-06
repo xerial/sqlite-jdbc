@@ -40,10 +40,10 @@ public abstract class CoreStatement implements Codes {
 
     // pattern for matching insert statements of the general format starting with INSERT or REPLACE.
     // CTEs used prior to the insert or replace keyword are also be permitted.
-    private final Pattern insertPattern =
-            Pattern.compile(
-                    "^(with\\s+.+\\(.+?\\))*\\s*(insert|replace)",
-                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    protected final Pattern insertPattern =
+              Pattern.compile(
+                      "^(with\\s+.+\\(.+?\\))*\\s*(insert|replace)",
+                      Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     protected CoreStatement(SQLiteConnection c) {
         conn = c;
@@ -163,14 +163,18 @@ public abstract class CoreStatement implements Codes {
     }
 
     protected void clearGeneratedKeys() throws SQLException {
-        if (generatedKeysRs != null && !generatedKeysRs.isClosed()) {
-            generatedKeysRs.close();
-        }
-        generatedKeysRs = null;
+        clearGeneratedRs();
         if (generatedKeysStat != null && !generatedKeysStat.isClosed()) {
             generatedKeysStat.close();
         }
         generatedKeysStat = null;
+    }
+
+    protected void clearGeneratedRs() throws SQLException {
+        if (generatedKeysRs != null && !generatedKeysRs.isClosed()) {
+            generatedKeysRs.close();
+        }
+        generatedKeysRs = null;
     }
 
     /**
@@ -185,6 +189,12 @@ public abstract class CoreStatement implements Codes {
         if (sql != null && insertPattern.matcher(sql.trim().toLowerCase()).find()) {
             generatedKeysStat = conn.createStatement();
             generatedKeysRs = generatedKeysStat.executeQuery("SELECT last_insert_rowid();");
+        }
+    }
+    public void updateGeneratedKeys(ResultSet result) throws SQLException {
+        clearGeneratedRs();
+        if (sql != null && insertPattern.matcher(sql.trim().toLowerCase()).find()) {
+            generatedKeysRs = result;
         }
     }
 
