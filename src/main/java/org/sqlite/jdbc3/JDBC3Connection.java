@@ -233,8 +233,12 @@ public abstract class JDBC3Connection extends SQLiteConnection {
     public PreparedStatement prepareStatement(String sql, String[] colNames) throws SQLException {
         PreparedStatement statement;
         if (QueryUtils.isInsertQuery(sql)) {
-            statement = prepareStatement(sql, String.join(",", colNames), ResultSet.TYPE_FORWARD_ONLY,
-                                         ResultSet.CONCUR_READ_ONLY, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            statement = prepareStatement(
+                    sql,
+                    String.join(",", colNames),
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY,
+                    ResultSet.CLOSE_CURSORS_AT_COMMIT);
         }
         else {
             statement = prepareStatement(sql);

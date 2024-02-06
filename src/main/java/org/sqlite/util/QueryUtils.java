@@ -52,19 +52,26 @@ public class QueryUtils {
     }
 
     public static String addReturningClause(String sql, String keys) {
-        String pattern = "RETURNING";
-        if (sql.indexOf(pattern) == -1) {
-            int pos = sql.indexOf(';');
-            int index = pos != -1 ? pos : sql.length();
-            StringBuilder buffer = new StringBuilder(sql.substring(0, index));
+        String separator = ";";
+        String clause = "RETURNING";
+        StringBuilder buffer = new StringBuilder();
+        int count = sql.length() - sql.replace(separator, "").length();
+        if (count == 1 && !sql.split(separator)[1].trim().isEmpty()) {
+            count = 2;
+        }
+        if (sql.indexOf(clause) == -1 && count < 2) {
+            int index = count == 1 ? sql.indexOf(separator) : sql.length();
+            buffer.append(sql.substring(0, index));
             buffer.append(" ");
-            buffer.append(pattern);
+            buffer.append(clause);
             buffer.append(" ");
             buffer.append(keys);
             buffer.append(sql.substring(index));
-            sql = buffer.toString();
         }
-        return sql;
+        else {
+            buffer.append(sql);
+        }
+        return buffer.toString();
     }
 
 

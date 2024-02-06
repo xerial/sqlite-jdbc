@@ -31,20 +31,23 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
     protected int columnCount;
     protected int paramCount;
     protected int batchQueryCount;
+    protected boolean hasReturningClause;
 
     /**
      * Constructs a prepared statement on a provided connection.
      *
      * @param conn Connection on which to create the prepared statement.
-     * @param sql The SQL script to prepare.
+     * @param sql1 The SQL script to prepare.
      * @throws SQLException
      */
-    protected CorePreparedStatement(SQLiteConnection conn, String sql, String keys) throws SQLException {
+    protected CorePreparedStatement(SQLiteConnection conn, String sql1, String keys) throws SQLException {
         super(conn);
-        if (!keys.isEmpty() && QueryUtils.isInsertQuery(sql)) {
-            sql = QueryUtils.addReturningClause(sql, keys);
+        String sql2 = new String(sql1);
+        if (!keys.isEmpty() && QueryUtils.isInsertQuery(sql1)) {
+            sql2 = QueryUtils.addReturningClause(sql1, keys);
         }
-        this.sql = sql;
+        sql = sql2;
+        hasReturningClause = !sql2.equals(sql1);
         DB db = conn.getDatabase();
         db.prepare(this);
         rs.colsMeta = pointer.safeRun(DB::column_names);

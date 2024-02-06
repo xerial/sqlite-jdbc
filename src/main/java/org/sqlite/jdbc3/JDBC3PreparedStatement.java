@@ -25,7 +25,6 @@ import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CorePreparedStatement;
 import org.sqlite.core.DB;
-import org.sqlite.util.QueryUtils;
 
 public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
@@ -42,7 +41,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#execute() */
     public boolean execute() throws SQLException {
-        if (QueryUtils.isInsertQuery(sql)) {
+        if (hasReturningClause) {
             updateGeneratedKeys(executeQuery());
             return true;
         }
@@ -113,7 +112,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#executeLargeUpdate() */
     public long executeLargeUpdate() throws SQLException {
-        if (QueryUtils.isInsertQuery(sql)) {
+        if (hasReturningClause) {
             updateGeneratedKeys(executeQuery());
             return 1;
         }
