@@ -59,7 +59,7 @@ public class QueryUtils {
         if (count == 1 && !sql.split(separator)[1].trim().isEmpty()) {
             count = 2;
         }
-        if (sql.indexOf(clause) == -1 && count < 2) {
+        if (sql.toUpperCase().indexOf(clause) == -1 && count < 2) {
             int index = count == 1 ? sql.indexOf(separator) : sql.length();
             buffer.append(sql.substring(0, index));
             buffer.append(" ");
