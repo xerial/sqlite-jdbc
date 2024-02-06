@@ -1,6 +1,7 @@
 package org.sqlite.util;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class QueryUtils {
@@ -38,4 +39,33 @@ public class QueryUtils {
                         .collect(Collectors.joining(","))
                 + ") select * from cte";
     }
+
+    // pattern for matching insert statements of the general format starting with INSERT or REPLACE.
+    // CTEs used prior to the insert or replace keyword are also be permitted.
+    private final static Pattern insertPattern =
+                                   Pattern.compile(
+                                       "^(with\\s+.+\\(.+?\\))*\\s*(insert|replace)",
+                                       Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    public static boolean isInsertQuery(String sql) {
+        return insertPattern.matcher(sql.trim().toLowerCase()).find();
+    }
+
+    public static String addReturningClause(String sql, String keys) {
+        String pattern = "RETURNING";
+        if (sql.indexOf(pattern) == -1) {
+            int pos = sql.indexOf(';');
+            int index = pos != -1 ? pos : sql.length();
+            StringBuilder buffer = new StringBuilder(sql.substring(0, index));
+            buffer.append(" ");
+            buffer.append(pattern);
+            buffer.append(" ");
+            buffer.append(keys);
+            buffer.append(sql.substring(index));
+            sql = buffer.toString();
+        }
+        return sql;
+    }
+
+
 }

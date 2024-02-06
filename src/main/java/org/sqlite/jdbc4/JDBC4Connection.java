@@ -28,10 +28,15 @@ public class JDBC4Connection extends JDBC3Connection {
 
     public PreparedStatement prepareStatement(String sql, int rst, int rsc, int rsh)
             throws SQLException {
+        return prepareStatement(sql, "", rst, rsc, rsh);
+    }
+
+    public PreparedStatement prepareStatement(String sql, String keys, int rst, int rsc, int rsh)
+            throws SQLException {
         checkOpen();
         checkCursor(rst, rsc, rsh);
 
-        return new JDBC4PreparedStatement(this, sql);
+        return new JDBC4PreparedStatement(this, sql, keys);
     }
 
     // JDBC 4

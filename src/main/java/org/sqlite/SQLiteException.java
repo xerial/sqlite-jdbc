@@ -26,6 +26,7 @@ package org.sqlite;
 
 import java.sql.SQLException;
 
+@SuppressWarnings("serial")
 public class SQLiteException extends SQLException {
     private SQLiteErrorCode resultCode;
 

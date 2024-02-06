@@ -25,11 +25,12 @@ import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CorePreparedStatement;
 import org.sqlite.core.DB;
+import org.sqlite.util.QueryUtils;
 
 public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
-    protected JDBC3PreparedStatement(SQLiteConnection conn, String sql) throws SQLException {
-        super(conn, sql);
+    protected JDBC3PreparedStatement(SQLiteConnection conn, String sql, String keys) throws SQLException {
+        super(conn, sql, keys);
     }
 
     /** @see java.sql.PreparedStatement#clearParameters() */
@@ -41,6 +42,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#execute() */
     public boolean execute() throws SQLException {
+        if (QueryUtils.isInsertQuery(sql)) {
+            updateGeneratedKeys(executeQuery());
+            return true;
+        }
+
         checkOpen();
         rs.close();
         pointer.safeRunConsume(DB::reset);
@@ -107,6 +113,11 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#executeLargeUpdate() */
     public long executeLargeUpdate() throws SQLException {
+        if (QueryUtils.isInsertQuery(sql)) {
+            updateGeneratedKeys(executeQuery());
+            return 1;
+        }
+
         checkOpen();
 
         if (columnCount != 0) {
@@ -311,22 +322,26 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /** @see java.sql.PreparedStatement#setDouble(int, double) */
-    public void setDouble(int pos, double value) throws SQLException {
+    @SuppressWarnings("deprecation")
+	public void setDouble(int pos, double value) throws SQLException {
         batch(pos, new Double(value));
     }
 
     /** @see java.sql.PreparedStatement#setFloat(int, float) */
-    public void setFloat(int pos, float value) throws SQLException {
+    @SuppressWarnings("deprecation")
+	public void setFloat(int pos, float value) throws SQLException {
         batch(pos, new Float(value));
     }
 
     /** @see java.sql.PreparedStatement#setInt(int, int) */
-    public void setInt(int pos, int value) throws SQLException {
+    @SuppressWarnings("deprecation")
+	public void setInt(int pos, int value) throws SQLException {
         batch(pos, new Integer(value));
     }
 
     /** @see java.sql.PreparedStatement#setLong(int, long) */
-    public void setLong(int pos, long value) throws SQLException {
+    @SuppressWarnings("deprecation")
+	public void setLong(int pos, long value) throws SQLException {
         batch(pos, new Long(value));
     }
 
@@ -341,7 +356,8 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /** @see java.sql.PreparedStatement#setObject(int, java.lang.Object) */
-    public void setObject(int pos, Object value) throws SQLException {
+    @SuppressWarnings("deprecation")
+	public void setObject(int pos, Object value) throws SQLException {
         if (value == null) {
             batch(pos, null);
         } else if (value instanceof java.util.Date) {

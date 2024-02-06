@@ -188,7 +188,7 @@ class SQLitePooledConnectionHandle extends SQLiteConnection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return new JDBC4PreparedStatement(this, sql);
+        return new JDBC4PreparedStatement(this, sql, "");
     }
 
     @Override

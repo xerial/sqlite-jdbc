@@ -25,6 +25,7 @@ import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.date.FastDateFormat;
 import org.sqlite.jdbc3.JDBC3Connection;
 import org.sqlite.jdbc4.JDBC4Statement;
+import org.sqlite.util.QueryUtils;
 
 public abstract class CorePreparedStatement extends JDBC4Statement {
     protected int columnCount;
@@ -38,9 +39,11 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
      * @param sql The SQL script to prepare.
      * @throws SQLException
      */
-    protected CorePreparedStatement(SQLiteConnection conn, String sql) throws SQLException {
+    protected CorePreparedStatement(SQLiteConnection conn, String sql, String keys) throws SQLException {
         super(conn);
-
+        if (!keys.isEmpty() && QueryUtils.isInsertQuery(sql)) {
+            sql = QueryUtils.addReturningClause(sql, keys);
+        }
         this.sql = sql;
         DB db = conn.getDatabase();
         db.prepare(this);
@@ -106,7 +109,8 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
     }
 
     /** Store the date in the user's preferred format (text, int, or real) */
-    protected void setDateByMilliseconds(int pos, Long value, Calendar calendar)
+    @SuppressWarnings("deprecation")
+	protected void setDateByMilliseconds(int pos, Long value, Calendar calendar)
             throws SQLException {
         SQLiteConnectionConfig config = conn.getConnectionConfig();
         switch (config.getDateClass()) {

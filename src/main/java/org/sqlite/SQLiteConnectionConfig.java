@@ -119,7 +119,6 @@ public class SQLiteConnectionConfig implements Cloneable {
         return transactionMode;
     }
 
-    @SuppressWarnings("deprecation")
     public void setTransactionMode(SQLiteConfig.TransactionMode transactionMode) {
         this.transactionMode = transactionMode;
     }

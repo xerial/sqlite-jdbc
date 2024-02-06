@@ -181,7 +181,8 @@ public class SQLiteDataSource implements DataSource {
      * @see <a
      *     href="https://www.sqlite.org/pragma.html#pragma_count_changes">https://www.sqlite.org/pragma.html#pragma_count_changes</a>
      */
-    public void setCountChanges(boolean enable) {
+    @SuppressWarnings("deprecation")
+	public void setCountChanges(boolean enable) {
         config.enableCountChanges(enable);
     }
 
@@ -229,7 +230,8 @@ public class SQLiteDataSource implements DataSource {
      * @see <a
      *     href="https://www.sqlite.org/pragma.html#pragma_full_column_names">https://www.sqlite.org/pragma.html#pragma_full_column_names</a>
      */
-    public void setFullColumnNames(boolean enable) {
+    @SuppressWarnings("deprecation")
+	public void setFullColumnNames(boolean enable) {
         config.enableFullColumnNames(enable);
     }
 
