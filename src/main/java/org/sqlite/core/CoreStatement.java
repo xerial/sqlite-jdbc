@@ -18,6 +18,7 @@ package org.sqlite.core;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.regex.Pattern;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc3.JDBC3Connection;
@@ -36,6 +37,13 @@ public abstract class CoreStatement implements Codes {
 
     private Statement generatedKeysStat = null;
     private ResultSet generatedKeysRs = null;
+
+    // pattern for matching insert statements of the general format starting with INSERT or REPLACE.
+    // CTEs used prior to the insert or replace keyword are also be permitted.
+    private final Pattern insertPattern =
+            Pattern.compile(
+                    "^(with\\s+.+\\(.+?\\))*\\s*(insert|replace)",
+                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     protected CoreStatement(SQLiteConnection c) {
         conn = c;
@@ -174,7 +182,7 @@ public abstract class CoreStatement implements Codes {
      */
     public void updateGeneratedKeys() throws SQLException {
         clearGeneratedKeys();
-        if (sql != null && sql.toLowerCase().startsWith("insert")) {
+        if (sql != null && insertPattern.matcher(sql.trim().toLowerCase()).find()) {
             generatedKeysStat = conn.createStatement();
             generatedKeysRs = generatedKeysStat.executeQuery("SELECT last_insert_rowid();");
         }

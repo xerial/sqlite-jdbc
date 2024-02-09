@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.aga.sqlite</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.45.0.0</version>
+  <version>3.45.1.0</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
   <url>https://github.com/austinarbor/sqlite-jdbc</url>
@@ -10,7 +10,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>5.10.1</junit.version>
     <surefire.version>3.2.5</surefire.version>
-    <graalvm.version>23.1.1</graalvm.version>
+    <graalvm.version>23.1.2</graalvm.version>
     <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
   </properties>
   <licenses>
@@ -395,7 +395,7 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.25.1</version>
+      <version>3.25.2</version>
       <scope>test</scope>
       <exclusions>
         <exclusion><!--
@@ -416,7 +416,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.9.0</version>
+      <version>5.10.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
