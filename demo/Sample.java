@@ -8,12 +8,15 @@
     {
       public static void main(String[] args) 
       {
-        Connection connection = null;
+        // NOTE: Connection and Statement are AutoClosable.
+        //       Don't forget to close them both in order to avoid leaks.
         try
-        {
+        (
           // create a database connection
-          connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+          Connection connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
           Statement statement = connection.createStatement();
+        )
+        {
           statement.setQueryTimeout(30);  // set timeout to 30 sec.
           
           statement.executeUpdate("drop table if exists person");
@@ -32,20 +35,7 @@
         {
           // if the error message is "out of memory", 
           // it probably means no database file is found
-          System.err.println(e.getMessage());
-        }
-        finally
-        {
-          try
-          {
-            if(connection != null)
-              connection.close();
-          }
-          catch(SQLException e)
-          {
-            // connection close failed.
-            System.err.println(e);
-          }
+          e.printStackTrace(System.err);
         }
       }
     }
