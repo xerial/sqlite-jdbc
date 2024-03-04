@@ -198,7 +198,7 @@
             <plugin>
                 <groupId>org.jreleaser</groupId>
                 <artifactId>jreleaser-maven-plugin</artifactId>
-                <version>1.10.0</version>
+                <version>1.11.0</version>
                 <configuration>
                     <configFile>jreleaser.yml</configFile>
                 </configuration>
