@@ -183,6 +183,33 @@ Download from https://search.maven.org/artifact/org.xerial/sqlite-jdbc[Maven Cen
 
 Snapshots of the development version are available in https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/[Sonatype's snapshots repository].
 
+=== Validating downloads
+
+Maven Central resources are signed using https://gnupg.org/[GPG] and the signature files, ending in .asc, are available in the same location as the other downloads. 
+
+The following key is currently used to sign releases:
+
+---- 
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: C1CB A75E C9BD 0BAF 8061  9354 59E0 5CE6 1818 7ED4
+Comment: Taro L. Saito (For GitHub Actions) <leo@xerial.org>
+
+xjMEYuRVGhYJKwYBBAHaRw8BAQdA2Dp4m1Yhtb1g94pQzzL24FuP6b9KXF8lP9Dh
+hZnynhfNM1Rhcm8gTC4gU2FpdG8gKEZvciBHaXRIdWIgQWN0aW9ucykgPGxlb0B4
+ZXJpYWwub3JnPsKUBBMWCgA8FiEEwcunXsm9C6+AYZNUWeBc5hgYftQFAmLkVRoC
+GwMFCwkIBwIDIgIBBhUKCQgLAgQWAgMBAh4HAheAAAoJEFngXOYYGH7UfPwBAK7x
+TVRebZeWcAwmGaMUsbg7SgJou8xnkhByObPLUC/4AQDPsZeYmi4KXyXPzmqhCicd
+Y+ZSJWIDQqitK2ujPDFXA844BGLkVRoSCisGAQQBl1UBBQEBB0Atu9kejBi+6wfO
+T0a9z/LYEEdNXM/VX6xt1onKToPPdQMBCAfCeAQYFgoAIBYhBMHLp17JvQuvgGGT
+VFngXOYYGH7UBQJi5FUaAhsMAAoJEFngXOYYGH7UlMABAKyRCazhVyUFg5FOpAnm
+ckBY38CaMGPPLXVyY8Kr6dYFAP9wYLu7nsDZCOXkAgS+et4Pk1WZCggoYUkxsX1o
+0KZXBQ==
+=Wyas
+-----END PGP PUBLIC KEY BLOCK-----
+
+----
+
 === Project versioning explained
 
 The project's version follows the version of the SQLite library that is bundled in the jar, with an extra digit to denote the project's increment.
