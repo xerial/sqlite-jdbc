@@ -40,9 +40,9 @@ public abstract class CoreStatement implements Codes {
 
     // pattern for matching insert statements of the general format starting with INSERT or REPLACE.
     // CTEs used prior to the insert or replace keyword are also be permitted.
-    private final Pattern insertPattern =
+    private static final Pattern INSERT_PATTERN =
             Pattern.compile(
-                    "^(with\\s+.+\\(.+?\\))*\\s*(insert|replace)",
+                    "^\\s*(?:with\\s+.+\\(.+?\\))*\\s*(?:insert|replace)\\s*",
                     Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     protected CoreStatement(SQLiteConnection c) {
@@ -182,7 +182,7 @@ public abstract class CoreStatement implements Codes {
      */
     public void updateGeneratedKeys() throws SQLException {
         clearGeneratedKeys();
-        if (sql != null && insertPattern.matcher(sql.trim().toLowerCase()).find()) {
+        if (sql != null && INSERT_PATTERN.matcher(sql).find()) {
             generatedKeysStat = conn.createStatement();
             generatedKeysRs = generatedKeysStat.executeQuery("SELECT last_insert_rowid();");
         }
