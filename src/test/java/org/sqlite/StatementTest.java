@@ -333,8 +333,8 @@ public class StatementTest {
 
         // test INSERT with common table expression
         stat.executeUpdate(
-                "with colors as (select 'green' as color)\n"
-                        + "insert into t1 (v) select color from colors;");
+                "  WITH colors as (select 'green' as color) \n"
+                        + "INSERT into t1 (v) select color from colors;");
         rs = stat.getGeneratedKeys();
         assertThat(rs.next()).isTrue();
         assertThat(rs.getInt(1)).isEqualTo(3);
