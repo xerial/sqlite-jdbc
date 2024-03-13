@@ -1,13 +1,5 @@
-== SQLite JDBC Driver Fork
-
-This repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.
-
-image:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&label=maven%20central[Maven Central,link=https://central.sonatype.com/search?q=g%3Adev.aga.sqlite+a%3Asqlite-jdbc]
-
-_Everything below this line comes from the original repository._
-
 = SQLite JDBC Driver
-:project-version: 3.45.1.0
+:project-version: 3.45.2.0
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
@@ -70,12 +62,15 @@ id = 2
     {
       public static void main(String[] args)
       {
-        Connection connection = null;
+        // NOTE: Connection and Statement are AutoClosable.
+        //       Don't forget to close them both in order to avoid leaks.
         try
-        {
+        (
           // create a database connection
-          connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+          Connection connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
           Statement statement = connection.createStatement();
+        )
+        {
           statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
           statement.executeUpdate("drop table if exists person");
@@ -94,20 +89,7 @@ id = 2
         {
           // if the error message is "out of memory",
           // it probably means no database file is found
-          System.err.println(e.getMessage());
-        }
-        finally
-        {
-          try
-          {
-            if(connection != null)
-              connection.close();
-          }
-          catch(SQLException e)
-          {
-            // connection close failed.
-            System.err.println(e.getMessage());
-          }
+          e.printStackTrace(System.err);
         }
       }
     }
@@ -200,6 +182,33 @@ Download from https://search.maven.org/artifact/org.xerial/sqlite-jdbc[Maven Cen
 ----
 
 Snapshots of the development version are available in https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/[Sonatype's snapshots repository].
+
+=== Validating downloads
+
+Maven Central resources are signed using https://gnupg.org/[GPG] and the signature files, ending in .asc, are available in the same location as the other downloads. 
+
+The following key is currently used to sign releases:
+
+---- 
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Comment: C1CB A75E C9BD 0BAF 8061  9354 59E0 5CE6 1818 7ED4
+Comment: Taro L. Saito (For GitHub Actions) <leo@xerial.org>
+
+xjMEYuRVGhYJKwYBBAHaRw8BAQdA2Dp4m1Yhtb1g94pQzzL24FuP6b9KXF8lP9Dh
+hZnynhfNM1Rhcm8gTC4gU2FpdG8gKEZvciBHaXRIdWIgQWN0aW9ucykgPGxlb0B4
+ZXJpYWwub3JnPsKUBBMWCgA8FiEEwcunXsm9C6+AYZNUWeBc5hgYftQFAmLkVRoC
+GwMFCwkIBwIDIgIBBhUKCQgLAgQWAgMBAh4HAheAAAoJEFngXOYYGH7UfPwBAK7x
+TVRebZeWcAwmGaMUsbg7SgJou8xnkhByObPLUC/4AQDPsZeYmi4KXyXPzmqhCicd
+Y+ZSJWIDQqitK2ujPDFXA844BGLkVRoSCisGAQQBl1UBBQEBB0Atu9kejBi+6wfO
+T0a9z/LYEEdNXM/VX6xt1onKToPPdQMBCAfCeAQYFgoAIBYhBMHLp17JvQuvgGGT
+VFngXOYYGH7UBQJi5FUaAhsMAAoJEFngXOYYGH7UlMABAKyRCazhVyUFg5FOpAnm
+ckBY38CaMGPPLXVyY8Kr6dYFAP9wYLu7nsDZCOXkAgS+et4Pk1WZCggoYUkxsX1o
+0KZXBQ==
+=Wyas
+-----END PGP PUBLIC KEY BLOCK-----
+
+----
 
 === Project versioning explained
 
