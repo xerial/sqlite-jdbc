@@ -917,9 +917,59 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         //        empty string --- if it cannot be determined whether the column is auto incremented
         // parameter is unknown
         checkOpen();
-
+        ResultSet schemas = getSchemas(c, s);
+        ArrayList<String> schemasNames = getSchemasNames(schemas);
         StringBuilder sql = new StringBuilder(700);
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, tblname as TABLE_NAME, ")
+        for (int i = 0; i < schemasNames.size(); i++) {
+            if (i == 0) {
+                sql.append("SELECT * FROM (");
+            }
+            appendGetSchemaColumns(sql, c, schemasNames.get(i), tblNamePattern, colNamePattern);
+            if (i != schemasNames.size() - 1) {
+                sql.append(" UNION ALL ");
+            } else {
+                sql.append("\n) order by TABLE_NAME, TABLE_SCHEM, ORDINAL_POSITION;");
+            }
+        }
+        if (schemasNames.size() == 0) {
+            sql.append("select ");
+            sql.append("\tnull as TABLE_CAT,\n")
+                    .append("\tnull as TABLE_SCHEM,\n")
+                    .append("\tnull as TABLE_NAME,\n")
+                    .append("\tnull as COLUMN_NAME,\n")
+                    .append("\tnull as DATA_TYPE,\n")
+                    .append("\tnull as TYPE_NAME,\n")
+                    .append("\tnull as COLUMN_SIZE,\n")
+                    .append("\tnull as BUFFER_LENGTH,\n")
+                    .append("\tnull as DECIMAL_DIGITS,\n")
+                    .append("\tnull as NUM_PREC_RADIX,\n")
+                    .append("\tnull as NULLABLE,\n")
+                    .append("\tnull as REMARKS,\n")
+                    .append("\tnull as COLUMN_DEF,\n")
+                    .append("\tnull as SQL_DATA_TYPE,\n")
+                    .append("\tnull as SQL_DATETIME_SUB,\n")
+                    .append("\tnull as CHAR_OCTET_LENGTH,\n")
+                    .append("\tnull as ORDINAL_POSITION,\n")
+                    .append("\tnull as IS_NULLABLE,\n")
+                    .append("\tnull as SCOPE_CATLOG,\n")
+                    .append("\tnull as SCOPE_SCHEMA,\n")
+                    .append("\tnull as SCOPE_TABLE,\n")
+                    .append("\tnull as SOURCE_DATA_TYPE,\n")
+                    .append("\tnull as IS_AUTOINCREMENT,\n")
+                    .append("\tnull as IS_GENERATEDCOLUMN\n")
+                    .append("\t limit 0");
+        }
+        Statement stat = conn.createStatement();
+        return ((CoreStatement) stat).executeQuery(sql.toString(), true);
+    }
+
+    private StringBuilder appendGetSchemaColumns(
+            StringBuilder sql, String c, String s, String tblNamePattern, String colNamePattern)
+            throws SQLException {
+
+        sql.append("select null as TABLE_CAT, ")
+                .append(quote(s == null ? "main" : s))
+                .append(" as TABLE_SCHEM, tblname as TABLE_NAME, ")
                 .append(
                         "cn as COLUMN_NAME, ct as DATA_TYPE, tn as TYPE_NAME, colSize as COLUMN_SIZE, ")
                 .append(
@@ -953,8 +1003,9 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                     statColAutoinc = conn.createStatement();
                     rsColAutoinc =
                             statColAutoinc.executeQuery(
-                                    "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM sqlite_schema "
-                                            + "WHERE LOWER(name) = LOWER('"
+                                    "SELECT LIKE('%autoincrement%', LOWER(sql)) FROM "
+                                            + prependSchemaPrefix(
+                                                    s, "sqlite_schema WHERE LOWER(name) = LOWER('")
                                             + escape(tableName)
                                             + "') AND TYPE IN ('table', 'view')");
                     rsColAutoinc.next();
@@ -977,7 +1028,10 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                 }
 
                 // For each table, get the column info and build into overall SQL
-                String pragmaStatement = "PRAGMA table_xinfo('" + escape(tableName) + "')";
+                String pragmaStatement =
+                        "PRAGMA "
+                                + prependSchemaPrefix(
+                                        s, "table_xinfo('" + escape(tableName) + "')");
                 try (Statement colstat = conn.createStatement();
                         ResultSet rscol = colstat.executeQuery(pragmaStatement)) {
 
@@ -1128,14 +1182,14 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         }
 
         if (colFound) {
-            sql.append(") order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION;");
+            sql.append(") ");
         } else {
             sql.append(
-                    "select null as ordpos, null as colnullable, null as ct, null as colsize, null as colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as colautoincrement, null as colgenerated) limit 0;");
+                    "select null as ordpos, null as colnullable, null as ct, null as colsize, null as "
+                            + "colDecimalDigits, null as tblname, null as cn, null as tn, null as colDefault, null as "
+                            + "colautoincrement, null as colgenerated limit 0)");
         }
-
-        Statement stat = conn.createStatement();
-        return ((CoreStatement) stat).executeQuery(sql.toString(), true);
+        return sql;
     }
 
     /**
@@ -1179,10 +1233,31 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         if (getSchemas == null) {
             getSchemas =
                     conn.prepareStatement(
-                            "select null as TABLE_SCHEM, null as TABLE_CATALOG limit 0;");
+                            "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list order by "
+                                    + "TABLE_SCHEM;");
         }
 
         return getSchemas.executeQuery();
+    }
+
+    /** @see java.sql.DatabaseMetaData#getSchemas(String, String) */
+    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+        if (schemaPattern == null) {
+            return getSchemas();
+        }
+        if ("".equals(schemaPattern)) {
+            schemaPattern = "main";
+        }
+        Statement stat = conn.createStatement();
+        String sql =
+                "select name as TABLE_SCHEM, null as TABLE_CATALOG from pragma_database_list\n"
+                        + "where TABLE_SCHEM like '"
+                        + schemaPattern
+                        + "' escape '"
+                        + getSearchStringEscape()
+                        + "' order by "
+                        + "TABLE_SCHEM;";
+        return stat.executeQuery(sql);
     }
 
     /** @see java.sql.DatabaseMetaData#getCatalogs() */
@@ -1199,19 +1274,52 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
      *     java.lang.String)
      */
     public ResultSet getPrimaryKeys(String c, String s, String table) throws SQLException {
-        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
-        String[] columns = pkFinder.getColumns();
 
         Statement stat = conn.createStatement();
         StringBuilder sql = new StringBuilder(512);
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
+        ResultSet schemas = getSchemas(c, escapeWildcards(s));
+        ArrayList<String> schemaNames = getSchemasNames(schemas);
+        for (int i = 0; i < schemaNames.size(); i++) {
+            createSchemaPrimaryKeysQuery(schemaNames.get(i), table, sql);
+            if (i != schemaNames.size() - 1) {
+                sql.append(" union all ");
+            } else {
+                sql.append(" order by cn;");
+            }
+        }
+        if (schemaNames.size() == 0) {
+            sql.append("select null as TABLE_CAT, ")
+                    .append("null")
+                    .append(" as TABLE_SCHEM, '")
+                    .append("null")
+                    .append(
+                            "' as TABLE_NAME, null as COLUMN_NAME, null as KEY_SEQ, null as PK_NAME limit 0;");
+        }
+
+        return ((CoreStatement) stat).executeQuery(sql.toString(), true);
+    }
+
+    private ArrayList<String> getSchemasNames(ResultSet schemas) throws SQLException {
+        ArrayList<String> schemaNames = new ArrayList<>();
+        while (schemas.next()) {
+            schemaNames.add(schemas.getString("TABLE_SCHEM"));
+        }
+        return schemaNames;
+    }
+
+    private void createSchemaPrimaryKeysQuery(String s, String table, StringBuilder sql)
+            throws SQLException {
+        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table, s);
+        String[] columns = pkFinder.getColumns();
+        sql.append("select null as TABLE_CAT, ")
+                .append(quote(s))
+                .append(" as TABLE_SCHEM, '")
                 .append(escape(table))
                 .append("' as TABLE_NAME, cn as COLUMN_NAME, ks as KEY_SEQ, pk as PK_NAME from (");
 
         if (columns == null) {
             sql.append("select null as cn, null as pk, 0 as ks) limit 0;");
-
-            return ((CoreStatement) stat).executeQuery(sql.toString(), true);
+            return;
         }
 
         String pkName = pkFinder.getName();
@@ -1229,8 +1337,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                     .append(i + 1)
                     .append(" as ks");
         }
-
-        return ((CoreStatement) stat).executeQuery(sql.append(") order by cn;").toString(), true);
+        sql.append(") ");
     }
 
     private static final Map<String, Integer> RULE_MAP = new HashMap<>();
@@ -1249,137 +1356,176 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
      */
     public ResultSet getExportedKeys(String catalog, String schema, String table)
             throws SQLException {
-        PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table);
-        String[] pkColumns = pkFinder.getColumns();
         Statement stat = conn.createStatement();
+        StringBuilder sql = new StringBuilder(2048);
 
-        catalog = (catalog != null) ? quote(catalog) : null;
-        schema = (schema != null) ? quote(schema) : null;
+        ResultSet schemas = getSchemas(catalog, escapeWildcards(schema));
+        ArrayList<String> schemasNames = getSchemasNames(schemas);
+        for (int i = 0; i < schemasNames.size(); i++) {
+            PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(table, schemasNames.get(i));
+            String[] pkColumns = pkFinder.getColumns();
 
-        StringBuilder exportedKeysQuery = new StringBuilder(512);
+            catalog = (catalog != null) ? quote(catalog) : null;
 
-        String target = null;
-        int count = 0;
-        if (pkColumns != null) {
-            // retrieve table list
-            ArrayList<String> tableList;
-            try (ResultSet rs =
-                    stat.executeQuery("select name from sqlite_schema where type = 'table'")) {
-                tableList = new ArrayList<>();
+            String quotedSchema = (schema != null) ? quote(schemasNames.get(i)) : quote("main");
 
-                while (rs.next()) {
-                    String tblname = rs.getString(1);
-                    tableList.add(tblname);
-                    if (tblname.equalsIgnoreCase(table)) {
-                        // get the correct case as in the database
-                        // (not uppercase nor lowercase)
-                        target = tblname;
+            StringBuilder exportedKeysQuery = new StringBuilder(512);
+
+            String target = null;
+            int count = 0;
+            if (pkColumns != null) {
+                // retrieve table list
+                ArrayList<String> tableList;
+                try (ResultSet rs =
+                        stat.executeQuery(
+                                "select name from "
+                                        + prependSchemaPrefix(
+                                                schema,
+                                                "sqlite_schema where type = " + "'table'"))) {
+                    tableList = new ArrayList<>();
+
+                    while (rs.next()) {
+                        String tblname = rs.getString(1);
+                        tableList.add(tblname);
+                        if (tblname.equalsIgnoreCase(table)) {
+                            // get the correct case as in the database
+                            // (not uppercase nor lowercase)
+                            target = tblname;
+                        }
                     }
                 }
-            }
 
-            // find imported keys for each table
-            for (String tbl : tableList) {
-                final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(tbl);
-                List<ForeignKey> fkNames = impFkFinder.getFkList();
+                // find imported keys for each table
+                for (String tbl : tableList) {
+                    final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(tbl, schema);
+                    List<ForeignKey> fkNames = impFkFinder.getFkList();
 
-                for (ForeignKey foreignKey : fkNames) {
-                    String PKTabName = foreignKey.getPkTableName();
+                    for (ForeignKey foreignKey : fkNames) {
+                        String PKTabName = foreignKey.getPkTableName();
 
-                    if (PKTabName == null || !PKTabName.equalsIgnoreCase(target)) {
-                        continue;
-                    }
+                        if (PKTabName == null || !PKTabName.equalsIgnoreCase(target)) {
+                            continue;
+                        }
 
-                    for (int j = 0; j < foreignKey.getColumnMappingCount(); j++) {
-                        int keySeq = j + 1;
-                        String[] columnMapping = foreignKey.getColumnMapping(j);
-                        String PKColName = columnMapping[1];
-                        PKColName = (PKColName == null) ? "" : PKColName;
-                        String FKColName = columnMapping[0];
-                        FKColName = (FKColName == null) ? "" : FKColName;
+                        for (int j = 0; j < foreignKey.getColumnMappingCount(); j++) {
+                            int keySeq = j + 1;
+                            String[] columnMapping = foreignKey.getColumnMapping(j);
+                            String PKColName = columnMapping[1];
+                            PKColName = (PKColName == null) ? "" : PKColName;
+                            String FKColName = columnMapping[0];
+                            FKColName = (FKColName == null) ? "" : FKColName;
 
-                        boolean usePkName = false;
-                        for (String pkColumn : pkColumns) {
-                            if (pkColumn != null && pkColumn.equalsIgnoreCase(PKColName)) {
-                                usePkName = true;
-                                break;
+                            boolean usePkName = false;
+                            for (String pkColumn : pkColumns) {
+                                if (pkColumn != null && pkColumn.equalsIgnoreCase(PKColName)) {
+                                    usePkName = true;
+                                    break;
+                                }
                             }
+                            String pkName =
+                                    (usePkName && pkFinder.getName() != null)
+                                            ? pkFinder.getName()
+                                            : "";
+
+                            exportedKeysQuery
+                                    .append(count > 0 ? " union all select " : "select ")
+                                    .append(keySeq)
+                                    .append(" as ks, '")
+                                    .append(escape(tbl))
+                                    .append("' as fkt, '")
+                                    .append(escape(FKColName))
+                                    .append("' as fcn, '")
+                                    .append(escape(PKColName))
+                                    .append("' as pcn, '")
+                                    .append(escape(pkName))
+                                    .append("' as pkn, ")
+                                    .append(RULE_MAP.get(foreignKey.getOnUpdate()))
+                                    .append(" as ur, ")
+                                    .append(RULE_MAP.get(foreignKey.getOnDelete()))
+                                    .append(" as dr, ");
+
+                            String fkName = foreignKey.getFkName();
+
+                            if (fkName != null) {
+                                exportedKeysQuery
+                                        .append("'")
+                                        .append(escape(fkName))
+                                        .append("' as fkn");
+                            } else {
+                                exportedKeysQuery.append("'' as fkn");
+                            }
+
+                            count++;
                         }
-                        String pkName =
-                                (usePkName && pkFinder.getName() != null) ? pkFinder.getName() : "";
-
-                        exportedKeysQuery
-                                .append(count > 0 ? " union all select " : "select ")
-                                .append(keySeq)
-                                .append(" as ks, '")
-                                .append(escape(tbl))
-                                .append("' as fkt, '")
-                                .append(escape(FKColName))
-                                .append("' as fcn, '")
-                                .append(escape(PKColName))
-                                .append("' as pcn, '")
-                                .append(escape(pkName))
-                                .append("' as pkn, ")
-                                .append(RULE_MAP.get(foreignKey.getOnUpdate()))
-                                .append(" as ur, ")
-                                .append(RULE_MAP.get(foreignKey.getOnDelete()))
-                                .append(" as dr, ");
-
-                        String fkName = foreignKey.getFkName();
-
-                        if (fkName != null) {
-                            exportedKeysQuery.append("'").append(escape(fkName)).append("' as fkn");
-                        } else {
-                            exportedKeysQuery.append("'' as fkn");
-                        }
-
-                        count++;
                     }
                 }
             }
+
+            boolean hasImportedKey = (count > 0);
+            sql.append("select ")
+                    .append(catalog)
+                    .append(" as PKTABLE_CAT, ")
+                    .append(quotedSchema)
+                    .append(" as PKTABLE_SCHEM, ")
+                    .append(quote(target))
+                    .append(" as PKTABLE_NAME, ")
+                    .append(hasImportedKey ? "pcn" : "''")
+                    .append(" as PKCOLUMN_NAME, ")
+                    .append(catalog)
+                    .append(" as FKTABLE_CAT, ")
+                    .append(quotedSchema)
+                    .append(" as FKTABLE_SCHEM, ")
+                    .append(hasImportedKey ? "fkt" : "''")
+                    .append(" as FKTABLE_NAME, ")
+                    .append(hasImportedKey ? "fcn" : "''")
+                    .append(" as FKCOLUMN_NAME, ")
+                    .append(hasImportedKey ? "ks" : "-1")
+                    .append(" as KEY_SEQ, ")
+                    .append(hasImportedKey ? "ur" : "3")
+                    .append(" as UPDATE_RULE, ")
+                    .append(hasImportedKey ? "dr" : "3")
+                    .append(" as DELETE_RULE, ")
+                    .append(hasImportedKey ? "fkn" : "''")
+                    .append(" as FK_NAME, ")
+                    .append(hasImportedKey ? "pkn" : "''")
+                    .append(" as PK_NAME, ")
+                    .append(
+                            DatabaseMetaData
+                                    .importedKeyInitiallyDeferred) // FIXME: Check for pragma
+                    // foreign_keys = true ?
+                    .append(" as DEFERRABILITY ");
+
+            if (hasImportedKey) {
+                sql.append("from (")
+                        .append(exportedKeysQuery)
+                        .append(") ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
+            } else {
+                sql.append("limit 0");
+            }
+            if (i != schemasNames.size() - 1) {
+                sql.append(" union all ");
+            } else {
+                sql.append(";");
+            }
         }
-
-        boolean hasImportedKey = (count > 0);
-        StringBuilder sql = new StringBuilder(512);
-        sql.append("select ")
-                .append(catalog)
-                .append(" as PKTABLE_CAT, ")
-                .append(schema)
-                .append(" as PKTABLE_SCHEM, ")
-                .append(quote(target))
-                .append(" as PKTABLE_NAME, ")
-                .append(hasImportedKey ? "pcn" : "''")
-                .append(" as PKCOLUMN_NAME, ")
-                .append(catalog)
-                .append(" as FKTABLE_CAT, ")
-                .append(schema)
-                .append(" as FKTABLE_SCHEM, ")
-                .append(hasImportedKey ? "fkt" : "''")
-                .append(" as FKTABLE_NAME, ")
-                .append(hasImportedKey ? "fcn" : "''")
-                .append(" as FKCOLUMN_NAME, ")
-                .append(hasImportedKey ? "ks" : "-1")
-                .append(" as KEY_SEQ, ")
-                .append(hasImportedKey ? "ur" : "3")
-                .append(" as UPDATE_RULE, ")
-                .append(hasImportedKey ? "dr" : "3")
-                .append(" as DELETE_RULE, ")
-                .append(hasImportedKey ? "fkn" : "''")
-                .append(" as FK_NAME, ")
-                .append(hasImportedKey ? "pkn" : "''")
-                .append(" as PK_NAME, ")
-                .append(DatabaseMetaData.importedKeyInitiallyDeferred) // FIXME: Check for pragma
-                // foreign_keys = true ?
-                .append(" as DEFERRABILITY ");
-
-        if (hasImportedKey) {
-            sql.append("from (")
-                    .append(exportedKeysQuery)
-                    .append(") ORDER BY FKTABLE_CAT, FKTABLE_SCHEM, FKTABLE_NAME, KEY_SEQ");
-        } else {
-            sql.append("limit 0");
+        if (schemasNames.size() == 0) {
+            sql.append("select\n")
+                    .append("\tnull as PKTABLE_CAT,\n")
+                    .append("\tnull as PKTABLE_SCHEM,\n")
+                    .append("\tnull as PKTABLE_NAME,\n")
+                    .append("\tnull as PKCOLUMN_NAME,\n")
+                    .append("\tnull as FKTABLE_CAT,\n")
+                    .append("\tnull as FKTABLE_SCHEM,\n")
+                    .append("\t'null' as FKTABLE_NAME,\n")
+                    .append("\tnull as FKCOLUMN_NAME,\n")
+                    .append("\tnull as KEY_SEQ,\n")
+                    .append("\tnull as UPDATE_RULE,\n")
+                    .append("\tnull as DELETE_RULE,\n")
+                    .append("\tnull as FK_NAME,\n")
+                    .append("\tnull as PK_NAME,\n")
+                    .append("\tnull as DEFERRABILITY\n")
+                    .append("limit 0;");
         }
-
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
 
@@ -1391,7 +1537,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                 .append(" as dr, ")
                 .append(" '' as fkn, ")
                 .append(" '' as pkn ")
-                .append(") limit 0;");
+                .append(" limit 0");
         return sql;
     }
 
@@ -1403,113 +1549,142 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
             throws SQLException {
         ResultSet rs;
         Statement stat = conn.createStatement();
-        StringBuilder sql = new StringBuilder(700);
-
-        sql.append("select ")
-                .append(quote(catalog))
-                .append(" as PKTABLE_CAT, ")
-                .append(quote(schema))
-                .append(" as PKTABLE_SCHEM, ")
-                .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
-                .append(quote(catalog))
-                .append(" as FKTABLE_CAT, ")
-                .append(quote(schema))
-                .append(" as FKTABLE_SCHEM, ")
-                .append(quote(table))
-                .append(" as FKTABLE_NAME, ")
-                .append(
-                        "fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, pkn as PK_NAME, ")
-                .append(DatabaseMetaData.importedKeyInitiallyDeferred)
-                .append(" as DEFERRABILITY from (");
-
-        // Use a try catch block to avoid "query does not return ResultSet" error
-        try {
-            rs = stat.executeQuery("pragma foreign_key_list('" + escape(table) + "');");
-        } catch (SQLException e) {
-            sql = appendDummyForeignKeyList(sql);
-            return ((CoreStatement) stat).executeQuery(sql.toString(), true);
-        }
-
-        final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(table);
-        List<ForeignKey> fkNames = impFkFinder.getFkList();
-
-        int i = 0;
-        for (; rs.next(); i++) {
-            int keySeq = rs.getInt(2) + 1;
-            int keyId = rs.getInt(1);
-            String PKTabName = rs.getString(3);
-            String FKColName = rs.getString(4);
-            String PKColName = rs.getString(5);
-
-            String pkName = null;
-            try {
-                PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(PKTabName);
-                pkName = pkFinder.getName();
-                if (PKColName == null) {
-                    PKColName = pkFinder.getColumns()[0];
-                }
-            } catch (SQLException ignored) {
-            }
-
-            String updateRule = rs.getString(6);
-            String deleteRule = rs.getString(7);
-
-            if (i > 0) {
-                sql.append(" union all ");
-            }
-
-            String fkName = null;
-            if (fkNames.size() > keyId) fkName = fkNames.get(keyId).getFkName();
-
+        StringBuilder sql = new StringBuilder(1024);
+        ResultSet schemas = getSchemas(null, escapeWildcards(schema));
+        List<String> schemasNames = getSchemasNames(schemas);
+        for (int i = 0; i < schemasNames.size(); i++) {
+            String schemaName = schemasNames.get(i);
             sql.append("select ")
-                    .append(keySeq)
-                    .append(" as ks,")
-                    .append("'")
-                    .append(escape(PKTabName))
-                    .append("' as ptn, '")
-                    .append(escape(FKColName))
-                    .append("' as fcn, '")
-                    .append(escape(PKColName))
-                    .append("' as pcn,")
-                    .append("case '")
-                    .append(escape(updateRule))
-                    .append("'")
-                    .append(" when 'NO ACTION' then ")
-                    .append(DatabaseMetaData.importedKeyNoAction)
-                    .append(" when 'CASCADE' then ")
-                    .append(DatabaseMetaData.importedKeyCascade)
-                    .append(" when 'RESTRICT' then ")
-                    .append(DatabaseMetaData.importedKeyRestrict)
-                    .append(" when 'SET NULL' then ")
-                    .append(DatabaseMetaData.importedKeySetNull)
-                    .append(" when 'SET DEFAULT' then ")
-                    .append(DatabaseMetaData.importedKeySetDefault)
-                    .append(" end as ur, ")
-                    .append("case '")
-                    .append(escape(deleteRule))
-                    .append("'")
-                    .append(" when 'NO ACTION' then ")
-                    .append(DatabaseMetaData.importedKeyNoAction)
-                    .append(" when 'CASCADE' then ")
-                    .append(DatabaseMetaData.importedKeyCascade)
-                    .append(" when 'RESTRICT' then ")
-                    .append(DatabaseMetaData.importedKeyRestrict)
-                    .append(" when 'SET NULL' then ")
-                    .append(DatabaseMetaData.importedKeySetNull)
-                    .append(" when 'SET DEFAULT' then ")
-                    .append(DatabaseMetaData.importedKeySetDefault)
-                    .append(" end as dr, ")
-                    .append(fkName == null ? "''" : quote(fkName))
-                    .append(" as fkn, ")
-                    .append(pkName == null ? "''" : quote(pkName))
-                    .append(" as pkn");
-        }
-        rs.close();
+                    .append(quote(catalog))
+                    .append(" as PKTABLE_CAT, ")
+                    .append(quote(schemaName))
+                    .append(" as PKTABLE_SCHEM, ")
+                    .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
+                    .append(quote(catalog))
+                    .append(" as FKTABLE_CAT, ")
+                    .append(quote(schemaName))
+                    .append(" as FKTABLE_SCHEM, ")
+                    .append(quote(table))
+                    .append(" as FKTABLE_NAME, ")
+                    .append(
+                            "fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, pkn as PK_NAME, ")
+                    .append(DatabaseMetaData.importedKeyInitiallyDeferred)
+                    .append(" as DEFERRABILITY from (");
 
-        if (i == 0) {
-            sql = appendDummyForeignKeyList(sql);
-        } else {
-            sql.append(") ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ;");
+            // Use a try catch block to avoid "query does not return ResultSet" error
+            try {
+                rs = stat.executeQuery("pragma foreign_key_list('" + escape(table) + "');");
+            } catch (SQLException e) {
+                appendDummyForeignKeyList(sql);
+                if (i != schemasNames.size() - 1) {
+                    sql.append(" union all ");
+                } else {
+                    sql.append(";");
+                }
+                continue;
+            }
+
+            final ImportedKeyFinder impFkFinder = new ImportedKeyFinder(table, schemaName);
+            List<ForeignKey> fkNames = impFkFinder.getFkList();
+
+            int j = 0;
+            for (; rs.next(); j++) {
+                int keySeq = rs.getInt(2) + 1;
+                int keyId = rs.getInt(1);
+                String PKTabName = rs.getString(3);
+                String FKColName = rs.getString(4);
+                String PKColName = rs.getString(5);
+
+                String pkName = null;
+                try {
+                    PrimaryKeyFinder pkFinder = new PrimaryKeyFinder(PKTabName, schemaName);
+                    pkName = pkFinder.getName();
+                    if (PKColName == null) {
+                        PKColName = pkFinder.getColumns()[0];
+                    }
+                } catch (SQLException ignored) {
+                }
+
+                String updateRule = rs.getString(6);
+                String deleteRule = rs.getString(7);
+
+                if (j > 0) {
+                    sql.append(" union all ");
+                }
+
+                String fkName = null;
+                if (fkNames.size() > keyId) fkName = fkNames.get(keyId).getFkName();
+
+                sql.append("select ")
+                        .append(keySeq)
+                        .append(" as ks,")
+                        .append("'")
+                        .append(escape(PKTabName))
+                        .append("' as ptn, '")
+                        .append(escape(FKColName))
+                        .append("' as fcn, '")
+                        .append(escape(PKColName))
+                        .append("' as pcn,")
+                        .append("case '")
+                        .append(escape(updateRule))
+                        .append("'")
+                        .append(" when 'NO ACTION' then ")
+                        .append(DatabaseMetaData.importedKeyNoAction)
+                        .append(" when 'CASCADE' then ")
+                        .append(DatabaseMetaData.importedKeyCascade)
+                        .append(" when 'RESTRICT' then ")
+                        .append(DatabaseMetaData.importedKeyRestrict)
+                        .append(" when 'SET NULL' then ")
+                        .append(DatabaseMetaData.importedKeySetNull)
+                        .append(" when 'SET DEFAULT' then ")
+                        .append(DatabaseMetaData.importedKeySetDefault)
+                        .append(" end as ur, ")
+                        .append("case '")
+                        .append(escape(deleteRule))
+                        .append("'")
+                        .append(" when 'NO ACTION' then ")
+                        .append(DatabaseMetaData.importedKeyNoAction)
+                        .append(" when 'CASCADE' then ")
+                        .append(DatabaseMetaData.importedKeyCascade)
+                        .append(" when 'RESTRICT' then ")
+                        .append(DatabaseMetaData.importedKeyRestrict)
+                        .append(" when 'SET NULL' then ")
+                        .append(DatabaseMetaData.importedKeySetNull)
+                        .append(" when 'SET DEFAULT' then ")
+                        .append(DatabaseMetaData.importedKeySetDefault)
+                        .append(" end as dr, ")
+                        .append(fkName == null ? "''" : quote(fkName))
+                        .append(" as fkn, ")
+                        .append(pkName == null ? "''" : quote(pkName))
+                        .append(" as pkn");
+            }
+            rs.close();
+
+            if (j == 0) {
+                appendDummyForeignKeyList(sql);
+            }
+            if (i != schemasNames.size() - 1) {
+                sql.append(") UNION ALL ");
+            } else {
+                sql.append(") ORDER BY PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ;");
+            }
+        }
+        if (schemasNames.size() == 0) {
+            sql.append("select\n")
+                    .append("\tnull as PKTABLE_CAT,\n")
+                    .append("\tnull as PKTABLE_SCHEM,\n")
+                    .append("\tnull as PKTABLE_NAME,\n")
+                    .append("\tnull as PKCOLUMN_NAME,\n")
+                    .append("\tnull as FKTABLE_CAT,\n")
+                    .append("\tnull as FKTABLE_SCHEM,\n")
+                    .append("\tnull as FKTABLE_NAME,\n")
+                    .append("\tnull as FKCOLUMN_NAME,\n")
+                    .append("\tnull as KEY_SEQ,\n")
+                    .append("\tnull as UPDATE_RULE,\n")
+                    .append("\tnull as DELETE_RULE,\n")
+                    .append("\tnull as FK_NAME,\n")
+                    .append("\tnull as PK_NAME,\n")
+                    .append("\tnull as DEFERRABILITY limit 0;");
         }
 
         return ((CoreStatement) stat).executeQuery(sql.toString(), true);
@@ -1521,78 +1696,98 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
      */
     public ResultSet getIndexInfo(String c, String s, String table, boolean u, boolean approximate)
             throws SQLException {
-        ResultSet rs;
         Statement stat = conn.createStatement();
-        StringBuilder sql = new StringBuilder(500);
+        ResultSet schemas = getSchemas(c, escapeWildcards(s));
+        ArrayList<String> schemasNames = getSchemasNames(schemas);
+        StringBuilder sql = new StringBuilder(1000);
+        for (int i = 0; i < schemasNames.size(); i++) {
+            ResultSet rs;
+            // define the column header
+            // this is from the JDBC spec, it is part of the driver protocol
+            sql.append("select null as TABLE_CAT,'")
+                    .append(escape(schemasNames.get(i)))
+                    .append("' as TABLE_SCHEM, '")
+                    .append(escape(table))
+                    .append(
+                            "' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
+                    .append(Integer.toString(DatabaseMetaData.tableIndexOther))
+                    .append(" as TYPE, op as ORDINAL_POSITION, ")
+                    .append(
+                            "cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
 
-        // define the column header
-        // this is from the JDBC spec, it is part of the driver protocol
-        sql.append("select null as TABLE_CAT, null as TABLE_SCHEM, '")
-                .append(escape(table))
-                .append(
-                        "' as TABLE_NAME, un as NON_UNIQUE, null as INDEX_QUALIFIER, n as INDEX_NAME, ")
-                .append(Integer.toString(DatabaseMetaData.tableIndexOther))
-                .append(" as TYPE, op as ORDINAL_POSITION, ")
-                .append(
-                        "cn as COLUMN_NAME, null as ASC_OR_DESC, 0 as CARDINALITY, 0 as PAGES, null as FILTER_CONDITION from (");
+            // this always returns a result set now, previously threw exception
+            rs =
+                    stat.executeQuery(
+                            "pragma "
+                                    + prependSchemaPrefix(
+                                            s,
+                                            "index_list('" + escape(schemasNames.get(i)) + "');"));
 
-        // this always returns a result set now, previously threw exception
-        rs = stat.executeQuery("pragma index_list('" + escape(table) + "');");
+            ArrayList<ArrayList<Object>> indexList = new ArrayList<>();
+            while (rs.next()) {
+                indexList.add(new ArrayList<>());
+                indexList.get(indexList.size() - 1).add(rs.getString(2));
+                indexList.get(indexList.size() - 1).add(rs.getInt(3));
+            }
+            rs.close();
+            if (indexList.size() == 0) {
+                // if pragma index_list() returns no information, use this null block
+                sql.append("select null as un, null as n, null as op, null as cn limit 0");
+            } else {
+                // loop over results from pragma call, getting specific info for each index
 
-        ArrayList<ArrayList<Object>> indexList = new ArrayList<>();
-        while (rs.next()) {
-            indexList.add(new ArrayList<>());
-            indexList.get(indexList.size() - 1).add(rs.getString(2));
-            indexList.get(indexList.size() - 1).add(rs.getInt(3));
-        }
-        rs.close();
-        if (indexList.size() == 0) {
-            // if pragma index_list() returns no information, use this null block
-            sql.append("select null as un, null as n, null as op, null as cn) limit 0;");
-            return ((CoreStatement) stat).executeQuery(sql.toString(), true);
-        } else {
-            // loop over results from pragma call, getting specific info for each index
+                Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
+                ArrayList<Object> currentIndex;
 
-            Iterator<ArrayList<Object>> indexIterator = indexList.iterator();
-            ArrayList<Object> currentIndex;
+                ArrayList<String> unionAll = new ArrayList<>();
 
-            ArrayList<String> unionAll = new ArrayList<>();
+                while (indexIterator.hasNext()) {
+                    currentIndex = indexIterator.next();
+                    String indexName = currentIndex.get(0).toString();
+                    rs =
+                            stat.executeQuery(
+                                    "pragma "
+                                            + prependSchemaPrefix(
+                                                    s, "index_info('" + escape(indexName) + "');"));
 
-            while (indexIterator.hasNext()) {
-                currentIndex = indexIterator.next();
-                String indexName = currentIndex.get(0).toString();
-                rs = stat.executeQuery("pragma index_info('" + escape(indexName) + "');");
+                    while (rs.next()) {
 
-                while (rs.next()) {
+                        StringBuilder sqlRow = new StringBuilder();
 
-                    StringBuilder sqlRow = new StringBuilder();
+                        String colName = rs.getString(3);
+                        sqlRow.append("select ")
+                                .append(1 - (Integer) currentIndex.get(1))
+                                .append(" as un,'")
+                                .append(escape(indexName))
+                                .append("' as n,")
+                                .append(rs.getInt(1) + 1)
+                                .append(" as op,");
+                        if (colName == null) { // expression index
+                            sqlRow.append("null");
+                        } else {
+                            sqlRow.append("'").append(escape(colName)).append("'");
+                        }
+                        sqlRow.append(" as cn");
 
-                    String colName = rs.getString(3);
-                    sqlRow.append("select ")
-                            .append(1 - (Integer) currentIndex.get(1))
-                            .append(" as un,'")
-                            .append(escape(indexName))
-                            .append("' as n,")
-                            .append(rs.getInt(1) + 1)
-                            .append(" as op,");
-                    if (colName == null) { // expression index
-                        sqlRow.append("null");
-                    } else {
-                        sqlRow.append("'").append(escape(colName)).append("'");
+                        unionAll.add(sqlRow.toString());
                     }
-                    sqlRow.append(" as cn");
 
-                    unionAll.add(sqlRow.toString());
+                    rs.close();
                 }
 
-                rs.close();
+                String sqlBlock = StringUtils.join(unionAll, " union all ");
+                sql.append(sqlBlock);
             }
-
-            String sqlBlock = StringUtils.join(unionAll, " union all ");
-
-            return ((CoreStatement) stat)
-                    .executeQuery(sql.append(sqlBlock).append(");").toString(), true);
+            if (i != schemasNames.size() - 1) {
+                sql.append(") union all ");
+            } else {
+                sql.append(");");
+            }
         }
+        if (schemasNames.size() == 0) {
+            sql.append("select null as un, null as n, null as op, null as cn limit 0");
+        }
+        return ((CoreStatement) stat).executeQuery(sql.toString(), true);
     }
 
     /**
@@ -1636,7 +1831,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         if (getSuperTables == null) {
             getSuperTables =
                     conn.prepareStatement(
-                            "select null as TABLE_CAT, null as TABLE_SCHEM, "
+                            "select null as TABLE_CAT, s as TABLE_SCHEM, "
                                     + "null as TABLE_NAME, null as SUPERTABLE_NAME limit 0;");
         }
         return getSuperTables.executeQuery();
@@ -1680,16 +1875,43 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
             String c, String s, String tblNamePattern, String[] types) throws SQLException {
 
         checkOpen();
+        ArrayList<String> schemasNames = getSchemasNames(getSchemas(c, s));
+        StringBuilder sql = new StringBuilder();
+        for (int i = 0; i < schemasNames.size(); i++) {
+            appendSchemaTablesRequests(sql, schemasNames.get(i), tblNamePattern, types);
+            if (i != schemasNames.size() - 1) {
+                sql.append("\nUNION ALL\n");
+            } else {
+                sql.append(" ORDER BY TABLE_TYPE, TABLE_NAME;");
+            }
+        }
+        if (schemasNames.size() == 0) {
+            sql.append("\nSelect");
+            sql.append("\n  NULL AS TABLE_CAT,");
+            sql.append("\n      NULL AS TABLE_SCHEM,");
+            sql.append("\n  NULL AS TABLE_NAME,");
+            sql.append("\n      NULL AS TABLE_TYPE,");
+            sql.append("\n  NULL AS REMARKS,");
+            sql.append("\n      NULL AS TYPE_CAT,");
+            sql.append("\n  NULL AS TYPE_SCHEM,");
+            sql.append("\n      NULL AS TYPE_NAME,");
+            sql.append("\n  NULL AS SELF_REFERENCING_COL_NAME,");
+            sql.append("\n      NULL AS REF_GENERATION");
+            sql.append("\n   LIMIT 0;");
+        }
 
+        return ((CoreStatement) conn.createStatement()).executeQuery(sql.toString(), true);
+    }
+
+    private StringBuilder appendSchemaTablesRequests(
+            StringBuilder sql, String s, String tblNamePattern, String[] types) {
         tblNamePattern =
                 (tblNamePattern == null || "".equals(tblNamePattern))
                         ? "%"
                         : escape(tblNamePattern);
-
-        StringBuilder sql = new StringBuilder();
         sql.append("SELECT").append("\n");
         sql.append("  NULL AS TABLE_CAT,").append("\n");
-        sql.append("  NULL AS TABLE_SCHEM,").append("\n");
+        sql.append("  ").append(quote(s)).append(" AS TABLE_SCHEM,").append("\n");
         sql.append("  NAME AS TABLE_NAME,").append("\n");
         sql.append("  TYPE AS TABLE_TYPE,").append("\n");
         sql.append("  NULL AS REMARKS,").append("\n");
@@ -1702,13 +1924,14 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         sql.append("  (").append("\n");
         sql.append("    SELECT\n");
         sql.append("      'sqlite_schema' AS NAME,\n");
-        sql.append("      'SYSTEM TABLE' AS TYPE");
+        sql.append("      'SYSTEM TABLE' AS TYPE\n");
         sql.append("    UNION ALL").append("\n");
         sql.append("    SELECT").append("\n");
         sql.append("      NAME,").append("\n");
         sql.append("      UPPER(TYPE) AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
-        sql.append("      sqlite_schema").append("\n");
+        sql.append("      ");
+        prependSchemaPrefix(sql, s, "sqlite_schema\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME NOT LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("      AND UPPER(TYPE) IN ('TABLE', 'VIEW')").append("\n");
@@ -1723,7 +1946,8 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         sql.append("      NAME,").append("\n");
         sql.append("      'SYSTEM TABLE' AS TYPE").append("\n");
         sql.append("    FROM").append("\n");
-        sql.append("      sqlite_schema").append("\n");
+        sql.append("      ");
+        prependSchemaPrefix(sql, s, "sqlite_schema\n");
         sql.append("    WHERE").append("\n");
         sql.append("      NAME LIKE 'sqlite\\_%' ESCAPE '\\'").append("\n");
         sql.append("  )").append("\n");
@@ -1741,10 +1965,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                             .collect(Collectors.joining(",")));
             sql.append(")");
         }
-
-        sql.append(" ORDER BY TABLE_TYPE, TABLE_NAME;");
-
-        return ((CoreStatement) conn.createStatement()).executeQuery(sql.toString(), true);
+        return sql;
     }
 
     /** @see java.sql.DatabaseMetaData#getTableTypes() */
@@ -1963,6 +2184,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
     /** Parses the sqlite_schema table for a table's primary key */
     class PrimaryKeyFinder {
+        String schema;
         /** The table name. */
         String table;
 
@@ -1972,14 +2194,20 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         /** The column(s) for the primary key. */
         String[] pkColumns = null;
 
+        public PrimaryKeyFinder(String table) throws SQLException {
+            this(table, null);
+        }
+
         /**
          * Constructor.
          *
          * @param table The table for which to get find a primary key.
+         * @param schema Schema in which table is located
          * @throws SQLException
          */
-        public PrimaryKeyFinder(String table) throws SQLException {
+        public PrimaryKeyFinder(String table, String schema) throws SQLException {
             this.table = table;
+            this.schema = schema;
 
             // specific handling for sqlite_schema and synonyms, so that
             // getExportedKeys/getPrimaryKeys return an empty ResultSet instead of throwing an
@@ -1994,10 +2222,13 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                     // read create SQL script for table
                     ResultSet rs =
                             stat.executeQuery(
-                                    "select sql from sqlite_schema where"
-                                            + " lower(name) = lower('"
-                                            + escape(table)
-                                            + "') and type in ('table', 'view')")) {
+                                    "select sql from "
+                                            + prependSchemaPrefix(
+                                                    schema,
+                                                    "sqlite_schema where"
+                                                            + " lower(name) = lower('"
+                                                            + escape(table)
+                                                            + "') and type in ('table', 'view')"))) {
 
                 if (!rs.next()) throw new SQLException("Table not found: '" + table + "'");
 
@@ -2014,7 +2245,11 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
                 if (pkColumns == null) {
                     try (ResultSet rs2 =
-                            stat.executeQuery("pragma table_info('" + escape(table) + "');")) {
+                            stat.executeQuery(
+                                    "pragma "
+                                            + prependSchemaPrefix(
+                                                    schema,
+                                                    "table_info('" + escape(table) + "');"))) {
                         while (rs2.next()) {
                             if (rs2.getBoolean(6)) pkColumns = new String[] {rs2.getString(2)};
                         }
@@ -2052,6 +2287,10 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         private final List<ForeignKey> fkList = new ArrayList<>();
 
         public ImportedKeyFinder(String table) throws SQLException {
+            this(table, null);
+        }
+
+        public ImportedKeyFinder(String table, String schema) throws SQLException {
 
             if (table == null || table.trim().length() == 0) {
                 throw new SQLException("Invalid table name: '" + table + "'");
@@ -2059,14 +2298,17 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
             this.fkTableName = table;
 
-            List<String> fkNames = getForeignKeyNames(this.fkTableName);
+            List<String> fkNames = getForeignKeyNames(this.fkTableName, schema);
 
             try (Statement stat = conn.createStatement();
                     ResultSet rs =
                             stat.executeQuery(
-                                    "pragma foreign_key_list('"
-                                            + escape(this.fkTableName.toLowerCase())
-                                            + "')")) {
+                                    "pragma "
+                                            + prependSchemaPrefix(
+                                                    schema,
+                                                    "foreign_key_list('"
+                                                            + escape(this.fkTableName.toLowerCase())
+                                                            + "')"))) {
 
                 int prevFkId = -1;
                 int count = 0;
@@ -2103,7 +2345,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
             }
         }
 
-        private List<String> getForeignKeyNames(String tbl) throws SQLException {
+        private List<String> getForeignKeyNames(String tbl, String schema) throws SQLException {
             List<String> fkNames = new ArrayList<>();
             if (tbl == null) {
                 return fkNames;
@@ -2111,11 +2353,13 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
             try (Statement stat2 = conn.createStatement();
                     ResultSet rs =
                             stat2.executeQuery(
-                                    "select sql from sqlite_schema where"
-                                            + " lower(name) = lower('"
-                                            + escape(tbl)
-                                            + "')")) {
-
+                                    "select sql from "
+                                            + prependSchemaPrefix(
+                                                    schema,
+                                                    "sqlite_schema where"
+                                                            + " lower(name) = lower('"
+                                                            + escape(tbl)
+                                                            + "')"))) {
                 if (rs.next()) {
                     Matcher matcher = FK_NAMED_PATTERN.matcher(rs.getString(1));
 
