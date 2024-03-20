@@ -99,9 +99,8 @@ public class SQLiteJDBCLoader {
                                 Path lckFile = Paths.get(nativeLib + LOCK_EXT);
                                 if (Files.notExists(lckFile)) {
                                     try {
-                                        Files.delete(nativeLib);
+                                        Files.deleteIfExists(nativeLib);
                                     } catch (Exception e) {
-                                        logger.error("Failed to delete old native lib", e);
                                     }
                                 }
                             });
