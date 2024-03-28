@@ -26,13 +26,13 @@ jobs:
           server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: OSSH_USERNAME # env variable for username in deploy (1)
           server-password: OSSH_PASSWORD # env variable for token in deploy (2)
-          gpg-private-key: ${{ secrets.OSSH_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
-          gpg-passphrase: OSSH_GPG_PASSPHRASE  # env variable for GPG private key passphrase (3)
 
       - name: Perform Release
         run: |
-          mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests
+          mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests -Dgpg.signer=bc
         env:
           OSSH_USERNAME: ${{ secrets.OSSH_USERNAME }}
           OSSH_PASSWORD: ${{ secrets.OSSH_PASSWORD }}
           OSSH_GPG_PASSPHRASE: ${{ secrets.OSSH_GPG_PASSPHRASE }}
+          MAVEN_GPG_KEY: ${{ secrets.OSSH_GPG_PRIVATE_KEY }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.OSSH_GPG_PASSPHRASE }}
