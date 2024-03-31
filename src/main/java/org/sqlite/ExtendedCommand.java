@@ -53,7 +53,10 @@ public class ExtendedCommand {
     public static String removeQuotation(String s) {
         if (s == null) return s;
 
-        if ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))
+        Boolean containedInSlash = s.startsWith("\"") && s.endsWith("\""); // Check for backslash enclosed string
+        Boolean containedInQuote = s.startsWith("'") && s.endsWith("'"); // Check for quotation enclosed string
+
+        if (containedInSlash || containedInQuote)
             return s.substring(1, s.length() - 1);
         else return s;
     }
