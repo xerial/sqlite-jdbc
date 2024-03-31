@@ -31,9 +31,9 @@ import org.sqlite.SQLiteJDBCLoader;
 /** This class provides a thin JNI layer over the SQLite3 C API. */
 public final class NativeDB extends DB {
     private static final Logger logger = LoggerFactory.getLogger(NativeDB.class);
-    private static final int DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS = 100;
-    private static final int DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL = 3;
-    private static final int DEFAULT_PAGES_PER_BACKUP_STEP = 100;
+    private static final int SLEEP_TIME = 100;
+    private static final int NUM_BUSY_BEFORE_FAIL = 3;
+    private static final int PAGES_PER_STEP = 100;
 
     /** SQLite connection handle. */
     private long pointer = 0;
@@ -382,9 +382,9 @@ public final class NativeDB extends DB {
                 stringToUtf8ByteArray(dbName),
                 stringToUtf8ByteArray(destFileName),
                 observer,
-                DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS,
-                DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL,
-                DEFAULT_PAGES_PER_BACKUP_STEP);
+                SLEEP_TIME,
+                NUM_BUSY_BEFORE_FAIL,
+                PAGES_PER_STEP);
     }
 
     /**
@@ -430,9 +430,9 @@ public final class NativeDB extends DB {
                 dbName,
                 sourceFileName,
                 observer,
-                DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS,
-                DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL,
-                DEFAULT_PAGES_PER_BACKUP_STEP);
+                SLEEP_TIME,
+                NUM_BUSY_BEFORE_FAIL,
+                PAGES_PER_STEP);
     }
 
     /** @see org.sqlite.core.DB#restore(String, String, ProgressObserver, int, int, int) */
