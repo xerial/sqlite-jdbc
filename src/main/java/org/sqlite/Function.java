@@ -94,6 +94,7 @@ public abstract class Function {
      */
     public static void create(Connection conn, String name, Function f, int nArgs, int flags)
             throws SQLException {
+        int maxLimitOfArg = 127; // To keep a check on the maximum number of arguments that the function takes
         if (!(conn instanceof SQLiteConnection)) {
             throw new SQLException("connection must be to an SQLite db");
         }
@@ -104,7 +105,7 @@ public abstract class Function {
         f.conn = (SQLiteConnection) conn;
         f.db = f.conn.getDatabase();
 
-        if (nArgs < -1 || nArgs > 127) {
+        if (nArgs < -1 || nArgs > maxLimitOfArg) {
             throw new SQLException("invalid args provided: " + nArgs);
         }
 
