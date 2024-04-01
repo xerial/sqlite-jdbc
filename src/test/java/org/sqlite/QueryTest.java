@@ -91,7 +91,7 @@ public class QueryTest {
 
         Date now = new Date();
         String date =
-                FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT).format(now);
+                FastDateFormat.getInstance(SQLiteConnectionConfig.DEFAULT_DATE_STRING_FORMAT).format(now);
 
         conn.createStatement().execute("insert into sample values(" + now.getTime() + ")");
         conn.createStatement().execute("insert into sample values('" + date + "')");
@@ -145,9 +145,9 @@ public class QueryTest {
 
         java.sql.Date now = new java.sql.Date(new Date().getTime());
         FastDateFormat customFormat =
-                FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, customTimeZone);
+                FastDateFormat.getInstance(SQLiteConnectionConfig.DEFAULT_DATE_STRING_FORMAT, customTimeZone);
         FastDateFormat utcFormat =
-                FastDateFormat.getInstance(SQLiteConfig.DEFAULT_DATE_STRING_FORMAT, utcTimeZone);
+                FastDateFormat.getInstance(SQLiteConnectionConfig.DEFAULT_DATE_STRING_FORMAT, utcTimeZone);
         java.sql.Date nowLikeCustomZoneIsUtc =
                 new java.sql.Date(utcFormat.parse(customFormat.format(now)).getTime());
 

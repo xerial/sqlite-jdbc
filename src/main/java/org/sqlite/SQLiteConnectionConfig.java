@@ -1,7 +1,5 @@
 package org.sqlite;
 
-import static org.sqlite.SQLiteConfig.DEFAULT_DATE_STRING_FORMAT;
-
 import java.sql.Connection;
 import java.util.EnumMap;
 import java.util.Map;
@@ -13,6 +11,8 @@ public class SQLiteConnectionConfig implements Cloneable {
     private SQLiteConfig.DateClass dateClass = SQLiteConfig.DateClass.INTEGER;
     private SQLiteConfig.DatePrecision datePrecision =
             SQLiteConfig.DatePrecision.MILLISECONDS; // Calendar.SECOND or Calendar.MILLISECOND
+    public static final String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+
     private String dateStringFormat = DEFAULT_DATE_STRING_FORMAT;
     private FastDateFormat dateFormat = FastDateFormat.getInstance(dateStringFormat);
 

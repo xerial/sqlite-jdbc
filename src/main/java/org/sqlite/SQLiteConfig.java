@@ -41,8 +41,6 @@ import java.util.TreeSet;
  * @author leo
  */
 public class SQLiteConfig {
-    /* Date storage class*/
-    public static final String DEFAULT_DATE_STRING_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     /* Default limits used by SQLite: https://www.sqlite.org/limits.html */
     private static final int DEFAULT_MAX_LENGTH = 1000000000;
     private static final int DEFAULT_MAX_COLUMN = 2000;
