@@ -15,6 +15,7 @@
  */
 package org.sqlite.core;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -53,21 +54,6 @@ public abstract class DB implements Codes {
     private final Set<SQLiteUpdateListener> updateListeners = new HashSet<>();
     private final Set<SQLiteCommitListener> commitListeners = new HashSet<>();
 
-    private static boolean isLoaded;
-    private static boolean loadSucceeded;
-
-    static {
-        if ("The Android Project".equals(System.getProperty("java.vm.vendor"))) {
-            System.loadLibrary("sqlitejdbc");
-            isLoaded = true;
-            loadSucceeded = true;
-        } else {
-            // continue with non Android execution path
-            isLoaded = false;
-            loadSucceeded = false;
-        }
-    }
-
     public DB(String url, String fileName, SQLiteConfig config) throws SQLException {
         this.url = url;
         this.fileName = fileName;
@@ -86,20 +72,19 @@ public abstract class DB implements Codes {
         return config;
     }
 
-    /**
-     * Loads the SQLite interface backend.
-     *
-     * @return True if the SQLite JDBC driver is successfully loaded; false otherwise.
-     */
-    public static boolean load() throws Exception {
-        if (isLoaded) return loadSucceeded;
-
-        try {
-            loadSucceeded = SQLiteJDBCLoader.initialize();
-        } finally {
-            isLoaded = true;
+    static byte[] stringToUtf8ByteArray(String str) {
+        if (str == null) {
+            return null;
         }
-        return loadSucceeded;
+        return str.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public byte[] nameToUtf8ByteArray(String nameType, String name) throws SQLException {
+        final byte[] nameUtf8 = stringToUtf8ByteArray(name);
+        if (name == null || "".equals(name) || nameUtf8.length > 255) {
+            throw new SQLException("invalid " + nameType + " name: '" + name + "'");
+        }
+        return nameUtf8;
     }
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////

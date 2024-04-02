@@ -34,12 +34,43 @@ public final class NativeDB extends DB {
     private static final int SLEEP_TIME = 100;
     private static final int NUM_BUSY_BEFORE_FAIL = 3;
     private static final int PAGES_PER_STEP = 100;
+    private static boolean isLoaded;
+    private static boolean loadSucceeded;
 
     /** SQLite connection handle. */
     private long pointer = 0;
 
+
+    static {
+        if ("The Android Project".equals(System.getProperty("java.vm.vendor"))) {
+            System.loadLibrary("sqlitejdbc");
+            isLoaded = true;
+            loadSucceeded = true;
+        } else {
+            // continue with non Android execution path
+            isLoaded = false;
+            loadSucceeded = false;
+        }
+    }
+
     public NativeDB(String url, String fileName, SQLiteConfig config) throws SQLException {
         super(url, fileName, config);
+    }
+
+    /**
+     * Loads the SQLite interface backend.
+     *
+     * @return True if the SQLite JDBC driver is successfully loaded; false otherwise.
+     */
+    public static boolean load() throws Exception {
+        if (isLoaded) return loadSucceeded;
+
+        try {
+            loadSucceeded = SQLiteJDBCLoader.initialize();
+        } finally {
+            isLoaded = true;
+        }
+        return loadSucceeded;
     }
 
     // WRAPPER FUNCTIONS ////////////////////////////////////////////
@@ -332,14 +363,6 @@ public final class NativeDB extends DB {
     @Override
     public synchronized native int limit(int id, int value) throws SQLException;
 
-    private byte[] nameToUtf8ByteArray(String nameType, String name) throws SQLException {
-        final byte[] nameUtf8 = stringToUtf8ByteArray(name);
-        if (name == null || "".equals(name) || nameUtf8.length > 255) {
-            throw new SQLException("invalid " + nameType + " name: '" + name + "'");
-        }
-        return nameUtf8;
-    }
-
     /**
      * @see org.sqlite.core.DB#backup(java.lang.String, java.lang.String,
      *     org.sqlite.core.DB.ProgressObserver)
@@ -469,12 +492,7 @@ public final class NativeDB extends DB {
         throw new SQLException(msg);
     }
 
-    static byte[] stringToUtf8ByteArray(String str) {
-        if (str == null) {
-            return null;
-        }
-        return str.getBytes(StandardCharsets.UTF_8);
-    }
+
 
     static String utf8ByteBufferToString(ByteBuffer buffer) {
         if (buffer == null) {
