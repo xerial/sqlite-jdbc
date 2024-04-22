@@ -14,7 +14,7 @@
         <junit.version>5.10.2</junit.version>
         <surefire.version>3.2.5</surefire.version>
         <archunit.version>1.3.0</archunit.version>
-        <graalvm.version>24.0.0</graalvm.version>
+        <graalvm.version>24.0.1</graalvm.version>
         <java9.sourceDirectory>${project.basedir}/src/main/java9</java9.sourceDirectory>
     </properties>
 
