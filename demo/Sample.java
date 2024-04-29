@@ -8,7 +8,7 @@
     {
       public static void main(String[] args) 
       {
-        // NOTE: Connection and Statement are AutoClosable.
+        // NOTE: Connection and Statement are AutoCloseable.
         //       Don't forget to close them both in order to avoid leaks.
         try
         (
