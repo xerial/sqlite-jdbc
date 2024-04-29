@@ -94,18 +94,18 @@ jobs:
           # ARM v7
           - arch: armv7
             distro: ubuntu_latest
-            java: 11 # apt-get maven is 3.6.x, doesn't support Java 17
+            java: 21
           # ARM 64
           - arch: aarch64
             distro: ubuntu_latest
-            java: 11 # apt-get maven is 3.6.x, doesn't support Java 17
+            java: 21
           - arch: aarch64
             distro: alpine_latest
-            java: 11
+            java: 21
           # PPC64
           - arch: ppc64le
             distro: ubuntu_latest
-            java: 11 # apt-get maven is 3.6.x, doesn't support Java 17
+            java: 21
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -143,12 +143,12 @@ jobs:
             --user 1001:121
 
           env: |
-            SKIP_TEST_OSINFO: true
+            SKIP_TEST_MULTIARCH: true
 
           run: |
             echo "Architecture: `uname -a`"
             mvn --version
-            cd /work && mvn --batch-mode --no-transfer-progress test
+            cd /work && mvn -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
   # Java tests with that native library, as some functions will not be available (extensions).
