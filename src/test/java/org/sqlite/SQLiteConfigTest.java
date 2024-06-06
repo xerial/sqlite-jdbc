@@ -1,9 +1,15 @@
 package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.junit.jupiter.api.Test;
+import org.sqlite.SQLiteConfig.Pragma;
 
 public class SQLiteConfigTest {
 
@@ -49,5 +55,15 @@ public class SQLiteConfigTest {
         assertThat(config.toProperties().getProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.pragmaName))
                 .isEqualTo("100");
         assertThat(config.getBusyTimeout()).isEqualTo(100);
+    }
+
+    @Test
+    public void pragmaSet() {
+        Set<String> expectedPragmaSet = new HashSet<>();
+        for (Pragma v : SQLiteConfig.Pragma.values()) {
+            expectedPragmaSet.add(v.pragmaName);
+        }
+
+        assertEquals(SQLiteConfig.pragmaSet, expectedPragmaSet);
     }
 }
