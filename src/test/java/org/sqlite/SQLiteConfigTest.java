@@ -1,7 +1,6 @@
 package org.sqlite;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.HashSet;
 import java.util.Properties;
@@ -62,6 +61,6 @@ public class SQLiteConfigTest {
             expectedPragmaSet.add(v.pragmaName);
         }
 
-        assertEquals(SQLiteConfig.pragmaSet, expectedPragmaSet);
+        assertThat(SQLiteConfig.pragmaSet).isEqualTo(expectedPragmaSet);
     }
 }
