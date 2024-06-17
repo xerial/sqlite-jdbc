@@ -206,7 +206,7 @@ jobs:
           echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
       - name: Cancel action for non SNAPSHOT push
         if: github.event_name == 'push' && !endsWith(env.PROJECT_VERSION, '-SNAPSHOT')
-        uses: andymckay/cancel-action@0.4
+        uses: andymckay/cancel-action@0.5
       # from that point, if inputs.perform_release is true we perform a release, else we deploy snapshot
       - name: Prepare release
         if: inputs.perform_release
