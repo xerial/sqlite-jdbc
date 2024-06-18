@@ -175,7 +175,7 @@ public class OSInfo {
 
             // for Android, we fold everything that is not aarch64 into arm
             if (isAndroid()) {
-                if (armType.startsWith("aarch64") && !is32bit) {
+                if (armType.startsWith("aarch64")) {
                     // Use arm64
                     return "aarch64";
                 } else {
