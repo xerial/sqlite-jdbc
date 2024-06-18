@@ -492,12 +492,17 @@ public class DBMetaDataTest {
     }
 
     @Test
-    @DisplayName("Issue #1132 - Generated columns with stored in SQLite are not marked as generated")
+    @DisplayName(
+            "Issue #1132 - Generated columns with stored in SQLite are not marked as generated")
     public void getColumnsIncludingGeneratedStored() throws SQLException {
-        stat.executeUpdate("create table foo(" + "\n"
-            + "  id integer primary key," + "\n"
-            + "  bar int not null generated always as (id + 1) stored" + "\n"
-            + ");");
+        stat.executeUpdate(
+                "create table foo("
+                        + "\n"
+                        + "  id integer primary key,"
+                        + "\n"
+                        + "  bar int not null generated always as (id + 1) stored"
+                        + "\n"
+                        + ");");
 
         ResultSet rs = meta.getColumns(null, null, "foo", "%");
         assertThat(rs.next()).isTrue();
