@@ -171,8 +171,6 @@ public class OSInfo {
             // armType (uname -m) can be armv5t, armv5te, armv5tej, armv5tejl, armv6, armv7, armv7l,
             // aarch64, i686
 
-            boolean is32bit = "32".equals(System.getProperty("sun.arch.data.model"));
-
             // for Android, we fold everything that is not aarch64 into arm
             if (isAndroid()) {
                 if (armType.startsWith("aarch64")) {
@@ -192,9 +190,15 @@ public class OSInfo {
             } else if (armType.startsWith("armv5")) {
                 // Use armv5, soft-float ABI
                 return "arm";
-            } else if (armType.startsWith("aarch64") && !is32bit) {
-                // Use arm64
-                return "aarch64";
+            } else if (armType.startsWith("aarch64")) {
+                boolean is32bitJVM = "32".equals(System.getProperty("sun.arch.data.model"));
+                if (is32bitJVM) {
+                    // An aarch64 architecture should support armv7
+                    return "armv7";
+                } else {
+                    // Use arm64
+                    return "aarch64";
+                }
             }
 
             // Java 1.8 introduces a system property to determine armel or armhf
