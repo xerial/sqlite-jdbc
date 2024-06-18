@@ -1078,7 +1078,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                             colType = colType.substring(0, iStartOfDimension).trim();
                         }
 
-                        int colGenerated = "2".equals(colHidden) ? 1 : 0;
+                        int colGenerated = Arrays.binarySearch(new String[] {"2", "3"}, colHidden) >= 0 ? 1 : 0;
 
                         sql.append("select ")
                                 .append(i + 1)
