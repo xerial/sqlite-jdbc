@@ -7,7 +7,7 @@ image:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&
 _Everything below this line comes from the original repository._
 
 = SQLite JDBC Driver
-:project-version: 3.45.3.0
+:project-version: 3.46.0.0
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
@@ -70,7 +70,7 @@ id = 2
     {
       public static void main(String[] args)
       {
-        // NOTE: Connection and Statement are AutoClosable.
+        // NOTE: Connection and Statement are AutoCloseable.
         //       Don't forget to close them both in order to avoid leaks.
         try
         (

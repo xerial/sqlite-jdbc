@@ -24,7 +24,7 @@ import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junitpioneer.jupiter.SetSystemProperty;
 
 @DisabledIfEnvironmentVariable(
-        named = "SKIP_TEST_OSINFO",
+        named = "SKIP_TEST_MULTIARCH",
         matches = "true",
         disabledReason = "Those tests would fail when ran on a musl based Linux")
 @DisabledInNativeImage

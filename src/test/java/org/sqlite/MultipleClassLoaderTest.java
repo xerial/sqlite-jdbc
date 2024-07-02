@@ -48,7 +48,12 @@ import java.util.jar.JarOutputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
+@DisabledIfEnvironmentVariable(
+        named = "SKIP_TEST_MULTIARCH",
+        matches = "true",
+        disabledReason = "Those tests would fail when ran on a multi-arch image")
 public class MultipleClassLoaderTest {
 
     private Connection connection = null;
