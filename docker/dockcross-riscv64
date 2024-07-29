@@ -242,7 +242,6 @@ TTY_ARGS=
 tty -s && [ -z "$MSYS" ] && TTY_ARGS=-ti
 CONTAINER_NAME=dockcross_$RANDOM
 $OCI_EXE run $TTY_ARGS --name $CONTAINER_NAME \
-    --platform linux/amd64 \
     -v "$HOST_PWD":/work \
     $HOST_VOLUMES \
     "${USER_IDS[@]}" \
