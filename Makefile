@@ -195,7 +195,7 @@ linux-ppc64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-ppc64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=powerpc64le-unknown-linux-gnu- OS_NAME=Linux OS_ARCH=ppc64'
 
 linux-riscv64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-linux-riscv64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=riscv64-unknown-linux-gnu- OS_NAME=Linux OS_ARCH=riscv64'
+	./docker/dockcross-riscv64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=riscv64-unknown-linux-gnu- OS_NAME=Linux OS_ARCH=riscv64'
 
 mac64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir -e CROSS_TRIPLE=x86_64-apple-darwin multiarch/crossbuild make clean-native native OS_NAME=Mac OS_ARCH=x86_64

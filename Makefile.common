@@ -52,7 +52,7 @@ endif
 
 # os=Default is meant to be generic unix/linux
 
-known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64 Linux-ppc64 Mac-x86 Mac-x86_64 Mac-aarch64 DragonFly-x86_64 FreeBSD-x86 FreeBSD-x86_64 FreeBSD-aarch64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 Windows-armv7 Windows-aarch64 SunOS-sparcv9 HPUX-ia64_32
+known_targets := Linux-x86 Linux-x86_64 Linux-arm Linux-armv6 Linux-armv7 Linux-Android-arm Linux-Android-aarch64 Linux-Android-x86 Linux-Android-x86_64 Linux-ppc64 Linux-riscv64 Mac-x86 Mac-x86_64 Mac-aarch64 DragonFly-x86_64 FreeBSD-x86 FreeBSD-x86_64 FreeBSD-aarch64 OpenBSD-x86_64 Windows-x86 Windows-x86_64 Windows-armv7 Windows-aarch64 SunOS-sparcv9 HPUX-ia64_32
 target := $(OS_NAME)-$(OS_ARCH)
 
 ifeq (,$(findstring $(strip $(target)),$(known_targets)))
@@ -140,6 +140,13 @@ Linux-ppc64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisi
 Linux-ppc64_LINKFLAGS := $(Default_LINKFLAGS)
 Linux-ppc64_LIBNAME   := libsqlitejdbc.so
 Linux-ppc64_SQLITE_FLAGS  :=
+
+Linux-riscv64_CC        := $(CROSS_PREFIX)gcc
+Linux-riscv64_STRIP     := $(CROSS_PREFIX)strip
+Linux-riscv64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -Os -fPIC -fvisibility=hidden
+Linux-riscv64_LINKFLAGS := $(Default_LINKFLAGS)
+Linux-riscv64_LIBNAME   := libsqlitejdbc.so
+Linux-riscv64_SQLITE_FLAGS  :=
 
 DragonFly-x86_64_CC        := $(CROSS_PREFIX)cc
 DragonFly-x86_64_STRIP     := $(CROSS_PREFIX)strip
