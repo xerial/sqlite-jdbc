@@ -11,14 +11,14 @@ Opening a UNIX (Linux, maxOS, etc.) file `/home/leo/work/mydatabase.db`
 try (Connection connection = DriverManager.getConnection("jdbc:sqlite:/home/leo/work/mydatabase.db")) { /*...*/ }
 ```
 
-## How to Use Memory Databases
-SQLite supports on-memory database management, which does not create any database files. To use a memory database in your Java code, get the database connection as follows:
+## How to Use Memory or Temporary Databases
+SQLite supports in-memory databases, which do not create any database files. To use a memory database in your Java code, get the database connection as follows:
 
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) { /*...*/ }
 ```
 
-And also, you can create memory database as follows:
+You can create temporary database as follows:
 ```java
 try (Connection connection = DriverManager.getConnection("jdbc:sqlite:")) { /*...*/ }
 ```

@@ -49,6 +49,7 @@ public class OSInfo {
     public static final String IA64 = "ia64";
     public static final String PPC = "ppc";
     public static final String PPC64 = "ppc64";
+    public static final String RISCV64 = "riscv64";
 
     static {
         // x86 mappings
@@ -88,6 +89,8 @@ public class OSInfo {
         archMapping.put("power_rs64", PPC64);
         archMapping.put("ppc64el", PPC64);
         archMapping.put("ppc64le", PPC64);
+
+        archMapping.put(RISCV64, RISCV64);
     }
 
     public static void main(String[] args) {
@@ -191,8 +194,14 @@ public class OSInfo {
                 // Use armv5, soft-float ABI
                 return "arm";
             } else if (armType.startsWith("aarch64")) {
-                // Use arm64
-                return "aarch64";
+                boolean is32bitJVM = "32".equals(System.getProperty("sun.arch.data.model"));
+                if (is32bitJVM) {
+                    // An aarch64 architecture should support armv7
+                    return "armv7";
+                } else {
+                    // Use arm64
+                    return "aarch64";
+                }
             }
 
             // Java 1.8 introduces a system property to determine armel or armhf
