@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
@@ -486,6 +487,29 @@ public class DBMetaDataTest {
         assertThat(rs.getString(24)).as("first column is not generated").isEqualTo("NO");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString(4)).as("second column is named 'j'").isEqualTo("j");
+        assertThat(rs.getString(24)).as("second column is generated").isEqualTo("YES");
+        assertThat(rs.next()).isFalse();
+    }
+
+    @Test
+    @DisplayName(
+            "Issue #1132 - Generated columns with stored in SQLite are not marked as generated")
+    public void getColumnsIncludingGeneratedStored() throws SQLException {
+        stat.executeUpdate(
+                "create table foo("
+                        + "\n"
+                        + "  id integer primary key,"
+                        + "\n"
+                        + "  bar int not null generated always as (id + 1) stored"
+                        + "\n"
+                        + ");");
+
+        ResultSet rs = meta.getColumns(null, null, "foo", "%");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(4)).as("first column is named 'id'").isEqualTo("id");
+        assertThat(rs.getString(24)).as("first column is generated").isEqualTo("NO");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(4)).as("second column is named 'bar'").isEqualTo("bar");
         assertThat(rs.getString(24)).as("second column is generated").isEqualTo("YES");
         assertThat(rs.next()).isFalse();
     }
