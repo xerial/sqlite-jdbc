@@ -110,14 +110,14 @@ Since sqlite-jdbc-3.6.19, the natively compiled SQLite engines will be used for
 the following operating systems:
 
 |===
-| |x86 |x86_64 |armv5 |armv6 |armv7 |arm64 |ppc64 
+| |x86 |x86_64 |armv5 |armv6 |armv7 |arm64 |ppc64 | riscv64
 
-|Windows |✔ |✔ | | |✔ |✔ | 
-|macOS | |✔ | | | |✔ | 
-|Linux (libc) |✔ |✔ |✔ |✔ |✔ |✔ |✔ 
-|Linux (musl) |✔ |✔ | | | |✔ | 
-|Android |✔ |✔ |✔ | | |✔ | 
-|FreeBSD |✔ |✔ | | | |✔ | 
+|Windows |✔ |✔ | | |✔ |✔ | |
+|macOS | |✔ | | | |✔ | |
+|Linux (libc) |✔ |✔ |✔ |✔ |✔ |✔ |✔ |✔ 
+|Linux (musl) |✔ |✔ | | | |✔ | |
+|Android |✔ |✔ |✔ | | |✔ | |
+|FreeBSD |✔ |✔ | | | |✔ | |
 |===
 
 In the other OSs not listed above, the pure-java SQLite is used. (Applies to versions before 3.7.15)
