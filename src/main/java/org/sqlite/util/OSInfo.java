@@ -49,6 +49,7 @@ public class OSInfo {
     public static final String IA64 = "ia64";
     public static final String PPC = "ppc";
     public static final String PPC64 = "ppc64";
+    public static final String RISCV64 = "riscv64";
 
     static {
         // x86 mappings
@@ -88,6 +89,8 @@ public class OSInfo {
         archMapping.put("power_rs64", PPC64);
         archMapping.put("ppc64el", PPC64);
         archMapping.put("ppc64le", PPC64);
+
+        archMapping.put(RISCV64, RISCV64);
     }
 
     public static void main(String[] args) {
