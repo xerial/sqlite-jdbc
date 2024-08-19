@@ -10,6 +10,7 @@ import org.sqlite.core.NativeDB;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData;
 import org.sqlite.util.LibraryLoaderUtil;
 import org.sqlite.util.OSInfo;
+import org.sqlite.util.ProcessRunner;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ public class SqliteJdbcFeature implements Feature {
         RuntimeClassInitialization.initializeAtBuildTime(SQLiteJDBCLoader.VersionHolder.class);
         RuntimeClassInitialization.initializeAtBuildTime(JDBC3DatabaseMetaData.class);
         RuntimeClassInitialization.initializeAtBuildTime(OSInfo.class);
+        RuntimeClassInitialization.initializeAtBuildTime(ProcessRunner.class);
         RuntimeClassInitialization.initializeAtBuildTime(LibraryLoaderUtil.class);
         a.registerReachabilityHandler(
                 this::nativeDbReachable, method(SQLiteJDBCLoader.class, "initialize"));
