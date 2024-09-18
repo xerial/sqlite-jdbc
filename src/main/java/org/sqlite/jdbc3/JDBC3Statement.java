@@ -8,14 +8,14 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.core.DB;
 import org.sqlite.core.DB.ProgressObserver;
+import org.sqlite.util.Logger;
+import org.sqlite.util.LoggerFactory;
 
 public abstract class JDBC3Statement extends CoreStatement {
 

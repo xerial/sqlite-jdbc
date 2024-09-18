@@ -35,8 +35,6 @@ class CodingRulesTest {
 
     @ArchTest private final ArchRule no_jodatime = NO_CLASSES_SHOULD_USE_JODATIME;
 
-    @ArchTest private final ArchRule no_java_util_logging = NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING;
-
     @ArchTest
     private final ArchRule no_driver_manager_println =
             noClasses()

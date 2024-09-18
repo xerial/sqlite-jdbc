@@ -415,6 +415,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.36</version>
+            <optional>true</optional>
         </dependency>
         <!--
         This dependency makes compilation on non-GraalVM versions possible.

@@ -18,12 +18,12 @@ package org.sqlite;
 
 import java.sql.*;
 import java.util.Properties;
-import java.util.logging.Logger;
-import org.slf4j.LoggerFactory;
 import org.sqlite.jdbc4.JDBC4Connection;
+import org.sqlite.util.Logger;
+import org.sqlite.util.LoggerFactory;
 
 public class JDBC implements Driver {
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(JDBC.class);
+    private static final Logger logger = LoggerFactory.getLogger(JDBC.class);
     public static final String PREFIX = "jdbc:sqlite:";
 
     static {
@@ -49,7 +49,7 @@ public class JDBC implements Driver {
         return false;
     }
 
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
         // TODO
         return null;
     }
