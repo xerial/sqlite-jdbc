@@ -21,12 +21,12 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CoreDatabaseMetaData;
 import org.sqlite.core.CoreStatement;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData.ImportedKeyFinder.ForeignKey;
+import org.sqlite.util.Logger;
+import org.sqlite.util.LoggerFactory;
 import org.sqlite.util.QueryUtils;
 import org.sqlite.util.StringUtils;
 

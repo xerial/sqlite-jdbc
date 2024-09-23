@@ -39,9 +39,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sqlite.util.LibraryLoaderUtil;
+import org.sqlite.util.Logger;
+import org.sqlite.util.LoggerFactory;
 import org.sqlite.util.OSInfo;
 import org.sqlite.util.StringUtils;
 
