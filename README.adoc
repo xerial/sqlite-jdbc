@@ -7,7 +7,7 @@ image:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&
 _Everything below this line comes from the original repository._
 
 = SQLite JDBC Driver
-:project-version: 3.46.1.0
+:project-version: 3.46.1.1
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
@@ -37,19 +37,18 @@ SQLite JDBC is a library for accessing SQLite databases through the JDBC API. Fo
 
 . <<Download,Download>> `sqlite-jdbc-{project-version}.jar`
 then append this jar file into your classpath.
-. https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar[Download] `slf4j-api-1.7.36.jar` then append this jar file into your classpath.
 . Open a SQLite database connection from your code. (see the example below)
 
 === Example usage
 
-Assuming `sqlite-jdbc-{project-version}.jar` and `slf4j-api-1.7.36.jar` are placed in the current directory.
+Assuming `sqlite-jdbc-{project-version}.jar` is placed in the current directory.
 
 [source,shell,subs="attributes+"]
 ----
 > javac Sample.java
-> java -classpath ".;sqlite-jdbc-{project-version}.jar;slf4j-api-1.7.36.jar" Sample   # in Windows
+> java -classpath ".;sqlite-jdbc-{project-version}.jar" Sample   # in Windows
 or
-> java -classpath ".:sqlite-jdbc-{project-version}.jar:slf4j-api-1.7.36.jar" Sample   # in macOS or Linux
+> java -classpath ".:sqlite-jdbc-{project-version}.jar" Sample   # in macOS or Linux
 name = leo
 id = 1
 name = yui
