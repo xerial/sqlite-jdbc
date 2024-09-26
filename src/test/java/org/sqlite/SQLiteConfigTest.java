@@ -18,6 +18,7 @@ public class SQLiteConfigTest {
         config.setDateStringFormat("yyyy/mm/dd");
         config.setDatePrecision("seconds");
         config.setDateClass("real");
+        config.setGetGeneratedKeys(false);
 
         Properties properties = config.toProperties();
 
@@ -27,6 +28,8 @@ public class SQLiteConfigTest {
                 .isEqualTo(SQLiteConfig.DatePrecision.SECONDS.name());
         assertThat(properties.getProperty(SQLiteConfig.Pragma.DATE_CLASS.getPragmaName()))
                 .isEqualTo(SQLiteConfig.DateClass.REAL.name());
+        assertThat(properties.getProperty(Pragma.JDBC_GET_GENERATED_KEYS.getPragmaName()))
+                .isEqualTo("false");
     }
 
     @Test

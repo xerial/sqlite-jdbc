@@ -1189,4 +1189,12 @@ public class SQLiteConfig {
     public int getBusyTimeout() {
         return busyTimeout;
     }
+
+    public boolean isGetGeneratedKeys() {
+        return this.defaultConnectionConfig.isGetGeneratedKeys();
+    }
+
+    public void setGetGeneratedKeys(boolean generatedKeys) {
+        this.defaultConnectionConfig.setGetGeneratedKeys(generatedKeys);
+    }
 }
