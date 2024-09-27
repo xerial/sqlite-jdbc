@@ -82,6 +82,36 @@ public class PrepStmtTest {
     }
 
     @Test
+    public void pragmaGetGeneratedKeys() throws SQLException {
+        SQLiteConnection connection =
+                (SQLiteConnection)
+                        DriverManager.getConnection(
+                                "jdbc:sqlite::memory:?jdbc.get_generated_keys=false");
+        assertThat(connection.getConnectionConfig().isGetGeneratedKeys()).isFalse();
+    }
+
+    @Test
+    public void updateWithoutGeneratedKeys() throws SQLException {
+        Connection conn =
+                DriverManager.getConnection("jdbc:sqlite::memory:?jdbc.get_generated_keys=false");
+
+        assertThat(conn.prepareStatement("create table s1 (c1);").executeUpdate()).isEqualTo(0);
+        PreparedStatement prep = conn.prepareStatement("insert into s1 values (?);");
+        prep.setInt(1, 3);
+        assertThat(prep.executeUpdate()).isEqualTo(1);
+        assertThat(prep.getResultSet()).isNull();
+        prep.setInt(1, 5);
+        assertThat(prep.executeUpdate()).isEqualTo(1);
+        prep.setInt(1, 7);
+        assertThat(prep.executeUpdate()).isEqualTo(1);
+
+        ResultSet rsgk = prep.getGeneratedKeys();
+        assertThat(rsgk.next()).isFalse();
+        rsgk.close();
+        prep.close();
+    }
+
+    @Test
     public void multiUpdate() throws SQLException {
         stat.executeUpdate("create table test (c1);");
         PreparedStatement prep = conn.prepareStatement("insert into test values (?);");

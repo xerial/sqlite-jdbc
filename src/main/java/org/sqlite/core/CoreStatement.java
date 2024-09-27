@@ -181,10 +181,12 @@ public abstract class CoreStatement implements Codes {
      * block.
      */
     public void updateGeneratedKeys() throws SQLException {
-        clearGeneratedKeys();
-        if (sql != null && INSERT_PATTERN.matcher(sql).find()) {
-            generatedKeysStat = conn.createStatement();
-            generatedKeysRs = generatedKeysStat.executeQuery("SELECT last_insert_rowid();");
+        if (conn.getConnectionConfig().isGetGeneratedKeys()) {
+            clearGeneratedKeys();
+            if (sql != null && INSERT_PATTERN.matcher(sql).find()) {
+                generatedKeysStat = conn.createStatement();
+                generatedKeysRs = generatedKeysStat.executeQuery("SELECT last_insert_rowid();");
+            }
         }
     }
 

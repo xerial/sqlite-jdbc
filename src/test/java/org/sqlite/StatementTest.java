@@ -1,8 +1,6 @@
 package org.sqlite;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.data.Offset.offset;
 
 import java.lang.reflect.Method;
@@ -351,6 +349,23 @@ public class StatementTest {
         assertThat(rs).isNotNull();
         assertThat(rs.next()).isFalse();
         stat2.close();
+
+        // disable then re-enable generated keys retrieval
+        try {
+            ((SQLiteConnection) conn).getConnectionConfig().setGetGeneratedKeys(false);
+            stat.executeUpdate("insert into t1 (v) values ('red');");
+            rs = stat.getGeneratedKeys();
+            assertThat(rs.next()).isFalse();
+
+            ((SQLiteConnection) conn).getConnectionConfig().setGetGeneratedKeys(true);
+
+            stat.executeUpdate("insert into t1 (v) values ('red');");
+            rs = stat.getGeneratedKeys();
+            assertThat(rs.next()).isTrue();
+            rs.close();
+        } finally {
+            ((SQLiteConnection) conn).getConnectionConfig().setGetGeneratedKeys(true);
+        }
     }
 
     @Test
