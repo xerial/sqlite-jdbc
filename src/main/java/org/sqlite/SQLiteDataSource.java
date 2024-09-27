@@ -438,6 +438,15 @@ public class SQLiteDataSource implements DataSource {
     }
 
     /**
+     * Configure where generated keys will be retrieved for this database.
+     *
+     * @param generatedKeys true to retrieve generated keys
+     */
+    public void setGetGeneratedKeys(boolean generatedKeys) {
+        config.setGetGeneratedKeys(generatedKeys);
+    }
+
+    /**
      * Sets the value of the user-version. It is a big-endian 32-bit signed integer stored in the
      * database header at offset 60.
      *

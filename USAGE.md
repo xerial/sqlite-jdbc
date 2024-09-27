@@ -147,7 +147,8 @@ SQLite has limited support to retrieve generated keys, using [last_insert_rowid]
 
 By default the driver will eagerly retrieve the generated keys after each statement, which may impact performances.
 
-You can disable the retrieval of generated keys in 2 ways:
+You can disable the retrieval of generated keys in 3 ways:
+- via `SQLiteDataSource#setGetGeneratedKeys(false)`
 - via `SQLiteConnectionConfig#setGetGeneratedKeys(false)`:
 - using the pragma `jdbc.get_generated_keys`:
 ```java
