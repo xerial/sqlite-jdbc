@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.ByteOrder;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,5 +92,37 @@ public class SQLiteDataSourceTest {
                                 .getProperty(SQLiteConfig.Pragma.BUSY_TIMEOUT.pragmaName))
                 .isEqualTo("1234");
         assertThat(ds.getConfig().getBusyTimeout()).isEqualTo(1234);
+    }
+
+    @Test
+    public void setGetGeneratedKeys() throws SQLException {
+        final SQLiteDataSource ds = new SQLiteDataSource();
+        ds.setGetGeneratedKeys(false);
+        assertThat(
+                        ds.getConfig()
+                                .toProperties()
+                                .getProperty(
+                                        SQLiteConfig.Pragma.JDBC_GET_GENERATED_KEYS.pragmaName))
+                .isEqualTo("false");
+        assertThat(ds.getConfig().isGetGeneratedKeys()).isEqualTo(false);
+        assertThat(
+                        ((SQLiteConnection) ds.getConnection())
+                                .getConnectionConfig()
+                                .isGetGeneratedKeys())
+                .isFalse();
+
+        ds.setGetGeneratedKeys(true);
+        assertThat(
+                        ds.getConfig()
+                                .toProperties()
+                                .getProperty(
+                                        SQLiteConfig.Pragma.JDBC_GET_GENERATED_KEYS.pragmaName))
+                .isEqualTo("true");
+        assertThat(ds.getConfig().isGetGeneratedKeys()).isEqualTo(true);
+        assertThat(
+                        ((SQLiteConnection) ds.getConnection())
+                                .getConnectionConfig()
+                                .isGetGeneratedKeys())
+                .isTrue();
     }
 }
