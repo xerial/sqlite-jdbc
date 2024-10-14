@@ -19,6 +19,7 @@ package org.sqlite.core;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
 import org.sqlite.Function;
@@ -90,10 +91,11 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#_exec(java.lang.String) */
     @Override
     public synchronized int _exec(String sql) throws SQLException {
-        if (logger.isTraceEnabled()) {
-            logger.trace(
-                    "DriverManager [{}] [SQLite EXEC] {}", Thread.currentThread().getName(), sql);
-        }
+        logger.trace(
+                () ->
+                        MessageFormat.format(
+                                "DriverManager [{0}] [SQLite EXEC] {1}",
+                                Thread.currentThread().getName(), sql));
         return _exec_utf8(stringToUtf8ByteArray(sql));
     }
 
@@ -125,10 +127,11 @@ public final class NativeDB extends DB {
     /** @see org.sqlite.core.DB#prepare(java.lang.String) */
     @Override
     protected synchronized SafeStmtPtr prepare(String sql) throws SQLException {
-        if (logger.isTraceEnabled()) {
-            logger.trace(
-                    "DriverManager [{}] [SQLite EXEC] {}", Thread.currentThread().getName(), sql);
-        }
+        logger.trace(
+                () ->
+                        MessageFormat.format(
+                                "DriverManager [{0}] [SQLite EXEC] {1}",
+                                Thread.currentThread().getName(), sql));
         return new SafeStmtPtr(this, prepare_utf8(stringToUtf8ByteArray(sql)));
     }
 
