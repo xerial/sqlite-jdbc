@@ -1,6 +1,7 @@
 package org.sqlite.util;
 
-import java.text.MessageFormat;
+import java.util.function.Supplier;
+import java.util.logging.Level;
 
 /**
  * A factory for {@link Logger} instances that uses SLF4J if present, falling back on a
@@ -42,45 +43,30 @@ public class LoggerFactory {
         }
 
         @Override
-        public boolean isTraceEnabled() {
-            return logger.isLoggable(java.util.logging.Level.FINEST);
-        }
-
-        @Override
-        public void trace(String format, Object o1, Object o2) {
-            if (logger.isLoggable(java.util.logging.Level.FINEST)) {
-                logger.log(java.util.logging.Level.FINEST, MessageFormat.format(format, o1, o2));
+        public void trace(Supplier<String> message) {
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, message.get());
             }
         }
 
         @Override
-        public void info(String format, Object o1, Object o2) {
-            if (logger.isLoggable(java.util.logging.Level.INFO)) {
-                logger.log(java.util.logging.Level.INFO, MessageFormat.format(format, o1, o2));
+        public void info(Supplier<String> message) {
+            if (logger.isLoggable(Level.INFO)) {
+                logger.log(Level.INFO, message.get());
             }
         }
 
         @Override
-        public void warn(String msg) {
-            logger.log(java.util.logging.Level.WARNING, msg);
-        }
-
-        @Override
-        public void error(String message, Throwable t) {
-            logger.log(java.util.logging.Level.SEVERE, message, t);
-        }
-
-        @Override
-        public void error(String format, Object o1, Throwable t) {
-            if (logger.isLoggable(java.util.logging.Level.SEVERE)) {
-                logger.log(java.util.logging.Level.SEVERE, MessageFormat.format(format, o1), t);
+        public void warn(Supplier<String> message) {
+            if (logger.isLoggable(Level.WARNING)) {
+                logger.log(Level.WARNING, message.get());
             }
         }
 
         @Override
-        public void error(String format, Object o1, Object o2, Throwable t) {
-            if (logger.isLoggable(java.util.logging.Level.SEVERE)) {
-                logger.log(java.util.logging.Level.SEVERE, MessageFormat.format(format, o1, o2), t);
+        public void error(Supplier<String> message, Throwable t) {
+            if (logger.isLoggable(Level.SEVERE)) {
+                logger.log(Level.SEVERE, message.get(), t);
             }
         }
     }
@@ -93,38 +79,31 @@ public class LoggerFactory {
         }
 
         @Override
-        public boolean isTraceEnabled() {
-            return logger.isTraceEnabled();
+        public void trace(Supplier<String> message) {
+            if (logger.isTraceEnabled()) {
+                logger.trace(message.get());
+            }
         }
 
         @Override
-        public void trace(String format, Object o1, Object o2) {
-            logger.trace(format, o1, o2);
+        public void info(Supplier<String> message) {
+            if (logger.isInfoEnabled()) {
+                logger.info(message.get());
+            }
         }
 
         @Override
-        public void info(String format, Object o1, Object o2) {
-            logger.info(format, o1, o2);
+        public void warn(Supplier<String> message) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(message.get());
+            }
         }
 
         @Override
-        public void warn(String msg) {
-            logger.warn(msg);
-        }
-
-        @Override
-        public void error(String message, Throwable t) {
-            logger.error(message, t);
-        }
-
-        @Override
-        public void error(String format, Object o1, Throwable t) {
-            logger.error(format, o1, t);
-        }
-
-        @Override
-        public void error(String format, Object o1, Object o2, Throwable t) {
-            logger.error(format, o1, o2, t);
+        public void error(Supplier<String> message, Throwable t) {
+            if (logger.isErrorEnabled()) {
+                logger.error(message.get(), t);
+            }
         }
     }
 }

@@ -1,18 +1,14 @@
 package org.sqlite.util;
 
+import java.util.function.Supplier;
+
 /** A simple internal Logger interface. */
 public interface Logger {
-    boolean isTraceEnabled();
+    void trace(Supplier<String> message);
 
-    void trace(String format, Object o1, Object o2);
+    void info(Supplier<String> message);
 
-    void info(String format, Object o1, Object o2);
+    void warn(Supplier<String> message);
 
-    void warn(String msg);
-
-    void error(String message, Throwable t);
-
-    void error(String format, Object o1, Throwable t);
-
-    void error(String format, Object o1, Object o2, Throwable t);
+    void error(Supplier<String> message, Throwable t);
 }
