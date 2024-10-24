@@ -115,7 +115,7 @@ the following operating systems:
 |macOS | |✔ | | | |✔ | |
 |Linux (libc) |✔ |✔ |✔ |✔ |✔ |✔ |✔ |✔ 
 |Linux (musl) |✔ |✔ | | | |✔ | |
-|Android |✔ |✔ |✔ | | |✔ | |
+|Android (API Level 24+) |✔ |✔ |✔ | | |✔ | |
 |FreeBSD |✔ |✔ | | | |✔ | |
 |===
 
