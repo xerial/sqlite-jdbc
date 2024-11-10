@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import org.sqlite.ExtendedCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
@@ -100,7 +101,10 @@ public abstract class JDBC3Statement extends CoreStatement {
         private static final Logger logger = LoggerFactory.getLogger(BackupObserver.class);
 
         public void progress(int remaining, int pageCount) {
-            logger.info("remaining:{}, page count:{}", remaining, pageCount);
+            logger.info(
+                    () ->
+                            MessageFormat.format(
+                                    "remaining:{0}, page count:{1}", remaining, pageCount));
         }
     }
 
