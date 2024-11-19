@@ -188,6 +188,7 @@ public class SQLiteConfig {
 
         // exclude this "fake" pragma from execution
         pragmaParams.remove(Pragma.JDBC_EXPLICIT_READONLY.pragmaName);
+        pragmaParams.remove(Pragma.JDBC_GET_GENERATED_KEYS.pragmaName);
 
         Statement stat = conn.createStatement();
         try {
@@ -330,6 +331,9 @@ public class SQLiteConfig {
                 defaultConnectionConfig.getDateStringFormat());
         pragmaTable.setProperty(
                 Pragma.JDBC_EXPLICIT_READONLY.pragmaName, this.explicitReadOnly ? "true" : "false");
+        pragmaTable.setProperty(
+                Pragma.JDBC_GET_GENERATED_KEYS.pragmaName,
+                defaultConnectionConfig.isGetGeneratedKeys() ? "true" : "false");
         return pragmaTable;
     }
 
@@ -542,7 +546,9 @@ public class SQLiteConfig {
 
         // extensions: "fake" pragmas to allow conformance with JDBC
         JDBC_EXPLICIT_READONLY(
-                "jdbc.explicit_readonly", "Set explicit read only transactions", null);
+                "jdbc.explicit_readonly", "Set explicit read only transactions", null),
+        JDBC_GET_GENERATED_KEYS(
+                "jdbc.get_generated_keys", "Enable retrieval of generated keys", OnOff.Values);
 
         public final String pragmaName;
         public final String[] choices;
@@ -1182,5 +1188,13 @@ public class SQLiteConfig {
 
     public int getBusyTimeout() {
         return busyTimeout;
+    }
+
+    public boolean isGetGeneratedKeys() {
+        return this.defaultConnectionConfig.isGetGeneratedKeys();
+    }
+
+    public void setGetGeneratedKeys(boolean generatedKeys) {
+        this.defaultConnectionConfig.setGetGeneratedKeys(generatedKeys);
     }
 }
