@@ -69,4 +69,42 @@ public class ExtendedCommandTest {
         assertThat(b.targetDB).isEqualTo("main");
         assertThat(b.srcFile).isEqualTo("target/sample.db");
     }
+
+    @Test
+    public void removeQuotation() throws SQLException {
+        // Null String
+        String input = null;
+        String expected = null;
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+
+        // String with one single quotation only
+        input = "'";
+        expected = "'";
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+
+        // String with one double quotation only
+        String invalidStringDoubleQuotation = "\"";
+        expected = "\"";
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+
+        // String with two mismatch quotations
+        String normalStringMismatchQuotation = "'Test\"";
+        expected = "'Test\"";
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+
+        // String with two matching single quotations
+        String invalidStringMatchQuotation = "'Test'";
+        expected = "Test";
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+
+        // String with two matching double quotations
+        String invalidStringMatchQuotation = "\"Test\"";
+        expected = "Test";
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+
+        // String with more than two quotations
+        String invalidStringMatchQuotation = "'Te's\"t'";
+        expected = "Te's\"t";
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+    }
 }
