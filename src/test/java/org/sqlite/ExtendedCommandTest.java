@@ -12,7 +12,11 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.SQLException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.sqlite.ExtendedCommand.BackupCommand;
 import org.sqlite.ExtendedCommand.RestoreCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
@@ -68,5 +72,23 @@ public class ExtendedCommandTest {
         b = parseRestoreCommand("restore from target/sample.db");
         assertThat(b.targetDB).isEqualTo("main");
         assertThat(b.srcFile).isEqualTo("target/sample.db");
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void removeQuotation(String input, String expected) throws SQLException {
+        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> removeQuotation() {
+        return Stream.of(
+                Arguments.of(null, null), // Null String
+                Arguments.of("'", "'"), // String with one single quotation only
+                Arguments.of("\"", "\""), // String with one double quotation only
+                Arguments.of("'Test\"", "'Test\""), // String with two mismatch quotations
+                Arguments.of("'Test'", "Test"), // String with two matching single quotations
+                Arguments.of("\"Test\"", "Test"), // String with two matching double quotations
+                Arguments.of("'Te's\"t'", "Te's\"t") // String with more than two quotations
+                );
     }
 }
