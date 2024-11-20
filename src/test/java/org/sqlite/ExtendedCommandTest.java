@@ -12,7 +12,11 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.SQLException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.sqlite.ExtendedCommand.BackupCommand;
 import org.sqlite.ExtendedCommand.RestoreCommand;
 import org.sqlite.ExtendedCommand.SQLExtension;
@@ -70,41 +74,21 @@ public class ExtendedCommandTest {
         assertThat(b.srcFile).isEqualTo("target/sample.db");
     }
 
-    @Test
-    public void removeQuotation() throws SQLException {
-        // Null String
-        String input = null;
-        String expected = null;
+    @ParameterizedTest
+    @MethodSource
+    public void removeQuotation(String input, String expected) throws SQLException {
         assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+    }
 
-        // String with one single quotation only
-        input = "'";
-        expected = "'";
-        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
-
-        // String with one double quotation only
-        String invalidStringDoubleQuotation = "\"";
-        expected = "\"";
-        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
-
-        // String with two mismatch quotations
-        String normalStringMismatchQuotation = "'Test\"";
-        expected = "'Test\"";
-        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
-
-        // String with two matching single quotations
-        String invalidStringMatchQuotation = "'Test'";
-        expected = "Test";
-        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
-
-        // String with two matching double quotations
-        String invalidStringMatchQuotation = "\"Test\"";
-        expected = "Test";
-        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
-
-        // String with more than two quotations
-        String invalidStringMatchQuotation = "'Te's\"t'";
-        expected = "Te's\"t";
-        assertThat(ExtendedCommand.removeQuotation(input)).isEqualTo(expected);
+    private static Stream<Arguments> removeQuotation() {
+        return Stream.of(
+                Arguments.of(null, null), // Null String
+                Arguments.of("'", "'"), // String with one single quotation only
+                Arguments.of("\"", "\""), // String with one double quotation only
+                Arguments.of("'Test\"", "'Test\""), // String with two mismatch quotations
+                Arguments.of("'Test'", "Test"), // String with two matching single quotations
+                Arguments.of("\"Test\"", "Test"), // String with two matching double quotations
+                Arguments.of("'Te's\"t'", "Te's\"t") // String with more than two quotations
+                );
     }
 }
