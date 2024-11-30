@@ -7,7 +7,7 @@ image:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&
 _Everything below this line comes from the original repository._
 
 = SQLite JDBC Driver
-:project-version: 3.47.0.0
+:project-version: 3.47.1.0
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
@@ -123,7 +123,7 @@ the following operating systems:
 |macOS | |✔ | | | |✔ | |
 |Linux (libc) |✔ |✔ |✔ |✔ |✔ |✔ |✔ |✔ 
 |Linux (musl) |✔ |✔ | | | |✔ | |
-|Android |✔ |✔ |✔ | | |✔ | |
+|Android (API Level 24+) |✔ |✔ |✔ | | |✔ | |
 |FreeBSD |✔ |✔ | | | |✔ | |
 |===
 
