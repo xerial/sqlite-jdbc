@@ -478,6 +478,24 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getColumnsPrecisionScale() throws SQLException {
+        stat.executeUpdate("create table gh_1215 (n numeric ( 10 , 5 ), d decimal ( 10 ))");
+
+        ResultSet rs = meta.getColumns(null, null, "gh_1215", "%");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("n");
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("NUMERIC");
+        assertThat(rs.getString("COLUMN_SIZE")).isEqualTo("15");
+        assertThat(rs.getString("DECIMAL_DIGITS")).isEqualTo("5");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("d");
+        assertThat(rs.getString("TYPE_NAME")).isEqualTo("DECIMAL");
+        assertThat(rs.getString("COLUMN_SIZE")).isEqualTo("10");
+        assertThat(rs.getString("DECIMAL_DIGITS")).isEqualTo("0");
+        assertThat(rs.next()).isFalse();
+    }
+
+    @Test
     public void getColumnsIncludingGenerated() throws SQLException {
         stat.executeUpdate("create table gh_724 (i integer,j integer generated always as (i))");
 

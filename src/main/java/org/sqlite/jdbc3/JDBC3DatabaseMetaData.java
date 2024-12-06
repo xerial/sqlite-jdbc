@@ -1057,10 +1057,10 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                                 }
                                 // try to parse the values
                                 try {
-                                    int iInteger = Integer.parseUnsignedInt(sInteger);
+                                    int iInteger = Integer.parseUnsignedInt(sInteger.trim());
                                     // parse decimals?
                                     if (sDecimal != null) {
-                                        iDecimalDigits = Integer.parseUnsignedInt(sDecimal);
+                                        iDecimalDigits = Integer.parseUnsignedInt(sDecimal.trim());
                                         // columns size equals sum of integer and decimal part
                                         // of dimension
                                         iColumnSize = iInteger + iDecimalDigits;
