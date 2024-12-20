@@ -54,6 +54,7 @@ extern "C" {
 
 #ifndef JNI_TYPES_ALREADY_DEFINED_IN_JNI_MD_H
 
+
 typedef unsigned char   jboolean;
 typedef unsigned short  jchar;
 typedef short           jshort;
