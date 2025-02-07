@@ -12,7 +12,7 @@ jobs:
     outputs:
       upstream_version: ${{ steps.add-upstream-and-update.outputs.upstream_version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GH_TOKEN }}
@@ -157,7 +157,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build matrix from Makefile
         id: set-matrix
@@ -178,7 +178,7 @@ jobs:
     strategy:
       matrix: ${{fromJson(needs.matrix.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Delete existing libs so we only upload the generated one into the artifact
       - name: Delete existing native libs
@@ -188,9 +188,9 @@ jobs:
         env:
           OCI_EXE: docker
       - name: Upload native libraries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: native-libs
+          name: native-libs-${{ matrix.target }}
           path: src/main/resources/org/sqlite/native/
 
   test:
@@ -209,19 +209,20 @@ jobs:
           java-version: '17'
           java-package: jdk
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - run: git pull --rebase
 
       - name: Download native libraries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: native-libs
+          pattern: native-libs-*
+          merge-multiple: true
           path: src/main/resources/org/sqlite/native/
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: austinarbor/sqlite-jdbc-decimal-test
           path: sqlite-jdbc-decimal-test
@@ -234,18 +235,18 @@ jobs:
           cp "target/sqlite-jdbc-${{ needs.update-from-upstream.outputs.upstream_version }}.jar" sqlite-jdbc-decimal-test/libs/
 
       - name: run tests
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
         with:
-          arguments: test
-          build-root-directory: sqlite-jdbc-decimal-test
           cache-read-only: ${{ github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/heads/releases/') }}
+      - run: ./gradlew test
+        working-directory: sqlite-jdbc-decimal-test
 
   push:
     name: Push new native libraries to branch
     runs-on: ubuntu-latest
     needs: [ test ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
           fetch-depth: 0
@@ -253,9 +254,10 @@ jobs:
       - run: git pull --rebase
 
       - name: Download native libraries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: native-libs
+          pattern: native-libs-*
+          merge-multiple: true
           path: src/main/resources/org/sqlite/native/
 
       - run: git status
@@ -273,7 +275,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ update-from-upstream, push ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Open PR
         run: |
