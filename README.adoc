@@ -1,5 +1,5 @@
 = SQLite JDBC Driver
-:project-version: 3.48.0.0
+:project-version: 3.49.0.0
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
