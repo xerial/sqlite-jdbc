@@ -705,9 +705,13 @@ public class FastDatePrinter implements DatePrinter, Serializable {
 
         /** {@inheritDoc} */
         public final void appendTo(final StringBuffer buffer, final int value) {
-            if (value < 10) {
+            // Declare constants for upper bounds
+            final int SINGLE_DIGIT_UPPER_BOUND = 10;  // Upper limit for single-digit numbers
+            final int DOUBLE_DIGIT_UPPER_BOUND = 100; // Upper limit for double-digit numbers
+
+            if (value < SINGLE_DIGIT_UPPER_BOUND) {
                 buffer.append((char) (value + '0'));
-            } else if (value < 100) {
+            } else if (value < DOUBLE_DIGIT_UPPER_BOUND) {
                 appendDigits(buffer, value);
             } else {
                 buffer.append(value);
