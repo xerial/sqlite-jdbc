@@ -25,6 +25,7 @@ import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CorePreparedStatement;
 import org.sqlite.core.DB;
+import org.sqlite.date.DateFormatUtils;
 
 public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
@@ -345,7 +346,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         if (value == null) {
             batch(pos, null);
         } else if (value instanceof java.util.Date) {
-            setDateByMilliseconds(pos, ((java.util.Date) value).getTime(), Calendar.getInstance());
+            DateFormatUtils.setDateByMilliseconds(pos, ((java.util.Date) value).getTime(), Calendar.getInstance(),this);
         } else if (value instanceof Long) {
             batch(pos, value);
         } else if (value instanceof Integer) {
@@ -417,7 +418,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         if (x == null) {
             setObject(pos, null);
         } else {
-            setDateByMilliseconds(pos, x.getTime(), cal);
+            DateFormatUtils.setDateByMilliseconds(pos, x.getTime(), cal,this);
         }
     }
 
@@ -431,7 +432,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         if (x == null) {
             setObject(pos, null);
         } else {
-            setDateByMilliseconds(pos, x.getTime(), cal);
+            DateFormatUtils.setDateByMilliseconds(pos, x.getTime(), cal,this);
         }
     }
 
@@ -445,7 +446,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         if (x == null) {
             setObject(pos, null);
         } else {
-            setDateByMilliseconds(pos, x.getTime(), cal);
+            DateFormatUtils.setDateByMilliseconds(pos, x.getTime(), cal,this);
         }
     }
 

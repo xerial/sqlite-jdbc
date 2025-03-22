@@ -16,13 +16,9 @@
 
 package org.sqlite.core;
 
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
-import org.sqlite.SQLiteConnectionConfig;
-import org.sqlite.date.FastDateFormat;
 import org.sqlite.jdbc3.JDBC3Connection;
 import org.sqlite.jdbc4.JDBC4Statement;
 
@@ -97,40 +93,11 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
      * @param value
      * @throws SQLException
      */
-    protected void batch(int pos, Object value) throws SQLException {
+    public void batch(int pos, Object value) throws SQLException {
         checkOpen();
         if (batch == null) {
             batch = new Object[paramCount];
         }
         batch[batchPos + pos - 1] = value;
     }
-
-    /** Store the date in the user's preferred format (text, int, or real) */
-    protected void setDateByMilliseconds(int pos, Long value, Calendar calendar)
-            throws SQLException {
-
-        // Constants for magic numbers
-        final double MILLISECONDS_IN_A_DAY = 86400000.0;
-        final double JULIAN_DATE_OFFSET = 2440587.5;
-
-        SQLiteConnectionConfig config = conn.getConnectionConfig();
-        switch (config.getDateClass()) {
-            case TEXT:
-                batch(
-                        pos,
-                        FastDateFormat.getInstance(
-                                        config.getDateStringFormat(), calendar.getTimeZone())
-                                .format(new Date(value)));
-                break;
-
-            case REAL:
-                // long to Julian date using the defined constants
-                batch(pos, new Double((value / MILLISECONDS_IN_A_DAY) + JULIAN_DATE_OFFSET));
-                break;
-
-            default: // INTEGER:
-                batch(pos, new Long(value / config.getDateMultiplier()));
-        }
-    }
-
 }

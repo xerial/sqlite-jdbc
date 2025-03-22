@@ -16,6 +16,10 @@
  */
 package org.sqlite.date;
 
+import org.sqlite.SQLiteConnectionConfig;
+import org.sqlite.core.CorePreparedStatement;
+
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -308,5 +312,33 @@ public class DateFormatUtils {
             final Locale locale) {
         final FastDateFormat df = FastDateFormat.getInstance(pattern, timeZone, locale);
         return df.format(calendar);
+    }
+
+    /** Store the date in the user's preferred format (text, int, or real) */
+    public static void setDateByMilliseconds(int pos, Long value, Calendar calendar, CorePreparedStatement stmt)
+            throws SQLException {
+
+        // Constants for magic numbers
+        final double MILLISECONDS_IN_A_DAY = 86400000.0;
+        final double JULIAN_DATE_OFFSET = 2440587.5;
+
+        SQLiteConnectionConfig config = stmt.conn.getConnectionConfig();
+        switch (config.getDateClass()) {
+            case TEXT:
+                stmt.batch(
+                        pos,
+                        FastDateFormat.getInstance(
+                                        config.getDateStringFormat(), calendar.getTimeZone())
+                                .format(new java.sql.Date(value)));
+                break;
+
+            case REAL:
+                // long to Julian date using the defined constants
+               stmt.batch(pos, new Double((value / MILLISECONDS_IN_A_DAY) + JULIAN_DATE_OFFSET));
+                break;
+
+            default: // INTEGER:
+               stmt.batch(pos, new Long(value / config.getDateMultiplier()));
+        }
     }
 }
