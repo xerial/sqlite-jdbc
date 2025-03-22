@@ -14,6 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.sqlite.core.DB;
 
+import static org.sqlite.util.PatternConstants.BACKUP_CMD;
+import static org.sqlite.util.PatternConstants.RESTORE_CMD;
+
 /**
  * parsing SQLite specific extension of SQL command
  *
@@ -73,11 +76,6 @@ public class ExtendedCommand {
             this.destFile = destFile;
         }
 
-        private static Pattern backupCmd =
-                Pattern.compile(
-                        "backup(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+to\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)",
-                        Pattern.CASE_INSENSITIVE);
-
         /**
          * Parses SQLite database backup command and creates a BackupCommand object.
          *
@@ -87,7 +85,7 @@ public class ExtendedCommand {
          */
         public static BackupCommand parse(String sql) throws SQLException {
             if (sql != null) {
-                Matcher m = backupCmd.matcher(sql);
+                Matcher m = BACKUP_CMD.matcher(sql);
                 if (m.matches()) {
                     String dbName = removeQuotation(m.group(2));
                     String dest = removeQuotation(m.group(3));
@@ -111,11 +109,7 @@ public class ExtendedCommand {
     public static class RestoreCommand implements SQLExtension {
         public final String targetDB;
         public final String srcFile;
-        private static Pattern restoreCmd =
-                Pattern.compile(
-                        "restore(\\s+(\"[^\"]*\"|'[^\']*\'|\\S+))?\\s+from\\s+(\"[^\"]*\"|'[^\']*\'|\\S+)",
-                        Pattern.CASE_INSENSITIVE);
-
+        
         /**
          * Constructs a RestoreCommand instance that restores the database from a given source file.
          *
@@ -136,7 +130,7 @@ public class ExtendedCommand {
          */
         public static RestoreCommand parse(String sql) throws SQLException {
             if (sql != null) {
-                Matcher m = restoreCmd.matcher(sql);
+                Matcher m = RESTORE_CMD.matcher(sql);
                 if (m.matches()) {
                     String dbName = removeQuotation(m.group(2));
                     String dest = removeQuotation(m.group(3));
