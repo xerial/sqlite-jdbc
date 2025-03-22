@@ -108,6 +108,11 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
     /** Store the date in the user's preferred format (text, int, or real) */
     protected void setDateByMilliseconds(int pos, Long value, Calendar calendar)
             throws SQLException {
+
+        // Constants for magic numbers
+        final double MILLISECONDS_IN_A_DAY = 86400000.0;
+        final double JULIAN_DATE_OFFSET = 2440587.5;
+
         SQLiteConnectionConfig config = conn.getConnectionConfig();
         switch (config.getDateClass()) {
             case TEXT:
@@ -119,12 +124,13 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
                 break;
 
             case REAL:
-                // long to Julian date
-                batch(pos, new Double((value / 86400000.0) + 2440587.5));
+                // long to Julian date using the defined constants
+                batch(pos, new Double((value / MILLISECONDS_IN_A_DAY) + JULIAN_DATE_OFFSET));
                 break;
 
             default: // INTEGER:
                 batch(pos, new Long(value / config.getDateMultiplier()));
         }
     }
+
 }
