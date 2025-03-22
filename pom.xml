@@ -355,6 +355,15 @@
                             <buildArgs>
                                 <!-- required to allow junit-pioneer to compile with strict image heap enabled -->
                                 <arg>--initialize-at-build-time=org.junitpioneer.jupiter.issue.IssueExtensionExecutionListener</arg>
+                                <!--
+                                Issues with JUnit support should be largely resolved by https://github.com/graalvm/native-build-tools/issues/613
+                                These are only necessary for GraalVM for JDK 22+ as this has the Strict Image Heap enabled by default,
+                                and should be removed when aforementioned issue is released in a new buildtools release.
+                                -->
+                                <arg>--initialize-at-build-time=org.junit.jupiter.engine.descriptor.ExclusiveResourceCollector$DefaultExclusiveResourceCollector</arg>
+                                <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceLock</arg>
+                                <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceLockTarget</arg>
+                                <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceAccessMode</arg>
                             </buildArgs>
                         </configuration>
                     </plugin>
