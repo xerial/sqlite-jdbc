@@ -724,7 +724,14 @@ public class SQLiteConfig {
      * @author leo
      */
     private static interface PragmaValue {
-        public String getValue();
+        /**
+         * Returns the value of the pragma.
+         *
+         * @return The value as a string.
+         */
+        default String getValue() {
+            return this instanceof Enum ? ((Enum<?>) this).name() : toString();
+        }
     }
 
     public enum Encoding implements PragmaValue {
@@ -747,6 +754,7 @@ public class SQLiteConfig {
             this.typeName = encoding.getValue();
         }
 
+        @Override
         public String getValue() {
             return typeName;
         }
@@ -763,10 +771,6 @@ public class SQLiteConfig {
         MEMORY,
         WAL,
         OFF;
-
-        public String getValue() {
-            return name();
-        }
     }
 
     /**
@@ -885,10 +889,6 @@ public class SQLiteConfig {
     public enum LockingMode implements PragmaValue {
         NORMAL,
         EXCLUSIVE;
-
-        public String getValue() {
-            return name();
-        }
     }
 
     /**
@@ -977,10 +977,6 @@ public class SQLiteConfig {
         OFF,
         NORMAL,
         FULL;
-
-        public String getValue() {
-            return name();
-        }
     }
 
     /**
@@ -1009,10 +1005,6 @@ public class SQLiteConfig {
         DEFAULT,
         FILE,
         MEMORY;
-
-        public String getValue() {
-            return name();
-        }
     }
 
     /**
@@ -1033,10 +1025,6 @@ public class SQLiteConfig {
         NONE,
         SSE,
         SQLCIPHER;
-
-        public String getValue() {
-            return name();
-        }
     }
 
     /**
@@ -1101,10 +1089,6 @@ public class SQLiteConfig {
         IMMEDIATE,
         EXCLUSIVE;
 
-        public String getValue() {
-            return name();
-        }
-
         public static TransactionMode getMode(String mode) {
             return TransactionMode.valueOf(mode.toUpperCase());
         }
@@ -1141,10 +1125,6 @@ public class SQLiteConfig {
         SECONDS,
         MILLISECONDS;
 
-        public String getValue() {
-            return name();
-        }
-
         public static DatePrecision getPrecision(String precision) {
             return DatePrecision.valueOf(precision.toUpperCase());
         }
@@ -1159,10 +1139,6 @@ public class SQLiteConfig {
         INTEGER,
         TEXT,
         REAL;
-
-        public String getValue() {
-            return name();
-        }
 
         public static DateClass getDateClass(String dateClass) {
             return DateClass.valueOf(dateClass.toUpperCase());
