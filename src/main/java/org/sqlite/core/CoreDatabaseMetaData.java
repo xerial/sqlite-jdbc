@@ -182,20 +182,6 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
         return buf.toString();
     }
 
-    // inner classes
-
-    /** Pattern used to extract column order for an unnamed primary key. */
-    protected static final Pattern PK_UNNAMED_PATTERN =
-            Pattern.compile(
-                    ".*\\sPRIMARY\\s+KEY\\s+\\((.*?,+.*?)\\).*",
-                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    /** Pattern used to extract a named primary key. */
-    protected static final Pattern PK_NAMED_PATTERN =
-            Pattern.compile(
-                    ".*\\sCONSTRAINT\\s+(.*?)\\s+PRIMARY\\s+KEY\\s+\\((.*?)\\).*",
-                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     /** @see java.lang.Object#finalize() */
     protected void finalize() throws Throwable {
         close();

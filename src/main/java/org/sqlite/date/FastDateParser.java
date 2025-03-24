@@ -37,6 +37,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.sqlite.util.PatternConstants.FORMAT_PATTERN;
+
 /**
  * FastDateParser is a fast and thread-safe version of {@link java.text.SimpleDateFormat}.
  *
@@ -151,7 +153,7 @@ public class FastDateParser implements DateParser, Serializable {
         final StringBuilder regex = new StringBuilder();
         final List<Strategy> collector = new ArrayList<Strategy>();
 
-        final Matcher patternMatcher = formatPattern.matcher(pattern);
+        final Matcher patternMatcher = FORMAT_PATTERN.matcher(pattern);
         if (!patternMatcher.lookingAt()) {
             throw new IllegalArgumentException(
                     "Illegal pattern character '"
@@ -479,11 +481,6 @@ public class FastDateParser implements DateParser, Serializable {
          */
         abstract boolean addRegex(FastDateParser parser, StringBuilder regex);
     }
-
-    /** A <code>Pattern</code> to parse the user supplied SimpleDateFormat pattern */
-    private static final Pattern formatPattern =
-            Pattern.compile(
-                    "D+|E+|F+|G+|H+|K+|M+|S+|W+|X+|Z+|a+|d+|h+|k+|m+|s+|w+|y+|z+|''|'[^']++(''[^']*+)*+'|[^'A-Za-z]++");
 
     /**
      * Obtain a Strategy given a field from a SimpleDateFormat pattern

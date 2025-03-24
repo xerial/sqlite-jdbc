@@ -30,6 +30,8 @@ import org.sqlite.util.LoggerFactory;
 import org.sqlite.util.QueryUtils;
 import org.sqlite.util.StringUtils;
 
+import static org.sqlite.util.PatternConstants.*;
+
 public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
     private static String driverName;
@@ -840,11 +842,6 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
         return getColumnPrivileges.executeQuery();
     }
-
-    // Column type patterns
-    protected static final Pattern TYPE_INTEGER = Pattern.compile(".*(INT|BOOL).*");
-    protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
-    protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
 
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,
@@ -1951,19 +1948,6 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         throw new SQLFeatureNotSupportedException("Not yet implemented by SQLite JDBC driver");
     }
 
-    // inner classes
-
-    /** Pattern used to extract column order for an unnamed primary key. */
-    protected static final Pattern PK_UNNAMED_PATTERN =
-            Pattern.compile(
-                    ".*PRIMARY\\s+KEY\\s*\\((.*?)\\).*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    /** Pattern used to extract a named primary key. */
-    protected static final Pattern PK_NAMED_PATTERN =
-            Pattern.compile(
-                    ".*CONSTRAINT\\s*(.*?)\\s*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
-                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     /** Parses the sqlite_schema table for a table's primary key */
     class PrimaryKeyFinder {
         /** The table name. */
@@ -2044,12 +2028,6 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
     }
 
     class ImportedKeyFinder {
-
-        /** Pattern used to extract a named primary key. */
-        private final Pattern FK_NAMED_PATTERN =
-                Pattern.compile(
-                        "CONSTRAINT\\s*\"?([A-Za-z_][A-Za-z\\d_]*)?\"?\\s*FOREIGN\\s+KEY\\s*\\((.*?)\\)",
-                        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
         private final String fkTableName;
         private final List<ForeignKey> fkList = new ArrayList<>();

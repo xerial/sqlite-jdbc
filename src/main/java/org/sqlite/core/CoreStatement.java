@@ -24,6 +24,8 @@ import org.sqlite.SQLiteConnectionConfig;
 import org.sqlite.jdbc3.JDBC3Connection;
 import org.sqlite.jdbc4.JDBC4ResultSet;
 
+import static org.sqlite.util.PatternConstants.INSERT_PATTERN;
+
 public abstract class CoreStatement implements Codes {
     public final SQLiteConnection conn;
     protected final CoreResultSet rs;
@@ -37,13 +39,6 @@ public abstract class CoreStatement implements Codes {
 
     private Statement generatedKeysStat = null;
     private ResultSet generatedKeysRs = null;
-
-    // pattern for matching insert statements of the general format starting with INSERT or REPLACE.
-    // CTEs used prior to the insert or replace keyword are also be permitted.
-    private static final Pattern INSERT_PATTERN =
-            Pattern.compile(
-                    "^\\s*(?:with\\s+.+\\(.+?\\))*\\s*(?:insert|replace)\\s*",
-                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     protected CoreStatement(SQLiteConnection c) {
         conn = c;

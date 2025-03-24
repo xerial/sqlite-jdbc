@@ -25,6 +25,8 @@ import org.sqlite.core.CoreStatement;
 import org.sqlite.core.DB;
 import org.sqlite.date.FastDateFormat;
 
+import static org.sqlite.util.PatternConstants.*;
+
 public abstract class JDBC3ResultSet extends CoreResultSet {
     // ResultSet Functions //////////////////////////////////////////
 
@@ -551,17 +553,6 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     // ResultSetMetaData Functions //////////////////////////////////
 
-    /** Pattern used to extract the column type name from table column definition. */
-    protected static final Pattern COLUMN_TYPENAME = Pattern.compile("([^\\(]*)");
-
-    /** Pattern used to extract the column type name from a cast(col as type) */
-    protected static final Pattern COLUMN_TYPECAST =
-            Pattern.compile("cast\\(.*?\\s+as\\s+(.*?)\\s*\\)");
-
-    /**
-     * Pattern used to extract the precision and scale from column meta returned by the JDBC driver.
-     */
-    protected static final Pattern COLUMN_PRECISION = Pattern.compile(".*?\\((.*?)\\)");
 
     // we do not need to check the RS is open, only that colsMeta
     // is not null, done with checkCol(int).
