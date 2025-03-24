@@ -18,6 +18,7 @@ import java.sql.Types;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.sqlite.core.CoreResultSet;
@@ -623,37 +624,51 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         String typeName = getColumnTypeName(col);
         int valueType = safeGetColumnType(checkCol(col));
 
+        // Define sets for type names
+        Set<String> booleanTypes = Set.of("BOOLEAN");
+        Set<String> tinyIntTypes = Set.of("TINYINT");
+        Set<String> smallIntTypes = Set.of("SMALLINT", "INT2");
+        Set<String> bigIntTypes = Set.of("BIGINT", "INT8", "UNSIGNED BIG INT");
+        Set<String> dateTypes = Set.of("DATE", "DATETIME");
+        Set<String> timestampTypes = Set.of("TIMESTAMP");
+        Set<String> integerTypes = Set.of("INT", "INTEGER", "MEDIUMINT");
+        Set<String> decimalTypes = Set.of("DECIMAL");
+        Set<String> doubleTypes = Set.of("DOUBLE", "DOUBLE PRECISION");
+        Set<String> numericTypes = Set.of("NUMERIC");
+        Set<String> realTypes = Set.of("REAL");
+        Set<String> floatTypes = Set.of("FLOAT");
+        Set<String> charTypes = Set.of("CHARACTER", "NCHAR", "NATIVE CHARACTER", "CHAR");
+        Set<String> clobTypes = Set.of("CLOB");
+        Set<String> varcharTypes = Set.of("VARCHAR", "VARYING CHARACTER", "NVARCHAR", "TEXT");
+        Set<String> binaryTypes = Set.of("BINARY");
+        Set<String> blobTypes = Set.of("BLOB");
+
         if (valueType == SQLITE_INTEGER || valueType == SQLITE_NULL) {
-            if ("BOOLEAN".equals(typeName)) {
+            if (booleanTypes.contains(typeName)) {
                 return Types.BOOLEAN;
             }
 
-            if ("TINYINT".equals(typeName)) {
+            if (tinyIntTypes.contains(typeName)) {
                 return Types.TINYINT;
             }
 
-            if ("SMALLINT".equals(typeName) || "INT2".equals(typeName)) {
+            if (smallIntTypes.contains(typeName)) {
                 return Types.SMALLINT;
             }
 
-            if ("BIGINT".equals(typeName)
-                    || "INT8".equals(typeName)
-                    || "UNSIGNED BIG INT".equals(typeName)) {
+            if (bigIntTypes.contains(typeName)) {
                 return Types.BIGINT;
             }
 
-            if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
+            if (dateTypes.contains(typeName)) {
                 return Types.DATE;
             }
 
-            if ("TIMESTAMP".equals(typeName)) {
+            if (timestampTypes.contains(typeName)) {
                 return Types.TIMESTAMP;
             }
 
-            if (valueType == SQLITE_INTEGER
-                    || "INT".equals(typeName)
-                    || "INTEGER".equals(typeName)
-                    || "MEDIUMINT".equals(typeName)) {
+            if (valueType == SQLITE_INTEGER || integerTypes.contains(typeName)) {
                 long val = getLong(col);
                 if (val > Integer.MAX_VALUE || val < Integer.MIN_VALUE) {
                     return Types.BIGINT;
@@ -664,69 +679,61 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         }
 
         if (valueType == SQLITE_FLOAT || valueType == SQLITE_NULL) {
-            if ("DECIMAL".equals(typeName)) {
+            if (decimalTypes.contains(typeName)) {
                 return Types.DECIMAL;
             }
 
-            if ("DOUBLE".equals(typeName) || "DOUBLE PRECISION".equals(typeName)) {
+            if (doubleTypes.contains(typeName)) {
                 return Types.DOUBLE;
             }
 
-            if ("NUMERIC".equals(typeName)) {
+            if (numericTypes.contains(typeName)) {
                 return Types.NUMERIC;
             }
 
-            if ("REAL".equals(typeName)) {
+            if (realTypes.contains(typeName)) {
                 return Types.REAL;
             }
 
-            if (valueType == SQLITE_FLOAT || "FLOAT".equals(typeName)) {
+            if (valueType == SQLITE_FLOAT || floatTypes.contains(typeName)) {
                 return Types.FLOAT;
             }
         }
 
         if (valueType == SQLITE_TEXT || valueType == SQLITE_NULL) {
-            if ("CHARACTER".equals(typeName)
-                    || "NCHAR".equals(typeName)
-                    || "NATIVE CHARACTER".equals(typeName)
-                    || "CHAR".equals(typeName)) {
+            if (charTypes.contains(typeName)) {
                 return Types.CHAR;
             }
 
-            if ("CLOB".equals(typeName)) {
+            if (clobTypes.contains(typeName)) {
                 return Types.CLOB;
             }
 
-            if ("DATE".equals(typeName) || "DATETIME".equals(typeName)) {
+            if (dateTypes.contains(typeName)) {
                 return Types.DATE;
             }
 
-            if ("TIMESTAMP".equals(typeName)) {
+            if (timestampTypes.contains(typeName)) {
                 return Types.TIMESTAMP;
             }
 
-            if (valueType == SQLITE_TEXT
-                    || "VARCHAR".equals(typeName)
-                    || "VARYING CHARACTER".equals(typeName)
-                    || "NVARCHAR".equals(typeName)
-                    || "TEXT".equals(typeName)) {
+            if (valueType == SQLITE_TEXT || varcharTypes.contains(typeName)) {
                 return Types.VARCHAR;
             }
         }
 
         if (valueType == SQLITE_BLOB || valueType == SQLITE_NULL) {
-            if ("BINARY".equals(typeName)) {
+            if (binaryTypes.contains(typeName)) {
                 return Types.BINARY;
             }
 
-            if (valueType == SQLITE_BLOB || "BLOB".equals(typeName)) {
+            if (valueType == SQLITE_BLOB || blobTypes.contains(typeName)) {
                 return Types.BLOB;
             }
         }
 
         return Types.NUMERIC;
     }
-
     /**
      * @return The data type from either the 'create table' statement, or CAST(expr AS TYPE)
      *     otherwise sqlite3_value_type.
