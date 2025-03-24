@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.11.4</junit.version>
+        <junit.version>5.12.1</junit.version>
         <surefire.version>3.5.2</surefire.version>
         <archunit.version>1.4.0</archunit.version>
         <graalvm.version>24.1.2</graalvm.version>
@@ -355,6 +355,15 @@
                             <buildArgs>
                                 <!-- required to allow junit-pioneer to compile with strict image heap enabled -->
                                 <arg>--initialize-at-build-time=org.junitpioneer.jupiter.issue.IssueExtensionExecutionListener</arg>
+                                <!--
+                                Issues with JUnit support should be largely resolved by https://github.com/graalvm/native-build-tools/issues/613
+                                These are only necessary for GraalVM for JDK 22+ as this has the Strict Image Heap enabled by default,
+                                and should be removed when aforementioned issue is released in a new buildtools release.
+                                -->
+                                <arg>--initialize-at-build-time=org.junit.jupiter.engine.descriptor.ExclusiveResourceCollector$DefaultExclusiveResourceCollector</arg>
+                                <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceLock</arg>
+                                <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceLockTarget</arg>
+                                <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceAccessMode</arg>
                             </buildArgs>
                         </configuration>
                     </plugin>
@@ -431,7 +440,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -476,4 +484,15 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

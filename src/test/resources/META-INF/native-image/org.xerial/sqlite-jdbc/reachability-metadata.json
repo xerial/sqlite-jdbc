@@ -1,0 +1,35 @@
+{
+  "comment": "New reachability metadata format introduced in GraalVM for JDK 23, this merges the other *-config.json files into one: https://www.graalvm.org/latest/reference-manual/native-image/metadata/",
+  "resources": [
+    {
+      "glob": "org/sqlite/*.jar"
+    },
+    {
+      "glob": "org/sqlite/*.db"
+    },
+    {
+      "module": "java.sql.rowset",
+      "glob": "javax/sql/rowset/rowset.properties"
+    }
+  ],
+  "bundles": [
+    {
+      "name": "com.sun.rowset.RowSetResourceBundle"
+    }
+  ],
+  "reflection": [
+    {
+      "type": "com.sun.rowset.providers.RIOptimisticProvider",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.sql.Types",
+      "allPublicFields": true
+    }
+  ]
+}
