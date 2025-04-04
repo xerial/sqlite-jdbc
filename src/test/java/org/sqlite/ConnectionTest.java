@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -13,6 +16,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteConfig.JournalMode;
@@ -408,5 +414,32 @@ public class ConnectionTest {
 
         stat.close();
         conn.close();
+    }
+
+    @SuppressWarnings("resource")
+    @Test
+    public void openNonExistingFileNoCreate() {
+        Path nonExisting = Paths.get("non_existing.db").toAbsolutePath();
+        Assertions.assertFalse(Files.exists(nonExisting));
+        SQLiteConfig cfg = new SQLiteConfig();
+        cfg.resetOpenMode(SQLiteOpenMode.CREATE);
+        SQLiteException ex = Assertions.assertThrows(SQLiteException.class, () -> cfg.createConnection("jdbc:sqlite:" + nonExisting));
+        Assertions.assertEquals(SQLiteErrorCode.SQLITE_CANTOPEN, ex.getResultCode());
+        Assertions.assertFalse(Files.exists(nonExisting));
+    }
+
+    @SuppressWarnings("resource")
+    @Test
+    public void openNonExistingFileInReadOnlyDirectory(@TempDir Path tmpDir) {
+        Assertions.assertTrue(tmpDir.toFile().setReadOnly());
+        Assertions.assertTrue(Files.exists(tmpDir));
+        Path nonExisting = tmpDir.resolve("non_existing.db").toAbsolutePath();
+        Assertions.assertThrows(AccessDeniedException.class, () -> Files.createFile(nonExisting));
+        Assertions.assertFalse(Files.exists(nonExisting));
+        SQLiteConfig cfg = new SQLiteConfig();
+        SQLiteException ex = Assertions.assertThrows(SQLiteException.class, () -> cfg.createConnection("jdbc:sqlite:" + nonExisting));
+        // It would be nice, if the native error code were more specific on why the file can't be opened, but this is what we get:
+        Assertions.assertEquals(SQLiteErrorCode.SQLITE_CANTOPEN, ex.getResultCode());
+        Assertions.assertFalse(Files.exists(nonExisting));
     }
 }
