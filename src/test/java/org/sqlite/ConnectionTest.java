@@ -416,7 +416,6 @@ public class ConnectionTest {
         conn.close();
     }
 
-    @SuppressWarnings("resource")
     @Test
     public void openNonExistingFileNoCreate() {
         Path nonExisting = Paths.get("non_existing.db").toAbsolutePath();
@@ -424,7 +423,11 @@ public class ConnectionTest {
         SQLiteConfig cfg = new SQLiteConfig();
         cfg.resetOpenMode(SQLiteOpenMode.CREATE);
         assertThatExceptionOfType(SQLiteException.class)
-                .isThrownBy(() -> cfg.createConnection("jdbc:sqlite:" + nonExisting))
+                .isThrownBy(
+                        () -> {
+                            @SuppressWarnings({"resource", "unused"})
+                            Connection _c = cfg.createConnection("jdbc:sqlite:" + nonExisting);
+                        })
                 .satisfies(
                         e ->
                                 assertThat(e.getResultCode())
@@ -432,7 +435,6 @@ public class ConnectionTest {
         assertThat(Files.exists(nonExisting)).isFalse();
     }
 
-    @SuppressWarnings("resource")
     @DisabledOnOs(OS.WINDOWS) // File.setReadOnly doesn't seem to work here
     @Test
     public void openNonExistingFileInReadOnlyDirectory(@TempDir Path tmpDir) {
@@ -444,7 +446,11 @@ public class ConnectionTest {
         assertThat(Files.exists(nonExisting)).isFalse();
         SQLiteConfig cfg = new SQLiteConfig();
         assertThatExceptionOfType(SQLiteException.class)
-                .isThrownBy(() -> cfg.createConnection("jdbc:sqlite:" + nonExisting))
+                .isThrownBy(
+                        () -> {
+                            @SuppressWarnings({"resource", "unused"})
+                            Connection _c = cfg.createConnection("jdbc:sqlite:" + nonExisting);
+                        })
                 .satisfies(
                         e ->
                                 // It would be nice, if the native error code were more specific on
