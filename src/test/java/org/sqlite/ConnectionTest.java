@@ -17,13 +17,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteConfig.JournalMode;
 import org.sqlite.SQLiteConfig.Pragma;
 import org.sqlite.SQLiteConfig.SynchronousMode;
-import org.sqlite.util.OSInfo;
 
 /**
  * These tests check whether access to files is working correctly and some Connection.close() cases.
@@ -433,12 +433,9 @@ public class ConnectionTest {
     }
 
     @SuppressWarnings("resource")
+    @DisabledOnOs(OS.WINDOWS) // File.setReadOnly doesn't seem to work here
     @Test
     public void openNonExistingFileInReadOnlyDirectory(@TempDir Path tmpDir) {
-        // skip test on windows as there marking a folder as readonly doesn't seem to work with pure
-        // java means
-        Assumptions.assumeFalse(OSInfo.getOSName().equals("Windows"));
-
         assertThat(tmpDir.toFile().setReadOnly()).isTrue();
         assertThat(Files.exists(tmpDir)).isTrue();
         Path nonExisting = tmpDir.resolve("non_existing.db").toAbsolutePath();
