@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -14,6 +18,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteConfig.JournalMode;
 import org.sqlite.SQLiteConfig.Pragma;
@@ -408,5 +414,50 @@ public class ConnectionTest {
 
         stat.close();
         conn.close();
+    }
+
+    @Test
+    public void openNonExistingFileNoCreate() {
+        Path nonExisting = Paths.get("non_existing.db").toAbsolutePath();
+        assertThat(Files.exists(nonExisting)).isFalse();
+        SQLiteConfig cfg = new SQLiteConfig();
+        cfg.resetOpenMode(SQLiteOpenMode.CREATE);
+        assertThatExceptionOfType(SQLiteException.class)
+                .isThrownBy(
+                        () -> {
+                            @SuppressWarnings({"resource", "unused"})
+                            Connection _c = cfg.createConnection("jdbc:sqlite:" + nonExisting);
+                        })
+                .satisfies(
+                        e ->
+                                assertThat(e.getResultCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_CANTOPEN));
+        assertThat(Files.exists(nonExisting)).isFalse();
+    }
+
+    @DisabledOnOs(OS.WINDOWS) // File.setReadOnly doesn't seem to work here
+    @Test
+    public void openNonExistingFileInReadOnlyDirectory(@TempDir Path tmpDir) {
+        assertThat(tmpDir.toFile().setReadOnly()).isTrue();
+        assertThat(Files.exists(tmpDir)).isTrue();
+        Path nonExisting = tmpDir.resolve("non_existing.db").toAbsolutePath();
+        assertThatThrownBy(() -> Files.createFile(nonExisting))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThat(Files.exists(nonExisting)).isFalse();
+        SQLiteConfig cfg = new SQLiteConfig();
+        assertThatExceptionOfType(SQLiteException.class)
+                .isThrownBy(
+                        () -> {
+                            @SuppressWarnings({"resource", "unused"})
+                            Connection _c = cfg.createConnection("jdbc:sqlite:" + nonExisting);
+                        })
+                .satisfies(
+                        e ->
+                                // It would be nice, if the native error code were more specific on
+                                // why the file can't be
+                                // opened, but this is what we get:
+                                assertThat(e.getResultCode())
+                                        .isEqualTo(SQLiteErrorCode.SQLITE_CANTOPEN));
+        assertThat(Files.exists(nonExisting)).isFalse();
     }
 }
