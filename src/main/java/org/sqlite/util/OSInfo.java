@@ -24,6 +24,7 @@
 // --------------------------------------
 package org.sqlite.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -114,7 +115,21 @@ public class OSInfo {
     }
 
     public static boolean isAndroid() {
-        return isAndroidRuntime() || isAndroidTermux();
+        return isAndroidRuntime() || isAndroidTermux() || isRunningAndroid();
+    }
+
+    private static boolean isRunningAndroid() {
+        // This file is guaranteed to be present on every android version since 1.6 (Donut, API 4),
+        // see https://developer.android.com/ndk/guides/stable_apis#graphics
+        // We don't use libc/libm/libdl because that has changed what directory its pointing to and
+        // OEMs implement the symlink that allows backwards compatibility
+        // for apps that use the old path differently, which may cause this check to fail because
+        // common undocumented behaviour. See
+        // https://developer.android.com/about/versions/10/behavior-changes-all#bionic
+        File androidGLES = new File("/system/lib/libGLESv1_CM");
+        File android64GLES = new File("/system/lib64/libGLESv1_CM");
+
+        return android64GLES.exists() || androidGLES.exists();
     }
 
     public static boolean isAndroidRuntime() {
