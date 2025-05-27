@@ -133,8 +133,8 @@ public class OSInfoTest {
     }
 
     @Nested
-    @SetSystemProperty(key = "java.runtime.name", value = "Java for Android")
-    @SetSystemProperty(key = "os.name", value = "Linux for Android")
+    @SetSystemProperty(key = "java.runtime.name", value = "Android Runtime")
+    @SetSystemProperty(key = "os.name", value = "Linux")
     class AndroidRuntime {
 
         @Test
