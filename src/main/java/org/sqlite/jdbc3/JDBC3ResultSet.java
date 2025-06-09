@@ -573,7 +573,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
 
     /** @see java.sql.ResultSetMetaData#getCatalogName(int) */
     public String getCatalogName(int col) throws SQLException {
-        return safeGetColumnTableName(col);
+        return "";
     }
 
     /** @see java.sql.ResultSetMetaData#getColumnClassName(int) */

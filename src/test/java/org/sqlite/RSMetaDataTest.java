@@ -43,7 +43,12 @@ public class RSMetaDataTest {
 
     @Test
     public void catalogName() throws SQLException {
-        assertThat(meta.getCatalogName(1)).isEqualTo("People");
+        assertThat(meta.getCatalogName(1)).isEqualTo("");
+    }
+
+    @Test
+    public void schemaName() throws SQLException {
+        assertThat(meta.getSchemaName(1)).isEqualTo("");
     }
 
     @Test
@@ -196,8 +201,8 @@ public class RSMetaDataTest {
     }
 
     @Test
-    public void badCatalogIndex() {
-        assertThatExceptionOfType(SQLException.class).isThrownBy(() -> meta.getCatalogName(4));
+    public void badTableIndex() {
+        assertThatExceptionOfType(SQLException.class).isThrownBy(() -> meta.getTableName(5));
     }
 
     @Test
