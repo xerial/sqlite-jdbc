@@ -182,7 +182,7 @@ jobs:
 
   release:
     name: Deploy
-#    needs: [ lint, test, test_multiarch, test_external_amalgamation, test_graalvm ]
+    needs: [ lint, test, test_multiarch, test_external_amalgamation, test_graalvm ]
     if: github.repository_owner == 'xerial' && github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
