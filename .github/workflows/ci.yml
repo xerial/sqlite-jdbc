@@ -202,7 +202,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           java-package: jdk
-          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-id: central # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_CENTRAL_USERNAME # env variable for username in deploy (1)
           server-password: MAVEN_CENTRAL_PASSWORD # env variable for token in deploy (2)
       - name: Get Project Version
