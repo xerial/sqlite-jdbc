@@ -264,13 +264,6 @@
         <url>https://github.com/xerial/sqlite-jdbc</url>
     </scm>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>central</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <profiles>
         <profile>
             <id>release</id>
