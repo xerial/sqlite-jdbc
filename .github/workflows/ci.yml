@@ -31,154 +31,154 @@ on:
       - '.github/workflows/*.yml'
 
 jobs:
-#  lint:
-#    name: Check code formatting
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: actions/setup-java@v4
-#        with:
-#          distribution: 'temurin'
-#          java-version: 11
-#          java-package: jdk
-#          cache: 'maven'
-#      - name: spotless:check
-#        run: mvn --batch-mode --no-transfer-progress spotless:check
-#
-#  test:
-#    name: test ${{ matrix.os }} jdk${{ matrix.java }}
-#    strategy:
-#      matrix:
-#        os: [ ubuntu-latest ]
-#        java: [ 11, 17, 20 ]
-#        include:
-#          - os: windows-latest
-#            java: 20
-#          - os: macos-latest
-#            java: 20
-#    runs-on: ${{ matrix.os }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: actions/setup-java@v4
-#        with:
-#          distribution: 'temurin'
-#          java-version: ${{ matrix.java }}
-#          java-package: jdk
-#          cache: 'maven'
-#      - name: Test
-#        run: mvn --batch-mode --no-transfer-progress test
-#
-#  test_graalvm:
-#    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image - ${{ matrix.profiles }}
-#    strategy:
-#      matrix:
-#        os: [ ubuntu-latest, windows-latest, macos-latest ]
-#        java: [ '17', '21', '24' ]
-#        profiles: ['native', 'native,native-exported']
-#    runs-on: ${{ matrix.os }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: graalvm/setup-graalvm@v1
-#        with:
-#          java-version: ${{ matrix.java }}
-#          distribution: 'graalvm-community'
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
-#      - name: Test
-#        run: mvn --batch-mode --no-transfer-progress -P ${{ matrix.profiles }} integration-test
-#
-#  test_multiarch:
-#    name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
-#    strategy:
-#      matrix:
-#        include:
-#          # ARM v7
-#          - arch: armv7
-#            distro: ubuntu_latest
-#            java: 21
-#          # ARM 64
-#          - arch: aarch64
-#            distro: ubuntu_latest
-#            java: 21
-#          - arch: aarch64
-#            distro: alpine_latest
-#            java: 21
-#          # PPC64
-#          - arch: ppc64le
-#            distro: ubuntu_latest
-#            java: 21
-#          # RISC-V 64
-#          - arch: riscv64
-#            distro: ubuntu_latest
-#            java: 21
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: uraimo/run-on-arch-action@v3
-#        name: Test
-#        with:
-#          arch: ${{ matrix.arch }}
-#          distro: ${{ matrix.distro }}
-#
-#          # Not required, but speeds up builds
-#          githubToken: ${{ github.token }}
-#
-#          # Install some dependencies in the container. This speeds up builds if
-#          # you are also using githubToken. Any dependencies installed here will
-#          # be part of the container image that gets cached, so subsequent
-#          # builds don't have to re-install them. The image layer is cached
-#          # publicly in your project's package repository, so it is vital that
-#          # no secrets are present in the container state or logs.
-#          install: |
-#            case "${{ matrix.distro }}" in
-#              ubuntu*|jessie|stretch|buster|bullseye)
-#                apt-get update -q -y
-#                apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
-#                ;;
-#              alpine*)
-#                apk update
-#                apk add maven openjdk${{ matrix.java }}
-#                ;;
-#            esac
-#
-#          # We use the Github Action user, 1001:121, so that maven can access
-#          # the /work directory and create target/classes
-#          dockerRunArgs: |
-#            --volume "${PWD}:/work"
-#            --user 1001:121
-#
-#          env: |
-#            SKIP_TEST_MULTIARCH: true
-#
-#          run: |
-#            echo "Architecture: `uname -a`"
-#            mvn --version
-#            cd /work && mvn -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
-#
-#  # This will test the build process using an external amalgamation, as well as the
-#  # Java tests with that native library, as some functions will not be available (extensions).
-#  # Here we use the sqlite3 package installed by homebrew on Mac, which comes
-#  # with the header file and library.
-#  test_external_amalgamation:
-#    name: test external amalgamation
-#    runs-on: macos-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: actions/setup-java@v4
-#        with:
-#          distribution: 'temurin'
-#          java-version: 20
-#          java-package: jdk
-#          cache: 'maven'
-#      - run: brew install sqlite3
-#      - name: Find SQLite directory
-#        run: |
-#          BREW_SQLITE_PREFIX=`brew --prefix sqlite3`
-#          echo "SQLITE_DIR=$(dirname ${BREW_SQLITE_PREFIX})/$(readlink ${BREW_SQLITE_PREFIX})" | tee -a $GITHUB_ENV
-#      - name: Make native lib
-#        run: |
-#          make native SQLITE_OBJ=${{ env.SQLITE_DIR }}/lib/libsqlite3.dylib SQLITE_HEADER=${{ env.SQLITE_DIR }}/include/sqlite3.h
-#      - name: Test
-#        run: mvn --batch-mode --no-transfer-progress test
+  lint:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 11
+          java-package: jdk
+          cache: 'maven'
+      - name: spotless:check
+        run: mvn --batch-mode --no-transfer-progress spotless:check
+
+  test:
+    name: test ${{ matrix.os }} jdk${{ matrix.java }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        java: [ 11, 17, 20 ]
+        include:
+          - os: windows-latest
+            java: 20
+          - os: macos-latest
+            java: 20
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+          java-package: jdk
+          cache: 'maven'
+      - name: Test
+        run: mvn --batch-mode --no-transfer-progress test
+
+  test_graalvm:
+    name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image - ${{ matrix.profiles }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        java: [ '17', '21', '24' ]
+        profiles: ['native', 'native,native-exported']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'graalvm-community'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test
+        run: mvn --batch-mode --no-transfer-progress -P ${{ matrix.profiles }} integration-test
+
+  test_multiarch:
+    name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
+    strategy:
+      matrix:
+        include:
+          # ARM v7
+          - arch: armv7
+            distro: ubuntu_latest
+            java: 21
+          # ARM 64
+          - arch: aarch64
+            distro: ubuntu_latest
+            java: 21
+          - arch: aarch64
+            distro: alpine_latest
+            java: 21
+          # PPC64
+          - arch: ppc64le
+            distro: ubuntu_latest
+            java: 21
+          # RISC-V 64
+          - arch: riscv64
+            distro: ubuntu_latest
+            java: 21
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: uraimo/run-on-arch-action@v3
+        name: Test
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -q -y
+                apt-get install -q -y maven openjdk-${{ matrix.java }}-jdk
+                ;;
+              alpine*)
+                apk update
+                apk add maven openjdk${{ matrix.java }}
+                ;;
+            esac
+
+          # We use the Github Action user, 1001:121, so that maven can access
+          # the /work directory and create target/classes
+          dockerRunArgs: |
+            --volume "${PWD}:/work"
+            --user 1001:121
+
+          env: |
+            SKIP_TEST_MULTIARCH: true
+
+          run: |
+            echo "Architecture: `uname -a`"
+            mvn --version
+            cd /work && mvn -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
+
+  # This will test the build process using an external amalgamation, as well as the
+  # Java tests with that native library, as some functions will not be available (extensions).
+  # Here we use the sqlite3 package installed by homebrew on Mac, which comes
+  # with the header file and library.
+  test_external_amalgamation:
+    name: test external amalgamation
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 20
+          java-package: jdk
+          cache: 'maven'
+      - run: brew install sqlite3
+      - name: Find SQLite directory
+        run: |
+          BREW_SQLITE_PREFIX=`brew --prefix sqlite3`
+          echo "SQLITE_DIR=$(dirname ${BREW_SQLITE_PREFIX})/$(readlink ${BREW_SQLITE_PREFIX})" | tee -a $GITHUB_ENV
+      - name: Make native lib
+        run: |
+          make native SQLITE_OBJ=${{ env.SQLITE_DIR }}/lib/libsqlite3.dylib SQLITE_HEADER=${{ env.SQLITE_DIR }}/include/sqlite3.h
+      - name: Test
+        run: mvn --batch-mode --no-transfer-progress test
 
   release:
     name: Deploy
