@@ -438,12 +438,12 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
     /** @see java.sql.DatabaseMetaData#supportsAlterTableWithAddColumn() */
     public boolean supportsAlterTableWithAddColumn() {
-        return false;
+        return true;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsAlterTableWithDropColumn() */
     public boolean supportsAlterTableWithDropColumn() {
-        return false;
+        return true;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsANSI92EntryLevelSQL() */
