@@ -126,8 +126,8 @@ public class OSInfo {
         // for apps that use the old path differently, which may cause this check to fail because
         // common undocumented behaviour. See
         // https://developer.android.com/about/versions/10/behavior-changes-all#bionic
-        File androidGLES = new File("/system/lib/libGLESv1_CM");
-        File android64GLES = new File("/system/lib64/libGLESv1_CM");
+        File androidGLES = new File("/system/lib/libGLESv1_CM.so");
+        File android64GLES = new File("/system/lib64/libGLESv1_CM.so");
 
         return android64GLES.exists() || androidGLES.exists();
     }
