@@ -3,7 +3,7 @@
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
-image:https://img.shields.io/maven-central/v/org.xerial/sqlite-jdbc?label=maven%20central&color=dark-green[Maven Central,link=https://search.maven.org/artifact/org.xerial/sqlite-jdbc]
+image:https://img.shields.io/maven-central/v/org.xerial/sqlite-jdbc?label=maven%20central&color=dark-green[Maven Central,link=https://central.sonatype.com/artifact/org.xerial/sqlite-jdbc]
 image:https://javadoc.io/badge2/org.xerial/sqlite-jdbc/javadoc.svg[javadoc,link=https://javadoc.io/doc/org.xerial/sqlite-jdbc]
 image:https://img.shields.io/nexus/s/org.xerial/sqlite-jdbc?color=blue&label=maven%20snapshot&server=https%3A%2F%2Foss.sonatype.org%2F[Sonatype Nexus (Snapshots),link=https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/]
 
@@ -167,7 +167,7 @@ When packaging the resulting app, simply include the library in the distribution
 
 == Download
 
-Download from https://search.maven.org/artifact/org.xerial/sqlite-jdbc[Maven Central] or from the https://github.com/xerial/sqlite-jdbc/releases[releases] page.
+Download from https://central.sonatype.com/artifact/org.xerial/sqlite-jdbc[Maven Central] or from the https://github.com/xerial/sqlite-jdbc/releases[releases] page.
 
 [source,xml,subs="attributes+"]
 ----
