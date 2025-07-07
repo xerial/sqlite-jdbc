@@ -109,28 +109,28 @@ Linux-armv7_SQLITE_FLAGS  :=
 Linux-Android-arm_CC        := $(CROSS_PREFIX)clang
 Linux-Android-arm_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
 Linux-Android-arm_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
-Linux-Android-arm_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-arm_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-z,max-page-size=16384,-soname,libsqlitejdbc.so
 Linux-Android-arm_LIBNAME   := libsqlitejdbc.so
 Linux-Android-arm_SQLITE_FLAGS  :=
 
 Linux-Android-aarch64_CC        := $(CROSS_PREFIX)clang
 Linux-Android-aarch64_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
 Linux-Android-aarch64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
-Linux-Android-aarch64_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-aarch64_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-z,max-page-size=16384,-soname,libsqlitejdbc.so
 Linux-Android-aarch64_LIBNAME   := libsqlitejdbc.so
 Linux-Android-aarch64_SQLITE_FLAGS  :=
 
 Linux-Android-x86_CC        := $(CROSS_PREFIX)clang
 Linux-Android-x86_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
 Linux-Android-x86_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
-Linux-Android-x86_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-x86_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-z,max-page-size=16384,-soname,libsqlitejdbc.so
 Linux-Android-x86_LIBNAME   := libsqlitejdbc.so
 Linux-Android-x86_SQLITE_FLAGS  :=
 
 Linux-Android-x86_64_CC        := $(CROSS_PREFIX)clang
 Linux-Android-x86_64_STRIP     := $(CROSS_ROOT)/bin/llvm-strip
 Linux-Android-x86_64_CCFLAGS   := -I$(JAVA_HOME)/include -Ilib/inc_linux -I$(CROSS_ROOT)/sysroot/usr/include -Os -fPIC -fvisibility=hidden -fPIE -pie -lm -lc -landroid -ldl -llog
-Linux-Android-x86_64_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-soname,libsqlitejdbc.so
+Linux-Android-x86_64_LINKFLAGS := $(Default_LINKFLAGS) -Wl,-z,max-page-size=16384,-soname,libsqlitejdbc.so
 Linux-Android-x86_64_LIBNAME   := libsqlitejdbc.so
 Linux-Android-x86_64_SQLITE_FLAGS  :=
 
