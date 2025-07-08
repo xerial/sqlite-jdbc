@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -173,6 +174,32 @@ public class PrepStmtTest {
         assertThat(prep.getUpdateCount()).isEqualTo(-1);
         assertThat(rs.next()).isTrue();
         assertThat(name).isEqualTo(rs.getString(1));
+        assertThat(rs.next()).isFalse();
+        rs.close();
+    }
+
+    @Test
+    public void clobRS() throws SQLException {
+        String name = "Gandhi";
+        PreparedStatement prep = conn.prepareStatement("select ?;");
+        prep.setClob(1, new StringReader(name));
+        ResultSet rs = prep.executeQuery();
+        assertThat(prep.getUpdateCount()).isEqualTo(-1);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo(name);
+        assertThat(rs.next()).isFalse();
+        rs.close();
+    }
+
+    @Test
+    public void blobRS() throws SQLException {
+        String name = "Gandhi";
+        PreparedStatement prep = conn.prepareStatement("select ?;");
+        prep.setBlob(1, new ByteArrayInputStream(name.getBytes()));
+        ResultSet rs = prep.executeQuery();
+        assertThat(prep.getUpdateCount()).isEqualTo(-1);
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getBytes(1)).isEqualTo(name.getBytes());
         assertThat(rs.next()).isFalse();
         rs.close();
     }
