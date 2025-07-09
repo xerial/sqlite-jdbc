@@ -93,8 +93,8 @@ public class SQLiteJDBCLoader {
                             path ->
                                     !path.getFileName().toString().endsWith(LOCK_EXT)
                                             && path.getFileName()
-                                                    .toString()
-                                                    .startsWith(searchPattern))
+                                            .toString()
+                                            .startsWith(searchPattern))
                     .forEach(
                             nativeLib -> {
                                 Path lckFile = Paths.get(nativeLib + LOCK_EXT);
@@ -212,7 +212,7 @@ public class SQLiteJDBCLoader {
             // Check whether the contents are properly copied from the resource folder
             {
                 try (InputStream nativeIn = getResourceAsStream(nativeLibraryFilePath);
-                        InputStream extractedLibIn = Files.newInputStream(extractedLibFile)) {
+                     InputStream extractedLibIn = Files.newInputStream(extractedLibFile)) {
                     if (!contentsEquals(nativeIn, extractedLibIn)) {
                         throw new FileException(
                                 String.format(
@@ -297,74 +297,121 @@ public class SQLiteJDBCLoader {
      *
      * @throws
      */
+    /**
+     * Loads the SQLite native library from various locations, such as system properties, the JAR file,
+     * or the system's library path. This method ensures the library is loaded only once by using the
+     * `extracted` flag.
+     */
     private static void loadSQLiteNativeLibrary() throws Exception {
         if (extracted) {
             return;
         }
 
         List<String> triedPaths = new LinkedList<>();
+        String sqliteNativeLibraryName = getSqliteNativeLibraryName();
 
-        // Try loading library from org.sqlite.lib.path library path */
-        String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
-        String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
-        if (sqliteNativeLibraryName == null) {
-            sqliteNativeLibraryName = LibraryLoaderUtil.getNativeLibName();
+        // Try loading from a custom system property path.
+        if (tryLoadingFromSystemProperty(triedPaths, sqliteNativeLibraryName)) {
+            return; // Library loaded successfully.
         }
 
-        if (sqliteNativeLibraryPath != null) {
-            if (loadNativeLibrary(sqliteNativeLibraryPath, sqliteNativeLibraryName)) {
-                extracted = true;
-                return;
-            } else {
-                triedPaths.add(sqliteNativeLibraryPath);
-            }
+        // Try loading from the JAR file by extracting it to a temporary folder.
+        if (tryLoadingFromJar(triedPaths, sqliteNativeLibraryName)) {
+            return; // Library loaded successfully.
         }
 
-        // Load the os-dependent library from the jar file
-        sqliteNativeLibraryPath = LibraryLoaderUtil.getNativeLibResourcePath();
-        boolean hasNativeLib =
-                LibraryLoaderUtil.hasNativeLib(sqliteNativeLibraryPath, sqliteNativeLibraryName);
-
-        if (hasNativeLib) {
-            // temporary library folder
-            String tempFolder = getTempDir().getAbsolutePath();
-            // Try extracting the library from jar
-            if (extractAndLoadLibraryFile(
-                    sqliteNativeLibraryPath, sqliteNativeLibraryName, tempFolder)) {
-                extracted = true;
-                return;
-            } else {
-                triedPaths.add(sqliteNativeLibraryPath);
-            }
+        // Try loading from the system's `java.library.path`.
+        if (tryLoadingFromJavaLibraryPath(triedPaths, sqliteNativeLibraryName)) {
+            return; // Library loaded successfully.
         }
 
-        // As a last resort try from java.library.path
-        String javaLibraryPath = System.getProperty("java.library.path", "");
-        for (String ldPath : javaLibraryPath.split(File.pathSeparator)) {
-            if (ldPath.isEmpty()) {
-                continue;
-            }
-            if (loadNativeLibrary(ldPath, sqliteNativeLibraryName)) {
-                extracted = true;
-                return;
-            } else {
-                triedPaths.add(ldPath);
-            }
+        // Try loading using `System.loadLibrary` as a last resort.
+        if (tryLoadingWithSystemLoadLibrary()) {
+            return; // Library loaded successfully.
         }
 
-        // As an ultimate last resort, try loading through System.loadLibrary
-        if (loadNativeLibraryJdk()) {
-            extracted = true;
-            return;
-        }
-
-        extracted = false;
+        // If all attempts fail, throw an exception with details about the failed paths.
         throw new NativeLibraryNotFoundException(
                 String.format(
                         "No native library found for os.name=%s, os.arch=%s, paths=[%s]",
                         OSInfo.getOSName(),
                         OSInfo.getArchName(),
                         StringUtils.join(triedPaths, File.pathSeparator)));
+    }
+
+    /**
+     * Retrieves the SQLite native library name from system properties or defaults to the name
+     * provided by `LibraryLoaderUtil`.
+     */
+    private static String getSqliteNativeLibraryName() {
+        String sqliteNativeLibraryName = System.getProperty("org.sqlite.lib.name");
+        return sqliteNativeLibraryName != null ? sqliteNativeLibraryName : LibraryLoaderUtil.getNativeLibName();
+    }
+
+    /**
+     * Attempts to load the library from a custom path specified in the system property
+     * `org.sqlite.lib.path`.
+     */
+    private static boolean tryLoadingFromSystemProperty(List<String> triedPaths, String libraryName) {
+        String sqliteNativeLibraryPath = System.getProperty("org.sqlite.lib.path");
+        if (sqliteNativeLibraryPath != null) {
+            if (loadNativeLibrary(sqliteNativeLibraryPath, libraryName)) {
+                extracted = true; // Library loaded successfully.
+                return true;
+            } else {
+                triedPaths.add(sqliteNativeLibraryPath); // Add path to the list of failed attempts.
+            }
+        }
+        return false; // Library not loaded.
+    }
+
+    /**
+     * Attempts to extract and load the library from the JAR file into a temporary folder.
+     */
+    private static boolean tryLoadingFromJar(List<String> triedPaths, String libraryName) throws FileException {
+        String sqliteNativeLibraryPath = LibraryLoaderUtil.getNativeLibResourcePath();
+        boolean hasNativeLib = LibraryLoaderUtil.hasNativeLib(sqliteNativeLibraryPath, libraryName);
+
+        if (hasNativeLib) {
+            String tempFolder = getTempDir().getAbsolutePath();
+            if (extractAndLoadLibraryFile(sqliteNativeLibraryPath, libraryName, tempFolder)) {
+                extracted = true; // Library loaded successfully.
+                return true;
+            } else {
+                triedPaths.add(sqliteNativeLibraryPath); // Add path to the list of failed attempts.
+            }
+        }
+        return false; // Library not loaded.
+    }
+
+    /**
+     * Attempts to load the library from the system's `java.library.path`.
+     */
+    private static boolean tryLoadingFromJavaLibraryPath(List<String> triedPaths, String libraryName) {
+        String javaLibraryPath = System.getProperty("java.library.path", "");
+        for (String ldPath : javaLibraryPath.split(File.pathSeparator)) {
+            if (ldPath.isEmpty()) {
+                continue; // Skip empty paths.
+            }
+            if (loadNativeLibrary(ldPath, libraryName)) {
+                extracted = true; // Library loaded successfully.
+                return true;
+            } else {
+                triedPaths.add(ldPath); // Add path to the list of failed attempts.
+            }
+        }
+        return false; // Library not loaded.
+    }
+
+    /**
+     * Attempts to load the library using `System.loadLibrary` as a last resort.
+     */
+    private static boolean tryLoadingWithSystemLoadLibrary() {
+        if (loadNativeLibraryJdk()) {
+            extracted = true; // Library loaded successfully.
+            return true;
+        }
+        return false; // Library not loaded.
     }
 
     @SuppressWarnings("unused")
