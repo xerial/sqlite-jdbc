@@ -1,17 +1,9 @@
-== SQLite JDBC Driver Fork
-
-This repo is a fork of https://github.com/xerial/sqlite-jdbc[xerial/sqlite-jdbc], the only difference being the inclusion of the `decimal.c` extension in the jar.
-
-image:https://img.shields.io/maven-central/v/dev.aga.sqlite/sqlite-jdbc?color=g&label=maven%20central[Maven Central,link=https://central.sonatype.com/search?q=g%3Adev.aga.sqlite+a%3Asqlite-jdbc]
-
-_Everything below this line comes from the original repository._
-
 = SQLite JDBC Driver
-:project-version: 3.49.1.0
+:project-version: 3.50.2.0
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
-image:https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/badge.svg[Maven Central,link=https://maven-badges.herokuapp.com/maven-central/org.xerial/sqlite-jdbc/]
+image:https://img.shields.io/maven-central/v/org.xerial/sqlite-jdbc?label=maven%20central&color=dark-green[Maven Central,link=https://central.sonatype.com/artifact/org.xerial/sqlite-jdbc]
 image:https://javadoc.io/badge2/org.xerial/sqlite-jdbc/javadoc.svg[javadoc,link=https://javadoc.io/doc/org.xerial/sqlite-jdbc]
 image:https://img.shields.io/nexus/s/org.xerial/sqlite-jdbc?color=blue&label=maven%20snapshot&server=https%3A%2F%2Foss.sonatype.org%2F[Sonatype Nexus (Snapshots),link=https://oss.sonatype.org/content/repositories/snapshots/org/xerial/sqlite-jdbc/]
 
@@ -175,7 +167,7 @@ When packaging the resulting app, simply include the library in the distribution
 
 == Download
 
-Download from https://search.maven.org/artifact/org.xerial/sqlite-jdbc[Maven Central] or from the https://github.com/xerial/sqlite-jdbc/releases[releases] page.
+Download from https://central.sonatype.com/artifact/org.xerial/sqlite-jdbc[Maven Central] or from the https://github.com/xerial/sqlite-jdbc/releases[releases] page.
 
 [source,xml,subs="attributes+"]
 ----
