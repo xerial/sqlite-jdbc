@@ -48,8 +48,6 @@ jobs:
           yq -i -e '.project.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
           # update groupId
           yq -i -e '.project.groupId = "dev.aga.sqlite"' pom.xml
-          # update snapshot repository url
-          yq -i -e '.project.distributionManagement.snapshotRepository.url = "https://s01.oss.sonatype.org/content/repositories/snapshots"' pom.xml
           # update connection
           yq -i -e '.project.scm.connection = "scm:git:git://github.com/austinarbor/sqlite-jdbc.git"' pom.xml
           # update developer connection
@@ -57,9 +55,6 @@ jobs:
           # update url
           yq -i -e '.project.scm.url = "https://github.com/austinarbor/sqlite-jdbc"' pom.xml
           # update nexus url
-          yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.nexusUrl) ="https://s01.oss.sonatype.org/"' pom.xml
-          # disable the auto release for now
-          yq -i -e '(.project.build.plugins.plugin.[] | select(.artifactId == "nexus-staging-maven-plugin") |  .configuration.autoReleaseAfterClose) ="false"' pom.xml
           # yq seems to maybe have a bug with this? not sure of a better way to insert the developer
           yq -i '.project.developers += {"+developer" : {"id": "austinarbor", "name": "Austin G. Arbor", "email": "aarbor989@gmail.com"}}' pom.xml -p=xml -o=xml
           # remove the + from the developer tag
