@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.aga.sqlite</groupId>
   <artifactId>sqlite-jdbc</artifactId>
-  <version>3.50.2.0</version>
+  <version>3.50.3.0</version>
   <name>SQLite JDBC</name>
   <description>SQLite JDBC library</description>
   <url>https://github.com/austinarbor/sqlite-jdbc</url>
@@ -185,7 +185,7 @@
       <plugin>
         <groupId>org.jreleaser</groupId>
         <artifactId>jreleaser-maven-plugin</artifactId>
-        <version>1.18.0</version>
+        <version>1.19.0</version>
         <configuration>
           <configFile>jreleaser.yml</configFile>
         </configuration>
@@ -198,7 +198,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.5.0</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
@@ -258,7 +258,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.7</version>
+            <version>3.2.8</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

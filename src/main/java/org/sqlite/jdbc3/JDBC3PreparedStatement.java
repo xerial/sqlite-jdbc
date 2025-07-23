@@ -390,13 +390,14 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     /** @see java.sql.PreparedStatement#setCharacterStream(int, java.io.Reader, int) */
     public void setCharacterStream(int pos, Reader reader, int length) throws SQLException {
         try {
-            // copy chars from reader to StringBuffer
-            StringBuffer sb = new StringBuffer();
+            // copy chars from reader to StringBuilder
+            StringBuilder sb = new StringBuilder();
             char[] cbuf = new char[8192];
             int cnt;
 
-            while ((cnt = reader.read(cbuf)) > 0) {
+            while ((cnt = reader.read(cbuf, 0, Math.min(length, cbuf.length))) > 0) {
                 sb.append(cbuf, 0, cnt);
+                length -= cnt;
             }
 
             // set as string

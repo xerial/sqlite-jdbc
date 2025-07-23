@@ -1,5 +1,8 @@
 package org.sqlite.jdbc4;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.NClob;
@@ -48,14 +51,21 @@ public class JDBC4PreparedStatement extends JDBC3PreparedStatement
     }
 
     public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        requireLengthIsPositiveInt(length);
+        setCharacterStream(parameterIndex, reader, (int) length);
+    }
+
+    private void requireLengthIsPositiveInt(long length) throws SQLFeatureNotSupportedException {
+        if (length > Integer.MAX_VALUE || length < 0) {
+            throw new SQLFeatureNotSupportedException(
+                    "Data must have a length between 0 and Integer.MAX_VALUE");
+        }
     }
 
     public void setBlob(int parameterIndex, InputStream inputStream, long length)
             throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        requireLengthIsPositiveInt(length);
+        setBinaryStream(parameterIndex, inputStream, (int) length);
     }
 
     public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
@@ -69,35 +79,59 @@ public class JDBC4PreparedStatement extends JDBC3PreparedStatement
     }
 
     public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        requireLengthIsPositiveInt(length);
+        setAsciiStream(parameterIndex, x, (int) length);
     }
 
     public void setBinaryStream(int parameterIndex, InputStream x, long length)
             throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        requireLengthIsPositiveInt(length);
+        setBinaryStream(parameterIndex, x, (int) length);
     }
 
     public void setCharacterStream(int parameterIndex, Reader reader, long length)
             throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        requireLengthIsPositiveInt(length);
+        setCharacterStream(parameterIndex, reader, (int) length);
     }
 
     public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        byte[] bytes = readBytes(x);
+        setAsciiStream(parameterIndex, new ByteArrayInputStream(bytes), bytes.length);
+    }
+
+    /**
+     * Reads given number of bytes from an input stream.
+     *
+     * @param istream The input stream.
+     * @param length The number of bytes to read.
+     * @return byte array.
+     * @throws SQLException
+     */
+    private byte[] readBytes(InputStream istream) throws SQLException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] bytes = new byte[8192];
+
+        try {
+            int bytesRead;
+            while ((bytesRead = istream.read(bytes)) > 0) {
+                baos.write(bytes, 0, bytesRead);
+            }
+            return baos.toByteArray();
+        } catch (IOException cause) {
+            SQLException exception = new SQLException("Error reading stream");
+
+            exception.initCause(cause);
+            throw exception;
+        }
     }
 
     public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        setBytes(parameterIndex, readBytes(x));
     }
 
     public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        setCharacterStream(parameterIndex, reader, Integer.MAX_VALUE);
     }
 
     public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
@@ -106,13 +140,11 @@ public class JDBC4PreparedStatement extends JDBC3PreparedStatement
     }
 
     public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        setCharacterStream(parameterIndex, reader, Integer.MAX_VALUE);
     }
 
     public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
-        // TODO Support this
-        throw new SQLFeatureNotSupportedException();
+        setBytes(parameterIndex, readBytes(inputStream));
     }
 
     public void setNClob(int parameterIndex, Reader reader) throws SQLException {
