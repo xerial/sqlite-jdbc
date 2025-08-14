@@ -66,12 +66,11 @@ jobs:
         id: set-matrix
         # parse the Makefile to retrieve the list of targets in 'native-all', without 'native'
         run: |
-          matrix=$((
-            echo '{ "target" : ['
-            sed -n "/^native-all *: */ { s///; p }" Makefile | sed "s/^native\s//g" | sed 's/ /, /g' | xargs -n 1 echo | sed -r 's/^([^,]*)(,?)$/"\1"\2/'
-            echo " ]}"
-          ) | jq -c .)
-          echo $matrix | jq .
+          matrix="$(
+            jq --compact-output --null-input '{ target: $ARGS.positional }' \
+              --args $(awk '/^native-all.*:/ { $1 = $2 = ""; print }' Makefile)
+          )"
+          jq . <<< "$matrix"
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   build:
