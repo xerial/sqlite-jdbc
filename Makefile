@@ -3,6 +3,7 @@ include Makefile.common
 
 RESOURCE_DIR = src/main/resources
 
+
 .phony: all package native native-all deploy
 
 all: jni-header package
