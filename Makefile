@@ -17,6 +17,11 @@ SRC:=src/main/java
 JAVA_CLASSPATH:=$(TARGET)/classpath/slf4j-api.jar
 SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
 SQLITE_OBJ?=$(SQLITE_OUT)/sqlite3.o
+SQLITE_SRC_ARCHIVE:=$(TARGET)/$(sqlite)-src.zip
+SQLITE_SRC:=$(TARGET)/sqlite-src.log
+SQLITE_SRC_TMP:=$(TARGET)/tmp-src.$(version)/$(SQLITE_SRC_PREFIX)
+SQLITE_AMALGAMATION_FROM_SRC:=$(TARGET)/tmp-src.$(version)/$(SQLITE_AMAL_PREFIX)
+SQLITE_AMALGAMATION_ZIP_FROM_SRC:=$(SQLITE_AMALGAMATION_FROM_SRC).zip
 SQLITE_ARCHIVE:=$(TARGET)/$(sqlite)-amal.zip
 SQLITE_UNPACKED:=$(TARGET)/sqlite-unpack.log
 SQLITE_SOURCE?=$(TARGET)/$(SQLITE_AMAL_PREFIX)
@@ -24,13 +29,34 @@ SQLITE_HEADER?=$(SQLITE_SOURCE)/sqlite3.h
 ifneq ($(SQLITE_SOURCE),$(TARGET)/$(SQLITE_AMAL_PREFIX))
 	created := $(shell touch $(SQLITE_UNPACKED))
 endif
+ENABLE_UPDATE_DELETE_LIMIT?=1
 
 SQLITE_INCLUDE := $(shell dirname "$(SQLITE_HEADER)")
 
 CCFLAGS:= -I$(SQLITE_OUT) -I$(SQLITE_INCLUDE) $(CCFLAGS)
 
+$(SQLITE_SRC_ARCHIVE):
+	mkdir -p $(@D)
+	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2025/$(SQLITE_SRC_PREFIX).zip
+
+$(SQLITE_SRC): $(SQLITE_SRC_ARCHIVE)
+	unzip -qo $< -d $(TARGET)/tmp-src.$(version)
+	((cd $(SQLITE_SRC_TMP) && ./configure --update-limit && make sqlite3.c) | tee $@)
+
+$(SQLITE_AMALGAMATION_ZIP_FROM_SRC): $(SQLITE_SRC)
+	mkdir -p $(SQLITE_AMALGAMATION_FROM_SRC)
+	cp $(SQLITE_SRC_TMP)/sqlite3.c $(SQLITE_SRC_TMP)/sqlite3.h $(SQLITE_SRC_TMP)/sqlite3ext.h $(SQLITE_AMALGAMATION_FROM_SRC)/
+	(cd $(SQLITE_AMALGAMATION_FROM_SRC)/.. && zip -r $(SQLITE_AMAL_PREFIX).zip $(SQLITE_AMAL_PREFIX))
+
+ifneq ($(ENABLE_UPDATE_DELETE_LIMIT),1)
+ENABLE_UPDATE_DELETE_LIMIT_FLAG :=
 $(SQLITE_ARCHIVE):
+else
+ENABLE_UPDATE_DELETE_LIMIT_FLAG := -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT
+$(SQLITE_ARCHIVE): $(SQLITE_AMALGAMATION_ZIP_FROM_SRC)
+endif
 	@mkdir -p $(@D)
+	cp -v $(SQLITE_AMALGAMATION_ZIP_FROM_SRC) $@ || \
 	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2025/$(SQLITE_AMAL_PREFIX).zip || \
 	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2024/$(SQLITE_AMAL_PREFIX).zip || \
 	curl -L --max-redirs 0 -f -o$@ https://www.sqlite.org/2023/$(SQLITE_AMAL_PREFIX).zip || \
@@ -103,6 +129,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 	    -DSQLITE_MAX_ATTACHED=125 \
 	    -DSQLITE_MAX_PAGE_COUNT=4294967294 \
 	    -DSQLITE_DISABLE_PAGECACHE_OVERFLOW_STATS \
+	    $(ENABLE_UPDATE_DELETE_LIMIT_FLAG) \
 	    $(SQLITE_FLAGS) \
 	    $(SQLITE_OUT)/sqlite3.c
 
