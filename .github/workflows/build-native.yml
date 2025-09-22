@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Check if PR comment trigger is present
         if: github.event_name != 'workflow_dispatch'
-        uses: khan/pull-request-comment-trigger@v1.1.0
+        uses: shanegenschaw/pull-request-comment-trigger@v3.0.0
         id: check
         with:
           trigger: '/native'
