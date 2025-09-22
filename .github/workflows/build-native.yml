@@ -80,6 +80,7 @@ jobs:
     needs: [check, matrix]
     strategy:
       matrix: ${{fromJson(needs.matrix.outputs.matrix)}}
+      fail-fast: false
     steps:
       - uses: actions/checkout@v5
         with:
