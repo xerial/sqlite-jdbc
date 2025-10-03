@@ -201,3 +201,26 @@ The name of directories in our jar and in Android Studio differ, here is a mappi
 | arm           | armeabi                  |
 | x86           | x86                      |
 | x86_64        | x86_64                   |
+
+## How to load Run-Time Loadable Extensions
+
+### Enable loadable extensions
+
+- If you use `DriverManager`, configure the `Properties`:
+
+```java
+prop.setProperty("enable_load_extension", "true");
+```
+
+- If you use `SQLiteConfig`:
+
+```java
+SQLiteConfig config = new SQLiteConfig();
+config.enableLoadExtension(true);
+```
+
+- You can also specify the pragma in the connection string: `"jdbc:sqlite::memory:?enable_load_extension=true"`
+
+### Load an extension
+
+Use the `load_extension` [SQL function](https://sqlite.org/lang_corefunc.html#load_extension).
