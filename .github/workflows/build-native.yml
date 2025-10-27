@@ -110,7 +110,7 @@ jobs:
           ref: ${{ needs.check.outputs.ref }}
 
       - name: Download native libraries
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           pattern: native-libs-*
           merge-multiple: true
