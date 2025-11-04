@@ -13,8 +13,8 @@ jobs:
       - name: fetch upstream release version
         id: fetch-upstream-version
         run: |
-          curl -sL https://api.github.com/repos/xerial/sqlite-jdbc/releases/latest | \
-          jq -r ".tag_name" > .fork-meta/upstream-version.txt
+          tag=$(gh release list --repo xerial/sqlite-jdbc --json isLatest,tagName --jq '.[] | select(.isLatest == true) | .tagName')
+          echo "${tag}" > .fork-meta/upstream-version.txt
           
           upstream_version="$(cat .fork-meta/upstream-version.txt)"
           echo "latest release from upstream is: ${upstream_version}"
