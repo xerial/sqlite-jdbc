@@ -331,7 +331,7 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.10.6</version>
+                        <version>0.11.2</version>
                         <extensions>true</extensions>
                         <executions>
                             <execution>
@@ -346,6 +346,16 @@
                             <fallback>false</fallback>
                             <verbose>true</verbose>
                             <buildArgs>
+                                <!--
+                                Only required for GraalVM for JDK 17.
+                                The option is deprecated in later versions and could cause failures on later GraalVM versions.
+                                -->
+                                <arg>-H:+AllowDeprecatedBuilderClassesOnImageClasspath</arg>
+
+                                <!--
+                                The initialization flags below seem only necessary for GraalVM for JDK 17 and 21.
+                                If CI checks for either of these GraalVM versions are dropped, this should be cleaned up.
+                                -->
                                 <!-- required to allow junit-pioneer to compile with strict image heap enabled -->
                                 <arg>--initialize-at-build-time=org.junitpioneer.jupiter.issue.IssueExtensionExecutionListener</arg>
                                 <!--
@@ -357,6 +367,8 @@
                                 <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceLock</arg>
                                 <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceLockTarget</arg>
                                 <arg>--initialize-at-build-time=org.junit.jupiter.api.parallel.ResourceAccessMode</arg>
+                                <arg>--initialize-at-build-time=org.junit.jupiter.engine.descriptor.ExclusiveResourceCollector$1</arg>
+                                <arg>--initialize-at-build-time=org.junit.platform.commons.support.scanning.DefaultClasspathScanner</arg>
                             </buildArgs>
                         </configuration>
                     </plugin>
