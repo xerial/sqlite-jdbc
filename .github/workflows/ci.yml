@@ -48,6 +48,7 @@ jobs:
   test:
     name: test ${{ matrix.os }} jdk${{ matrix.java }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
         java: [ 11, 17, 20 ]
@@ -71,6 +72,7 @@ jobs:
   test_graalvm:
     name: test ${{ matrix.os }} jdk${{ matrix.java }} GraalVM native-image - ${{ matrix.profiles }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         java: [ '17', '21', '25' ]
@@ -89,6 +91,7 @@ jobs:
   test_multiarch:
     name: test ${{ matrix.arch }} ${{ matrix.distro }} jdk${{ matrix.java }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           # ARM v7
