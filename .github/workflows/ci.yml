@@ -51,12 +51,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        java: [ 11, 17, 20 ]
+        java: [ 11, 21, 25 ]
         include:
           - os: windows-latest
-            java: 20
+            java: 25
           - os: macos-latest
-            java: 20
+            java: 25
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
@@ -101,10 +101,10 @@ jobs:
           # ARM 64
           - arch: aarch64
             distro: ubuntu_latest
-            java: 21
+            java: 25
           - arch: aarch64
             distro: alpine_latest
-            java: 21
+            java: 25
           # PPC64
           - arch: ppc64le
             distro: ubuntu_latest
@@ -112,7 +112,7 @@ jobs:
           # RISC-V 64
           - arch: riscv64
             distro: ubuntu_latest
-            java: 21
+            java: 25
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -169,7 +169,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 20
+          java-version: 25
           java-package: jdk
           cache: 'maven'
       - run: brew install sqlite3
