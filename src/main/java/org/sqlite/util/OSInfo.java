@@ -145,22 +145,44 @@ public class OSInfo {
     }
 
     public static boolean isMusl() {
-        Path mapFilesDir = Paths.get("/proc/self/map_files");
-        try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
-            return dirStream
-                    .map(
-                            path -> {
-                                try {
-                                    return path.toRealPath().toString();
-                                } catch (IOException e) {
-                                    return "";
-                                }
-                            })
-                    .anyMatch(s -> s.toLowerCase().contains("musl"));
+        if (hasMuslLoader()) {
+            return true;
+        }
+
+        if (mapsContainMusl()) {
+            return true;
+        }
+
+        // fallback check Alpine
+        return isAlpineLinux();
+    }
+
+    private static boolean hasMuslLoader() {
+        return checkMuslLoaderInDir("/lib") || checkMuslLoaderInDir("/usr/lib");
+    }
+
+    private static boolean checkMuslLoaderInDir(String dir) {
+        try (Stream<Path> paths = Files.list(Paths.get(dir))) {
+            return paths
+                .map(Path::getFileName)
+                .map(Path::toString)
+                .anyMatch(name ->
+                    name.startsWith("ld-musl-") && name.endsWith(".so.1"));
         } catch (Exception ignored) {
-            // fall back to checking for alpine linux in the event we're using an older kernel which
-            // may not fail the above check
-            return isAlpineLinux();
+            return false;
+        }
+    }
+
+    private static boolean mapsContainMusl() {
+        return checkMapsContainMusl("/proc/self/maps") || checkMapsContainMusl("/proc/self/map_files");
+    }
+
+    private static boolean checkMapsContainMusl(String dir) {
+        try (Stream<String> lines = Files.lines(Paths.get(dir))) {
+            return lines.anyMatch(line ->
+                line.toLowerCase(Locale.US).contains("musl"));
+        } catch (Exception ignored) {
+            return false;
         }
     }
 
