@@ -121,7 +121,7 @@ jobs:
         run: echo "MAVEN_OPTS=-Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
       - name: Set MAVEN_OPTS armv7
         if: matrix.arch == 'armv7'
-        run: echo "MAVEN_OPTS=-XX:-UseCompactObjectHeaders -Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
+        run: echo "MAVEN_OPTS=-XX:+UseSerialGC -XX:+TieredCompilation -XX:TieredStopAtLevel=3 -Xbatch -Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
