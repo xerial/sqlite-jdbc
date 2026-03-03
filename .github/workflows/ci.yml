@@ -155,7 +155,7 @@ jobs:
           run: |
             echo "Architecture: `uname -a`"
             mvn --version
-            cd /work && mvn -X -e -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
+            cd /work && mvn -X -e -Dhttps.protocols=TLSv1.2 -Djdk.tls.client.protocols=TLSv1.2 -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
   # Java tests with that native library, as some functions will not be available (extensions).
