@@ -117,7 +117,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Set MAVEN_OPTS
-        if: matrix.arch == 'armv7' || matrix.arch == 'ppc64le'
+#        if: matrix.arch == 'armv7' || matrix.arch == 'ppc64le'
         run: |
           echo "MAVEN_OPTS=-Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
       - uses: uraimo/run-on-arch-action@v3
