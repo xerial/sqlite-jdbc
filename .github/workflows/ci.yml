@@ -96,23 +96,23 @@ jobs:
         include:
           # ARM v7
           - arch: armv7
-            distro: ubuntu_rolling
+            distro: ubuntu_latest
             java: 25
           # ARM 64
-#          - arch: aarch64
-#            distro: ubuntu_latest
-#            java: 25
-#          - arch: aarch64
-#            distro: alpine_latest
-#            java: 25
+          - arch: aarch64
+            distro: ubuntu_latest
+            java: 25
+          - arch: aarch64
+            distro: alpine_latest
+            java: 25
           # PPC64
           - arch: ppc64le
-            distro: ubuntu_rolling
+            distro: ubuntu_latest
             java: 25
           # RISC-V 64
-#          - arch: riscv64
-#            distro: ubuntu_latest
-#            java: 25
+          - arch: riscv64
+            distro: ubuntu_latest
+            java: 25
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -153,8 +153,8 @@ jobs:
             SKIP_TEST_MULTIARCH: true
             MAVEN_OPTS: >-
               -Dmaven.repo.local=/work/.m2/repository
-              -Dhttps.protocols=TLSv1.2
-              -Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+#              -Dhttps.protocols=TLSv1.2
+              ${{ (matrix.arch == 'ppc64le' || matrix.arch == 'armv7') && '-Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA' || '' }}
 #              -Djdk.tls.client.protocols=TLSv1.2
 #              -Dmaven.wagon.httpconnection.readTimeout=120000
 #              -Dmaven.wagon.http.streamCache=true
