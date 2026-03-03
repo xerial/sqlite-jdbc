@@ -139,6 +139,7 @@ jobs:
           mvn dependency:resolve --batch-mode  --no-transfer-progress
           mvn dependency:resolve-plugins --batch-mode  --no-transfer-progress
           mvn dependency:go-offline -U --batch-mode  --no-transfer-progress
+          mvn -o verify
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
