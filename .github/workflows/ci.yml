@@ -154,6 +154,7 @@ jobs:
             MAVEN_OPTS: >-
               -Dmaven.repo.local=/work/.m2/repository
               -Dhttps.protocols=TLSv1.2
+              -Djdk.tls.client.cipherSuites=TLS_RSA_WITH_AES_128_CBC_SHA
 #              -Djdk.tls.client.protocols=TLSv1.2
 #              -Dmaven.wagon.httpconnection.readTimeout=120000
 #              -Dmaven.wagon.http.streamCache=true
