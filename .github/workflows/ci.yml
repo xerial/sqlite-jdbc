@@ -122,6 +122,18 @@ jobs:
       - name: Set MAVEN_OPTS armv7
         if: matrix.arch == 'armv7'
         run: echo "MAVEN_OPTS=-XX:+UseSerialGC -DforkCount=1 -DreuseForks=true -Dsurefire.parallel=methods -Dsurefire.threadCount=1 -Dsurefire.useUnlimitedThreads=false -Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
+      - name: Set MAVEN_OPTS riscv64
+        if: matrix.arch == 'riscv64'
+        run: echo "MAVEN_OPTS=-DforkCount=2 -DreuseForks=true -Dsurefire.parallel=methods -Dsurefire.threadCount=1 -Dsurefire.useUnlimitedThreads=false" >> $GITHUB_ENV
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+          java-package: jdk
+          cache: 'maven'
+      - name: Pre compile
+        run: mvn --batch-mode --no-transfer-progress install -DskipTests -am
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:

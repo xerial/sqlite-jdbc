@@ -19,16 +19,9 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.conditions.ArchConditions;
 import java.sql.DriverManager;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.sqlite.util.LoggerFactory;
 import org.sqlite.util.OSInfo;
 
-@DisabledIfEnvironmentVariable(
-        named = "SKIP_TEST_MULTIARCH",
-        matches = "true",
-        disabledReason = "Those tests don't need to run in multi-arch")
-@DisabledInNativeImage
 @AnalyzeClasses(
         packages = "org.sqlite",
         importOptions = {ImportOption.DoNotIncludeTests.class})
