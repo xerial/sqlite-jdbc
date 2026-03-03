@@ -132,8 +132,8 @@ jobs:
           java-version: ${{ matrix.java }}
           java-package: jdk
           cache: 'maven'
-      - name: Pre compile
-        run: mvn -Dspotless.check.skip=true -DskipTests --batch-mode --no-transfer-progress install -am
+      - name: Maven deps
+        run: mvn dependency:resolve -U -o --batch-mode  --no-transfer-progress
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
@@ -175,7 +175,7 @@ jobs:
             echo "Architecture: `uname -a`"
             echo "MAVEN_OPTS: ${MAVEN_OPTS}"
             mvn --version
-            cd /work && mvn -Dmaven.main.skip=true -Dspotless.check.skip=true -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
+            cd /work && mvn -T 1 -o -Dspotless.check.skip=true -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
   # Java tests with that native library, as some functions will not be available (extensions).
