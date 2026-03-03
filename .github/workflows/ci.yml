@@ -121,7 +121,7 @@ jobs:
         run: echo "MAVEN_OPTS=-Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
       - name: Set MAVEN_OPTS armv7
         if: matrix.arch == 'armv7'
-        run: echo "MAVEN_OPTS=-DforkCount=1 -DreuseForks=true -Dsurefire.parallel=methods -Dsurefire.threadCount=1 -Dsurefire.useUnlimitedThreads=false -Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
+        run: echo "MAVEN_OPTS=-XX:+UseSerialGC -DforkCount=1 -DreuseForks=true -Dsurefire.parallel=methods -Dsurefire.threadCount=1 -Dsurefire.useUnlimitedThreads=false -Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
@@ -158,17 +158,6 @@ jobs:
           env: |
             SKIP_TEST_MULTIARCH: true
             MAVEN_OPTS: ${{ env.MAVEN_OPTS || '-Xmx2g' }}
-#              -Dhttps.protocols=TLSv1.2
-#              -Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
-#              -Djdk.tls.client.protocols=TLSv1.2
-#              -Dmaven.wagon.httpconnection.readTimeout=120000
-#              -Dmaven.wagon.http.streamCache=true
-#              -Dmaven.wagon.httpclient.max-connections=1
-#              -Dmaven.wagon.httpclient.bufferSize=8192
-#              -Dmaven.wagon.http.ssl.insecure=true
-#              -Dmaven.wagon.http.ssl.allowall=true
-#              -Dmaven.wagon.httpclient.disableContentCompression=true
-#              -Dhttpclient.http2.enabled=false
 
           run: |
             echo "Architecture: `uname -a`"
