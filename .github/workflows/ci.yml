@@ -134,8 +134,8 @@ jobs:
           cache: 'maven'
       - name: Maven deps
         run: |
-          mvn dependency:go-offline --no-transfer-progress test
-          ls -la .m2/repository/org/apache/felix/maven-bundle-plugin/5.1.9/
+          mvn dependency:go-offline --no-transfer-progress
+          ls -la ~/.m2/repository
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
