@@ -175,7 +175,7 @@ jobs:
             echo "Architecture: `uname -a`"
             echo "MAVEN_OPTS: ${MAVEN_OPTS}"
             mvn --version
-            cd /work && mvn -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
+            cd /work && mvn -Dspotless.skip=true -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
   # Java tests with that native library, as some functions will not be available (extensions).
