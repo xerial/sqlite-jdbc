@@ -96,7 +96,7 @@ jobs:
         include:
           # ARM v7
           - arch: armv7
-            distro: ubuntu_latest
+            distro: ubuntu_rolling
             java: 25
           # ARM 64
 #          - arch: aarch64
@@ -107,7 +107,7 @@ jobs:
 #            java: 25
           # PPC64
           - arch: ppc64le
-            distro: ubuntu_latest
+            distro: ubuntu_rolling
             java: 25
           # RISC-V 64
 #          - arch: riscv64
