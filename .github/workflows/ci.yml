@@ -158,6 +158,9 @@ jobs:
               -Dmaven.wagon.http.streamCache=true
               -Dmaven.wagon.httpclient.max-connections=1
               -Dmaven.wagon.httpclient.bufferSize=8192
+              -Dmaven.wagon.http.ssl.insecure=true
+              -Dmaven.wagon.http.ssl.allowall=true
+              -Dmaven.wagon.httpclient.disableContentCompression=true
               -Dhttpclient.http2.enabled=false
 
           run: |
