@@ -134,7 +134,7 @@ jobs:
           cache: 'maven'
       - name: Maven deps
         run: |
-          mvn -Dmaven.repo.local=./maven-repo dependency:resolve dependency:resolve-plugins dependency:go-offline -DskipTests=false -U --no-transfer-progress
+          mvn -Dmaven.repo.local=./maven-repo dependency:go-offline -DexcludeTransitive=false -U --batch-mode --no-transfer-progress
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
