@@ -149,7 +149,6 @@ jobs:
             --volume "${PWD}:/work"
             --user 1001:121
             --sysctl net.ipv4.tcp_mtu_probing=1
-            --sysctl net.core.rmem_max=16777216
             --sysctl net.ipv6.conf.all.disable_ipv6=1
 
           env: |
