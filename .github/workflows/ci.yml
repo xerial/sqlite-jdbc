@@ -134,12 +134,7 @@ jobs:
           cache: 'maven'
       - name: Maven deps
         run: |
-          mvn help:evaluate -Dexpression=project.plugins -q > /dev/null
-          mvn validate -U
-          mvn dependency:resolve --batch-mode  --no-transfer-progress
-          mvn dependency:resolve-plugins --batch-mode  --no-transfer-progress
-          mvn dependency:go-offline -U --batch-mode  --no-transfer-progress
-          mvn -o verify -Dspotless.check.skip=true
+          mvn dependency:go-offline
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
@@ -181,6 +176,7 @@ jobs:
             echo "Architecture: `uname -a`"
             echo "MAVEN_OPTS: ${MAVEN_OPTS}"
             mvn --version
+            ls -la /work/.m2/repository/org/apache/felix/maven-bundle-plugin/5.1.9/
             cd /work && mvn -T 1 -o -Dspotless.check.skip=true -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
