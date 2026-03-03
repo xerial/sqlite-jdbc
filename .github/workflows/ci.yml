@@ -97,7 +97,7 @@ jobs:
           # ARM v7
           - arch: armv7
             distro: ubuntu_latest
-            java: 21
+            java: 25
           # ARM 64
           - arch: aarch64
             distro: ubuntu_latest
@@ -116,8 +116,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Set MAVEN_OPTS ppc64le
-        if: matrix.arch == 'ppc64le'
+      - name: Set MAVEN_OPTS
+        if: matrix.arch == 'ppc64le' || matrix.arch == 'armv7'
         run: echo "MAVEN_OPTS=-Djdk.tls.client.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" >> $GITHUB_ENV
       - uses: uraimo/run-on-arch-action@v3
         name: Test
