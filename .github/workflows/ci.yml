@@ -134,6 +134,8 @@ jobs:
           cache: 'maven'
       - name: Maven deps
         run: |
+          mvn help:evaluate -Dexpression=project.plugins -q > /dev/null
+          mvn validate -U
           mvn dependency:resolve --batch-mode  --no-transfer-progress
           mvn dependency:resolve-plugins --batch-mode  --no-transfer-progress
           mvn dependency:go-offline -U --batch-mode  --no-transfer-progress
