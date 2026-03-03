@@ -133,7 +133,7 @@ jobs:
           java-package: jdk
           cache: 'maven'
       - name: Pre compile
-        run: mvn --batch-mode --no-transfer-progress install -DskipTests -am
+        run: mvn --batch-mode --no-transfer-progress install -Dspotless.skip=true -DskipTests -am
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
