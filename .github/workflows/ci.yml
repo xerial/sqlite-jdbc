@@ -137,7 +137,6 @@ jobs:
           mvn -Dmaven.repo.local=./maven-repo dependency:resolve-plugins -U --no-transfer-progress
           mvn -Dmaven.repo.local=./maven-repo compile -U --no-transfer-progress
           mvn -Dmaven.repo.local=./maven-repo dependency:go-offline --no-transfer-progress
-#          ls -la /maven-repo/org/apache/maven/plugins/maven-resources-plugin/3.4.0/
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
@@ -179,7 +178,6 @@ jobs:
             echo "Architecture: `uname -a`"
             echo "MAVEN_OPTS: ${MAVEN_OPTS}"
             mvn --version
-#            ls -la /work/maven-repo/org/apache/maven/plugins/maven-resources-plugin/3.4.0/
             cd /work && mvn -T 1 -o -nsu -Dspotless.check.skip=true -Dmaven.repo.local=/work/maven-repo --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
