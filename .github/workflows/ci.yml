@@ -135,7 +135,7 @@ jobs:
       - name: Maven deps
         run: |
           mvn -Dmaven.repo.local=./maven-repo dependency:resolve-plugins -U --no-transfer-progress
-          mvn -Dmaven.repo.local=./maven-repo clean compile -U --no-transfer-progress
+          mvn -Dmaven.repo.local=./maven-repo compile -U --no-transfer-progress
           mvn -Dmaven.repo.local=./maven-repo dependency:go-offline --no-transfer-progress
       - uses: uraimo/run-on-arch-action@v3
         name: Test
@@ -178,7 +178,7 @@ jobs:
             echo "Architecture: `uname -a`"
             echo "MAVEN_OPTS: ${MAVEN_OPTS}"
             mvn --version
-            cd /work && mvn -T 1 -o -npu -Dspotless.check.skip=true -Dmaven.repo.local=/work/maven-repo --batch-mode --no-transfer-progress test
+            cd /work && mvn -T 1 -o -nsu -Dspotless.check.skip=true -Dmaven.repo.local=/work/maven-repo --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
   # Java tests with that native library, as some functions will not be available (extensions).
