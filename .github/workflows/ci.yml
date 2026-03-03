@@ -153,7 +153,7 @@ jobs:
             SKIP_TEST_MULTIARCH: true
             MAVEN_OPTS: >-
               -Dmaven.repo.local=/work/.m2/repository
-#              -Dhttps.protocols=TLSv1.2
+              -Dhttps.protocols=TLSv1.2
 #              -Djdk.tls.client.protocols=TLSv1.2
 #              -Dmaven.wagon.httpconnection.readTimeout=120000
 #              -Dmaven.wagon.http.streamCache=true
