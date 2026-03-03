@@ -148,16 +148,22 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}:/work"
             --user 1001:121
-            --sysctl net.ipv4.tcp_mtu_probing=1
-            --sysctl net.ipv6.conf.all.disable_ipv6=1
 
           env: |
             SKIP_TEST_MULTIARCH: true
+            MAVEN_OPTS: >-
+              -Dhttps.protocols=TLSv1.2
+              -Djdk.tls.client.protocols=TLSv1.2 
+              -Dmaven.wagon.httpconnection.readTimeout=120000
+              -Dmaven.wagon.http.streamCache=true
+              -Dmaven.wagon.httpclient.max-connections=1
+              -Dmaven.wagon.httpclient.bufferSize=8192
+              -Dhttpclient.http2.enabled=false
 
           run: |
             echo "Architecture: `uname -a`"
             mvn --version
-            cd /work && mvn -X -e -Dhttps.protocols=TLSv1.2 -Djdk.tls.client.protocols=TLSv1.2 -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
+            cd /work && mvn -e -Dmaven.repo.local=/work/.m2/repository --batch-mode --no-transfer-progress test
 
   # This will test the build process using an external amalgamation, as well as the
   # Java tests with that native library, as some functions will not be available (extensions).
