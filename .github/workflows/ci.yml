@@ -133,7 +133,7 @@ jobs:
           java-package: jdk
           cache: 'maven'
       - name: Maven deps
-        run: mvn dependency:resolve -U -o --batch-mode  --no-transfer-progress
+        run: mvn dependency:resolve -U --batch-mode  --no-transfer-progress
       - uses: uraimo/run-on-arch-action@v3
         name: Test
         with:
