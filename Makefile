@@ -13,7 +13,7 @@ deploy:
 DOCKER_RUN_OPTS=--rm
 MVN:=mvn
 CODESIGN:=docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir gotson/rcodesign sign
-SRC:=sqlite-jdbc-bare/src/main/java
+SRC:=sqlite-jdbc-jni/src/main/java
 JAVA_CLASSPATH:=$(TARGET)/classpath/slf4j-api.jar
 SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
 SQLITE_OBJ?=$(SQLITE_OUT)/sqlite3.o
@@ -76,13 +76,13 @@ $(JAVA_CLASSPATH):
 	@mkdir -p $(@D)
 	curl -L -f -o$@ https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
 
-$(TARGET)/common-lib/org/sqlite/%.class: sqlite-jdbc-bare/src/main/java/org/sqlite/%.java
+$(TARGET)/common-lib/org/sqlite/%.class: sqlite-jdbc-jni/src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
 	$(JAVAC) -source 1.6 -target 1.6 -sourcepath $(SRC) -d $(TARGET)/common-lib $<
 
 jni-header: $(TARGET)/common-lib/NativeDB.h
 
-$(TARGET)/common-lib/NativeDB.h: sqlite-jdbc-bare/src/main/java/org/sqlite/core/NativeDB.java $(JAVA_CLASSPATH)
+$(TARGET)/common-lib/NativeDB.h: sqlite-jdbc-jni/src/main/java/org/sqlite/core/NativeDB.java $(JAVA_CLASSPATH)
 	@mkdir -p $(TARGET)/common-lib
 	$(JAVAC) -cp $(JAVA_CLASSPATH) -d $(TARGET)/common-lib -sourcepath $(SRC) -h $(TARGET)/common-lib $(SRC)/org/sqlite/core/NativeDB.java
 	mv target/common-lib/org_sqlite_core_NativeDB.h target/common-lib/NativeDB.h
@@ -104,7 +104,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 # limits defined here: https://www.sqlite.org/limits.html
 	perl -p -e "s/^(static const char \* const sqlite3azCompileOpt.+)$$/\1\n\n\/* This has been automatically added by sqlite-jdbc *\/\n  \"JDBC_EXTENSIONS\",/;" \
 	    $(SQLITE_OUT)/sqlite3.c.tmp > $(SQLITE_OUT)/sqlite3.c
-	cat sqlite-jdbc-bare/src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
+	cat sqlite-jdbc-jni/src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
 	$(CC) -o $@ -c $(CCFLAGS) \
 	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
 	    -DSQLITE_HAVE_ISNAN \
