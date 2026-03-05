@@ -203,27 +203,26 @@ public class MultipleClassLoaderTest {
                     for (File nestedFile : source.listFiles()) {
                         addJarEntry(nestedFile, changeDir, target);
                     }
-                    return;
-                }
+                } else if (source.isFile()) {
+                    JarEntry entry =
+                            new JarEntry(
+                                    source.getPath()
+                                            .replace("\\", "/")
+                                            .substring(changeDir.length() + 1));
+                    entry.setTime(source.lastModified());
+                    target.putNextEntry(entry);
+                    in = new BufferedInputStream(Files.newInputStream(source.toPath()));
 
-                JarEntry entry =
-                        new JarEntry(
-                                source.getPath()
-                                        .replace("\\", "/")
-                                        .substring(changeDir.length() + 1));
-                entry.setTime(source.lastModified());
-                target.putNextEntry(entry);
-                in = new BufferedInputStream(Files.newInputStream(source.toPath()));
-
-                byte[] buffer = new byte[8192];
-                while (true) {
-                    int count = in.read(buffer);
-                    if (count == -1) {
-                        break;
+                    byte[] buffer = new byte[8192];
+                    while (true) {
+                        int count = in.read(buffer);
+                        if (count == -1) {
+                            break;
+                        }
+                        target.write(buffer, 0, count);
                     }
-                    target.write(buffer, 0, count);
+                    target.closeEntry();
                 }
-                target.closeEntry();
             } finally {
                 if (in != null) {
                     in.close();
