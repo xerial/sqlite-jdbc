@@ -61,8 +61,9 @@
                 <groupId>org.jreleaser</groupId>
                 <artifactId>jreleaser-maven-plugin</artifactId>
                 <version>1.23.0</version>
+                <inherited>false</inherited>
                 <configuration>
-                    <configFile>../jreleaser.yml</configFile>
+                    <configFile>jreleaser.yml</configFile>
                 </configuration>
             </plugin>
         </plugins>

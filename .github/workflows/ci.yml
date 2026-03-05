@@ -252,7 +252,7 @@ jobs:
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn --batch-mode --no-transfer-progress -DskipTests jreleaser:full-release
+          mvn --non-recursive --batch-mode --no-transfer-progress -DskipTests jreleaser:full-release
       - name: Prepare next snapshot
         if: inputs.perform_release
         run: |
