@@ -97,9 +97,8 @@ id = 2
 
 == How does SQLiteJDBC work?
 
-Our SQLite JDBC driver package (i.e., `sqlite-jdbc-{project-version}.jar`) contains three
-types of native SQLite libraries (`sqlitejdbc.dll`, `sqlitejdbc.dylib`, `sqlitejdbc.so`),
-each of them is compiled for Windows, macOS and Linux. An appropriate native library
+Our SQLite JDBC driver packages (i.e., `sqlite-jdbc-jni-libs-\{OS}-\{ARCH}-{project-version}.jar`) contain the native SQLite libraries (`sqlitejdbc.dll`, `sqlitejdbc.dylib`, `sqlitejdbc.so`)
+compiled for the specific `OS` and `ARCH`. An appropriate native library
 file is automatically extracted into your OS's temporary folder, when your program
 loads `org.sqlite.JDBC` driver.
 
@@ -168,6 +167,73 @@ When packaging the resulting app, simply include the library in the distribution
 == Download
 
 Download from https://central.sonatype.com/artifact/org.xerial/sqlite-jdbc[Maven Central] or from the https://github.com/xerial/sqlite-jdbc/releases[releases] page.
+
+=== Modular packaging
+
+[source,xml,subs="attributes+"]
+----
+<dependencies>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc-jni</artifactId>
+      <version>{project-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc-jni-libs-all</artifactId>
+      <version>{project-version}</version>
+    </dependency>
+</dependencies>
+----
+
+List of available native libraries artifacts:
+
+----
+sqlite-jdbc-jni-libs-all: All architectures for all OSes, except Android
+
+sqlite-jdbc-jni-libs-android: All architectures for Android
+sqlite-jdbc-jni-libs-android-aarch64
+sqlite-jdbc-jni-libs-android-arm
+sqlite-jdbc-jni-libs-android-x86
+sqlite-jdbc-jni-libs-android-x86_64
+
+sqlite-jdbc-jni-libs-freebsd: All architectures for FreeBSD
+sqlite-jdbc-jni-libs-freebsd-aarch64
+sqlite-jdbc-jni-libs-freebsd-x86
+sqlite-jdbc-jni-libs-freebsd-x86_64
+
+sqlite-jdbc-jni-libs-linux: All architectures for Linux
+sqlite-jdbc-jni-libs-linux-aarch64
+sqlite-jdbc-jni-libs-linux-arm
+sqlite-jdbc-jni-libs-linux-armv6
+sqlite-jdbc-jni-libs-linux-armv7
+sqlite-jdbc-jni-libs-linux-ppc64
+sqlite-jdbc-jni-libs-linux-riscv64
+sqlite-jdbc-jni-libs-linux-x86
+sqlite-jdbc-jni-libs-linux-x86_64
+
+sqlite-jdbc-jni-libs-linux_musl: All architectures for Linux Musl
+sqlite-jdbc-jni-libs-linux_musl-aarch64
+sqlite-jdbc-jni-libs-linux_musl-x86
+sqlite-jdbc-jni-libs-linux_musl-x86_64
+
+sqlite-jdbc-jni-libs-mac: All architectures for Mac
+sqlite-jdbc-jni-libs-mac-x86_64
+sqlite-jdbc-jni-libs-macos-aarch64
+
+sqlite-jdbc-jni-libs-windows: All architectures for Windows
+sqlite-jdbc-jni-libs-windows-aarch64
+sqlite-jdbc-jni-libs-windows-armv7
+sqlite-jdbc-jni-libs-windows-x86
+sqlite-jdbc-jni-libs-windows-x86_64
+----
+
+=== Legacy packaging
+
+The historical `artifactId` will pull:
+
+- `sqlite-jdbc-jni`
+- `sqlite-jdbc-jni-libs-all`
 
 [source,xml,subs="attributes+"]
 ----

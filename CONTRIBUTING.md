@@ -1,7 +1,7 @@
 # Development
 ## Prerequisites
 
-- JDK 11
+- JDK 17
 
 ## Commits
 
@@ -20,7 +20,7 @@ Since August 2022 the commit messages follow the [Conventional Commits](https://
 # How to compile the native libraries
 ## Prerequisites
 
-1. JDK 11
+1. JDK 17
 2. Perl
 3. Maven
 4. make
@@ -30,8 +30,11 @@ Since August 2022 the commit messages follow the [Conventional Commits](https://
 8. Docker (for cross-compilation only)
 
 ## Version update
+Version update can be triggered through the **Upgrade SQLite version** workflow.
+
 1. Edit the `VERSION` file and set the SQLite version to use.
-2. Edit the version number in `pom.xml` to `${VERSION}.0-SNAPSHOT`. So if `VERSION`=`3.39.2`, the version number in `pom.xml` should be `3.39.2.0-SNAPSHOT`. 
+2. Use the Maven Versions plugin to update the version: `mvn versions:set -DnewVersion=${VERSION}.0-SNAPSHOT -DgenerateBackupPoms=false`. So if `VERSION`=`3.39.2`, the Maven version number should be `3.39.2.0-SNAPSHOT`. 
+
 
 ## Build for the current platform
 ```shell
