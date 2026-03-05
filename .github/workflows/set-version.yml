@@ -1,0 +1,38 @@
+name: Upgrade SQLite version
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_version:
+        description: 'New SQLite version (x.y.z)'
+        required: true
+        type: string
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+          java-package: jdk
+          cache: 'maven'
+
+      - name: Set SQLite version in VERSION
+        run: |
+          echo "version=${{ inputs.new_version }}" >> VERSION
+
+      - name: Update version in POM
+        run: |
+          mvn versions:set -DnewVersion=${{ inputs.new_version }}-SNAPSHOT -DgenerateBackupPoms=false
+
+      - run: git status
+
+#      - name: Commit and push
+#        uses: EndBug/add-and-commit@v9
+#        with:
+#          message: 'feat(sqlite): upgrade to sqlite ${{ inputs.new_version }}'
+#          default_author: github_actions
