@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ matrix.java }}
+          java-version: '17'
           java-package: jdk
           cache: 'maven'
 
