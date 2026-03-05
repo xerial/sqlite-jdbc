@@ -248,10 +248,12 @@ sparcv9:
 	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
 
 mac64-signed: mac64
-	$(CODESIGN) src/main/resources/org/sqlite/native/Mac/x86_64/libsqlitejdbc.dylib
+	$(CODESIGN) $(NATIVE_DLL)
+	$(CODESIGN) $(NATIVE_STORE_DIR)/$(LIBNAME)
 
 mac-arm64-signed: mac-arm64
-	$(CODESIGN) src/main/resources/org/sqlite/native/Mac/aarch64/libsqlitejdbc.dylib
+	$(CODESIGN) $(NATIVE_DLL)
+	$(CODESIGN) $(NATIVE_STORE_DIR)/$(LIBNAME)
 
 package: native-all
 	rm -rf target/dependency-maven-plugin-markers
