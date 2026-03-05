@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: 17
           java-package: jdk
           cache: 'maven'
       - name: spotless:check
@@ -51,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        java: [ 11, 21, 25 ]
+        java: [ 17, 21, 25 ]
         include:
           - os: windows-latest
             java: 25
@@ -208,7 +208,7 @@ jobs:
         uses: actions/setup-java@v5
         with: # running setup-java again overwrites the settings.xml
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
           java-package: jdk
           server-id: central # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_CENTRAL_USERNAME # env variable for username in deploy (1)
