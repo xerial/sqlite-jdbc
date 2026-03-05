@@ -9,6 +9,7 @@
 
     <artifactId>sqlite-jdbc-jni-libs-all</artifactId>
     <name>sqlite-jdbc-jni-libs-all</name>
+    <description>Bundle containing SQLite JDBC JNI native libraries for all OSes and architectures, except Android</description>
 
     <dependencies>
         <dependency>

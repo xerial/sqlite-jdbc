@@ -22,7 +22,7 @@
 
     <modules>
         <module>sqlite-jdbc</module>
-        <module>sqlite-jdbc-bare</module>
+        <module>sqlite-jdbc-jni</module>
         <module>sqlite-jdbc-jni-libs</module>
     </modules>
 

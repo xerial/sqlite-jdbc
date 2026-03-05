@@ -9,6 +9,7 @@
 
     <artifactId>sqlite-jdbc-jni-libs-linux_musl</artifactId>
     <name>sqlite-jdbc-jni-libs-linux_musl</name>
+    <description>Bundle containing SQLite JDBC JNI native libraries for all Linux MUSL architectures</description>
 
     <dependencies>
         <dependency>

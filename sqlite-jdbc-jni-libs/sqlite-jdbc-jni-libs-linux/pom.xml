@@ -9,6 +9,7 @@
 
     <artifactId>sqlite-jdbc-jni-libs-linux</artifactId>
     <name>sqlite-jdbc-jni-libs-linux</name>
+    <description>Bundle containing SQLite JDBC JNI native libraries for all Linux architectures</description>
 
     <dependencies>
         <dependency>

@@ -10,23 +10,18 @@
     <artifactId>sqlite-jdbc</artifactId>
     <packaging>jar</packaging>
 
-    <name>sqlite-jdbc</name>
-    <description>SQLite JDBC library</description>
+    <name>SQLite JDBC legacy</name>
+    <description>SQLite JDBC library legacy packaging containing all the native libraries, except Android</description>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sqlite-jdbc-bare</artifactId>
+            <artifactId>sqlite-jdbc-jni</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sqlite-jdbc-jni-libs-mac</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>sqlite-jdbc-jni-libs-windows</artifactId>
+            <artifactId>sqlite-jdbc-jni-libs-all</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

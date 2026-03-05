@@ -8,7 +8,7 @@
         <version>3.51.2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sqlite-jdbc-bare</artifactId>
+    <artifactId>sqlite-jdbc-jni</artifactId>
     <packaging>jar</packaging>
 
     <name>SQLite JDBC</name>

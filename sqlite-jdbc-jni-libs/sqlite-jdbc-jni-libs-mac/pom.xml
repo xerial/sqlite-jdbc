@@ -9,6 +9,7 @@
 
     <artifactId>sqlite-jdbc-jni-libs-mac</artifactId>
     <name>sqlite-jdbc-jni-libs-mac</name>
+    <description>Bundle containing SQLite JDBC JNI native libraries for all Mac architectures</description>
 
     <dependencies>
         <dependency>

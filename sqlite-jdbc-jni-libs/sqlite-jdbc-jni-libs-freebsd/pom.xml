@@ -9,6 +9,7 @@
 
     <artifactId>sqlite-jdbc-jni-libs-freebsd</artifactId>
     <name>sqlite-jdbc-jni-libs-freebsd</name>
+    <description>Bundle containing SQLite JDBC JNI native libraries for all FreeBSD architectures</description>
 
     <dependencies>
         <dependency>
