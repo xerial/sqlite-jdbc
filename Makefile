@@ -196,10 +196,10 @@ freebsd-arm64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir gotson/freebsd-cross-build:aarch64-11.4 sh -c 'make clean-native native OS_NAME=FreeBSD OS_ARCH=aarch64 CROSS_PREFIX=aarch64-unknown-freebsd11-'
 
 linux-musl32: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work gotson/alpine-linux-x86 bash -c 'make clean-native native OS_SHORTNAME=linux_muslOS_NAME=Linux-Musl OS_ARCH=x86'
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work gotson/alpine-linux-x86 bash -c 'make clean-native native OS_SHORTNAME=linux_musl OS_NAME=Linux-Musl OS_ARCH=x86'
 
 linux-musl64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_SHORTNAME=linux_muslOS_NAME=Linux-Musl OS_ARCH=x86_64'
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_SHORTNAME=linux_musl OS_NAME=Linux-Musl OS_ARCH=x86_64'
 
 linux-musl-arm64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-musl-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=aarch64-linux-musl- OS_SHORTNAME=linux_musl OS_NAME=Linux-Musl OS_ARCH=aarch64'
