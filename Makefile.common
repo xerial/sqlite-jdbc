@@ -22,7 +22,7 @@ ifeq ("$(wildcard $(OSINFO_PROG))","")
 $(info Building OSInfo tool)
 $(shell mkdir -p $(TARGET)/classpath)
 $(shell curl -L -f -o$(JAVA_CLASSPATH) https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar)
-$(shell $(JAVAC) -cp $(JAVA_CLASSPATH) -sourcepath $(SRC) -d lib src/main/java/org/sqlite/util/OSInfo.java)
+$(shell $(JAVAC) -cp $(JAVA_CLASSPATH) -sourcepath $(SRC) -d lib $(SRC)/org/sqlite/util/OSInfo.java)
 endif
 
 ifndef OS_NAME
