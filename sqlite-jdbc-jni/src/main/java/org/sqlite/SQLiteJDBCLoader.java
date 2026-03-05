@@ -180,6 +180,7 @@ public class SQLiteJDBCLoader {
             String libFolderForCurrentOS, String libraryFileName, String targetFolder)
             throws FileException {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
+        System.out.println("Extract: " + nativeLibraryFilePath + " to: " + targetFolder);
         // Include architecture name in temporary filename in order to avoid conflicts
         // when multiple JVMs with different architectures running at the same time
         String uuid = UUID.randomUUID().toString();
@@ -325,6 +326,7 @@ public class SQLiteJDBCLoader {
 
         // Load the os-dependent library from the jar file
         sqliteNativeLibraryPath = LibraryLoaderUtil.getNativeLibResourcePath();
+        System.out.println("sqliteNativeLibraryPath: " + sqliteNativeLibraryPath);
         boolean hasNativeLib =
                 LibraryLoaderUtil.hasNativeLib(sqliteNativeLibraryPath, sqliteNativeLibraryName);
 
