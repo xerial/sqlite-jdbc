@@ -146,8 +146,13 @@ $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_HEADER) $(SQLITE_OBJ) $(SRC)/org/sqlite/core/
 	$(STRIP) /tmp/$(@F)
 	cp /tmp/$(@F) $@
 
+# This is the java projects resources directories
 NATIVE_DIR=sqlite-jdbc-jni-libs/sqlite-jdbc-jni-libs-$(call lc,$(if $(OS_SHORTNAME),$(OS_SHORTNAME),$(OS_NAME)))-$(OS_ARCH)/src/main/resources/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+# Not sure why we have this, leaving it for now
 NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+# This is the exact hierarchy of updated native libraries
+# Will be used in Build Native CI workflow
+NATIVE_STORE_DIR:=$(TARGET)/store/$(NATIVE_DIR)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
@@ -160,6 +165,8 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	cp $< $@
 	@mkdir -p $(NATIVE_TARGET_DIR)
 	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
+	@mkdir -p $(NATIVE_STORE_DIR)
+	cp $< $(NATIVE_STORE_DIR)/$(LIBNAME)
 
 win32: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-windows-x86 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=i686-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86'
