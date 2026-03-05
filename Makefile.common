@@ -9,7 +9,7 @@ JAVAC := "$$JAVA_HOME/bin/javac"
 JAVAH := "$$JAVA_HOME/bin/javah"
 
 TARGET := target
-SRC:=src/main/java
+SRC:=sqlite-jdbc-jni/src/main/java
 OSINFO_CLASS := org.sqlite.util.OSInfo
 OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
 JAVA_CLASSPATH:=$(TARGET)/classpath/slf4j-api.jar
