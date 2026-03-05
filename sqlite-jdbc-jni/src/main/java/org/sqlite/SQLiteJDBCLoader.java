@@ -209,6 +209,9 @@ public class SQLiteJDBCLoader {
             extractedLibFile.toFile().setWritable(true, true);
             extractedLibFile.toFile().setExecutable(true);
 
+            System.out.println("Extracted native lib: " + extractedLibFile);
+            System.out.println("Extracted native lib size: " + extractedLibFile.toFile().length());
+
             // Check whether the contents are properly copied from the resource folder
             {
                 try (InputStream nativeIn = getResourceAsStream(nativeLibraryFilePath);
