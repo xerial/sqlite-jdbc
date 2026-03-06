@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>sqlite-jdbc</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>SQLite JDBC legacy</name>
     <description>SQLite JDBC library legacy packaging containing all the native libraries, except Android</description>

@@ -10,6 +10,7 @@
     <artifactId>sqlite-jdbc-jni-libs-android</artifactId>
     <name>sqlite-jdbc-jni-libs-android</name>
     <description>Bundle containing SQLite JDBC JNI native libraries for all Android architectures</description>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>

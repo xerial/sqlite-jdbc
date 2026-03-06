@@ -10,6 +10,7 @@
     <artifactId>sqlite-jdbc-jni-libs-windows</artifactId>
     <name>sqlite-jdbc-jni-libs-windows</name>
     <description>Bundle containing SQLite JDBC JNI native libraries for all Windows architectures</description>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
