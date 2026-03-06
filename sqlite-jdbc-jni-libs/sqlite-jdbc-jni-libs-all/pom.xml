@@ -17,26 +17,31 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sqlite-jdbc-jni-libs-freebsd</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sqlite-jdbc-jni-libs-linux</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sqlite-jdbc-jni-libs-linux_musl</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sqlite-jdbc-jni-libs-mac</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>sqlite-jdbc-jni-libs-windows</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
         </dependency>
     </dependencies>
 </project>

@@ -404,6 +404,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>sqlite-jdbc-jni-libs-all</artifactId>
             <version>${project.version}</version>
+            <type>pom</type>
             <scope>test</scope>
         </dependency>
     </dependencies>
