@@ -1,4 +1,5 @@
 project:
+  name: sqlite-jdbc
   versionPattern: CUSTOM
   copyright: Taro L. Saito
 release:
@@ -44,5 +45,5 @@ release:
         description: 'Issue has been released'
         color: '#ededed'
 files:
-  artifacts:
-    - path: 'target/{{projectName}}-{{projectVersion}}.jar'
+  globs:
+    - pattern: '**/target/sqlite-jdbc-jni*-{{projectVersion}}.jar'

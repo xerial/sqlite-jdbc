@@ -39,11 +39,11 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: 17
           java-package: jdk
           cache: 'maven'
       - name: spotless:check
-        run: mvn --batch-mode --no-transfer-progress spotless:check
+        run: mvn -Pspotless --batch-mode --no-transfer-progress spotless:check
 
   test:
     name: test ${{ matrix.os }} jdk${{ matrix.java }}
@@ -208,7 +208,7 @@ jobs:
         uses: actions/setup-java@v5
         with: # running setup-java again overwrites the settings.xml
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
           java-package: jdk
           server-id: central # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_CENTRAL_USERNAME # env variable for username in deploy (1)
@@ -231,7 +231,7 @@ jobs:
       - name: Build
         run: mvn --batch-mode --no-transfer-progress package -P release -DskipTests
 
-      # The sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
+      # The Sonatype maven plugin will decide the right destination depending on whether the project is SNAPSHOT or not
       - name: Publish to Apache Maven Central
         if: github.event_name == 'push' || inputs.push_maven
         run: mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests -Dgpg.signer=bc
@@ -252,7 +252,7 @@ jobs:
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn --batch-mode --no-transfer-progress -DskipTests jreleaser:full-release
+          mvn --non-recursive --batch-mode --no-transfer-progress -DskipTests jreleaser:full-release
       - name: Prepare next snapshot
         if: inputs.perform_release
         run: |

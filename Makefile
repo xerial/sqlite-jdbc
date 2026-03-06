@@ -13,7 +13,7 @@ deploy:
 DOCKER_RUN_OPTS=--rm
 MVN:=mvn
 CODESIGN:=docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir gotson/rcodesign sign
-SRC:=src/main/java
+SRC:=sqlite-jdbc-jni/src/main/java
 JAVA_CLASSPATH:=$(TARGET)/classpath/slf4j-api.jar
 SQLITE_OUT:=$(TARGET)/$(sqlite)-$(OS_NAME)-$(OS_ARCH)
 SQLITE_OBJ?=$(SQLITE_OUT)/sqlite3.o
@@ -76,15 +76,15 @@ $(JAVA_CLASSPATH):
 	@mkdir -p $(@D)
 	curl -L -f -o$@ https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
 
-$(TARGET)/common-lib/org/sqlite/%.class: src/main/java/org/sqlite/%.java
+$(TARGET)/common-lib/org/sqlite/%.class: sqlite-jdbc-jni/src/main/java/org/sqlite/%.java
 	@mkdir -p $(@D)
 	$(JAVAC) -source 1.6 -target 1.6 -sourcepath $(SRC) -d $(TARGET)/common-lib $<
 
 jni-header: $(TARGET)/common-lib/NativeDB.h
 
-$(TARGET)/common-lib/NativeDB.h: src/main/java/org/sqlite/core/NativeDB.java $(JAVA_CLASSPATH)
+$(TARGET)/common-lib/NativeDB.h: sqlite-jdbc-jni/src/main/java/org/sqlite/core/NativeDB.java $(JAVA_CLASSPATH)
 	@mkdir -p $(TARGET)/common-lib
-	$(JAVAC) -cp $(JAVA_CLASSPATH) -d $(TARGET)/common-lib -sourcepath $(SRC) -h $(TARGET)/common-lib src/main/java/org/sqlite/core/NativeDB.java
+	$(JAVAC) -cp $(JAVA_CLASSPATH) -d $(TARGET)/common-lib -sourcepath $(SRC) -h $(TARGET)/common-lib $(SRC)/org/sqlite/core/NativeDB.java
 	mv target/common-lib/org_sqlite_core_NativeDB.h target/common-lib/NativeDB.h
 
 test:
@@ -104,7 +104,7 @@ $(SQLITE_OUT)/sqlite3.o : $(SQLITE_UNPACKED)
 # limits defined here: https://www.sqlite.org/limits.html
 	perl -p -e "s/^(static const char \* const sqlite3azCompileOpt.+)$$/\1\n\n\/* This has been automatically added by sqlite-jdbc *\/\n  \"JDBC_EXTENSIONS\",/;" \
 	    $(SQLITE_OUT)/sqlite3.c.tmp > $(SQLITE_OUT)/sqlite3.c
-	cat src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
+	cat sqlite-jdbc-jni/src/main/ext/*.c >> $(SQLITE_OUT)/sqlite3.c
 	$(CC) -o $@ -c $(CCFLAGS) \
 	    -DSQLITE_ENABLE_LOAD_EXTENSION=1 \
 	    -DSQLITE_HAVE_ISNAN \
@@ -146,8 +146,13 @@ $(SQLITE_OUT)/$(LIBNAME): $(SQLITE_HEADER) $(SQLITE_OBJ) $(SRC)/org/sqlite/core/
 	$(STRIP) /tmp/$(@F)
 	cp /tmp/$(@F) $@
 
-NATIVE_DIR=src/main/resources/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+# This is the java projects resources directories
+NATIVE_DIR=sqlite-jdbc-jni-libs/sqlite-jdbc-jni-libs-$(call lc,$(if $(OS_SHORTNAME),$(OS_SHORTNAME),$(OS_NAME)))-$(OS_ARCH)/src/main/resources/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+# Not sure why we have this, leaving it for now
 NATIVE_TARGET_DIR:=$(TARGET)/classes/org/sqlite/native/$(OS_NAME)/$(OS_ARCH)
+# This is the exact hierarchy of updated native libraries
+# Will be used in Build Native CI workflow
+NATIVE_STORE_DIR:=$(TARGET)/store/$(NATIVE_DIR)
 NATIVE_DLL:=$(NATIVE_DIR)/$(LIBNAME)
 
 # For cross-compilation, install docker. See also https://github.com/dockcross/dockcross
@@ -160,6 +165,8 @@ $(NATIVE_DLL): $(SQLITE_OUT)/$(LIBNAME)
 	cp $< $@
 	@mkdir -p $(NATIVE_TARGET_DIR)
 	cp $< $(NATIVE_TARGET_DIR)/$(LIBNAME)
+	@mkdir -p $(NATIVE_STORE_DIR)
+	cp $< $(NATIVE_STORE_DIR)/$(LIBNAME)
 
 win32: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-windows-x86 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=i686-w64-mingw32.static- OS_NAME=Windows OS_ARCH=x86'
@@ -189,13 +196,13 @@ freebsd-arm64: $(SQLITE_UNPACKED) jni-header
 	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/workdir gotson/freebsd-cross-build:aarch64-11.4 sh -c 'make clean-native native OS_NAME=FreeBSD OS_ARCH=aarch64 CROSS_PREFIX=aarch64-unknown-freebsd11-'
 
 linux-musl32: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work gotson/alpine-linux-x86 bash -c 'make clean-native native OS_NAME=Linux-Musl OS_ARCH=x86'
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work gotson/alpine-linux-x86 bash -c 'make clean-native native OS_SHORTNAME=linux_musl OS_NAME=Linux-Musl OS_ARCH=x86'
 
 linux-musl64: $(SQLITE_UNPACKED) jni-header
-	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_NAME=Linux-Musl OS_ARCH=x86_64'
+	docker run $(DOCKER_RUN_OPTS) -v $$PWD:/work xerial/alpine-linux-x86_64 bash -c 'make clean-native native OS_SHORTNAME=linux_musl OS_NAME=Linux-Musl OS_ARCH=x86_64'
 
 linux-musl-arm64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-musl-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=aarch64-linux-musl- OS_NAME=Linux-Musl OS_ARCH=aarch64'
+	./docker/dockcross-musl-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=aarch64-linux-musl- OS_SHORTNAME=linux_musl OS_NAME=Linux-Musl OS_ARCH=aarch64'
 
 linux-arm: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-armv5 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=armv5-unknown-linux-gnueabi- OS_NAME=Linux OS_ARCH=arm'
@@ -210,16 +217,16 @@ linux-arm64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-arm64-lts -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=aarch64-unknown-linux-gnu- OS_NAME=Linux OS_ARCH=aarch64'
 
 linux-android-arm: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-android-arm -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/arm-linux-androideabi/bin/arm-linux-androideabi- OS_NAME=Linux-Android OS_ARCH=arm'
+	./docker/dockcross-android-arm -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/arm-linux-androideabi/bin/arm-linux-androideabi- OS_SHORTNAME=android OS_NAME=Linux-Android OS_ARCH=arm'
 
 linux-android-arm64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-android-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/aarch64-linux-android/bin/aarch64-linux-android- OS_NAME=Linux-Android OS_ARCH=aarch64'
+	./docker/dockcross-android-arm64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/aarch64-linux-android/bin/aarch64-linux-android- OS_SHORTNAME=android OS_NAME=Linux-Android OS_ARCH=aarch64'
 
 linux-android-x86: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-android-x86 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/i686-linux-android/bin/i686-linux-android- OS_NAME=Linux-Android OS_ARCH=x86'
+	./docker/dockcross-android-x86 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/i686-linux-android/bin/i686-linux-android- OS_SHORTNAME=android OS_NAME=Linux-Android OS_ARCH=x86'
 
 linux-android-x64: $(SQLITE_UNPACKED) jni-header
-	./docker/dockcross-android-x86_64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/x86_64-linux-android/bin/x86_64-linux-android- OS_NAME=Linux-Android OS_ARCH=x86_64'
+	./docker/dockcross-android-x86_64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=/usr/x86_64-linux-android/bin/x86_64-linux-android- OS_SHORTNAME=android OS_NAME=Linux-Android OS_ARCH=x86_64'
 
 linux-ppc64: $(SQLITE_UNPACKED) jni-header
 	./docker/dockcross-ppc64 -a $(DOCKER_RUN_OPTS) bash -c 'make clean-native native CROSS_PREFIX=powerpc64le-unknown-linux-gnu- OS_NAME=Linux OS_ARCH=ppc64'
@@ -241,10 +248,12 @@ sparcv9:
 	$(MAKE) native OS_NAME=SunOS OS_ARCH=sparcv9
 
 mac64-signed: mac64
-	$(CODESIGN) src/main/resources/org/sqlite/native/Mac/x86_64/libsqlitejdbc.dylib
+	$(CODESIGN) target/store/sqlite-jdbc-jni-libs/sqlite-jdbc-jni-libs-mac-x86_64/src/main/resources/org/sqlite/native/Mac/x86_64/libsqlitejdbc.dylib
+	$(CODESIGN) sqlite-jdbc-jni-libs/sqlite-jdbc-jni-libs-mac-x86_64/src/main/resources/org/sqlite/native/Mac/x86_64/libsqlitejdbc.dylib
 
 mac-arm64-signed: mac-arm64
-	$(CODESIGN) src/main/resources/org/sqlite/native/Mac/aarch64/libsqlitejdbc.dylib
+	$(CODESIGN) target/store/sqlite-jdbc-jni-libs/sqlite-jdbc-jni-libs-mac-aarch64/src/main/resources/org/sqlite/native/Mac/aarch64/libsqlitejdbc.dylib
+	$(CODESIGN) sqlite-jdbc-jni-libs/sqlite-jdbc-jni-libs-mac-aarch64/src/main/resources/org/sqlite/native/Mac/aarch64/libsqlitejdbc.dylib
 
 package: native-all
 	rm -rf target/dependency-maven-plugin-markers
