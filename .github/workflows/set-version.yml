@@ -27,9 +27,12 @@ jobs:
 
       - name: Update version in POM
         run: |
-          mvn versions:set -DnewVersion=${{ inputs.new_version }}-SNAPSHOT -DgenerateBackupPoms=false
+          mvn versions:set -DnewVersion=${{ inputs.new_version }}.0-SNAPSHOT -DgenerateBackupPoms=false
 
       - run: git status
+      - run: |
+          cat VERSION
+          cat pom.xml
 
 #      - name: Commit and push
 #        uses: EndBug/add-and-commit@v9
