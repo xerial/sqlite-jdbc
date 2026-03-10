@@ -30,12 +30,14 @@ jobs:
           mvn --batch-mode --no-transfer-progress versions:set -DnewVersion=${{ inputs.new_version }}.0-SNAPSHOT -DgenerateBackupPoms=false
 
       - run: git status
-      - run: |
-          cat VERSION
-          cat pom.xml
 
-#      - name: Commit and push
-#        uses: EndBug/add-and-commit@v9
-#        with:
-#          message: 'feat(sqlite): upgrade to sqlite ${{ inputs.new_version }}'
-#          default_author: github_actions
+      - name: Commit and push
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'feat(sqlite): upgrade to sqlite ${{ inputs.new_version }}'
+          default_author: github_actions
+
+      - name: Invoke Build Native workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build-native.yml
