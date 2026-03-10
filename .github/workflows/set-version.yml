@@ -23,11 +23,11 @@ jobs:
 
       - name: Set SQLite version in VERSION
         run: |
-          echo "version=${{ inputs.new_version }}" >> VERSION
+          echo "version=${{ inputs.new_version }}" > VERSION
 
       - name: Update version in POM
         run: |
-          mvn versions:set -DnewVersion=${{ inputs.new_version }}.0-SNAPSHOT -DgenerateBackupPoms=false
+          mvn --batch-mode --no-transfer-progress versions:set -DnewVersion=${{ inputs.new_version }}.0-SNAPSHOT -DgenerateBackupPoms=false
 
       - run: git status
       - run: |
