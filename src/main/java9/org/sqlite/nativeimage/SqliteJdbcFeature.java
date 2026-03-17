@@ -1,5 +1,6 @@
 package org.sqlite.nativeimage;
 
+import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeJNIAccess;
@@ -21,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+@IgnoreJRERequirement
 public class SqliteJdbcFeature implements Feature {
 
     @Override
