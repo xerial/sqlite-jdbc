@@ -202,6 +202,9 @@ The name of directories in our jar and in Android Studio differ, here is a mappi
 | x86           | x86                      |
 | x86_64        | x86_64                   |
 
+The following methods will not work in Android:
+- `JDBC3PreparedStatement#getParameterTypeName`
+
 ## How to load Run-Time Loadable Extensions
 
 ### Enable loadable extensions
