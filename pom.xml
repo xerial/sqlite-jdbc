@@ -139,7 +139,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.5.0</version>
                 <executions>
-                    <!-- Default JAR with all classes/resources -->
+                    <!-- Default JAR with all classes/resources, except Android natives -->
                     <execution>
                         <id>default-jar</id>
                         <phase>package</phase>
@@ -151,6 +151,9 @@
                                     <Multi-Release>true</Multi-Release>
                                 </manifestEntries>
                             </archive>
+                            <excludes>
+                                <exclude>org/sqlite/native/Linux-Android/**/*</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                     <!-- JAR without native libraries -->
@@ -174,9 +177,9 @@
                             </excludes>
                         </configuration>
                     </execution>
-                    <!-- JAR with only native libraries -->
+                    <!-- JAR with only native libraries, except Android -->
                     <execution>
-                        <id>natives-desktop</id>
+                        <id>natives-all</id>
                         <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
@@ -226,23 +229,6 @@
                             </excludes>
                             <includes>
                                 <include>org/sqlite/native/Linux/**/*</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                    <!-- JAR with only native libraries: Linux Musl -->
-                    <execution>
-                        <id>natives-linux_musl</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>natives-linux_musl</classifier>
-                            <excludes>
-                                <exclude>**/*.class</exclude>
-                                <exclude>**/*.properties</exclude>
-                            </excludes>
-                            <includes>
                                 <include>org/sqlite/native/Linux-Musl/**/*</include>
                             </includes>
                         </configuration>
