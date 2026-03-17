@@ -22,10 +22,10 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
-import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CorePreparedStatement;
 import org.sqlite.core.DB;
+import org.sqlite.util.AndroidSignatureIgnore;
 
 public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
@@ -170,7 +170,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /** @see java.sql.ParameterMetaData#getParameterTypeName(int) */
-    @IgnoreJRERequirement
+    @AndroidSignatureIgnore
     public String getParameterTypeName(int pos) throws SQLException {
         checkIndex(pos);
         return JDBCType.valueOf(getParameterType(pos)).getName();
