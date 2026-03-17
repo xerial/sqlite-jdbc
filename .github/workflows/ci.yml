@@ -45,6 +45,20 @@ jobs:
       - name: spotless:check
         run: mvn --batch-mode --no-transfer-progress spotless:check
 
+  android-signatures:
+    name: Check Android signatures
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 11
+          java-package: jdk
+          cache: 'maven'
+      - name: animal-sniffer:check
+        run: mvn --batch-mode --no-transfer-progress compile animal-sniffer:check
+
   test:
     name: test ${{ matrix.os }} jdk${{ matrix.java }}
     strategy:
@@ -190,7 +204,7 @@ jobs:
 
   release:
     name: Deploy
-    needs: [ lint, test, test_multiarch, test_external_amalgamation, test_graalvm ]
+    needs: [ lint, android-signatures, test, test_multiarch, test_external_amalgamation, test_graalvm ]
     if: github.repository_owner == 'xerial' && github.ref == 'refs/heads/master' # only perform on latest master
     runs-on: ubuntu-latest
     steps:
