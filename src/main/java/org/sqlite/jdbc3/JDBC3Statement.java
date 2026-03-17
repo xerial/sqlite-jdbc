@@ -246,7 +246,11 @@ public abstract class JDBC3Statement extends CoreStatement {
                         changes[i] = db.executeUpdate(this, null);
                     } catch (SQLException e) {
                         throw new BatchUpdateException(
-                                "batch entry " + i + ": " + e.getMessage(), null, 0, changes, e);
+                                "batch entry " + i + ": " + e.getMessage(),
+                                null,
+                                0,
+                                Arrays.stream(changes).mapToInt(l -> (int) l).toArray(),
+                                e);
                     } finally {
                         if (pointer != null) pointer.close();
                     }
