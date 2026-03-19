@@ -326,6 +326,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
             try {
                 Date date = getDate(columnIndex);
                 if (date != null)
+                    // inlining of java.sql.Date.toLocateDate() for Android
                     return type.cast(
                             LocalDate.of(
                                     date.getYear() + 1900, date.getMonth() + 1, date.getDate()));
@@ -340,6 +341,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
             try {
                 Time time = getTime(columnIndex);
                 if (time != null)
+                    // inlining of java.sql.Date.toLocateTime() for Android
                     return type.cast(
                             LocalTime.of(time.getHours(), time.getMinutes(), time.getSeconds()));
                 else return null;
@@ -353,6 +355,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
             try {
                 Timestamp timestamp = getTimestamp(columnIndex);
                 if (timestamp != null)
+                    // inlining of java.sql.Date.toLocateDateTime() for Android
                     return type.cast(
                             LocalDateTime.of(
                                     timestamp.getYear() + 1900,

@@ -245,6 +245,8 @@ public abstract class JDBC3Statement extends CoreStatement {
                         db.prepare(this);
                         changes[i] = db.executeUpdate(this, null);
                     } catch (SQLException e) {
+                        // don't use the constructor with long because of
+                        // https://github.com/xerial/sqlite-jdbc/issues/1378
                         throw new BatchUpdateException(
                                 "batch entry " + i + ": " + e.getMessage(),
                                 null,

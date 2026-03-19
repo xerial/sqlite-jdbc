@@ -942,6 +942,8 @@ public abstract class DB implements Codes {
                 if (rc != SQLITE_DONE) {
                     reset(stmt);
                     if (rc == SQLITE_ROW) {
+                        // don't use the constructor with long because of
+                        // https://github.com/xerial/sqlite-jdbc/issues/1378
                         throw new BatchUpdateException(
                                 "batch entry " + i + ": query returns results",
                                 null,

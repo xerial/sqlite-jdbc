@@ -26,7 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
-@AndroidSignatureIgnore
+@AndroidSignatureIgnore(explanation = "Used by GraalVM only")
 public class SqliteJdbcFeature implements Feature {
 
     @Override

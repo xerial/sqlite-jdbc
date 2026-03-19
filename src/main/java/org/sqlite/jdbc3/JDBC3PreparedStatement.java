@@ -170,7 +170,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /** @see java.sql.ParameterMetaData#getParameterTypeName(int) */
-    @AndroidSignatureIgnore
+    @AndroidSignatureIgnore(explanation = "Android does not support java.sql.JDBCType")
     public String getParameterTypeName(int pos) throws SQLException {
         checkIndex(pos);
         return JDBCType.valueOf(getParameterType(pos)).getName();
