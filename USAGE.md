@@ -202,6 +202,8 @@ The name of directories in our jar and in Android Studio differ, here is a mappi
 | x86           | x86                      |
 | x86_64        | x86_64                   |
 
+Your project will need to integrate the [desugared core library](https://developer.android.com/studio/write/java11-default-support-table) (default).
+
 The following methods will not work in Android:
 - `JDBC3PreparedStatement#getParameterTypeName`
 
