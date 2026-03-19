@@ -56,6 +56,10 @@ jobs:
           java-version: 11
           java-package: jdk
           cache: 'maven'
+      - name: Download and install signatures jar
+        run: |
+          curl -L -o ./signatures.jar ./ https://repo1.maven.org/maven2/com/toasttab/android/gummy-bears-api-24/0.12.0/gummy-bears-api-24-0.12.0-coreLib2.signature
+          mvn org.apache.maven.plugins:maven-install-plugin:3.1.1:install-file -Dfile=./signatures.jar -DgroupId=org.sqlite.signatures -DartifactId=gummy-bears-api-24 -Dversion=0.1 -Dpackaging=signature
       - name: animal-sniffer:check
         run: mvn --batch-mode --no-transfer-progress compile animal-sniffer:check
 
