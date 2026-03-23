@@ -242,7 +242,7 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Release commit and push
         if: inputs.perform_release
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           message: 'chore(release): ${{ env.RELEASE_VERSION }} [skip ci]'
           tag: '${{ env.RELEASE_VERSION }} --force'
@@ -259,7 +259,7 @@ jobs:
           mvn versions:set -DnextSnapshot -DgenerateBackupPoms=false
       - name: Next snapshot commit and push
         if: inputs.perform_release
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           message: 'chore(release): prepare next snapshot [skip ci]'
           default_author: github_actions
