@@ -80,19 +80,6 @@ public class SQLiteConfigTest {
     }
 
     @Test
-    public void setWalCheckpoint() {
-        for (SQLiteConfig.WalCheckpointMode mode : SQLiteConfig.WalCheckpointMode.values()) {
-            SQLiteConfig config = new SQLiteConfig();
-            config.setWalCheckpoint(mode);
-            assertThat(
-                            config.toProperties()
-                                    .getProperty(
-                                            SQLiteConfig.Pragma.WAL_CHECKPOINT.getPragmaName()))
-                    .isEqualTo(mode.name());
-        }
-    }
-    
-    @Test
     public void pragmaSet() {
         Set<String> expectedPragmaSet = new HashSet<>();
         for (Pragma v : SQLiteConfig.Pragma.values()) {

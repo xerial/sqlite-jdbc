@@ -479,9 +479,6 @@ public class SQLiteConfig {
         WAL_AUTOCHECKPOINT("wal_autocheckpoint",
 				"The wal_autocheckpoint pragma sets the write-ahead log auto-checkpoint interval. If the argument N is specified, then the auto-checkpoint is adjusted to fire whenever the WAL has N or more pages. Passing zero or a negative value turns off automatic checkpointing entirely. The default auto-checkpoint interval is 1000 or SQLITE_DEFAULT_WAL_AUTOCHECKPOINT.",
 				null),
-		WAL_CHECKPOINT("wal_checkpoint",
-				"The wal_checkpoint pragma causes a checkpoint operation to run on the database. The optional mode argument specifies the checkpointing mode: PASSIVE (default) does as much as possible without waiting, FULL blocks until all writers are done, RESTART blocks until all readers are done, TRUNCATE resets the WAL file to zero length, NOOP does nothing but returns checkpoint status.",
-				toStringArray(WalCheckpointMode.values())),
 
         // Limits
         LIMIT_LENGTH(
@@ -1115,44 +1112,6 @@ public class SQLiteConfig {
      */
     public void setWalAutocheckpoint(int pages) {
         set(Pragma.WAL_AUTOCHECKPOINT, pages);
-    }
-
-    public enum WalCheckpointMode implements PragmaValue {
-        PASSIVE,
-        FULL,
-        RESTART,
-        TRUNCATE,
-        NOOP;
-
-        @Override
-        public String getValue() {
-            return name();
-        }
-    }
-
-    /**
-     * In write-ahead log mode runs a checkpoint operation on the database.
-     *
-     * <p>The checkpoint mode controls how aggressively SQLite waits for readers and writers:
-     *
-     * <ul>
-     *   <li>{@link WalCheckpoint#PASSIVE} – transfers as many frames as possible without blocking;
-     *       does not wait for readers or writers
-     *   <li>{@link WalCheckpoint#FULL} – blocks until there are no more writers, then checkpoints
-     *       all frames
-     *   <li>{@link WalCheckpoint#RESTART} – like FULL, but also blocks until all readers are using
-     *       the database file directly, allowing the WAL to be restarted from the beginning
-     *   <li>{@link WalCheckpoint#TRUNCATE} – like RESTART, but additionally truncates the WAL file
-     *       to zero bytes
-     *   <li>{@link WalCheckpoint#NOOP} – does nothing; returns current checkpoint status only
-     * </ul>
-     *
-     * @param walCheckpoint the checkpoint mode to apply
-     * @see <a href=
-     *     "https://www.sqlite.org/pragma.html#pragma_wal_checkpoint">www.sqlite.org/pragma.html#pragma_wal_checkpoint</a>
-     */
-    public void setWalCheckpoint(WalCheckpointMode walCheckpoint) {
-        setPragma(Pragma.WAL_CHECKPOINT, walCheckpoint.name());
     }
 
     public enum TransactionMode implements PragmaValue {
