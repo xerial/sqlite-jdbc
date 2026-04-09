@@ -476,6 +476,10 @@ public class SQLiteConfig {
                 "application_id",
                 "Set the 32-bit signed big-endian \"Application ID\" integer located at offset 68 into the database header. Applications that use SQLite as their application file-format should set the Application ID integer to a unique integer so that utilities such as file(1) can determine the specific file type rather than just reporting \"SQLite3 Database\"",
                 null),
+        WAL_AUTOCHECKPOINT(
+                "wal_autocheckpoint",
+                "The wal_autocheckpoint pragma sets the write-ahead log auto-checkpoint interval. If the argument N is specified, then the auto-checkpoint is adjusted to fire whenever the WAL has N or more pages. Passing zero or a negative value turns off automatic checkpointing entirely. The default auto-checkpoint interval is 1000 or SQLITE_DEFAULT_WAL_AUTOCHECKPOINT.",
+                null),
 
         // Limits
         LIMIT_LENGTH(
@@ -1094,6 +1098,21 @@ public class SQLiteConfig {
      */
     public void setApplicationId(int id) {
         set(Pragma.APPLICATION_ID, id);
+    }
+
+    /**
+     * Sets the write-ahead log auto-checkpoint interval. The auto-checkpoint fires whenever the WAL
+     * reaches #pages. Setting the auto-checkpoint size to zero or a negative value turns
+     * auto-checkpointing off. The default interval is 1000 pages (or {@code
+     * SQLITE_DEFAULT_WAL_AUTOCHECKPOINT}).
+     *
+     * @param pages the number of WAL pages that triggers an automatic checkpoint; zero or negative
+     *     disables auto-checkpointing
+     * @see <a href=
+     *     "https://www.sqlite.org/pragma.html#pragma_wal_autocheckpoint">www.sqlite.org/pragma.html#pragma_wal_autocheckpoint</a>
+     */
+    public void setWalAutocheckpoint(int pages) {
+        set(Pragma.WAL_AUTOCHECKPOINT, pages);
     }
 
     public enum TransactionMode implements PragmaValue {
