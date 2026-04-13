@@ -185,7 +185,7 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <classifier>natives-desktop</classifier>
+                            <classifier>natives-all</classifier>
                             <excludes>
                                 <exclude>**/*.class</exclude>
                                 <exclude>**/*.properties</exclude>
