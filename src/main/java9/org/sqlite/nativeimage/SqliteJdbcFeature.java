@@ -4,10 +4,15 @@ import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeJNIAccess;
 import org.graalvm.nativeimage.hosted.RuntimeResourceAccess;
-import org.sqlite.*;
+import org.sqlite.BusyHandler;
+import org.sqlite.Collation;
+import org.sqlite.Function;
+import org.sqlite.ProgressHandler;
+import org.sqlite.SQLiteJDBCLoader;
 import org.sqlite.core.DB;
 import org.sqlite.core.NativeDB;
 import org.sqlite.jdbc3.JDBC3DatabaseMetaData;
+import org.sqlite.util.AndroidSignatureIgnore;
 import org.sqlite.util.LibraryLoaderUtil;
 import org.sqlite.util.OSInfo;
 import org.sqlite.util.ProcessRunner;
@@ -21,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+@AndroidSignatureIgnore(explanation = "Used by GraalVM only")
 public class SqliteJdbcFeature implements Feature {
 
     @Override
