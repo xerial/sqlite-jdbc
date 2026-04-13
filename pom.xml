@@ -152,7 +152,7 @@
                                 </manifestEntries>
                             </archive>
                             <excludes>
-                                <exclude>org/sqlite/native/Linux-Android/**/*</exclude>
+                                <exclude>org/sqlite/native/Linux-Android/</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -173,7 +173,7 @@
                                 </manifestEntries>
                             </archive>
                             <excludes>
-                                <exclude>org/sqlite/native/**/*</exclude>
+                                <exclude>org/sqlite/native/</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -187,9 +187,7 @@
                         <configuration>
                             <classifier>natives-all</classifier>
                             <excludes>
-                                <exclude>**/*.class</exclude>
-                                <exclude>**/*.properties</exclude>
-                                <exclude>org/sqlite/native/Linux-Android/**/*</exclude>
+                                <exclude>org/sqlite/native/Linux-Android/</exclude>
                             </excludes>
                             <includes>
                                 <include>org/sqlite/native/**/*</include>
@@ -205,10 +203,6 @@
                         </goals>
                         <configuration>
                             <classifier>natives-android</classifier>
-                            <excludes>
-                                <exclude>**/*.class</exclude>
-                                <exclude>**/*.properties</exclude>
-                            </excludes>
                             <includes>
                                 <include>org/sqlite/native/Linux-Android/**/*</include>
                             </includes>
@@ -223,10 +217,6 @@
                         </goals>
                         <configuration>
                             <classifier>natives-linux</classifier>
-                            <excludes>
-                                <exclude>**/*.class</exclude>
-                                <exclude>**/*.properties</exclude>
-                            </excludes>
                             <includes>
                                 <include>org/sqlite/native/Linux/**/*</include>
                                 <include>org/sqlite/native/Linux-Musl/**/*</include>
@@ -242,10 +232,6 @@
                         </goals>
                         <configuration>
                             <classifier>natives-windows</classifier>
-                            <excludes>
-                                <exclude>**/*.class</exclude>
-                                <exclude>**/*.properties</exclude>
-                            </excludes>
                             <includes>
                                 <include>org/sqlite/native/Windows/**/*</include>
                             </includes>
@@ -260,10 +246,6 @@
                         </goals>
                         <configuration>
                             <classifier>natives-mac</classifier>
-                            <excludes>
-                                <exclude>**/*.class</exclude>
-                                <exclude>**/*.properties</exclude>
-                            </excludes>
                             <includes>
                                 <include>org/sqlite/native/Mac/**/*</include>
                             </includes>
@@ -278,10 +260,6 @@
                         </goals>
                         <configuration>
                             <classifier>natives-freebsd</classifier>
-                            <excludes>
-                                <exclude>**/*.class</exclude>
-                                <exclude>**/*.properties</exclude>
-                            </excludes>
                             <includes>
                                 <include>org/sqlite/native/FreeBSD/**/*</include>
                             </includes>
