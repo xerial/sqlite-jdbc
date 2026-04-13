@@ -189,7 +189,7 @@ try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:?j
 
 Android expects JNI native libraries to be bundled differently than a normal Java application.
 
-You will need to extract the native libraries from our jar (from `org/sqlite/native/Linux-Android`), and place them in the `jniLibs` directory:
+You will need to extract the native libraries from our jar with classifier `natives-android` (from `org/sqlite/native/Linux-Android`), and place them in the `jniLibs` directory:
 
 ![android-studio-screenshot](./.github/README_IMAGES/android_jnilibs.png)
 
