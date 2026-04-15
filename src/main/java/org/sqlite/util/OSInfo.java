@@ -144,18 +144,12 @@ public class OSInfo {
         }
     }
 
+    @AndroidSignatureIgnore(explanation = "Should not reach this code path")
     public static boolean isMusl() {
         Path mapFilesDir = Paths.get("/proc/self/map_files");
         try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
             return dirStream
-                    .map(
-                            path -> {
-                                try {
-                                    return path.toRealPath().toString();
-                                } catch (IOException e) {
-                                    return "";
-                                }
-                            })
+                    .map(OSInfo::toRealPathOrEmpty)
                     .anyMatch(s -> s.toLowerCase().contains("musl"));
         } catch (Exception ignored) {
             // fall back to checking for alpine linux in the event we're using an older kernel which
@@ -164,6 +158,16 @@ public class OSInfo {
         }
     }
 
+    @AndroidSignatureIgnore(explanation = "Should not reach this code path")
+    private static String toRealPathOrEmpty(Path path) {
+        try {
+            return path.toRealPath().toString();
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    @AndroidSignatureIgnore(explanation = "Should not reach this code path")
     private static boolean isAlpineLinux() {
         try (Stream<String> osLines = Files.lines(Paths.get("/etc/os-release"))) {
             return osLines.anyMatch(l -> l.startsWith("ID") && l.contains("alpine"));
@@ -279,10 +283,10 @@ public class OSInfo {
             return "Mac";
         } else if (osName.contains("AIX")) {
             return "AIX";
-        } else if (isMusl()) {
-            return "Linux-Musl";
         } else if (isAndroid()) {
             return "Linux-Android";
+        } else if (isMusl()) {
+            return "Linux-Musl";
         } else if (osName.contains("Linux")) {
             return "Linux";
         } else {
