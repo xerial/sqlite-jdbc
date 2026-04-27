@@ -12,7 +12,7 @@ TARGET := target
 SRC:=src/main/java
 OSINFO_CLASS := org.sqlite.util.OSInfo
 OSINFO_PROG := lib/org/sqlite/util/OSInfo.class
-JAVA_CLASSPATH:=$(TARGET)/classpath/slf4j-api.jar
+JAVA_CLASSPATH?=$(TARGET)/classpath/slf4j-api.jar
 
 ## building OSInfo.java
 ifeq ("$(wildcard $(OSINFO_PROG))","")
