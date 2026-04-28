@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Used to generate the version for the amalgamation download zip.
 # https://www.sqlite.org/download.html#encoding
 # The version is encoded so that filenames sort in order of increasing version number when viewed using "ls".
@@ -7,13 +7,13 @@ version=""
 i=0
 export IFS="."
 for num in $1; do
-	if [ $i -gt 0 ]; then
-		if [ $num -le 9 ]; then
-			eval num=0$num
-		fi
-	fi
-	eval version=$version$num
-	let i+=1
+  if [ $i -gt 0 ]; then
+    case $num in
+      [0-9]) num=0$num ;;
+    esac
+  fi
+  version="${version}${num}"
+  i=$((i+1))
 done
 unset IFS
 if [ $i -gt 3 ]; then
