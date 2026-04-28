@@ -192,7 +192,8 @@ public class SQLiteConfig {
 
         Statement stat = conn.createStatement();
         try {
-            if (pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
+            boolean hasPasswordPragma = pragmaTable.containsKey(Pragma.PASSWORD.pragmaName);
+            if (hasPasswordPragma) {
                 String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
                 if (password != null && !password.isEmpty()) {
                     String hexkeyMode = pragmaTable.getProperty(Pragma.HEXKEY_MODE.pragmaName);
@@ -205,7 +206,6 @@ public class SQLiteConfig {
                         passwordPragma = "pragma key = '%s'";
                     }
                     stat.execute(String.format(passwordPragma, password.replace("'", "''")));
-                    stat.execute("select 1 from sqlite_schema");
                 }
             }
 
@@ -219,6 +219,11 @@ public class SQLiteConfig {
                 if (value != null) {
                     stat.execute(String.format("pragma %s=%s", key, value));
                 }
+            }
+
+            // password validation
+            if (hasPasswordPragma) {
+                stat.execute("select 1 from sqlite_schema");
             }
         } finally {
             if (stat != null) {
