@@ -120,7 +120,8 @@ public class SQLiteConfig {
         applyLimits(conn);
 
         Set<String> pragmaParams = allowedPragmaParams();
-        Set<String> restrictedPragmaParams = pragmaParams.isEmpty() ? restrictedPragmaParams() : new HashSet<>();
+        Set<String> restrictedPragmaParams =
+                pragmaParams.isEmpty() ? restrictedPragmaParams() : new HashSet<>();
 
         Statement stat = conn.createStatement();
         try {
@@ -143,7 +144,8 @@ public class SQLiteConfig {
 
             for (Object each : pragmaTable.keySet()) {
                 String key = each.toString();
-                if ((pragmaParams.isEmpty() && restrictedPragmaParams.contains(key)) || !pragmaParams.contains(key)) {
+                if ((pragmaParams.isEmpty() && restrictedPragmaParams.contains(key))
+                        || !pragmaParams.contains(key)) {
                     continue;
                 }
 
@@ -333,9 +335,10 @@ public class SQLiteConfig {
     }
 
     /**
-     * <p>Sets a pragma's value.</p>
-     * <p>Pragma name not from the {@link Pragma#values()} is allowed when "-Dorg.sqlite.jdbc.pragma.validation"
-     * value is not equals ignore case "true".</p>
+     * Sets a pragma's value.
+     *
+     * <p>Pragma name not from the {@link Pragma#values()} is allowed when
+     * "-Dorg.sqlite.jdbc.pragma.validation" value is not equals ignore case "true".
      *
      * @param pragmaName The pragma name to change.
      * @param value The value to set it to.
