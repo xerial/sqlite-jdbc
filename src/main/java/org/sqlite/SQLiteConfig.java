@@ -145,7 +145,7 @@ public class SQLiteConfig {
             for (Object each : pragmaTable.keySet()) {
                 String key = each.toString();
                 if ((pragmaParams.isEmpty() && restrictedPragmaParams.contains(key))
-                        || !pragmaParams.contains(key)) {
+                        || (!pragmaParams.isEmpty() && !pragmaParams.contains(key))) {
                     continue;
                 }
 
