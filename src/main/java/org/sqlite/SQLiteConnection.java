@@ -241,14 +241,14 @@ public abstract class SQLiteConnection implements Connection {
                         resourceAddr = new URL(resourceName);
                     } catch (MalformedURLException e) {
                         throw new SQLException(
-                                String.format("resource %s not found: %s", resourceName, e));
+                                "resource %s not found: %s".formatted(resourceName, e));
                     }
                 }
 
                 try {
                     fileName = extractResource(resourceAddr).getAbsolutePath();
                 } catch (IOException e) {
-                    throw new SQLException(String.format("failed to load %s: %s", resourceName, e));
+                    throw new SQLException("failed to load %s: %s".formatted(resourceName, e));
                 }
             } else {
                 fileName = new File(fileName).getAbsolutePath();
@@ -286,7 +286,7 @@ public abstract class SQLiteConnection implements Connection {
         }
 
         String tempFolder = new File(System.getProperty("java.io.tmpdir")).getAbsolutePath();
-        String dbFileName = String.format("sqlite-jdbc-tmp-%s.db", UUID.randomUUID());
+        String dbFileName = "sqlite-jdbc-tmp-%s.db".formatted(UUID.randomUUID());
         File dbFile = new File(tempFolder, dbFileName);
 
         if (dbFile.exists()) {
@@ -525,8 +525,7 @@ public abstract class SQLiteConnection implements Connection {
             if (SQLiteConfig.pragmaSet.contains(key)) {
                 if (kvp.length == 1) {
                     throw new SQLException(
-                            String.format(
-                                    "Please specify a value for PRAGMA %s in URL %s", key, url));
+                            "Please specify a value for PRAGMA %s in URL %s".formatted(key, url));
                 }
                 String value = kvp[1].trim();
                 if (!value.isEmpty()) {

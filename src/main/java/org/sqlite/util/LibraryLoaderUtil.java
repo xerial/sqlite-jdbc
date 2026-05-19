@@ -12,8 +12,7 @@ public class LibraryLoaderUtil {
      */
     public static String getNativeLibResourcePath() {
         String packagePath = SQLiteJDBCLoader.class.getPackage().getName().replace(".", "/");
-        return String.format(
-                "/%s/native/%s", packagePath, OSInfo.getNativeLibFolderPathForCurrentOS());
+        return "/%s/native/%s".formatted(packagePath, OSInfo.getNativeLibFolderPathForCurrentOS());
     }
 
     /** Get the OS-specific name of the sqlitejdbc native library. */

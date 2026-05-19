@@ -29,7 +29,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -99,7 +98,7 @@ public class SQLiteJDBCLoader {
                                                     .startsWith(searchPattern))
                     .forEach(
                             nativeLib -> {
-                                Path lckFile = Paths.get(nativeLib + LOCK_EXT);
+                                Path lckFile = Path.of(nativeLib + LOCK_EXT);
                                 if (Files.notExists(lckFile)) {
                                     try {
                                         Files.delete(nativeLib);
@@ -186,11 +185,11 @@ public class SQLiteJDBCLoader {
         // when multiple JVMs with different architectures running at the same time
         String uuid = UUID.randomUUID().toString();
         String extractedLibFileName =
-                String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
+                "sqlite-%s-%s-%s".formatted(getVersion(), uuid, libraryFileName);
         String extractedLckFileName = extractedLibFileName + LOCK_EXT;
 
-        Path extractedLibFile = Paths.get(targetFolder, extractedLibFileName);
-        Path extractedLckFile = Paths.get(targetFolder, extractedLckFileName);
+        Path extractedLibFile = Path.of(targetFolder, extractedLibFileName);
+        Path extractedLckFile = Path.of(targetFolder, extractedLckFileName);
 
         try {
             // Extract a native library file into the target directory
@@ -217,8 +216,7 @@ public class SQLiteJDBCLoader {
                         InputStream extractedLibIn = Files.newInputStream(extractedLibFile)) {
                     if (!contentsEquals(nativeIn, extractedLibIn)) {
                         throw new FileException(
-                                String.format(
-                                        "Failed to write a native library file at %s",
+                                "Failed to write a native library file at %s".formatted(
                                         extractedLibFile));
                     }
                 }
@@ -362,8 +360,7 @@ public class SQLiteJDBCLoader {
 
         extracted = false;
         throw new NativeLibraryNotFoundException(
-                String.format(
-                        "No native library found for os.name=%s, os.arch=%s, paths=[%s]",
+                "No native library found for os.name=%s, os.arch=%s, paths=[%s]".formatted(
                         OSInfo.getOSName(),
                         OSInfo.getArchName(),
                         StringUtils.join(triedPaths, File.pathSeparator)));

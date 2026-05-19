@@ -47,8 +47,8 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         pointer.safeRunConsume(DB::reset);
         exhaustedResults = false;
 
-        if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection connection) {
+            connection.tryEnforceTransactionMode();
         }
 
         return this.withConnectionTimeout(
@@ -81,8 +81,8 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         pointer.safeRunConsume(DB::reset);
         exhaustedResults = false;
 
-        if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection connection) {
+            connection.tryEnforceTransactionMode();
         }
 
         return this.withConnectionTimeout(
@@ -118,8 +118,8 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
         pointer.safeRunConsume(DB::reset);
         exhaustedResults = false;
 
-        if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection connection) {
+            connection.tryEnforceTransactionMode();
         }
 
         return this.withConnectionTimeout(
@@ -314,22 +314,22 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#setDouble(int, double) */
     public void setDouble(int pos, double value) throws SQLException {
-        batch(pos, new Double(value));
+        batch(pos, Double.valueOf(value));
     }
 
     /** @see java.sql.PreparedStatement#setFloat(int, float) */
     public void setFloat(int pos, float value) throws SQLException {
-        batch(pos, new Float(value));
+        batch(pos, Float.valueOf(value));
     }
 
     /** @see java.sql.PreparedStatement#setInt(int, int) */
     public void setInt(int pos, int value) throws SQLException {
-        batch(pos, new Integer(value));
+        batch(pos, Integer.valueOf(value));
     }
 
     /** @see java.sql.PreparedStatement#setLong(int, long) */
     public void setLong(int pos, long value) throws SQLException {
-        batch(pos, new Long(value));
+        batch(pos, Long.valueOf(value));
     }
 
     /** @see java.sql.PreparedStatement#setNull(int, int) */
@@ -346,24 +346,24 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void setObject(int pos, Object value) throws SQLException {
         if (value == null) {
             batch(pos, null);
-        } else if (value instanceof java.util.Date) {
-            setDateByMilliseconds(pos, ((java.util.Date) value).getTime(), Calendar.getInstance());
+        } else if (value instanceof java.util.Date date) {
+            setDateByMilliseconds(pos, date.getTime(), Calendar.getInstance());
         } else if (value instanceof Long) {
             batch(pos, value);
         } else if (value instanceof Integer) {
             batch(pos, value);
-        } else if (value instanceof Short) {
-            batch(pos, new Integer(((Short) value).intValue()));
+        } else if (value instanceof Short short1) {
+            batch(pos, Integer.valueOf(short1.intValue()));
         } else if (value instanceof Float) {
             batch(pos, value);
         } else if (value instanceof Double) {
             batch(pos, value);
-        } else if (value instanceof Boolean) {
-            setBoolean(pos, ((Boolean) value).booleanValue());
+        } else if (value instanceof Boolean boolean1) {
+            setBoolean(pos, boolean1.booleanValue());
         } else if (value instanceof byte[]) {
             batch(pos, value);
-        } else if (value instanceof BigDecimal) {
-            setBigDecimal(pos, (BigDecimal) value);
+        } else if (value instanceof BigDecimal decimal) {
+            setBigDecimal(pos, decimal);
         } else {
             batch(pos, value.toString());
         }

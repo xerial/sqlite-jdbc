@@ -882,20 +882,20 @@ public abstract class DB implements Codes {
         pos++;
         if (v == null) {
             return bind_null(stmt, pos);
-        } else if (v instanceof Integer) {
-            return bind_int(stmt, pos, (Integer) v);
-        } else if (v instanceof Short) {
-            return bind_int(stmt, pos, ((Short) v).intValue());
-        } else if (v instanceof Long) {
-            return bind_long(stmt, pos, (Long) v);
-        } else if (v instanceof Float) {
-            return bind_double(stmt, pos, ((Float) v).doubleValue());
-        } else if (v instanceof Double) {
-            return bind_double(stmt, pos, (Double) v);
-        } else if (v instanceof String) {
-            return bind_text(stmt, pos, (String) v);
-        } else if (v instanceof byte[]) {
-            return bind_blob(stmt, pos, (byte[]) v);
+        } else if (v instanceof Integer integer) {
+            return bind_int(stmt, pos, integer);
+        } else if (v instanceof Short short1) {
+            return bind_int(stmt, pos, short1.intValue());
+        } else if (v instanceof Long long1) {
+            return bind_long(stmt, pos, long1);
+        } else if (v instanceof Float float1) {
+            return bind_double(stmt, pos, float1.doubleValue());
+        } else if (v instanceof Double double1) {
+            return bind_double(stmt, pos, double1);
+        } else if (v instanceof String string) {
+            return bind_text(stmt, pos, string);
+        } else if (v instanceof byte[] bytes) {
+            return bind_blob(stmt, pos, bytes);
         } else {
             throw new SQLException("unexpected param type: " + v.getClass());
         }
@@ -1175,9 +1175,9 @@ public abstract class DB implements Codes {
         SQLiteErrorCode code = SQLiteErrorCode.getErrorCode(errorCode);
         String msg;
         if (code == SQLiteErrorCode.UNKNOWN_ERROR) {
-            msg = String.format("%s:%s (%s)", code, errorCode, errorMessage);
+            msg = "%s:%s (%s)".formatted(code, errorCode, errorMessage);
         } else {
-            msg = String.format("%s (%s)", code, errorMessage);
+            msg = "%s (%s)".formatted(code, errorMessage);
         }
         return new SQLiteException(msg, code);
     }

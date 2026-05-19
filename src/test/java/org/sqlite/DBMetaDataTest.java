@@ -514,13 +514,12 @@ public class DBMetaDataTest {
             "Issue #1132 - Generated columns with stored in SQLite are not marked as generated")
     public void getColumnsIncludingGeneratedStored() throws SQLException {
         stat.executeUpdate(
-                "create table foo("
-                        + "\n"
-                        + "  id integer primary key,"
-                        + "\n"
-                        + "  bar int not null generated always as (id + 1) stored"
-                        + "\n"
-                        + ");");
+                """
+                create table foo(
+                  id integer primary key,
+                  bar int not null generated always as (id + 1) stored
+                );\
+                """);
 
         ResultSet rs = meta.getColumns(null, null, "foo", "%");
         assertThat(rs.next()).isTrue();
@@ -1671,7 +1670,7 @@ public class DBMetaDataTest {
         assertThat(meta.getDriverName()).as("driver name").isEqualTo("SQLite JDBC");
         assertThat(
                         meta.getDriverVersion()
-                                .startsWith(String.format("%d.%d", majorVersion, minorVersion)))
+                                .startsWith("%d.%d".formatted(majorVersion, minorVersion)))
                 .as("driver version")
                 .isTrue();
         assertThat(meta.getDriverMajorVersion()).as("driver major version").isEqualTo(majorVersion);

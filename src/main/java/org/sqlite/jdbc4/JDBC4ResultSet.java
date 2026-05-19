@@ -41,8 +41,7 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         final boolean wasOpen = isOpen(); // prevent close() recursion
         super.close();
         // close-on-completion regardless of closeStmt
-        if (wasOpen && stmt instanceof JDBC4Statement) {
-            JDBC4Statement stat = (JDBC4Statement) stmt;
+        if (wasOpen && stmt instanceof JDBC4Statement stat) {
             // check if its not closed already in which case no-op
             if (stat.closeOnCompletion && !stat.isClosed()) {
                 stat.close();

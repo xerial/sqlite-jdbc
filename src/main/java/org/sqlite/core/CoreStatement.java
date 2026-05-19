@@ -81,8 +81,8 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
-        if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection connection) {
+            connection.tryEnforceTransactionMode();
         }
 
         boolean success = false;
@@ -113,8 +113,8 @@ public abstract class CoreStatement implements Codes {
         if (sql == null) throw new SQLException("SQLiteJDBC internal error: sql==null");
         if (rs.isOpen()) throw new SQLException("SQLite JDBC internal error: rs.isOpen() on exec.");
 
-        if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection connection) {
+            connection.tryEnforceTransactionMode();
         }
 
         boolean rc = false;

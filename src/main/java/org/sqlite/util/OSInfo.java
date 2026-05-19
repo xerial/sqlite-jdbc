@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -146,7 +145,7 @@ public class OSInfo {
 
     @AndroidSignatureIgnore(explanation = "Should not reach this code path")
     public static boolean isMusl() {
-        Path mapFilesDir = Paths.get("/proc/self/map_files");
+        Path mapFilesDir = Path.of("/proc/self/map_files");
         try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
             return dirStream
                     .map(OSInfo::toRealPathOrEmpty)
@@ -169,7 +168,7 @@ public class OSInfo {
 
     @AndroidSignatureIgnore(explanation = "Should not reach this code path")
     private static boolean isAlpineLinux() {
-        try (Stream<String> osLines = Files.lines(Paths.get("/etc/os-release"))) {
+        try (Stream<String> osLines = Files.lines(Path.of("/etc/os-release"))) {
             return osLines.anyMatch(l -> l.startsWith("ID") && l.contains("alpine"));
         } catch (Exception ignored2) {
         }

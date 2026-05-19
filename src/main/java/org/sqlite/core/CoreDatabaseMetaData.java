@@ -157,7 +157,7 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
         if (tableName == null) {
             return "null";
         } else {
-            return String.format("'%s'", tableName);
+            return "'%s'".formatted(tableName);
         }
     }
 

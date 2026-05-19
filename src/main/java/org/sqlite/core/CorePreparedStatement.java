@@ -65,8 +65,8 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
             return new long[] {};
         }
 
-        if (this.conn instanceof JDBC3Connection) {
-            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        if (this.conn instanceof JDBC3Connection connection) {
+            connection.tryEnforceTransactionMode();
         }
 
         return this.withConnectionTimeout(
@@ -120,11 +120,11 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
 
             case REAL:
                 // long to Julian date
-                batch(pos, new Double((value / 86400000.0) + 2440587.5));
+                batch(pos, Double.valueOf((value / 86400000.0) + 2440587.5));
                 break;
 
             default: // INTEGER:
-                batch(pos, new Long(value / config.getDateMultiplier()));
+                batch(pos, Long.valueOf(value / config.getDateMultiplier()));
         }
     }
 }

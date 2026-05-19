@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Arrays;
@@ -79,7 +79,7 @@ public class MultipleClassLoaderTest {
                 System.getProperty("java.class.path").split(System.getProperty("path.separator"));
         // Find the classes under test.
         String targetFolderName =
-                Paths.get("").toAbsolutePath().resolve(Paths.get("target", "classes")).toString();
+                Path.of("").toAbsolutePath().resolve(Path.of("target", "classes")).toString();
         File classesDir = null;
         String classesDirPrefix = null;
         for (String stringUrl : stringUrls) {
@@ -95,17 +95,17 @@ public class MultipleClassLoaderTest {
         }
 
         // find the slf4j-api jar
-        String targetSlf4j = Paths.get("org", "slf4j", "slf4j-api").toString();
+        String targetSlf4j = Path.of("org", "slf4j", "slf4j-api").toString();
         Optional<String> slf4jApi =
                 Arrays.stream(stringUrls).filter(s -> s.contains(targetSlf4j)).findFirst();
-        if (!slf4jApi.isPresent()) fail("Couldn't find slf4j-api");
+        if (slf4jApi.isEmpty()) fail("Couldn't find slf4j-api");
 
         // Create a JAR file out the classes and resources
         File jarFile = File.createTempFile("jar-for-test-", ".jar");
         createJar(classesDir, classesDirPrefix, jarFile);
         URL[] jarUrl =
                 new URL[] {
-                    jarFile.toPath().toUri().toURL(), Paths.get(slf4jApi.get()).toUri().toURL()
+                    jarFile.toPath().toUri().toURL(), Path.of(slf4jApi.get()).toUri().toURL()
                 };
 
         final AtomicInteger completedThreads = new AtomicInteger(0);

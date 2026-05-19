@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -164,7 +163,7 @@ public class ConnectionTest {
         assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
-                        String.format("jdbc:sqlite::resource:%s", testDB.toURI().toURL()));
+                        "jdbc:sqlite::resource:%s".formatted(testDB.toURI().toURL()));
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from coordinate");
         assertThat(rs.next()).isTrue();
@@ -180,8 +179,7 @@ public class ConnectionTest {
 
         Connection conn =
                 DriverManager.getConnection(
-                        String.format(
-                                "jdbc:sqlite::resource:jar:%s!/sample.db",
+                        "jdbc:sqlite::resource:jar:%s!/sample.db".formatted(
                                 testJAR.toURI().toURL()));
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("select * from coordinate");
@@ -196,7 +194,7 @@ public class ConnectionTest {
         File testDB = copyToTemp("sample.db");
 
         assertThat(testDB.exists()).isTrue();
-        Connection conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s", testDB));
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:%s".formatted(testDB));
         conn.close();
     }
 
@@ -291,8 +289,7 @@ public class ConnectionTest {
         assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
-                        String.format(
-                                "jdbc:sqlite:%s?journal_mode=WAL&synchronous=OFF&journal_size_limit=500",
+                        "jdbc:sqlite:%s?journal_mode=WAL&synchronous=OFF&journal_size_limit=500".formatted(
                                 testDB));
         Statement stat = conn.createStatement();
 
@@ -319,7 +316,7 @@ public class ConnectionTest {
         assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
-                        String.format("jdbc:sqlite:%s?limit_attached=0", testDB));
+                        "jdbc:sqlite:%s?limit_attached=0".formatted(testDB));
         Statement stat = conn.createStatement();
 
         assertThatExceptionOfType(SQLException.class)
@@ -360,8 +357,7 @@ public class ConnectionTest {
         assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
-                        String.format(
-                                "jdbc:sqlite:%s?synchronous=OFF&&&&journal_mode=WAL", testDB));
+                        "jdbc:sqlite:%s?synchronous=OFF&&&&journal_mode=WAL".formatted(testDB));
         Statement stat = conn.createStatement();
 
         ResultSet rs = stat.executeQuery("pragma journal_mode");
@@ -383,8 +379,7 @@ public class ConnectionTest {
         assertThat(testDB.exists()).isTrue();
         Connection conn =
                 DriverManager.getConnection(
-                        String.format(
-                                "jdbc:sqlite:%s?journal_mode=WAL&journal_mode=MEMORY&journal_mode=TRUNCATE",
+                        "jdbc:sqlite:%s?journal_mode=WAL&journal_mode=MEMORY&journal_mode=TRUNCATE".formatted(
                                 testDB));
         Statement stat = conn.createStatement();
 
@@ -405,7 +400,7 @@ public class ConnectionTest {
         props.setProperty(Pragma.JOURNAL_MODE.pragmaName, JournalMode.TRUNCATE.name());
         Connection conn =
                 DriverManager.getConnection(
-                        String.format("jdbc:sqlite:%s?journal_mode=WAL", testDB), props);
+                        "jdbc:sqlite:%s?journal_mode=WAL".formatted(testDB), props);
         Statement stat = conn.createStatement();
 
         ResultSet rs = stat.executeQuery("pragma journal_mode");
@@ -418,7 +413,7 @@ public class ConnectionTest {
 
     @Test
     public void openNonExistingFileNoCreate() {
-        Path nonExisting = Paths.get("non_existing.db").toAbsolutePath();
+        Path nonExisting = Path.of("non_existing.db").toAbsolutePath();
         assertThat(Files.exists(nonExisting)).isFalse();
         SQLiteConfig cfg = new SQLiteConfig();
         cfg.resetOpenMode(SQLiteOpenMode.CREATE);

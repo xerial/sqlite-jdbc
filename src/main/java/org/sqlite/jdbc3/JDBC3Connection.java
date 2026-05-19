@@ -240,7 +240,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
+        getDatabase().exec("SAVEPOINT %s".formatted(sp.getSavepointName()), false);
         return sp;
     }
 
@@ -255,7 +255,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
+        getDatabase().exec("SAVEPOINT %s".formatted(sp.getSavepointName()), false);
         return sp;
     }
 
@@ -266,7 +266,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             throw new SQLException("database in auto-commit mode");
         }
         getDatabase()
-                .exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()), false);
+                .exec("RELEASE SAVEPOINT %s".formatted(savepoint.getSavepointName()), false);
     }
 
     /** @see java.sql.Connection#rollback(java.sql.Savepoint) */
@@ -277,7 +277,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         }
         getDatabase()
                 .exec(
-                        String.format("ROLLBACK TO SAVEPOINT %s", savepoint.getSavepointName()),
+                "ROLLBACK TO SAVEPOINT %s".formatted(savepoint.getSavepointName()),
                         getAutoCommit());
     }
 

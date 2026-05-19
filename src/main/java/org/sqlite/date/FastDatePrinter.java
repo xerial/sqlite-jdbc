@@ -18,6 +18,7 @@ package org.sqlite.date;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
@@ -89,7 +90,7 @@ public class FastDatePrinter implements DatePrinter, Serializable {
      *
      * @see java.io.Serializable
      */
-    private static final long serialVersionUID = 1L;
+    @Serial private static final long serialVersionUID = 1L;
 
     /** FULL locale dependent date or time style. */
     public static final int FULL = DateFormat.FULL;
@@ -372,12 +373,12 @@ public class FastDatePrinter implements DatePrinter, Serializable {
      */
     public StringBuffer format(
             final Object obj, final StringBuffer toAppendTo, final FieldPosition pos) {
-        if (obj instanceof Date) {
-            return format((Date) obj, toAppendTo);
-        } else if (obj instanceof Calendar) {
-            return format((Calendar) obj, toAppendTo);
-        } else if (obj instanceof Long) {
-            return format(((Long) obj).longValue(), toAppendTo);
+        if (obj instanceof Date date) {
+            return format(date, toAppendTo);
+        } else if (obj instanceof Calendar calendar) {
+            return format(calendar, toAppendTo);
+        } else if (obj instanceof Long long1) {
+            return format(long1.longValue(), toAppendTo);
         } else {
             throw new IllegalArgumentException(
                     "Unknown class: " + (obj == null ? "<null>" : obj.getClass().getName()));
@@ -1180,8 +1181,7 @@ public class FastDatePrinter implements DatePrinter, Serializable {
             if (this == obj) {
                 return true;
             }
-            if (obj instanceof TimeZoneDisplayKey) {
-                final TimeZoneDisplayKey other = (TimeZoneDisplayKey) obj;
+            if (obj instanceof TimeZoneDisplayKey other) {
                 return mTimeZone.equals(other.mTimeZone)
                         && mStyle == other.mStyle
                         && mLocale.equals(other.mLocale);

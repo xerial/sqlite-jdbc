@@ -83,7 +83,7 @@ public class StatementTest {
         assertThat(rs.getInt(1)).isEqualTo(Integer.MAX_VALUE);
         assertThat(rs.getString(1)).isEqualTo(Integer.toString(Integer.MAX_VALUE));
         assertThat(0.001)
-                .isCloseTo(new Integer(Integer.MAX_VALUE).doubleValue(), offset(rs.getDouble(1)));
+                .isCloseTo(Integer.valueOf(Integer.MAX_VALUE).doubleValue(), offset(rs.getDouble(1)));
         assertThat(rs.next()).isFalse();
         rs.close();
     }
@@ -331,8 +331,10 @@ public class StatementTest {
 
         // test INSERT with common table expression
         stat.executeUpdate(
-                "  WITH colors as (select 'green' as color) \n"
-                        + "INSERT into t1 (v) select color from colors;");
+                """
+                  WITH colors as (select 'green' as color)\s
+                INSERT into t1 (v) select color from colors;\
+                """);
         rs = stat.getGeneratedKeys();
         assertThat(rs.next()).isTrue();
         assertThat(rs.getInt(1)).isEqualTo(3);

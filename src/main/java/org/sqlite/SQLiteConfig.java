@@ -122,8 +122,7 @@ public class SQLiteConfig {
             pragmaParams.add(each.pragmaName);
         }
 
-        if (conn instanceof SQLiteConnection) {
-            SQLiteConnection sqliteConn = (SQLiteConnection) conn;
+        if (conn instanceof SQLiteConnection sqliteConn) {
             sqliteConn.setLimit(
                     SQLiteLimits.SQLITE_LIMIT_ATTACHED,
                     parseLimitPragma(Pragma.LIMIT_ATTACHED, DEFAULT_MAX_ATTACHED));
@@ -204,7 +203,7 @@ public class SQLiteConfig {
                     } else {
                         passwordPragma = "pragma key = '%s'";
                     }
-                    stat.execute(String.format(passwordPragma, password.replace("'", "''")));
+                    stat.execute(passwordPragma.formatted(password.replace("'", "''")));
                     stat.execute("select 1 from sqlite_schema");
                 }
             }
@@ -217,7 +216,7 @@ public class SQLiteConfig {
 
                 String value = pragmaTable.getProperty(key);
                 if (value != null) {
-                    stat.execute(String.format("pragma %s=%s", key, value));
+                    stat.execute("pragma %s=%s".formatted(key, value));
                 }
             }
         } finally {
@@ -1070,7 +1069,7 @@ public class SQLiteConfig {
      *     href="https://www.sqlite.org/pragma.html#pragma_temp_store_directory">www.sqlite.org/pragma.html#pragma_temp_store_directory</a>
      */
     public void setTempStoreDirectory(String directoryName) {
-        setPragma(Pragma.TEMP_STORE_DIRECTORY, String.format("'%s'", directoryName));
+        setPragma(Pragma.TEMP_STORE_DIRECTORY, "'%s'".formatted(directoryName));
     }
 
     /**

@@ -16,6 +16,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -206,7 +207,7 @@ public class JDBCTest {
                                     try {
                                         try (Connection connection = dataSource.getConnection()) {
                                             connection.setAutoCommit(false);
-                                            boolean read = Math.random() < 0.5;
+                                            boolean read = ThreadLocalRandom.current().nextDouble() < 0.5;
                                             if (read) {
                                                 connection.setReadOnly(true);
                                                 try (Statement statement =

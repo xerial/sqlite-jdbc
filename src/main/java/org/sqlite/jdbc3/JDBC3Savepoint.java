@@ -24,6 +24,6 @@ public class JDBC3Savepoint implements Savepoint {
     }
 
     public String getSavepointName() throws SQLException {
-        return name == null ? String.format("SQLITE_SAVEPOINT_%s", id) : name;
+        return name == null ? "SQLITE_SAVEPOINT_%s".formatted(id) : name;
     }
 }

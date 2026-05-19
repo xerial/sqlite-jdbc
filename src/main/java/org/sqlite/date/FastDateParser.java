@@ -18,6 +18,7 @@ package org.sqlite.date;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -71,7 +72,7 @@ public class FastDateParser implements DateParser, Serializable {
      *
      * @see java.io.Serializable
      */
-    private static final long serialVersionUID = 2L;
+    @Serial private static final long serialVersionUID = 2L;
 
     static final Locale JAPANESE_IMPERIAL = new Locale("ja", "JP", "JP");
 
