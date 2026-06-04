@@ -42,6 +42,7 @@ jobs:
         with:
           workflow: build-native.yml
           wait-for-completion: true
+          sync-status: true
 
       - name: Invoke CI workflow
         uses: benc-uk/workflow-dispatch@v1
