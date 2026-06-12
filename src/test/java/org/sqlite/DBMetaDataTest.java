@@ -478,6 +478,20 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getColumnsTableNameWithQuote() throws SQLException {
+        stat.executeUpdate("create table \"o'brien\" (id integer, name text)");
+
+        ResultSet rs = meta.getColumns(null, null, "o'brien", "%");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("o'brien");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("id");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_NAME")).isEqualTo("o'brien");
+        assertThat(rs.getString("COLUMN_NAME")).isEqualTo("name");
+        assertThat(rs.next()).isFalse();
+    }
+
+    @Test
     public void getColumnsPrecisionScale() throws SQLException {
         stat.executeUpdate("create table gh_1215 (n numeric ( 10 , 5 ), d decimal ( 10 ))");
 
