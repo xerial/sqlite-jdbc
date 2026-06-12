@@ -1095,7 +1095,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                                 .append(iDecimalDigits)
                                 .append(" as colDecimalDigits, ")
                                 .append("'")
-                                .append(tableName)
+                                .append(escape(tableName))
                                 .append("' as tblname, ")
                                 .append("'")
                                 .append(escape(colName))
