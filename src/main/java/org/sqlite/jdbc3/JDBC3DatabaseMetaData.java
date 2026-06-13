@@ -1740,7 +1740,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
             sql.append(" AND TABLE_TYPE IN (");
             sql.append(
                     Arrays.stream(types)
-                            .map((t) -> "'" + t.toUpperCase() + "'")
+                            .map((t) -> "'" + escape(t.toUpperCase()) + "'")
                             .collect(Collectors.joining(",")));
             sql.append(")");
         }

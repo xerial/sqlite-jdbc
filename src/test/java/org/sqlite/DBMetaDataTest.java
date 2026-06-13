@@ -478,6 +478,15 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getTablesTypeWithQuote() throws SQLException {
+        // a type containing a single quote must be treated as a literal, not break out of the
+        // TABLE_TYPE IN (...) list; 'X' matches nothing so the result must be empty
+        try (ResultSet rs = meta.getTables(null, null, null, new String[] {"X') OR ('1'='1"})) {
+            assertThat(rs.next()).isFalse();
+        }
+    }
+
+    @Test
     public void getColumnsTableNameWithQuote() throws SQLException {
         stat.executeUpdate("create table \"o'brien\" (id integer, name text)");
 
