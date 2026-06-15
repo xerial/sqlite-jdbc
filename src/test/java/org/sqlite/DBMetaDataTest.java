@@ -487,6 +487,43 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getImportedKeysCatalogSchemaWithQuote() throws SQLException {
+        stat.executeUpdate("create table parent (id integer primary key)");
+        stat.executeUpdate(
+                "create table child1 (id integer primary key, pid integer, foreign key(pid) references parent(id))");
+        // a catalog/schema containing a single quote must be carried through as a literal,
+        // not break out of the surrounding string in the generated metadata query
+        try (ResultSet rs = meta.getImportedKeys("ca'talog", "sch'ema", "child1")) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("PKTABLE_CAT")).isEqualTo("ca'talog");
+            assertThat(rs.getString("PKTABLE_SCHEM")).isEqualTo("sch'ema");
+        }
+    }
+
+    @Test
+    public void getExportedKeysCatalogSchemaWithQuote() throws SQLException {
+        stat.executeUpdate("create table parent (id integer primary key)");
+        stat.executeUpdate(
+                "create table child1 (id integer primary key, pid integer, foreign key(pid) references parent(id))");
+        try (ResultSet rs = meta.getExportedKeys("ca'talog", "sch'ema", "parent")) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("PKTABLE_CAT")).isEqualTo("ca'talog");
+            assertThat(rs.getString("PKTABLE_SCHEM")).isEqualTo("sch'ema");
+        }
+    }
+
+    @Test
+    public void getCrossReferenceCatalogSchemaWithQuote() throws SQLException {
+        stat.executeUpdate("create table parent (id integer primary key)");
+        stat.executeUpdate(
+                "create table child1 (id integer primary key, pid integer, foreign key(pid) references parent(id))");
+        try (ResultSet rs =
+                meta.getCrossReference("ca'talog", "sch'ema", "parent", null, null, "child1")) {
+            assertThat(rs.next()).isFalse();
+        }
+    }
+
+    @Test
     public void getColumnsTableNameWithQuote() throws SQLException {
         stat.executeUpdate("create table \"o'brien\" (id integer, name text)");
 

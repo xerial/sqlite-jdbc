@@ -171,6 +171,9 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
         // TODO: this function is ugly, pass this work off to SQLite, then we
         //       don't have to worry about Unicode 4, other characters needing
         //       escaping, etc.
+        if (val == null) {
+            return null;
+        }
         int len = val.length();
         StringBuilder buf = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
