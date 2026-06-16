@@ -94,10 +94,13 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         java: [ '17', '21', '25' ]
-        profiles: ['native', 'native,native-exported']
+        profiles: [ 'native', 'native,native-exported' ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
+      - name: Configure MSVC Environment for Windows
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
       - uses: graalvm/setup-graalvm@v1
         with:
           java-version: ${{ matrix.java }}
