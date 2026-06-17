@@ -1349,7 +1349,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                 .append(" as PKTABLE_CAT, ")
                 .append(schema)
                 .append(" as PKTABLE_SCHEM, ")
-                .append(quote(target))
+                .append(quote(escape(target)))
                 .append(" as PKTABLE_NAME, ")
                 .append(hasImportedKey ? "pcn" : "''")
                 .append(" as PKCOLUMN_NAME, ")

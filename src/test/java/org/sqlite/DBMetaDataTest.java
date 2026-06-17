@@ -513,6 +513,21 @@ public class DBMetaDataTest {
     }
 
     @Test
+    public void getExportedKeysTableNameWithQuote() throws SQLException {
+        // the primary-key table name is read back from sqlite_schema and put into PKTABLE_NAME;
+        // a name containing a single quote must stay a literal, not break out of the generated
+        // query
+        stat.executeUpdate("create table \"o'parent\" (id integer primary key)");
+        stat.executeUpdate(
+                "create table child1 (id integer primary key, pid integer, foreign key(pid) references \"o'parent\"(id))");
+        try (ResultSet rs = meta.getExportedKeys(null, null, "o'parent")) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("PKTABLE_NAME")).isEqualTo("o'parent");
+            assertThat(rs.getString("FKTABLE_NAME")).isEqualTo("child1");
+        }
+    }
+
+    @Test
     public void getCrossReferenceCatalogSchemaWithQuote() throws SQLException {
         stat.executeUpdate("create table parent (id integer primary key)");
         stat.executeUpdate(
