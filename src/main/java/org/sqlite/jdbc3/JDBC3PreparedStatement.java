@@ -25,6 +25,7 @@ import java.util.Calendar;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.core.CorePreparedStatement;
 import org.sqlite.core.DB;
+import org.sqlite.util.AndroidSignatureIgnore;
 
 public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
@@ -169,6 +170,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     }
 
     /** @see java.sql.ParameterMetaData#getParameterTypeName(int) */
+    @AndroidSignatureIgnore(explanation = "Android does not support java.sql.JDBCType")
     public String getParameterTypeName(int pos) throws SQLException {
         checkIndex(pos);
         return JDBCType.valueOf(getParameterType(pos)).getName();

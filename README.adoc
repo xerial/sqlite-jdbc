@@ -1,5 +1,5 @@
 = SQLite JDBC Driver
-:project-version: 3.50.3.0
+:project-version: 3.53.2.0
 
 image:https://img.shields.io/github/actions/workflow/status/xerial/sqlite-jdbc/ci.yml?branch=master[GitHub Workflow Status (branch),link=https://github.com/xerial/sqlite-jdbc/actions/workflows/ci.yml?query=branch%3Amaster]
 image:https://badges.gitter.im/xerial/sqlite-jdbc.svg[Join the chat,link=https://gitter.im/xerial/sqlite-jdbc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge]
@@ -115,13 +115,29 @@ the following operating systems:
 |macOS | |✔ | | | |✔ | |
 |Linux (libc) |✔ |✔ |✔ |✔ |✔ |✔ |✔ |✔ 
 |Linux (musl) |✔ |✔ | | | |✔ | |
-|Android (API Level 24+) |✔ |✔ |✔ | | |✔ | |
 |FreeBSD |✔ |✔ | | | |✔ | |
+|link:USAGE.md[Android (API Level 24+)] |✔ |✔ |✔ | | |✔ | |
 |===
 
 In the other OSs not listed above, the pure-java SQLite is used. (Applies to versions before 3.7.15)
 
 If you want to use the native library for your OS, link:./CONTRIBUTING.md[build the source from scratch].
+
+=== JARs
+
+Since version `3.53.0.0` multiple JARs are published with different classifiers:
+
+|===
+|Classifier|Content
+|Default jar|Classes + all native libraries (except Android)
+|`without-natives`|Classes only
+|`natives-all`|Only native libraries (except Android)
+|`natives-linux`|Only native libraries for Linux
+|`natives-mac`|Only native libraries for Mac
+|`natives-windows`|Only native libraries for Windows
+|`natives-freebsd`|Only native libraries for FreeBSD
+|`natives-android`|Only native libraries for Android
+|===
 
 === GraalVM native-image support
 

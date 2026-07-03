@@ -325,7 +325,11 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == LocalDate.class) {
             try {
                 Date date = getDate(columnIndex);
-                if (date != null) return type.cast(date.toLocalDate());
+                if (date != null)
+                    // inlining of java.sql.Date.toLocateDate() for Android
+                    return type.cast(
+                            LocalDate.of(
+                                    date.getYear() + 1900, date.getMonth() + 1, date.getDate()));
                 else return null;
             } catch (SQLException sqlException) {
                 // If the FastDateParser failed, try parse it with LocalDate.
@@ -336,7 +340,10 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == LocalTime.class) {
             try {
                 Time time = getTime(columnIndex);
-                if (time != null) return type.cast(time.toLocalTime());
+                if (time != null)
+                    // inlining of java.sql.Date.toLocateTime() for Android
+                    return type.cast(
+                            LocalTime.of(time.getHours(), time.getMinutes(), time.getSeconds()));
                 else return null;
             } catch (SQLException sqlException) {
                 // If the FastDateParser failed, try parse it with LocalTime.
@@ -347,7 +354,17 @@ public class JDBC4ResultSet extends JDBC3ResultSet implements ResultSet, ResultS
         if (type == LocalDateTime.class) {
             try {
                 Timestamp timestamp = getTimestamp(columnIndex);
-                if (timestamp != null) return type.cast(timestamp.toLocalDateTime());
+                if (timestamp != null)
+                    // inlining of java.sql.Date.toLocateDateTime() for Android
+                    return type.cast(
+                            LocalDateTime.of(
+                                    timestamp.getYear() + 1900,
+                                    timestamp.getMonth() + 1,
+                                    timestamp.getDate(),
+                                    timestamp.getHours(),
+                                    timestamp.getMinutes(),
+                                    timestamp.getSeconds(),
+                                    timestamp.getNanos()));
                 else return null;
             } catch (SQLException e) {
                 // If the FastDateParser failed, try parse it with LocalDateTime.

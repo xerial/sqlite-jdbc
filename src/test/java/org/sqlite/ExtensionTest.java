@@ -33,6 +33,15 @@ public class ExtensionTest {
     }
 
     @Test
+    public void loadExtensionEnabled() throws Exception {
+        SQLiteConnection connection =
+                (SQLiteConnection)
+                        DriverManager.getConnection(
+                                "jdbc:sqlite::memory:?enable_load_extension=true");
+        assertThat(connection.getDatabase().getConfig().isEnabledLoadExtension()).isTrue();
+    }
+
+    @Test
     public void extFTS3() throws Exception {
         stat.execute("create virtual table recipe using fts3(name, ingredients)");
         stat.execute(

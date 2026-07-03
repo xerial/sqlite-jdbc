@@ -189,7 +189,7 @@ try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:?j
 
 Android expects JNI native libraries to be bundled differently than a normal Java application.
 
-You will need to extract the native libraries from our jar (from `org/sqlite/native/Linux-Android`), and place them in the `jniLibs` directory:
+You will need to extract the native libraries from our jar with classifier `natives-android` (from `org/sqlite/native/Linux-Android`), and place them in the `jniLibs` directory:
 
 ![android-studio-screenshot](./.github/README_IMAGES/android_jnilibs.png)
 
@@ -201,3 +201,31 @@ The name of directories in our jar and in Android Studio differ, here is a mappi
 | arm           | armeabi                  |
 | x86           | x86                      |
 | x86_64        | x86_64                   |
+
+Your project will need to integrate the [desugared core library](https://developer.android.com/studio/write/java11-default-support-table) (default).
+
+The following methods will not work in Android:
+- `JDBC3PreparedStatement#getParameterTypeName`
+
+## How to load Run-Time Loadable Extensions
+
+### Enable loadable extensions
+
+- If you use `DriverManager`, configure the `Properties`:
+
+```java
+prop.setProperty("enable_load_extension", "true");
+```
+
+- If you use `SQLiteConfig`:
+
+```java
+SQLiteConfig config = new SQLiteConfig();
+config.enableLoadExtension(true);
+```
+
+- You can also specify the pragma in the connection string: `"jdbc:sqlite::memory:?enable_load_extension=true"`
+
+### Load an extension
+
+Use the `load_extension` [SQL function](https://sqlite.org/lang_corefunc.html#load_extension).

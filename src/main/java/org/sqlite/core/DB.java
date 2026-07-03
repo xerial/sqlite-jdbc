@@ -17,6 +17,7 @@ package org.sqlite.core;
 
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -941,11 +942,13 @@ public abstract class DB implements Codes {
                 if (rc != SQLITE_DONE) {
                     reset(stmt);
                     if (rc == SQLITE_ROW) {
+                        // don't use the constructor with long because of
+                        // https://github.com/xerial/sqlite-jdbc/issues/1378
                         throw new BatchUpdateException(
                                 "batch entry " + i + ": query returns results",
                                 null,
                                 0,
-                                changes,
+                                Arrays.stream(changes).mapToInt(l -> (int) l).toArray(),
                                 null);
                     }
                     throwex(rc);

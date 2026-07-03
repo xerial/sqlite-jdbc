@@ -1806,7 +1806,7 @@ int RegisterExtensionFunctions(sqlite3 *db){
     { "stdev",            1, 0, 0, varianceStep, stdevFinalize  },
     { "variance",         1, 0, 0, varianceStep, varianceFinalize  },
     { "mode",             1, 0, 0, modeStep,     modeFinalize  },
-    { "median",           1, 0, 0, modeStep,     medianFinalize  },
+//    { "median",           1, 0, 0, modeStep,     medianFinalize  },
     { "lower_quartile",   1, 0, 0, modeStep,     lower_quartileFinalize  },
     { "upper_quartile",   1, 0, 0, modeStep,     upper_quartileFinalize  },
   };

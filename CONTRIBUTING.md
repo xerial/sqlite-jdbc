@@ -63,11 +63,9 @@ make native SQLITE_OBJ=/usr/local/lib/libsqlite3.so SQLITE_HEADER=/usr/local/inc
 
 ## Build from CI
 
-The native libraries can all be built with Github Actions:
-- by running the **Build Native** workflow [manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
-- by commenting "/native" on a PR
+The native libraries can all be built with Github Actions by running the **Build Native** workflow [manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow).
 
-Once the build succeeds, a commit will be added to the branch or PR with the updated binaries.
+Once the build succeeds, a commit will be added to the branch with the updated binaries.
 
 # Release process
 The project version can change by 2 means:

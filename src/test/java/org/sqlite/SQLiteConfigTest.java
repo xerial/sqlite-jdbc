@@ -58,6 +58,28 @@ public class SQLiteConfigTest {
     }
 
     @Test
+    public void setWalAutocheckpoint() {
+        SQLiteConfig config = new SQLiteConfig();
+        config.setWalAutocheckpoint(500);
+        assertThat(
+                        config.toProperties()
+                                .getProperty(
+                                        SQLiteConfig.Pragma.WAL_AUTOCHECKPOINT.getPragmaName()))
+                .isEqualTo("500");
+    }
+
+    @Test
+    public void setWalAutocheckpointDisabled() {
+        SQLiteConfig config = new SQLiteConfig();
+        config.setWalAutocheckpoint(0);
+        assertThat(
+                        config.toProperties()
+                                .getProperty(
+                                        SQLiteConfig.Pragma.WAL_AUTOCHECKPOINT.getPragmaName()))
+                .isEqualTo("0");
+    }
+
+    @Test
     public void pragmaSet() {
         Set<String> expectedPragmaSet = new HashSet<>();
         for (Pragma v : SQLiteConfig.Pragma.values()) {

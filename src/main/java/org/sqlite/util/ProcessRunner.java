@@ -3,20 +3,11 @@ package org.sqlite.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 public class ProcessRunner {
     String runAndWaitFor(String command) throws IOException, InterruptedException {
         Process p = Runtime.getRuntime().exec(command);
         p.waitFor();
-
-        return getProcessOutput(p);
-    }
-
-    String runAndWaitFor(String command, long timeout, TimeUnit unit)
-            throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec(command);
-        p.waitFor(timeout, unit);
 
         return getProcessOutput(p);
     }

@@ -1095,7 +1095,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                                 .append(iDecimalDigits)
                                 .append(" as colDecimalDigits, ")
                                 .append("'")
-                                .append(tableName)
+                                .append(escape(tableName))
                                 .append("' as tblname, ")
                                 .append("'")
                                 .append(escape(colName))
@@ -1157,18 +1157,18 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
         String query =
                 "select "
-                        + quote(pc)
+                        + quote(escape(pc))
                         + " as PKTABLE_CAT, "
-                        + quote(ps)
+                        + quote(escape(ps))
                         + " as PKTABLE_SCHEM, "
-                        + quote(pt)
+                        + quote(escape(pt))
                         + " as PKTABLE_NAME, "
                         + "'' as PKCOLUMN_NAME, "
-                        + quote(fc)
+                        + quote(escape(fc))
                         + " as FKTABLE_CAT, "
-                        + quote(fs)
+                        + quote(escape(fs))
                         + " as FKTABLE_SCHEM, "
-                        + quote(ft)
+                        + quote(escape(ft))
                         + " as FKTABLE_NAME, "
                         + "'' as FKCOLUMN_NAME, -1 as KEY_SEQ, 3 as UPDATE_RULE, 3 as DELETE_RULE, '' as FK_NAME, '' as PK_NAME, "
                         + DatabaseMetaData.importedKeyInitiallyDeferred
@@ -1256,8 +1256,8 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         String[] pkColumns = pkFinder.getColumns();
         Statement stat = conn.createStatement();
 
-        catalog = (catalog != null) ? quote(catalog) : null;
-        schema = (schema != null) ? quote(schema) : null;
+        catalog = (catalog != null) ? quote(escape(catalog)) : null;
+        schema = (schema != null) ? quote(escape(schema)) : null;
 
         StringBuilder exportedKeysQuery = new StringBuilder(512);
 
@@ -1349,7 +1349,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                 .append(" as PKTABLE_CAT, ")
                 .append(schema)
                 .append(" as PKTABLE_SCHEM, ")
-                .append(quote(target))
+                .append(quote(escape(target)))
                 .append(" as PKTABLE_NAME, ")
                 .append(hasImportedKey ? "pcn" : "''")
                 .append(" as PKCOLUMN_NAME, ")
@@ -1409,16 +1409,16 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         StringBuilder sql = new StringBuilder(700);
 
         sql.append("select ")
-                .append(quote(catalog))
+                .append(quote(escape(catalog)))
                 .append(" as PKTABLE_CAT, ")
-                .append(quote(schema))
+                .append(quote(escape(schema)))
                 .append(" as PKTABLE_SCHEM, ")
                 .append("ptn as PKTABLE_NAME, pcn as PKCOLUMN_NAME, ")
-                .append(quote(catalog))
+                .append(quote(escape(catalog)))
                 .append(" as FKTABLE_CAT, ")
-                .append(quote(schema))
+                .append(quote(escape(schema)))
                 .append(" as FKTABLE_SCHEM, ")
-                .append(quote(table))
+                .append(quote(escape(table)))
                 .append(" as FKTABLE_NAME, ")
                 .append(
                         "fcn as FKCOLUMN_NAME, ks as KEY_SEQ, ur as UPDATE_RULE, dr as DELETE_RULE, fkn as FK_NAME, pkn as PK_NAME, ")
@@ -1740,7 +1740,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
             sql.append(" AND TABLE_TYPE IN (");
             sql.append(
                     Arrays.stream(types)
-                            .map((t) -> "'" + t.toUpperCase() + "'")
+                            .map((t) -> "'" + escape(t.toUpperCase()) + "'")
                             .collect(Collectors.joining(",")));
             sql.append(")");
         }

@@ -44,5 +44,5 @@ release:
         description: 'Issue has been released'
         color: '#ededed'
 files:
-  artifacts:
-    - path: 'target/{{projectName}}-{{projectVersion}}.jar'
+  globs:
+    - pattern: 'target/{{projectName}}-{{projectVersion}}*.jar'
