@@ -17,8 +17,8 @@ jobs:
         # parse the Makefile to retrieve the list of targets in 'native-all', without 'native'
         run: |
           matrix="$(
-            jq --compact-output --null-input '{ target: $ARGS.positional }' \
-              --args $(awk '/^native-all.*:/ { $1 = $2 = ""; print }' Makefile)
+            jq --compact-output --null-input '{ target: $ARGS.positional[2:] }' \
+              --args $(grep '^native-all.*:' Makefile)
           )"
           jq . <<< "$matrix"
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
