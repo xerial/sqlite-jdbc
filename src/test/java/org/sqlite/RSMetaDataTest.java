@@ -125,7 +125,7 @@ public class RSMetaDataTest {
         assertThat(meta.getColumnType(25)).isEqualTo(Types.BOOLEAN);
 
         assertThat(meta.getColumnType(26)).isEqualTo(Types.DATE);
-        assertThat(meta.getColumnType(27)).isEqualTo(Types.DATE);
+        assertThat(meta.getColumnType(27)).isEqualTo(Types.TIMESTAMP);
 
         assertThat(meta.getColumnType(28)).isEqualTo(Types.TIMESTAMP);
         assertThat(meta.getColumnType(29)).isEqualTo(Types.CHAR);
@@ -165,6 +165,46 @@ public class RSMetaDataTest {
         assertThat(meta.isSigned(5)).isFalse();
 
         assertThat(rs.next()).isFalse();
+    }
+
+    @Test
+    public void datetimeColumnTypeIsTimestamp() throws SQLException {
+        stat.executeUpdate(
+                "CREATE TABLE mytable ("
+                        + "\"fid\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                        + "\"date_creation\" DATETIME)");
+
+        try (ResultSet rs = stat.executeQuery("SELECT * FROM mytable")) {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            assertThat(rsmd.getColumnTypeName(2)).isEqualTo("DATETIME");
+            assertThat(rsmd.getColumnType(2)).isEqualTo(Types.TIMESTAMP);
+        }
+
+        stat.executeUpdate("INSERT INTO mytable(date_creation) VALUES ('2024-01-15 13:45:30.123')");
+        try (ResultSet rs = stat.executeQuery("SELECT * FROM mytable")) {
+            assertThat(rs.next()).isTrue();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            assertThat(rsmd.getColumnType(2)).isEqualTo(Types.TIMESTAMP);
+            assertThat(rs.getTimestamp(2))
+                    .isEqualTo(java.sql.Timestamp.valueOf("2024-01-15 13:45:30.123"));
+        }
+
+        stat.executeUpdate("DELETE FROM mytable");
+        stat.executeUpdate("INSERT INTO mytable(date_creation) VALUES (1705326330)");
+        try (ResultSet rs = stat.executeQuery("SELECT * FROM mytable")) {
+            assertThat(rs.next()).isTrue();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            assertThat(rsmd.getColumnTypeName(2)).isEqualTo("DATETIME");
+            assertThat(rsmd.getColumnType(2)).isEqualTo(Types.TIMESTAMP);
+        }
+
+        stat.executeUpdate("CREATE TABLE temporal (d DATE, dt DATETIME, ts TIMESTAMP)");
+        try (ResultSet rs = stat.executeQuery("SELECT * FROM temporal")) {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            assertThat(rsmd.getColumnType(1)).isEqualTo(Types.DATE);
+            assertThat(rsmd.getColumnType(2)).isEqualTo(Types.TIMESTAMP);
+            assertThat(rsmd.getColumnType(3)).isEqualTo(Types.TIMESTAMP);
+        }
     }
 
     @Test
