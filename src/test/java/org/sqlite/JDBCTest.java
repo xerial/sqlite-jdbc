@@ -48,8 +48,32 @@ public class JDBCTest {
     }
 
     @Test
-    public void shouldReturnNullIfProtocolUnhandled() throws Exception {
-        assertThat(JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null)).isNull();
+    public void createConnectionThrowsIfProtocolUnhandled() {
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(
+                        () -> JDBC.createConnection("jdbc:anotherpopulardatabaseprotocol:", null))
+                .withMessageContaining("invalid database address");
+    }
+
+    @Test
+    public void driverConnectReturnsNullIfProtocolUnhandled() throws Exception {
+        assertThat(new JDBC().connect("jdbc:anotherpopulardatabaseprotocol:", null)).isNull();
+        assertThat(new JDBC().connect("jdbc:wrongprotocol:test.db", new Properties())).isNull();
+    }
+
+    @Test
+    public void createConnectionThrowsOnNullUrl() {
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(() -> JDBC.createConnection(null, null))
+                .withMessageContaining("invalid database address");
+    }
+
+    @Test
+    public void createConnectionAcceptsValidSqliteUrl() throws Exception {
+        try (Connection conn = JDBC.createConnection("jdbc:sqlite:", new Properties())) {
+            assertThat(conn).isNotNull();
+            assertThat(conn.isClosed()).isFalse();
+        }
     }
 
     @Test
