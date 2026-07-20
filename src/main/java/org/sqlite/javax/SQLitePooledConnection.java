@@ -91,13 +91,31 @@ public class SQLitePooledConnection extends JDBC4PooledConnection {
                                 getClass().getClassLoader(),
                                 new Class[] {Connection.class},
                                 new InvocationHandler() {
-                                    boolean isClosed;
+                                    volatile boolean isClosed;
 
                                     public Object invoke(Object proxy, Method method, Object[] args)
                                             throws Throwable {
                                         try {
                                             String name = method.getName();
                                             if ("close".equals(name)) {
+                                                // a handle may be closed twice: once by the
+                                                // client and again by getConnection() when the
+                                                // pooled connection is reused. only reset the
+                                                // physical connection once.
+                                                if (isClosed) {
+                                                    return null;
+                                                }
+
+                                                // reset the physical connection and mark this
+                                                // handle closed before notifying listeners, so the
+                                                // pool cannot hand the connection to another thread
+                                                // while the rollback/setAutoCommit is still running
+                                                if (!physicalConn.getAutoCommit()) {
+                                                    physicalConn.rollback();
+                                                }
+                                                physicalConn.setAutoCommit(true);
+                                                isClosed = true;
+
                                                 ConnectionEvent event =
                                                         new ConnectionEvent(
                                                                 SQLitePooledConnection.this);
@@ -105,12 +123,6 @@ public class SQLitePooledConnection extends JDBC4PooledConnection {
                                                 for (int i = listeners.size() - 1; i >= 0; i--) {
                                                     listeners.get(i).connectionClosed(event);
                                                 }
-
-                                                if (!physicalConn.getAutoCommit()) {
-                                                    physicalConn.rollback();
-                                                }
-                                                physicalConn.setAutoCommit(true);
-                                                isClosed = true;
 
                                                 return null; // don't close physical connection
                                             } else if ("isClosed".equals(name)) {

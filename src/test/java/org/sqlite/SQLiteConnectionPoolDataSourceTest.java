@@ -19,6 +19,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import org.junit.jupiter.api.Disabled;
@@ -52,6 +58,74 @@ public class SQLiteConnectionPoolDataSourceTest {
 
         pooledConn.close();
         assertThat(handle.isClosed()).isTrue();
+    }
+
+    /**
+     * When a handle is closed the physical connection must be reset (rollback + auto-commit) before
+     * the pool is notified, otherwise a concurrent borrower can reuse the physical connection while
+     * the reset is still running. See issue #821.
+     */
+    @Test
+    public void concurrentReuseDoesNotRaceOnClose() throws Exception {
+        SQLiteConnectionPoolDataSource ds = new SQLiteConnectionPoolDataSource();
+        ds.setUrl("jdbc:sqlite::memory:");
+
+        DummyPool pool = new DummyPool(ds);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        List<Thread> threads = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            Thread t =
+                    new Thread(
+                            () -> {
+                                for (int j = 0; j < 2000 && failure.get() == null; j++) {
+                                    try (Connection c = pool.getConnection()) {
+                                        c.setAutoCommit(false);
+                                        c.createStatement().execute("select 1");
+                                    } catch (Throwable e) {
+                                        failure.compareAndSet(null, e);
+                                    }
+                                }
+                            });
+            threads.add(t);
+            t.start();
+        }
+        for (Thread t : threads) {
+            t.join();
+        }
+
+        assertThat(failure.get()).isNull();
+    }
+
+    /** Minimal pool that hands out and takes back pooled connections, like a real pool would. */
+    private static class DummyPool implements ConnectionEventListener {
+        private final List<PooledConnection> available = new ArrayList<>();
+        private final ConnectionPoolDataSource dataSource;
+
+        DummyPool(ConnectionPoolDataSource dataSource) {
+            this.dataSource = dataSource;
+        }
+
+        synchronized Connection getConnection() throws SQLException {
+            Iterator<PooledConnection> it = available.iterator();
+            PooledConnection pooled;
+            if (it.hasNext()) {
+                pooled = it.next();
+                it.remove();
+            } else {
+                pooled = dataSource.getPooledConnection();
+                pooled.addConnectionEventListener(this);
+            }
+            return pooled.getConnection();
+        }
+
+        @Override
+        public synchronized void connectionClosed(ConnectionEvent event) {
+            available.add((PooledConnection) event.getSource());
+        }
+
+        @Override
+        public void connectionErrorOccurred(ConnectionEvent event) {}
     }
 
     @Disabled
