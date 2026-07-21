@@ -148,9 +148,10 @@ public class OSInfo {
     public static boolean isMusl() {
         Path mapFilesDir = Paths.get("/proc/self/map_files");
         try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
-            boolean found = dirStream
-                    .map(OSInfo::toRealPathOrEmpty)
-                    .anyMatch(s -> s.toLowerCase().contains("musl"));
+            boolean found =
+                    dirStream
+                            .map(OSInfo::toRealPathOrEmpty)
+                            .anyMatch(s -> s.toLowerCase().contains("musl"));
             if (found) {
                 return true;
             }
