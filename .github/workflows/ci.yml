@@ -101,6 +101,8 @@ jobs:
       - name: Configure MSVC Environment for Windows
         if: matrix.os == 'windows-latest'
         uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
       - uses: graalvm/setup-graalvm@v1
         with:
           java-version: ${{ matrix.java }}
