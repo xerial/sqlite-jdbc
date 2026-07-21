@@ -148,14 +148,17 @@ public class OSInfo {
     public static boolean isMusl() {
         Path mapFilesDir = Paths.get("/proc/self/map_files");
         try (Stream<Path> dirStream = Files.list(mapFilesDir)) {
-            return dirStream
+            boolean found = dirStream
                     .map(OSInfo::toRealPathOrEmpty)
                     .anyMatch(s -> s.toLowerCase().contains("musl"));
+            if (found) {
+                return true;
+            }
         } catch (Exception ignored) {
-            // fall back to checking for alpine linux in the event we're using an older kernel which
-            // may not fail the above check
-            return isAlpineLinux();
         }
+        // fall back to checking for alpine linux in the event we're using an older kernel which
+        // may not fail the above check
+        return isAlpineLinux();
     }
 
     @AndroidSignatureIgnore(explanation = "Should not reach this code path")
