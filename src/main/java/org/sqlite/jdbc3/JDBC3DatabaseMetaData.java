@@ -704,7 +704,7 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
     /** @see java.sql.DatabaseMetaData#supportsSchemasInTableDefinitions() */
     public boolean supportsSchemasInTableDefinitions() {
-        return false;
+        return true;
     }
 
     /** @see java.sql.DatabaseMetaData#supportsSelectForUpdate() */
@@ -1182,7 +1182,9 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         if (getSchemas == null) {
             getSchemas =
                     conn.prepareStatement(
-                            "select null as TABLE_SCHEM, null as TABLE_CATALOG limit 0;");
+                            "SELECT NULL AS TABLE_CATALOG, 'main' AS TABLE_SCHEM" +
+                                " UNION ALL " +
+                                "SELECT NULL AS TABLE_CATALOG, 'test' AS TABLE_SCHEM;");
         }
 
         return getSchemas.executeQuery();
