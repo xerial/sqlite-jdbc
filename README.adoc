@@ -131,7 +131,7 @@ Since version `3.53.0.0` multiple JARs are published with different classifiers:
 |Classifier|Content
 |Default jar|Classes + all native libraries (except Android)
 |`without-natives`|Classes only
-|`natives-all`|Only native libraries (except Android)
+|`natives-all`|All native libraries (except Android)
 |`natives-linux`|Only native libraries for Linux
 |`natives-mac`|Only native libraries for Mac
 |`natives-windows`|Only native libraries for Windows
