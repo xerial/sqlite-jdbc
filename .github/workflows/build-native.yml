@@ -66,7 +66,7 @@ jobs:
       - run: git status
 
       - name: Commit and push
-        uses: EndBug/add-and-commit@v10
+        uses: EndBug/add-and-commit@v11
         with:
           message: 'chore: update native libraries'
           default_author: github_actions
