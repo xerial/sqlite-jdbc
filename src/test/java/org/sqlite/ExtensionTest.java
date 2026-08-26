@@ -86,6 +86,43 @@ public class ExtensionTest {
 
     @Test
     @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    public void extFunctionsTruncatedUtf8() throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+
+        // A text value that ends in a truncated multibyte sequence: the lead byte
+        // announces more trailing bytes than the value actually holds. The utf-8
+        // reader behind these functions used to read those missing bytes past the
+        // terminating nul, a heap over-read. Each lead byte below claims 1, 2 and 3
+        // trailing bytes respectively, so all three trailing-byte cases are covered.
+        String[] truncated = {"x'c3'", "x'e0'", "x'f0'", "x'f4'"};
+        for (String value : truncated) {
+            String text = "cast(" + value + " as text)";
+            // every call site of the reader
+            assertReturnsRow("select reverse(" + text + ")");
+            assertReturnsRow("select proper(" + text + ")");
+            assertReturnsRow("select leftstr(" + text + ", 1)");
+            assertReturnsRow("select rightstr(" + text + ", 1)");
+            assertReturnsRow("select charindex('a', " + text + ")");
+            assertReturnsRow("select strfilter(" + text + ", 'a')");
+            assertReturnsRow("select difference(" + text + ", 'abc')");
+        }
+
+        // well-formed multibyte input still decodes as before
+        ResultSet rs = stat.executeQuery("select reverse('a£€')");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("€£a");
+        rs.close();
+    }
+
+    private void assertReturnsRow(String sql) throws Exception {
+        try (ResultSet rs = stat.executeQuery(sql)) {
+            assertThat(rs.next()).isTrue();
+            rs.getString(1);
+        }
+    }
+
+    @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
     public void dbstat() throws Exception {
         assumeThat(Utils.getCompileOptions(conn))
                 .as("SQLite has to be compiled with ENABLE_DBSTAT_VTAB")
