@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: 11
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: 11
@@ -78,7 +78,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
@@ -194,7 +194,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: 25
@@ -228,7 +228,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Apache Maven Central
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with: # running setup-java again overwrites the settings.xml
           distribution: 'temurin'
           java-version: '11'
