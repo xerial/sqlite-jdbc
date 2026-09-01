@@ -330,6 +330,25 @@ public class ConnectionTest {
     }
 
     @Test
+    public void automaticIndexAndCacheSpillInURI() throws Exception {
+        Connection conn =
+                DriverManager.getConnection(
+                        "jdbc:sqlite:file::memory:?automatic_index=OFF&cache_spill=OFF");
+        Statement stat = conn.createStatement();
+
+        ResultSet rs = stat.executeQuery("pragma automatic_index");
+        assertThat(rs.getBoolean(1)).isFalse();
+        rs.close();
+
+        rs = stat.executeQuery("pragma cache_spill");
+        assertThat(rs.getBoolean(1)).isFalse();
+        rs.close();
+
+        stat.close();
+        conn.close();
+    }
+
+    @Test
     public void ignoreUnknownParametersInURI() throws Exception {
         Connection conn =
                 DriverManager.getConnection(

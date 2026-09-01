@@ -393,9 +393,17 @@ public class SQLiteConfig {
                 OnOff.Values),
 
         // Pragmas that can be set after opening the database
+        AUTOMATIC_INDEX(
+                "automatic_index",
+                "When automatic_index is on, SQLite may create transient indexes for queries that would otherwise do a full table scan",
+                OnOff.Values),
         CACHE_SIZE(
                 "cache_size",
                 "Maximum number of database disk pages that SQLite will hold in memory at once per open database file",
+                null),
+        CACHE_SPILL(
+                "cache_spill",
+                "When cache_spill is on, the pager can spill dirty cache pages to the database file in the middle of a transaction. An integer N sets the spill threshold in pages",
                 null),
         MMAP_SIZE(
                 "mmap_size",
@@ -663,6 +671,42 @@ public class SQLiteConfig {
      */
     public void setCacheSize(int numberOfPages) {
         set(Pragma.CACHE_SIZE, numberOfPages);
+    }
+
+    /**
+     * Enables or disables automatic indexes. When enabled, SQLite may create transient indexes for
+     * queries that would otherwise do a full table scan.
+     *
+     * @param enable True to enable; false to disable.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_automatic_index">www.sqlite.org/pragma.html#pragma_automatic_index</a>
+     */
+    public void enableAutomaticIndex(boolean enable) {
+        set(Pragma.AUTOMATIC_INDEX, enable);
+    }
+
+    /**
+     * Enables or disables cache spill. When enabled, the pager can write dirty cache pages to the
+     * database file in the middle of a transaction.
+     *
+     * @param enable True to enable; false to disable.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_cache_spill">www.sqlite.org/pragma.html#pragma_cache_spill</a>
+     */
+    public void setCacheSpill(boolean enable) {
+        set(Pragma.CACHE_SPILL, enable);
+    }
+
+    /**
+     * Sets the cache-spill threshold in pages. Dirty pages are spilled when that many pages of
+     * cache are dirty.
+     *
+     * @param numberOfPages Spill threshold in pages.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_cache_spill">www.sqlite.org/pragma.html#pragma_cache_spill</a>
+     */
+    public void setCacheSpill(int numberOfPages) {
+        set(Pragma.CACHE_SPILL, numberOfPages);
     }
 
     /**

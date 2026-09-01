@@ -80,6 +80,31 @@ public class SQLiteConfigTest {
     }
 
     @Test
+    public void enableAutomaticIndex() {
+        SQLiteConfig config = new SQLiteConfig();
+        config.enableAutomaticIndex(false);
+        assertThat(
+                        config.toProperties()
+                                .getProperty(SQLiteConfig.Pragma.AUTOMATIC_INDEX.getPragmaName()))
+                .isEqualTo("false");
+    }
+
+    @Test
+    public void setCacheSpill() {
+        SQLiteConfig config = new SQLiteConfig();
+        config.setCacheSpill(false);
+        assertThat(
+                        config.toProperties()
+                                .getProperty(SQLiteConfig.Pragma.CACHE_SPILL.getPragmaName()))
+                .isEqualTo("false");
+        config.setCacheSpill(100);
+        assertThat(
+                        config.toProperties()
+                                .getProperty(SQLiteConfig.Pragma.CACHE_SPILL.getPragmaName()))
+                .isEqualTo("100");
+    }
+
+    @Test
     public void pragmaSet() {
         Set<String> expectedPragmaSet = new HashSet<>();
         for (Pragma v : SQLiteConfig.Pragma.values()) {

@@ -163,6 +163,39 @@ public class SQLiteDataSource implements DataSource {
     }
 
     /**
+     * Enables or disables automatic indexes.
+     *
+     * @param enable True to enable; false to disable.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_automatic_index">https://www.sqlite.org/pragma.html#pragma_automatic_index</a>
+     */
+    public void setAutomaticIndex(boolean enable) {
+        config.enableAutomaticIndex(enable);
+    }
+
+    /**
+     * Enables or disables cache spill.
+     *
+     * @param enable True to enable; false to disable.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_cache_spill">https://www.sqlite.org/pragma.html#pragma_cache_spill</a>
+     */
+    public void setCacheSpill(boolean enable) {
+        config.setCacheSpill(enable);
+    }
+
+    /**
+     * Sets the cache-spill threshold in pages.
+     *
+     * @param numberOfPages Spill threshold in pages.
+     * @see <a
+     *     href="https://www.sqlite.org/pragma.html#pragma_cache_spill">https://www.sqlite.org/pragma.html#pragma_cache_spill</a>
+     */
+    public void setCacheSpill(int numberOfPages) {
+        config.setCacheSpill(numberOfPages);
+    }
+
+    /**
      * Enables or disables case sensitivity for the built-in LIKE operator.
      *
      * @param enable True to enable; false to disable.
