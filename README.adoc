@@ -103,6 +103,9 @@ each of them is compiled for Windows, macOS and Linux. An appropriate native lib
 file is automatically extracted into your OS's temporary folder, when your program
 loads `org.sqlite.JDBC` driver.
 
+The bundled native library compiles official SQLite extensions such as FTS5, R*Tree, and JSON in.
+See link:USAGE.md#compiled-sqlite-extensions[USAGE.md] for the full list, and for what is not included.
+
 === Supported Operating Systems
 
 Since sqlite-jdbc-3.6.19, the natively compiled SQLite engines will be used for

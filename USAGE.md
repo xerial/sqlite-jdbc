@@ -207,6 +207,45 @@ Your project will need to integrate the [desugared core library](https://develop
 The following methods will not work in Android:
 - `JDBC3PreparedStatement#getParameterTypeName`
 
+## Compiled SQLite extensions
+
+The native library in the default jar is built from the SQLite amalgamation with extra flags in [`Makefile`](Makefile). Those features work out of the box; you do not load a separate extension for them.
+
+### Official features enabled at compile time
+
+| Feature | Compile option | What you get |
+|---------|----------------|--------------|
+| FTS3 / FTS4 | `SQLITE_ENABLE_FTS3`, `SQLITE_ENABLE_FTS3_PARENTHESIS` | Legacy full-text search, including grouped `MATCH` queries |
+| FTS5 | `SQLITE_ENABLE_FTS5` | Current full-text search |
+| R*Tree | `SQLITE_ENABLE_RTREE` | Geometrical index |
+| Percentile | `SQLITE_ENABLE_PERCENTILE` | `percentile()` aggregate |
+| STAT4 | `SQLITE_ENABLE_STAT4` | Richer `ANALYZE` statistics |
+| dbstat | `SQLITE_ENABLE_DBSTAT_VTAB` | `dbstat` virtual table |
+| Math functions | `SQLITE_ENABLE_MATH_FUNCTIONS` | `sin`, `log`, `pi`, and the other built-in math SQL functions |
+| Column metadata | `SQLITE_ENABLE_COLUMN_METADATA` | Used by JDBC `DatabaseMetaData` |
+| Loadable extensions | `SQLITE_ENABLE_LOAD_EXTENSION` | Compile-time support only; still off at runtime until you enable it (see below) |
+| UPDATE/DELETE LIMIT | `SQLITE_ENABLE_UPDATE_DELETE_LIMIT` | `UPDATE` / `DELETE` with `LIMIT` |
+
+JSON functions (`json()`, `json_extract()`, …) ship with SQLite itself since 3.38, so there is no separate `SQLITE_ENABLE_JSON1` flag.
+
+The Makefile also raises several `SQLITE_MAX_*` limits and sets `SQLITE_THREADSAFE=1`. To see the exact list for the binary you are running:
+
+```sql
+PRAGMA compile_options;
+```
+
+The driver adds `JDBC_EXTENSIONS` to that list when the extra functions below are compiled in.
+
+### Extra SQL functions (`JDBC_EXTENSIONS`)
+
+[`src/main/ext/extension-functions.c`](src/main/ext/extension-functions.c) is compiled into the native library and registered on every connection. It adds helpers such as `reverse`, `leftstr`, `rightstr`, `proper`, `charindex`, `stdev`, and `variance`. Math functions that overlap with `SQLITE_ENABLE_MATH_FUNCTIONS` are skipped when that option is on.
+
+### What is not compiled in
+
+Third-party or community SQLite extensions (ICU, Spellfix1, custom FTS tokenizers, …) are not bundled. This project only compiles official SQLite amalgamation options plus the small JDBC helper above. Load anything else at runtime — see the next section.
+
+If you need another official SQLite compile option on by default, open an issue with a use case. New flags have to keep the native build working on every supported OS and architecture.
+
 ## How to load Run-Time Loadable Extensions
 
 ### Enable loadable extensions
