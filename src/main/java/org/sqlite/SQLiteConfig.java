@@ -117,11 +117,56 @@ public class SQLiteConfig {
      */
     public void apply(Connection conn) throws SQLException {
 
-        HashSet<String> pragmaParams = new HashSet<String>();
-        for (Pragma each : Pragma.values()) {
-            pragmaParams.add(each.pragmaName);
-        }
+        applyLimits(conn);
 
+        Set<String> pragmaParams = allowedPragmaParams();
+        Set<String> restrictedPragmaParams =
+                pragmaParams.isEmpty() ? restrictedPragmaParams() : new HashSet<>();
+
+        Statement stat = conn.createStatement();
+        try {
+            boolean hasPasswordPragma = pragmaTable.containsKey(Pragma.PASSWORD.pragmaName);
+            if (hasPasswordPragma) {
+                String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
+                if (password != null && !password.isEmpty()) {
+                    String hexkeyMode = pragmaTable.getProperty(Pragma.HEXKEY_MODE.pragmaName);
+                    String passwordPragma;
+                    if (HexKeyMode.SSE.name().equalsIgnoreCase(hexkeyMode)) {
+                        passwordPragma = "pragma hexkey = '%s'";
+                    } else if (HexKeyMode.SQLCIPHER.name().equalsIgnoreCase(hexkeyMode)) {
+                        passwordPragma = "pragma key = \"x'%s'\"";
+                    } else {
+                        passwordPragma = "pragma key = '%s'";
+                    }
+                    stat.execute(String.format(passwordPragma, password.replace("'", "''")));
+                }
+            }
+
+            for (Object each : pragmaTable.keySet()) {
+                String key = each.toString();
+                if ((pragmaParams.isEmpty() && restrictedPragmaParams.contains(key))
+                        || (!pragmaParams.isEmpty() && !pragmaParams.contains(key))) {
+                    continue;
+                }
+
+                String value = pragmaTable.getProperty(key);
+                if (value != null) {
+                    stat.execute(String.format("pragma %s=%s", key, value));
+                }
+            }
+
+            // password validation
+            if (hasPasswordPragma) {
+                stat.execute("select 1 from sqlite_schema");
+            }
+        } finally {
+            if (stat != null) {
+                stat.close();
+            }
+        }
+    }
+
+    private void applyLimits(Connection conn) throws SQLException {
         if (conn instanceof SQLiteConnection) {
             SQLiteConnection sqliteConn = (SQLiteConnection) conn;
             sqliteConn.setLimit(
@@ -163,68 +208,47 @@ public class SQLiteConfig {
                     SQLiteLimits.SQLITE_LIMIT_PAGE_COUNT,
                     parseLimitPragma(Pragma.LIMIT_PAGE_COUNT, DEFAULT_MAX_PAGE_COUNT));
         }
+    }
 
-        pragmaParams.remove(Pragma.OPEN_MODE.pragmaName);
-        pragmaParams.remove(Pragma.SHARED_CACHE.pragmaName);
-        pragmaParams.remove(Pragma.LOAD_EXTENSION.pragmaName);
-        pragmaParams.remove(Pragma.DATE_PRECISION.pragmaName);
-        pragmaParams.remove(Pragma.DATE_CLASS.pragmaName);
-        pragmaParams.remove(Pragma.DATE_STRING_FORMAT.pragmaName);
-        pragmaParams.remove(Pragma.PASSWORD.pragmaName);
-        pragmaParams.remove(Pragma.HEXKEY_MODE.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_ATTACHED.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_COLUMN.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_COMPOUND_SELECT.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_EXPR_DEPTH.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_FUNCTION_ARG.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_LENGTH.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_LIKE_PATTERN_LENGTH.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_SQL_LENGTH.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_TRIGGER_DEPTH.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_VDBE_OP.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_WORKER_THREADS.pragmaName);
-        pragmaParams.remove(Pragma.LIMIT_PAGE_COUNT.pragmaName);
+    private Set<String> allowedPragmaParams() {
+        HashSet<String> pragmaParams = new HashSet<>();
+        if (Boolean.parseBoolean(System.getProperty("org.sqlite.jdbc.pragma.validation", "true"))) {
+            for (Pragma each : Pragma.values()) {
+                pragmaParams.add(each.pragmaName);
+            }
+            pragmaParams.removeAll(restrictedPragmaParams());
+        }
+        return pragmaParams;
+    }
+
+    private Set<String> restrictedPragmaParams() {
+        HashSet<String> pragmaParams = new HashSet<>();
+        pragmaParams.add(Pragma.OPEN_MODE.pragmaName);
+        pragmaParams.add(Pragma.SHARED_CACHE.pragmaName);
+        pragmaParams.add(Pragma.LOAD_EXTENSION.pragmaName);
+        pragmaParams.add(Pragma.DATE_PRECISION.pragmaName);
+        pragmaParams.add(Pragma.DATE_CLASS.pragmaName);
+        pragmaParams.add(Pragma.DATE_STRING_FORMAT.pragmaName);
+        pragmaParams.add(Pragma.PASSWORD.pragmaName);
+        pragmaParams.add(Pragma.HEXKEY_MODE.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_ATTACHED.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_COLUMN.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_COMPOUND_SELECT.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_EXPR_DEPTH.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_FUNCTION_ARG.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_LENGTH.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_LIKE_PATTERN_LENGTH.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_SQL_LENGTH.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_TRIGGER_DEPTH.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_VARIABLE_NUMBER.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_VDBE_OP.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_WORKER_THREADS.pragmaName);
+        pragmaParams.add(Pragma.LIMIT_PAGE_COUNT.pragmaName);
 
         // exclude this "fake" pragma from execution
-        pragmaParams.remove(Pragma.JDBC_EXPLICIT_READONLY.pragmaName);
-        pragmaParams.remove(Pragma.JDBC_GET_GENERATED_KEYS.pragmaName);
-
-        Statement stat = conn.createStatement();
-        try {
-            if (pragmaTable.containsKey(Pragma.PASSWORD.pragmaName)) {
-                String password = pragmaTable.getProperty(Pragma.PASSWORD.pragmaName);
-                if (password != null && !password.isEmpty()) {
-                    String hexkeyMode = pragmaTable.getProperty(Pragma.HEXKEY_MODE.pragmaName);
-                    String passwordPragma;
-                    if (HexKeyMode.SSE.name().equalsIgnoreCase(hexkeyMode)) {
-                        passwordPragma = "pragma hexkey = '%s'";
-                    } else if (HexKeyMode.SQLCIPHER.name().equalsIgnoreCase(hexkeyMode)) {
-                        passwordPragma = "pragma key = \"x'%s'\"";
-                    } else {
-                        passwordPragma = "pragma key = '%s'";
-                    }
-                    stat.execute(String.format(passwordPragma, password.replace("'", "''")));
-                    stat.execute("select 1 from sqlite_schema");
-                }
-            }
-
-            for (Object each : pragmaTable.keySet()) {
-                String key = each.toString();
-                if (!pragmaParams.contains(key)) {
-                    continue;
-                }
-
-                String value = pragmaTable.getProperty(key);
-                if (value != null) {
-                    stat.execute(String.format("pragma %s=%s", key, value));
-                }
-            }
-        } finally {
-            if (stat != null) {
-                stat.close();
-            }
-        }
+        pragmaParams.add(Pragma.JDBC_EXPLICIT_READONLY.pragmaName);
+        pragmaParams.add(Pragma.JDBC_GET_GENERATED_KEYS.pragmaName);
+        return pragmaParams;
     }
 
     /**
@@ -307,7 +331,20 @@ public class SQLiteConfig {
      * @param value The value to set it to.
      */
     public void setPragma(Pragma pragma, String value) {
-        pragmaTable.put(pragma.pragmaName, value);
+        setPragma(pragma.pragmaName, value);
+    }
+
+    /**
+     * Sets a pragma's value.
+     *
+     * <p>Pragma name not from the {@link Pragma#values()} is allowed when
+     * "-Dorg.sqlite.jdbc.pragma.validation" value is not equals ignore case "true".
+     *
+     * @param pragmaName The pragma name to change.
+     * @param value The value to set it to.
+     */
+    public void setPragma(String pragmaName, String value) {
+        pragmaTable.put(pragmaName, value);
     }
 
     /**
