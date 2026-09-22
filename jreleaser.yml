@@ -6,6 +6,7 @@ release:
     owner: xerial
     discussionCategoryName: Announcements
     tagName: '{{projectVersion}}'
+    immutableRelease: true
     changelog:
       links: true
       formatted: ALWAYS
