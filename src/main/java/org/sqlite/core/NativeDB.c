@@ -1902,7 +1902,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_sqlite_core_NativeDB_serialize(JNIEnv *env
       if (jbuff_pointer!=NULL)
       {
          memcpy(jbuff_pointer, buff, size);
-         (*env)->ReleasePrimitiveArrayCritical(env, jbuff, buff, 0);
+         (*env)->ReleasePrimitiveArrayCritical(env, jbuff, jbuff_pointer, 0);
       }
       else
       {
