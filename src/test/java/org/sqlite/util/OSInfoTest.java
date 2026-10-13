@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
@@ -100,6 +101,34 @@ public class OSInfoTest {
             // reset STDOUT
             System.setOut(out);
         }
+    }
+
+    @Test
+    public void testMuslDetectionFromOsRelease() {
+        // real musl based Alpine: no LIBC_TYPE, ID=alpine -> musl
+        assertThat(
+                        OSInfo.isMuslFromOsRelease(
+                                Stream.of(
+                                        "NAME=\"Alpine Linux\"",
+                                        "ID=alpine",
+                                        "VERSION_ID=3.20.0")))
+                .isTrue();
+
+        // Alpine-based image running glibc (e.g. Liberica hardened runtime): LIBC_TYPE=glibc
+        // must win over the ID_LIKE=alpine hint, see #1474
+        assertThat(
+                        OSInfo.isMuslFromOsRelease(
+                                Stream.of(
+                                        "NAME=\"Liberica\"",
+                                        "ID_LIKE=alpine",
+                                        "LIBC_TYPE=glibc")))
+                .isFalse();
+
+        // non-Alpine distribution -> not musl
+        assertThat(
+                        OSInfo.isMuslFromOsRelease(
+                                Stream.of("NAME=\"Ubuntu\"", "ID=ubuntu", "ID_LIKE=debian")))
+                .isFalse();
     }
 
     @Test
