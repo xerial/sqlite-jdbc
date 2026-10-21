@@ -573,7 +573,6 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1open_1utf8(
     db = gethandle(env, this);
     if (db) {
         throwex_msg(env, "DB already open");
-        sqlite3_close(db);
         return;
     }
 
