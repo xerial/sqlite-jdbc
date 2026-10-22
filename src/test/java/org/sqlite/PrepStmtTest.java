@@ -58,6 +58,40 @@ public class PrepStmtTest {
     }
 
     @Test
+    public void nullStreamsWithZeroLengthBindSqlNull() throws SQLException {
+        try (PreparedStatement prep = conn.prepareStatement("select ?, ?, ?")) {
+            prep.setBinaryStream(1, null, 0);
+            prep.setAsciiStream(2, null, 0);
+            prep.setUnicodeStream(3, null, 0);
+            try (ResultSet rs = prep.executeQuery()) {
+                assertThat(rs.next()).isTrue();
+                for (int column = 1; column <= 3; column++) {
+                    assertThat(rs.getObject(column)).isNull();
+                    assertThat(rs.wasNull()).isTrue();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void nonNullStreamsWithZeroLengthBindEmptyValues() throws SQLException {
+        try (PreparedStatement prep = conn.prepareStatement("select ?, ?, ?")) {
+            prep.setBinaryStream(1, new ByteArrayInputStream(b1), 0);
+            prep.setAsciiStream(2, new ByteArrayInputStream(b2), 0);
+            prep.setUnicodeStream(3, new ByteArrayInputStream(b3), 0);
+            try (ResultSet rs = prep.executeQuery()) {
+                assertThat(rs.next()).isTrue();
+                assertThat(rs.getBytes(1)).isEmpty();
+                assertThat(rs.wasNull()).isFalse();
+                assertThat(rs.getString(2)).isEmpty();
+                assertThat(rs.wasNull()).isFalse();
+                assertThat(rs.getString(3)).isEmpty();
+                assertThat(rs.wasNull()).isFalse();
+            }
+        }
+    }
+
+    @Test
     public void update() throws SQLException {
         assertThat(conn.prepareStatement("create table s1 (c1);").executeUpdate()).isEqualTo(0);
         PreparedStatement prep = conn.prepareStatement("insert into s1 values (?);");

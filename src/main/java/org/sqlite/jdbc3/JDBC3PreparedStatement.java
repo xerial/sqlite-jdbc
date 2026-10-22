@@ -271,6 +271,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void setBinaryStream(int pos, InputStream istream, int length) throws SQLException {
         if (istream == null && length == 0) {
             setBytes(pos, null);
+            return;
         }
 
         setBytes(pos, readBytes(istream, length));
@@ -285,6 +286,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
     public void setUnicodeStream(int pos, InputStream istream, int length) throws SQLException {
         if (istream == null && length == 0) {
             setString(pos, null);
+            return;
         }
 
         try {
