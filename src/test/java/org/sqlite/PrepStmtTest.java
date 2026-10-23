@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -60,15 +61,18 @@ public class PrepStmtTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {-1, 0, 1, 16})
+    @ValueSource(ints = {0, 1, 16})
     public void nullStreamsBindSqlNull(int length) throws SQLException {
-        try (PreparedStatement prep = conn.prepareStatement("select ?, ?, ?")) {
+        try (PreparedStatement prep = conn.prepareStatement("select ?, ?, ?, ?, ?, ?")) {
             prep.setBinaryStream(1, null, length);
             prep.setAsciiStream(2, null, length);
             prep.setUnicodeStream(3, null, length);
+            prep.setBinaryStream(4, null, (long) length);
+            prep.setAsciiStream(5, null, (long) length);
+            prep.setBlob(6, (InputStream) null, (long) length);
             try (ResultSet rs = prep.executeQuery()) {
                 assertThat(rs.next()).isTrue();
-                for (int column = 1; column <= 3; column++) {
+                for (int column = 1; column <= 6; column++) {
                     assertThat(rs.getObject(column)).isNull();
                     assertThat(rs.wasNull()).isTrue();
                 }
@@ -76,15 +80,23 @@ public class PrepStmtTest {
         }
     }
 
-    @Test
-    public void nonNullStreamsWithNegativeLengthAreRejected() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void streamsWithNegativeLengthAreRejected(boolean nullStream) throws SQLException {
+        InputStream input = nullStream ? null : new ByteArrayInputStream(b1);
         try (PreparedStatement prep = conn.prepareStatement("select ?")) {
             assertThatExceptionOfType(SQLException.class)
-                    .isThrownBy(() -> prep.setBinaryStream(1, new ByteArrayInputStream(b1), -1));
+                    .isThrownBy(() -> prep.setBinaryStream(1, input, -1));
             assertThatExceptionOfType(SQLException.class)
-                    .isThrownBy(() -> prep.setAsciiStream(1, new ByteArrayInputStream(b2), -1));
+                    .isThrownBy(() -> prep.setAsciiStream(1, input, -1));
             assertThatExceptionOfType(SQLException.class)
-                    .isThrownBy(() -> prep.setUnicodeStream(1, new ByteArrayInputStream(b3), -1));
+                    .isThrownBy(() -> prep.setUnicodeStream(1, input, -1));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setBinaryStream(1, input, -1L));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setAsciiStream(1, input, -1L));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setBlob(1, input, -1L));
         }
     }
 
