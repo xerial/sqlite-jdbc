@@ -150,6 +150,29 @@ public class SavepointTest {
     }
 
     @Test
+    public void savepointNameWithSpecialCharactersIsQuoted() throws SQLException {
+        stat1.executeUpdate("create table trans (c1);");
+
+        // A savepoint name is interpolated into the SAVEPOINT/ROLLBACK/RELEASE statement. Names
+        // carrying whitespace, a double quote or a statement separator must not corrupt it.
+        for (String name : new String[] {"a b", "a\"b", "x; drop table trans", "a' b"}) {
+            Savepoint sp = conn1.setSavepoint(name);
+            assertThat(sp.getSavepointName()).isEqualTo(name);
+            stat1.executeUpdate("insert into trans values (1);");
+
+            // the savepoint created under that name is usable for rollback and release
+            conn1.rollback(sp);
+            conn1.releaseSavepoint(conn1.setSavepoint(name));
+        }
+
+        // the table survives: every name was treated as a single quoted identifier
+        ResultSet rs = stat1.executeQuery("select count(*) from trans;");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(0);
+        rs.close();
+    }
+
+    @Test
     public void release() throws SQLException {
         ResultSet rs;
         String countSql = "select count(*) from trans;";

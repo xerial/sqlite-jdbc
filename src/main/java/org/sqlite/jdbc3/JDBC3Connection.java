@@ -240,7 +240,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
+        getDatabase().exec(String.format("SAVEPOINT %s", quoteSavepointName(sp)), false);
         return sp;
     }
 
@@ -255,7 +255,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);
-        getDatabase().exec(String.format("SAVEPOINT %s", sp.getSavepointName()), false);
+        getDatabase().exec(String.format("SAVEPOINT %s", quoteSavepointName(sp)), false);
         return sp;
     }
 
@@ -266,7 +266,7 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             throw new SQLException("database in auto-commit mode");
         }
         getDatabase()
-                .exec(String.format("RELEASE SAVEPOINT %s", savepoint.getSavepointName()), false);
+                .exec(String.format("RELEASE SAVEPOINT %s", quoteSavepointName(savepoint)), false);
     }
 
     /** @see java.sql.Connection#rollback(java.sql.Savepoint) */
@@ -277,8 +277,17 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         }
         getDatabase()
                 .exec(
-                        String.format("ROLLBACK TO SAVEPOINT %s", savepoint.getSavepointName()),
+                        String.format("ROLLBACK TO SAVEPOINT %s", quoteSavepointName(savepoint)),
                         getAutoCommit());
+    }
+
+    /**
+     * Quote a savepoint name as a SQLite identifier so that it cannot alter the surrounding
+     * SAVEPOINT/RELEASE/ROLLBACK statement. The name passed to {@link #setSavepoint(String)} is
+     * application supplied and is otherwise interpolated verbatim.
+     */
+    private static String quoteSavepointName(Savepoint savepoint) throws SQLException {
+        return "\"" + savepoint.getSavepointName().replace("\"", "\"\"") + "\"";
     }
 
     public Struct createStruct(String t, Object[] attr) throws SQLException {
