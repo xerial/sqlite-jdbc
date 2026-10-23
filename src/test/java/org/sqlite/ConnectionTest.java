@@ -10,6 +10,7 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -189,6 +190,28 @@ public class ConnectionTest {
         rs.close();
         stat.close();
         conn.close();
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS) // POSIX permissions
+    public void openJARResourceCopyIsPrivateToTheCurrentUser() throws Exception {
+        File testJAR = copyToTemp("testdb.jar");
+        assertThat(testJAR.exists()).isTrue();
+
+        // the resource is copied to the shared temp folder, the copy must not be readable or
+        // writable by other users
+        try (Connection conn =
+                        DriverManager.getConnection(
+                                String.format(
+                                        "jdbc:sqlite::resource:jar:%s!/sample.db",
+                                        testJAR.toURI().toURL()));
+                Statement stat = conn.createStatement();
+                ResultSet rs = stat.executeQuery("pragma database_list")) {
+            assertThat(rs.next()).isTrue();
+            Path copy = Paths.get(rs.getString("file"));
+            assertThat(Files.getPosixFilePermissions(copy))
+                    .isSubsetOf(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
+        }
     }
 
     @Test

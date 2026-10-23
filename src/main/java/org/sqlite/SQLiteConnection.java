@@ -313,6 +313,16 @@ public abstract class SQLiteConnection implements Connection {
             //            }
         }
 
+        // The temp folder is usually shared with other users, so create the copy readable and
+        // writable by the current user only before any data is written to it
+        if (!dbFile.createNewFile()) {
+            throw new IOException("failed to create DB file: " + dbFile.getAbsolutePath());
+        }
+        dbFile.setReadable(false, false);
+        dbFile.setReadable(true, true);
+        dbFile.setWritable(false, false);
+        dbFile.setWritable(true, true);
+
         URLConnection conn = resourceAddr.openConnection();
         // Disable caches to avoid keeping unnecessary file references after the single-use copy
         conn.setUseCaches(false);

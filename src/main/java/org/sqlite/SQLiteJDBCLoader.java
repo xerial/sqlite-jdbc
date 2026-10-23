@@ -30,7 +30,6 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,7 +37,6 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.stream.Stream;
 import org.sqlite.util.AndroidSignatureIgnore;
 import org.sqlite.util.LibraryLoaderUtil;
@@ -182,24 +180,32 @@ public class SQLiteJDBCLoader {
             String libFolderForCurrentOS, String libraryFileName, String targetFolder)
             throws FileException {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
-        // Include architecture name in temporary filename in order to avoid conflicts
-        // when multiple JVMs with different architectures running at the same time
-        String uuid = UUID.randomUUID().toString();
-        String extractedLibFileName =
-                String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
-        String extractedLckFileName = extractedLibFileName + LOCK_EXT;
-
-        Path extractedLibFile = Paths.get(targetFolder, extractedLibFileName);
-        Path extractedLckFile = Paths.get(targetFolder, extractedLckFileName);
 
         try {
+            // Include architecture name in temporary filename in order to avoid conflicts
+            // when multiple JVMs with different architectures running at the same time.
+            // The target folder is usually shared with other users, so the file is created
+            // readable and writable by the current user only before anything is written to it.
+            Path extractedLibFile =
+                    Files.createTempFile(
+                            Paths.get(targetFolder),
+                            String.format("sqlite-%s-", getVersion()),
+                            "-" + libraryFileName);
+            String extractedLibFileName = extractedLibFile.getFileName().toString();
+            Path extractedLckFile = Paths.get(targetFolder, extractedLibFileName + LOCK_EXT);
+
             // Extract a native library file into the target directory
-            try (InputStream reader = getResourceAsStream(nativeLibraryFilePath)) {
+            try (InputStream reader = getResourceAsStream(nativeLibraryFilePath);
+                    OutputStream writer = Files.newOutputStream(extractedLibFile)) {
                 if (Files.notExists(extractedLckFile)) {
                     Files.createFile(extractedLckFile);
                 }
 
-                Files.copy(reader, extractedLibFile, StandardCopyOption.REPLACE_EXISTING);
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = reader.read(buffer)) != -1) {
+                    writer.write(buffer, 0, bytesRead);
+                }
             } finally {
                 // Delete the extracted lib file on JVM exit.
                 extractedLibFile.toFile().deleteOnExit();
@@ -207,9 +213,9 @@ public class SQLiteJDBCLoader {
             }
 
             // Set executable (x) flag to enable Java to load the native library
-            extractedLibFile.toFile().setReadable(true);
+            extractedLibFile.toFile().setReadable(true, true);
             extractedLibFile.toFile().setWritable(true, true);
-            extractedLibFile.toFile().setExecutable(true);
+            extractedLibFile.toFile().setExecutable(true, true);
 
             // Check whether the contents are properly copied from the resource folder
             {
