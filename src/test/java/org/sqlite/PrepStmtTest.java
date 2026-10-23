@@ -23,6 +23,8 @@ import java.util.StringTokenizer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** These tests are designed to stress PreparedStatements on memory dbs. */
 public class PrepStmtTest {
@@ -57,12 +59,13 @@ public class PrepStmtTest {
         conn.close();
     }
 
-    @Test
-    public void nullStreamsWithZeroLengthBindSqlNull() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0, 1, 16})
+    public void nullStreamsBindSqlNull(int length) throws SQLException {
         try (PreparedStatement prep = conn.prepareStatement("select ?, ?, ?")) {
-            prep.setBinaryStream(1, null, 0);
-            prep.setAsciiStream(2, null, 0);
-            prep.setUnicodeStream(3, null, 0);
+            prep.setBinaryStream(1, null, length);
+            prep.setAsciiStream(2, null, length);
+            prep.setUnicodeStream(3, null, length);
             try (ResultSet rs = prep.executeQuery()) {
                 assertThat(rs.next()).isTrue();
                 for (int column = 1; column <= 3; column++) {
@@ -70,6 +73,18 @@ public class PrepStmtTest {
                     assertThat(rs.wasNull()).isTrue();
                 }
             }
+        }
+    }
+
+    @Test
+    public void nonNullStreamsWithNegativeLengthAreRejected() throws SQLException {
+        try (PreparedStatement prep = conn.prepareStatement("select ?")) {
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setBinaryStream(1, new ByteArrayInputStream(b1), -1));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setAsciiStream(1, new ByteArrayInputStream(b2), -1));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setUnicodeStream(1, new ByteArrayInputStream(b3), -1));
         }
     }
 

@@ -269,7 +269,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream, int) */
     public void setBinaryStream(int pos, InputStream istream, int length) throws SQLException {
-        if (istream == null && length == 0) {
+        if (istream == null) {
             setBytes(pos, null);
             return;
         }
@@ -284,7 +284,7 @@ public abstract class JDBC3PreparedStatement extends CorePreparedStatement {
 
     /** @see java.sql.PreparedStatement#setUnicodeStream(int, java.io.InputStream, int) */
     public void setUnicodeStream(int pos, InputStream istream, int length) throws SQLException {
-        if (istream == null && length == 0) {
+        if (istream == null) {
             setString(pos, null);
             return;
         }
