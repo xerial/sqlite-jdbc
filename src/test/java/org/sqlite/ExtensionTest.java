@@ -114,6 +114,28 @@ public class ExtensionTest {
         rs.close();
     }
 
+    @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    public void strfilterMatchingWiderCharacter() throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+
+        // strfilter sizes its output buffer by the byte length of the searched
+        // string, but when a character is kept it used to copy the matching
+        // character's bytes from the filter string. A single-byte searched
+        // character (here the invalid byte 0xff, which decodes to U+FFFD) that
+        // matches a wider filter character (U+FFFD, three bytes) made the copy
+        // write more bytes than were allocated, a heap overflow. The searched
+        // string stays one byte so the overflow is small and the call still
+        // returns, which is what this guards against under a sanitizer build.
+        assertReturnsRow("select strfilter(cast(x'ff' as text), char(65533))");
+
+        // well-formed input where a kept character is multibyte still filters
+        ResultSet rs = stat.executeQuery("select strfilter('a£b€c', '£€')");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("£€");
+        rs.close();
+    }
+
     private void assertReturnsRow(String sql) throws Exception {
         try (ResultSet rs = stat.executeQuery(sql)) {
             assertThat(rs.next()).isTrue();
