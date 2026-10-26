@@ -17,6 +17,7 @@ import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConfig.TransactionMode;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteOpenMode;
+import org.sqlite.util.QueryUtils;
 
 public abstract class JDBC3Connection extends SQLiteConnection {
     private final AtomicInteger savePoint = new AtomicInteger(0);
@@ -240,7 +241,11 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet());
-        getDatabase().exec(String.format("SAVEPOINT %s", quoteSavepointName(sp)), false);
+        getDatabase()
+                .exec(
+                        String.format(
+                                "SAVEPOINT %s", QueryUtils.quoteIdentifier(sp.getSavepointName())),
+                        false);
         return sp;
     }
 
@@ -255,7 +260,11 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             getConnectionConfig().setAutoCommit(false);
         }
         Savepoint sp = new JDBC3Savepoint(savePoint.incrementAndGet(), name);
-        getDatabase().exec(String.format("SAVEPOINT %s", quoteSavepointName(sp)), false);
+        getDatabase()
+                .exec(
+                        String.format(
+                                "SAVEPOINT %s", QueryUtils.quoteIdentifier(sp.getSavepointName())),
+                        false);
         return sp;
     }
 
@@ -266,7 +275,11 @@ public abstract class JDBC3Connection extends SQLiteConnection {
             throw new SQLException("database in auto-commit mode");
         }
         getDatabase()
-                .exec(String.format("RELEASE SAVEPOINT %s", quoteSavepointName(savepoint)), false);
+                .exec(
+                        String.format(
+                                "RELEASE SAVEPOINT %s",
+                                QueryUtils.quoteIdentifier(savepoint.getSavepointName())),
+                        false);
     }
 
     /** @see java.sql.Connection#rollback(java.sql.Savepoint) */
@@ -277,17 +290,10 @@ public abstract class JDBC3Connection extends SQLiteConnection {
         }
         getDatabase()
                 .exec(
-                        String.format("ROLLBACK TO SAVEPOINT %s", quoteSavepointName(savepoint)),
+                        String.format(
+                                "ROLLBACK TO SAVEPOINT %s",
+                                QueryUtils.quoteIdentifier(savepoint.getSavepointName())),
                         getAutoCommit());
-    }
-
-    /**
-     * Quote a savepoint name as a SQLite identifier so that it cannot alter the surrounding
-     * SAVEPOINT/RELEASE/ROLLBACK statement. The name passed to {@link #setSavepoint(String)} is
-     * application supplied and is otherwise interpolated verbatim.
-     */
-    private static String quoteSavepointName(Savepoint savepoint) throws SQLException {
-        return "\"" + savepoint.getSavepointName().replace("\"", "\"\"") + "\"";
     }
 
     public Struct createStruct(String t, Object[] attr) throws SQLException {
