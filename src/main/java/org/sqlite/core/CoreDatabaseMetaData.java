@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 import org.sqlite.SQLiteConnection;
+import org.sqlite.util.QueryUtils;
 
 public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
     protected SQLiteConnection conn;
@@ -168,21 +169,7 @@ public abstract class CoreDatabaseMetaData implements DatabaseMetaData {
      * @return The SQL escaped string.
      */
     protected String escape(final String val) {
-        // TODO: this function is ugly, pass this work off to SQLite, then we
-        //       don't have to worry about Unicode 4, other characters needing
-        //       escaping, etc.
-        if (val == null) {
-            return null;
-        }
-        int len = val.length();
-        StringBuilder buf = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            if (val.charAt(i) == '\'') {
-                buf.append('\'');
-            }
-            buf.append(val.charAt(i));
-        }
-        return buf.toString();
+        return QueryUtils.escape(val, '\'');
     }
 
     // inner classes
