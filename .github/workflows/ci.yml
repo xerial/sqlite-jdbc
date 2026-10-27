@@ -236,6 +236,7 @@ jobs:
           server-id: central # Value of the distributionManagement/repository/id field of the pom.xml
           server-username-env-var: MAVEN_CENTRAL_USERNAME # env variable for username in deploy (1)
           server-password-env-var: MAVEN_CENTRAL_PASSWORD # env variable for token in deploy (2)
+          mvn-server-repository-origins: 'central:https://central.sonatype.com'
       - name: Get Project Version
         run: |
           echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
