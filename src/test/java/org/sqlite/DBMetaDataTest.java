@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -1539,6 +1540,18 @@ public class DBMetaDataTest {
         assertPrimaryKey(meta, "Pk13", "NamedPk", "Col3", "Col2");
         assertPrimaryKey(meta, "Pk14", null, "Col3");
         assertPrimaryKey(meta, "Pk15", null, "Col3", "Col2");
+    }
+
+    @Test
+    @Timeout(value = 10, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void getPrimaryKeysWithManyCheckConstraints() throws Exception {
+        StringBuilder sql = new StringBuilder("create table manychecks (a integer primary key, b");
+        for (int i = 0; i < 400; i++) {
+            sql.append(", constraint c").append(i).append(" check (b > ").append(i).append(")");
+        }
+        stat.executeUpdate(sql.append(");").toString());
+
+        assertPrimaryKey(meta, "manychecks", null, "a");
     }
 
     private void assertPrimaryKey(

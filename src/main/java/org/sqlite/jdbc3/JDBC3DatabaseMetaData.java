@@ -1953,15 +1953,20 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
     // inner classes
 
+    // Anchored with \A so find() does not retry the leading .* from every offset. The constraint
+    // name may not span another CONSTRAINT, which the greedy .* rules out anyway. Both keep the
+    // same matches while avoiding cubic backtracking on long DDL.
+
     /** Pattern used to extract column order for an unnamed primary key. */
     protected static final Pattern PK_UNNAMED_PATTERN =
             Pattern.compile(
-                    ".*PRIMARY\\s+KEY\\s*\\((.*?)\\).*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+                    "\\A.*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /** Pattern used to extract a named primary key. */
     protected static final Pattern PK_NAMED_PATTERN =
             Pattern.compile(
-                    ".*CONSTRAINT\\s*(.*?)\\s*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
+                    "\\A.*CONSTRAINT\\s*((?:(?!CONSTRAINT).)*?)\\s*PRIMARY\\s+KEY\\s*\\((.*?)\\).*",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /** Parses the sqlite_schema table for a table's primary key */
@@ -2004,12 +2009,17 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
 
                 if (!rs.next()) throw new SQLException("Table not found: '" + table + "'");
 
-                Matcher matcher = PK_NAMED_PATTERN.matcher(rs.getString(1));
+                // both patterns need a ')' after PRIMARY KEY, so nothing past the last one can
+                // be part of a match
+                String sql = rs.getString(1);
+                sql = sql.substring(0, sql.lastIndexOf(')') + 1);
+
+                Matcher matcher = PK_NAMED_PATTERN.matcher(sql);
                 if (matcher.find()) {
                     pkName = unquoteIdentifier(escape(matcher.group(1)));
                     pkColumns = matcher.group(2).split(",");
                 } else {
-                    matcher = PK_UNNAMED_PATTERN.matcher(rs.getString(1));
+                    matcher = PK_UNNAMED_PATTERN.matcher(sql);
                     if (matcher.find()) {
                         pkColumns = matcher.group(1).split(",");
                     }
