@@ -234,8 +234,8 @@ jobs:
           java-version: '11'
           java-package: jdk
           server-id: central # Value of the distributionManagement/repository/id field of the pom.xml
-          server-username: MAVEN_CENTRAL_USERNAME # env variable for username in deploy (1)
-          server-password: MAVEN_CENTRAL_PASSWORD # env variable for token in deploy (2)
+          server-username-env-var: MAVEN_CENTRAL_USERNAME # env variable for username in deploy (1)
+          server-password-env-var: MAVEN_CENTRAL_PASSWORD # env variable for token in deploy (2)
       - name: Get Project Version
         run: |
           echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" | tee -a $GITHUB_ENV
