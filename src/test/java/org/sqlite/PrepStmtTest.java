@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,8 @@ import java.util.StringTokenizer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** These tests are designed to stress PreparedStatements on memory dbs. */
 public class PrepStmtTest {
@@ -55,6 +58,64 @@ public class PrepStmtTest {
     public void close() throws SQLException {
         stat.close();
         conn.close();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 16})
+    public void nullStreamsBindSqlNull(int length) throws SQLException {
+        try (PreparedStatement prep = conn.prepareStatement("select ?, ?, ?, ?, ?, ?")) {
+            prep.setBinaryStream(1, null, length);
+            prep.setAsciiStream(2, null, length);
+            prep.setUnicodeStream(3, null, length);
+            prep.setBinaryStream(4, null, (long) length);
+            prep.setAsciiStream(5, null, (long) length);
+            prep.setBlob(6, (InputStream) null, (long) length);
+            try (ResultSet rs = prep.executeQuery()) {
+                assertThat(rs.next()).isTrue();
+                for (int column = 1; column <= 6; column++) {
+                    assertThat(rs.getObject(column)).isNull();
+                    assertThat(rs.wasNull()).isTrue();
+                }
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void streamsWithNegativeLengthAreRejected(boolean nullStream) throws SQLException {
+        InputStream input = nullStream ? null : new ByteArrayInputStream(b1);
+        try (PreparedStatement prep = conn.prepareStatement("select ?")) {
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setBinaryStream(1, input, -1));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setAsciiStream(1, input, -1));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setUnicodeStream(1, input, -1));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setBinaryStream(1, input, -1L));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setAsciiStream(1, input, -1L));
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> prep.setBlob(1, input, -1L));
+        }
+    }
+
+    @Test
+    public void nonNullStreamsWithZeroLengthBindEmptyValues() throws SQLException {
+        try (PreparedStatement prep = conn.prepareStatement("select ?, ?, ?")) {
+            prep.setBinaryStream(1, new ByteArrayInputStream(b1), 0);
+            prep.setAsciiStream(2, new ByteArrayInputStream(b2), 0);
+            prep.setUnicodeStream(3, new ByteArrayInputStream(b3), 0);
+            try (ResultSet rs = prep.executeQuery()) {
+                assertThat(rs.next()).isTrue();
+                assertThat(rs.getBytes(1)).isEmpty();
+                assertThat(rs.wasNull()).isFalse();
+                assertThat(rs.getString(2)).isEmpty();
+                assertThat(rs.wasNull()).isFalse();
+                assertThat(rs.getString(3)).isEmpty();
+                assertThat(rs.wasNull()).isFalse();
+            }
+        }
     }
 
     @Test
