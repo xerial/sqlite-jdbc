@@ -13,6 +13,7 @@ import java.sql.Types;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 public class RSMetaDataTest {
     private Connection conn;
@@ -165,6 +166,36 @@ public class RSMetaDataTest {
         assertThat(meta.isSigned(5)).isFalse();
 
         assertThat(rs.next()).isFalse();
+    }
+
+    @Test
+    @Timeout(value = 10, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void columnTypeWithLongCastLikeName() throws SQLException {
+        StringBuilder name = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            name.append("cast( as ");
+        }
+        // no declared type, so the column name goes through the cast(col as type) pattern
+        stat.executeUpdate("create table castname (\"" + name + "\")");
+        stat.executeUpdate("insert into castname values (1)");
+        ResultSetMetaData meta = stat.executeQuery("select * from castname").getMetaData();
+
+        assertThat(meta.getColumnType(1)).isEqualTo(Types.INTEGER);
+        assertThat(meta.getColumnTypeName(1)).isEqualTo("INTEGER");
+    }
+
+    @Test
+    @Timeout(value = 10, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void precisionWithLongUnclosedDeclaredType() throws SQLException {
+        StringBuilder type = new StringBuilder();
+        for (int i = 0; i < 3000; i++) {
+            type.append('(');
+        }
+        stat.executeUpdate("create table unclosed (c '" + type + "')");
+        ResultSetMetaData meta = stat.executeQuery("select c from unclosed").getMetaData();
+
+        assertThat(meta.getPrecision(1)).isEqualTo(0);
+        assertThat(meta.getScale(1)).isEqualTo(0);
     }
 
     @Test

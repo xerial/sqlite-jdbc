@@ -572,6 +572,21 @@ public class DBMetaDataTest {
     }
 
     @Test
+    @Timeout(value = 10, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void getColumnsWithLongDeclaredType() throws SQLException {
+        StringBuilder type = new StringBuilder();
+        for (int i = 0; i < 50000; i++) {
+            type.append('x');
+        }
+        stat.executeUpdate("create table longtype (c " + type + ")");
+
+        ResultSet rs = meta.getColumns(null, null, "longtype", "%");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt("DATA_TYPE")).isEqualTo(Types.VARCHAR);
+        assertThat(rs.next()).isFalse();
+    }
+
+    @Test
     public void getColumnsIncludingGenerated() throws SQLException {
         stat.executeUpdate("create table gh_724 (i integer,j integer generated always as (i))");
 
