@@ -841,10 +841,11 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         return getColumnPrivileges.executeQuery();
     }
 
-    // Column type patterns
-    protected static final Pattern TYPE_INTEGER = Pattern.compile(".*(INT|BOOL).*");
-    protected static final Pattern TYPE_VARCHAR = Pattern.compile(".*(CHAR|CLOB|TEXT|BLOB).*");
-    protected static final Pattern TYPE_FLOAT = Pattern.compile(".*(REAL|FLOA|DOUB|DEC|NUM).*");
+    // Column type patterns, matched with find(). A leading .* was retried from every offset, which
+    // is quadratic in the length of the declared type, and the keyword alone finds the same types.
+    protected static final Pattern TYPE_INTEGER = Pattern.compile("INT|BOOL");
+    protected static final Pattern TYPE_VARCHAR = Pattern.compile("CHAR|CLOB|TEXT|BLOB");
+    protected static final Pattern TYPE_FLOAT = Pattern.compile("REAL|FLOA|DOUB|DEC|NUM");
 
     /**
      * @see java.sql.DatabaseMetaData#getColumns(java.lang.String, java.lang.String,

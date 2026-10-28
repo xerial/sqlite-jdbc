@@ -554,14 +554,23 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     /** Pattern used to extract the column type name from table column definition. */
     protected static final Pattern COLUMN_TYPENAME = Pattern.compile("([^\\(]*)");
 
-    /** Pattern used to extract the column type name from a cast(col as type) */
+    /**
+     * Pattern used to extract the column type name from a cast(col as type). Only the first "cast("
+     * and the first " as " after it are tried, which is all a lazy match could use on one line, and
+     * the type is read in a single pass so a long column name cannot make find() backtrack.
+     */
     protected static final Pattern COLUMN_TYPECAST =
-            Pattern.compile("cast\\(.*?\\s+as\\s+(.*?)\\s*\\)");
+            Pattern.compile(
+                    "\\A(?>.*?cast\\()(?>.*?(?<!\\s)\\s+as\\s+)((?:\\s*+[^\\s)])*+)\\s*+\\)",
+                    Pattern.DOTALL);
 
     /**
      * Pattern used to extract the precision and scale from column meta returned by the JDBC driver.
+     * Starts only at the first '(' of a line, the one a lazy leading .* settles on, so find() does
+     * not retry it from every offset.
      */
-    protected static final Pattern COLUMN_PRECISION = Pattern.compile(".*?\\((.*?)\\)");
+    protected static final Pattern COLUMN_PRECISION =
+            Pattern.compile("(?m)^(?:(?!\\().)*+\\((.*?)\\)");
 
     // we do not need to check the RS is open, only that colsMeta
     // is not null, done with checkCol(int).
