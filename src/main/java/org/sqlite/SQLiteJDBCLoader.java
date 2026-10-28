@@ -27,10 +27,12 @@ package org.sqlite;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -195,11 +197,33 @@ public class SQLiteJDBCLoader {
         try {
             // Extract a native library file into the target directory
             try (InputStream reader = getResourceAsStream(nativeLibraryFilePath)) {
+                // Create the lock file first, so that cleanup() in another JVM never sees the
+                // library without its lock and deletes it while it is being written
                 if (Files.notExists(extractedLckFile)) {
                     Files.createFile(extractedLckFile);
                 }
 
-                Files.copy(reader, extractedLibFile, StandardCopyOption.REPLACE_EXISTING);
+                // The target folder is usually shared with other users, so the file is created
+                // readable and writable by the current user only before anything is written to it
+                if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+                    Files.createFile(
+                            extractedLibFile,
+                            PosixFilePermissions.asFileAttribute(
+                                    PosixFilePermissions.fromString("rw-------")));
+                } else {
+                    Files.createFile(extractedLibFile);
+                }
+
+                // Write into the file created above, without CREATE so it is never recreated
+                // with default permissions
+                try (OutputStream writer =
+                        Files.newOutputStream(extractedLibFile, StandardOpenOption.WRITE)) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = reader.read(buffer)) != -1) {
+                        writer.write(buffer, 0, bytesRead);
+                    }
+                }
             } finally {
                 // Delete the extracted lib file on JVM exit.
                 extractedLibFile.toFile().deleteOnExit();
@@ -207,9 +231,9 @@ public class SQLiteJDBCLoader {
             }
 
             // Set executable (x) flag to enable Java to load the native library
-            extractedLibFile.toFile().setReadable(true);
+            extractedLibFile.toFile().setReadable(true, true);
             extractedLibFile.toFile().setWritable(true, true);
-            extractedLibFile.toFile().setExecutable(true);
+            extractedLibFile.toFile().setExecutable(true, true);
 
             // Check whether the contents are properly copied from the resource folder
             {

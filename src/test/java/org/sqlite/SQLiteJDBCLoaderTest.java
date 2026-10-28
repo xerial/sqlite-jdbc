@@ -26,16 +26,27 @@ package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.sql.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 public class SQLiteJDBCLoaderTest {
@@ -105,6 +116,49 @@ public class SQLiteJDBCLoaderTest {
     @Test
     public void version() {
         assertThat(SQLiteJDBCLoader.getVersion()).isNotEqualTo("unknown");
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS) // POSIX permissions
+    public void extractedLibraryIsPrivateToTheCurrentUser() throws Exception {
+        assertThat(SQLiteJDBCLoader.initialize()).isTrue();
+
+        // the library extracted by this JVM: same version prefix, not a lock file, and created
+        // after the JVM started (older files belong to other JVMs)
+        Path tempDir =
+                Paths.get(
+                        System.getProperty(
+                                "org.sqlite.tmpdir", System.getProperty("java.io.tmpdir")));
+        String prefix = "sqlite-" + SQLiteJDBCLoader.getVersion() + "-";
+        long jvmStart = ManagementFactory.getRuntimeMXBean().getStartTime() - 1000;
+        List<Path> extracted;
+        try (Stream<Path> files = Files.list(tempDir)) {
+            extracted =
+                    files.filter(p -> p.getFileName().toString().startsWith(prefix))
+                            .filter(p -> !p.getFileName().toString().endsWith(".lck"))
+                            .filter(p -> lastModified(p) >= jvmStart)
+                            .collect(Collectors.toList());
+        }
+        assumeTrue(!extracted.isEmpty(), "native library was not extracted by this JVM");
+
+        // the temp folder is shared with other users, the extracted library is the code loaded
+        // into the JVM and must not be readable or writable by anyone else
+        for (Path lib : extracted) {
+            assertThat(Files.getPosixFilePermissions(lib))
+                    .as(lib.toString())
+                    .isSubsetOf(
+                            PosixFilePermission.OWNER_READ,
+                            PosixFilePermission.OWNER_WRITE,
+                            PosixFilePermission.OWNER_EXECUTE);
+        }
+    }
+
+    private static long lastModified(Path path) {
+        try {
+            return Files.getLastModifiedTime(path).toMillis();
+        } catch (IOException e) {
+            return 0;
+        }
     }
 
     @Test
