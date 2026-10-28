@@ -27,9 +27,12 @@ package org.sqlite;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,6 +40,7 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.sqlite.util.AndroidSignatureIgnore;
 import org.sqlite.util.LibraryLoaderUtil;
@@ -180,31 +184,45 @@ public class SQLiteJDBCLoader {
             String libFolderForCurrentOS, String libraryFileName, String targetFolder)
             throws FileException {
         String nativeLibraryFilePath = libFolderForCurrentOS + "/" + libraryFileName;
+        // Include architecture name in temporary filename in order to avoid conflicts
+        // when multiple JVMs with different architectures running at the same time
+        String uuid = UUID.randomUUID().toString();
+        String extractedLibFileName =
+                String.format("sqlite-%s-%s-%s", getVersion(), uuid, libraryFileName);
+        String extractedLckFileName = extractedLibFileName + LOCK_EXT;
+
+        Path extractedLibFile = Paths.get(targetFolder, extractedLibFileName);
+        Path extractedLckFile = Paths.get(targetFolder, extractedLckFileName);
 
         try {
-            // Include architecture name in temporary filename in order to avoid conflicts
-            // when multiple JVMs with different architectures running at the same time.
-            // The target folder is usually shared with other users, so the file is created
-            // readable and writable by the current user only before anything is written to it.
-            Path extractedLibFile =
-                    Files.createTempFile(
-                            Paths.get(targetFolder),
-                            String.format("sqlite-%s-", getVersion()),
-                            "-" + libraryFileName);
-            String extractedLibFileName = extractedLibFile.getFileName().toString();
-            Path extractedLckFile = Paths.get(targetFolder, extractedLibFileName + LOCK_EXT);
-
             // Extract a native library file into the target directory
-            try (InputStream reader = getResourceAsStream(nativeLibraryFilePath);
-                    OutputStream writer = Files.newOutputStream(extractedLibFile)) {
+            try (InputStream reader = getResourceAsStream(nativeLibraryFilePath)) {
+                // Create the lock file first, so that cleanup() in another JVM never sees the
+                // library without its lock and deletes it while it is being written
                 if (Files.notExists(extractedLckFile)) {
                     Files.createFile(extractedLckFile);
                 }
 
-                byte[] buffer = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = reader.read(buffer)) != -1) {
-                    writer.write(buffer, 0, bytesRead);
+                // The target folder is usually shared with other users, so the file is created
+                // readable and writable by the current user only before anything is written to it
+                if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+                    Files.createFile(
+                            extractedLibFile,
+                            PosixFilePermissions.asFileAttribute(
+                                    PosixFilePermissions.fromString("rw-------")));
+                } else {
+                    Files.createFile(extractedLibFile);
+                }
+
+                // Write into the file created above, without CREATE so it is never recreated
+                // with default permissions
+                try (OutputStream writer =
+                        Files.newOutputStream(extractedLibFile, StandardOpenOption.WRITE)) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = reader.read(buffer)) != -1) {
+                        writer.write(buffer, 0, bytesRead);
+                    }
                 }
             } finally {
                 // Delete the extracted lib file on JVM exit.
