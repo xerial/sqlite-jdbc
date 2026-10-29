@@ -976,13 +976,13 @@ static void strfilterFunc(sqlite3_context *context, int argc, sqlite3_value **ar
       while( (c2=sqliteCharVal((unsigned char *)z21))!=0 && c2!=c1 ){
         sqliteNextChar(z21);
       }
+      z22=z1;
+      sqliteNextChar(z22);
       if( c2!=0){
-        z22=z21;
-        sqliteNextChar(z22);
-        strncpy(zot, z21, z22-z21);
-        zot+=z22-z21;
+        strncpy(zot, z1, z22-z1);
+        zot+=z22-z1;
       }
-      sqliteNextChar(z1);
+      z1=z22;
     }
     *zot = '\0';
 
