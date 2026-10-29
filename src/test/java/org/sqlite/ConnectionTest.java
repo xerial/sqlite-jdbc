@@ -154,6 +154,26 @@ public class ConnectionTest {
     }
 
     @Test
+    public void openAlreadyOpenKeepsConnection() throws SQLException {
+        SQLiteConnection conn = (SQLiteConnection) DriverManager.getConnection("jdbc:sqlite:");
+        assertThatExceptionOfType(SQLException.class)
+                .isThrownBy(
+                        () ->
+                                conn.getDatabase()
+                                        .open(
+                                                ":memory:",
+                                                SQLiteOpenMode.READWRITE.flag
+                                                        | SQLiteOpenMode.CREATE.flag))
+                .withMessageContaining("DB already open");
+
+        try (Statement stat = conn.createStatement()) {
+            stat.executeUpdate("create table t(x)");
+            stat.executeUpdate("insert into t values (1)");
+        }
+        conn.close();
+    }
+
+    @Test
     public void openInvalidLocation() {
         assertThatExceptionOfType(SQLException.class)
                 .isThrownBy(() -> DriverManager.getConnection("jdbc:sqlite:/"));
