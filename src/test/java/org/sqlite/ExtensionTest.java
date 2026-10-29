@@ -124,13 +124,17 @@ public class ExtensionTest {
         // character's bytes from the filter string. A single-byte searched
         // character (here the invalid byte 0xff, which decodes to U+FFFD) that
         // matches a wider filter character (U+FFFD, three bytes) made the copy
-        // write more bytes than were allocated, a heap overflow. The searched
-        // string stays one byte so the overflow is small and the call still
-        // returns, which is what this guards against under a sanitizer build.
-        assertReturnsRow("select strfilter(cast(x'ff' as text), char(65533))");
+        // write more bytes than were allocated, a heap overflow. The overflow is
+        // small enough to land in allocator slack, so check the bytes instead:
+        // the kept character must be the searched string's own 0xff, not the
+        // filter's EF BF BD. getString cannot tell them apart, hence hex().
+        ResultSet rs = stat.executeQuery("select hex(strfilter(cast(x'ff' as text), char(65533)))");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("FF");
+        rs.close();
 
         // well-formed input where a kept character is multibyte still filters
-        ResultSet rs = stat.executeQuery("select strfilter('a£b€c', '£€')");
+        rs = stat.executeQuery("select strfilter('a£b€c', '£€')");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString(1)).isEqualTo("£€");
         rs.close();
