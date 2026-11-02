@@ -314,9 +314,10 @@ static int sqlite3ReadUtf8(const unsigned char *z){
 /*
 ** X is a pointer to the first byte of a UTF-8 character.  Increment
 ** X so that it points to the next character.  This only works right
-** if X points to a well-formed UTF-8 string.
+** if X points to a well-formed UTF-8 string.  X is left alone when it
+** already points to the terminating nul.
 */
-#define sqliteNextChar(X)  while( (0xc0&*++(X))==0x80 ){}
+#define sqliteNextChar(X)  while( *(X) && (0xc0&*++(X))==0x80 ){}
 #define sqliteCharVal(X)   sqlite3ReadUtf8(X)
 
 /*
@@ -1146,6 +1147,8 @@ static void rightFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
   ze = zt;
   zt = z;
 
+  if(l<0)
+    l=0;
   cc=c-l;
   if(cc<0)
     cc=0;
