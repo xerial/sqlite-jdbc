@@ -3,14 +3,17 @@ package org.sqlite;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
 
+import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -323,6 +326,49 @@ public class UDFTest {
         ResultSet rs = stat.executeQuery("select mySum(c1), sum(c1) from t;");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getInt(1)).isEqualTo(rs.getInt(2));
+    }
+
+    @Test
+    public void finishedAggregatesAreNotRetainedDuringQuery() throws SQLException {
+        List<WeakReference<Function.Aggregate>> finished = new ArrayList<>();
+        AtomicBoolean released = new AtomicBoolean();
+        Function.create(
+                conn,
+                "tracked",
+                new Function.Aggregate() {
+                    @Override
+                    protected void xStep() throws SQLException {
+                        long group = value_long(0);
+                        if (group <= 100) {
+                            finished.add(new WeakReference<>(this));
+                        } else if (group == 1000) {
+                            released.set(anyCollected(finished));
+                        }
+                    }
+
+                    @Override
+                    protected void xFinal() throws SQLException {
+                        result(0);
+                    }
+                });
+        // every group is finalised inside the same step, so the instances of groups that are
+        // already done must become collectable before it ends
+        ResultSet rs =
+                stat.executeQuery(
+                        "with recursive r(i) as"
+                                + " (select 1 union all select i + 1 from r where i < 1000)"
+                                + " select count(*) from (select tracked(i) from r group by i);");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getInt(1)).isEqualTo(1000);
+        assertThat(released).isTrue();
+    }
+
+    private static boolean anyCollected(List<? extends WeakReference<?>> refs) {
+        for (int i = 0; i < 10; i++) {
+            System.gc();
+            if (refs.stream().anyMatch(ref -> ref.get() == null)) return true;
+        }
+        return false;
     }
 
     @Test
