@@ -2,6 +2,7 @@ package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -10,6 +11,8 @@ import java.sql.Statement;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -182,6 +185,48 @@ public class CollationTest {
 
         assertThat(received.stream().distinct().sorted().toArray())
                 .isEqualTo(Arrays.stream(expected).distinct().sorted().toArray());
+    }
+
+    @Test
+    public void comparedStringsAreNotRetainedDuringSort() throws SQLException {
+        List<WeakReference<String>> compared = new ArrayList<>();
+        AtomicBoolean released = new AtomicBoolean();
+        Collation.create(
+                conn,
+                "TRACKED",
+                new Collation() {
+                    private int calls = 0;
+
+                    @Override
+                    protected int xCompare(String str1, String str2) {
+                        calls++;
+                        if (calls <= 100) {
+                            compared.add(new WeakReference<>(str1));
+                            compared.add(new WeakReference<>(str2));
+                        } else if (calls == 1000) {
+                            released.set(anyCollected(compared));
+                        }
+                        return str1.compareTo(str2);
+                    }
+                });
+        stat.executeUpdate("create table t (c1);");
+        stat.executeUpdate(
+                "with recursive r(i) as (select 1 union all select i + 1 from r where i < 1000)"
+                        + " insert into t select hex(randomblob(8)) from r;");
+        // the whole sort runs inside the first step, so strings compared early on must become
+        // collectable before it ends
+        try (ResultSet rs = stat.executeQuery("select c1 from t order by c1 collate TRACKED;")) {
+            assertThat(rs.next()).isTrue();
+        }
+        assertThat(released).isTrue();
+    }
+
+    private static boolean anyCollected(List<? extends WeakReference<?>> refs) {
+        for (int i = 0; i < 10; i++) {
+            System.gc();
+            if (refs.stream().anyMatch(ref -> ref.get() == null)) return true;
+        }
+        return false;
     }
 
     @Test
