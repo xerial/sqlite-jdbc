@@ -154,7 +154,10 @@ SQLITE_EXTENSION_INIT1
 
 /*
 ** Simple binary tree implementation to use in median, mode and quartile calculations
-** Tree is not necessarily balanced. That would require something like red&black trees of AVL
+** The tree is kept balanced as a treap: every node gets a random priority and is
+** rotated above its parent when its priority is higher. Without that, values that
+** arrive in sorted order build a tree as deep as the number of rows, and the
+** recursive insert, iterate and destroy below overflow the stack.
 */
 
 typedef int(*cmp_func)(const void *, const void *);
@@ -165,6 +168,7 @@ typedef struct node{
   struct node *r;
   void* data;
   sqlite_int64 count;
+  unsigned int prio;
 } node;
 
 typedef struct map{
@@ -1892,6 +1896,7 @@ void node_insert(node** n, cmp_func cmp, void *e){
     nn = (node*)xcalloc(1,sizeof(node), "for node");
     nn->data = e;
     nn->count = 1;
+    sqlite3_randomness(sizeof(nn->prio), &nn->prio);
     *n=nn;
   }else{
     c=cmp((*n)->data,e);
@@ -1901,8 +1906,20 @@ void node_insert(node** n, cmp_func cmp, void *e){
     }else if(c>0){
       /* put it right here */
       node_insert(&((*n)->l), cmp, e);
+      if( (*n)->l->prio > (*n)->prio ){
+        nn = (*n)->l;
+        (*n)->l = nn->r;
+        nn->r = *n;
+        *n = nn;
+      }
     }else{
       node_insert(&((*n)->r), cmp, e);
+      if( (*n)->r->prio > (*n)->prio ){
+        nn = (*n)->r;
+        (*n)->r = nn->l;
+        nn->l = *n;
+        *n = nn;
+      }
     }
   }
 }

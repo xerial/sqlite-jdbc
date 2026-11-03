@@ -10,6 +10,7 @@ import java.sql.Statement;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 public class ExtensionTest {
@@ -138,6 +139,33 @@ public class ExtensionTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString(1)).isEqualTo("£€");
         rs.close();
+    }
+
+    @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    @Timeout(value = 10, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+    public void modeAndQuartilesOverSortedValues() throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+
+        // mode, lower_quartile and upper_quartile collect their values in a binary
+        // tree that was never balanced, so values arriving in sorted order built a
+        // tree as deep as the number of rows. Inserting took quadratic time, and the
+        // recursive walk over the tree overflowed the native stack and killed the
+        // JVM somewhere between 25k and 100k rows, depending on the stack size.
+        for (String order : new String[] {"asc", "desc"}) {
+            ResultSet rs =
+                    stat.executeQuery(
+                            "with recursive t(x) as (select 1 union all select x + 1 from t where x < 100000) "
+                                    + "select mode(x), lower_quartile(x), upper_quartile(x) "
+                                    + "from (select x from t union all select 4242 order by x "
+                                    + order
+                                    + ")");
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getLong(1)).isEqualTo(4242);
+            assertThat(rs.getLong(2)).isEqualTo(25000);
+            assertThat(rs.getLong(3)).isEqualTo(75000);
+            rs.close();
+        }
     }
 
     private void assertReturnsRow(String sql) throws Exception {
