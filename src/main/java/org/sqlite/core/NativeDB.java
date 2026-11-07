@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.regex.Pattern;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
 import org.sqlite.Function;
@@ -35,6 +36,16 @@ public final class NativeDB extends DB {
     private static final int DEFAULT_BACKUP_BUSY_SLEEP_TIME_MILLIS = 100;
     private static final int DEFAULT_BACKUP_NUM_BUSY_BEFORE_FAIL = 3;
     private static final int DEFAULT_PAGES_PER_BACKUP_STEP = 100;
+
+    /**
+     * Matches the value of the encryption key pragmas (key, hexkey, textkey, rekey, hexrekey,
+     * textrekey), in both the {@code pragma key = value} and {@code pragma key(value)} forms.
+     */
+    private static final Pattern SECRET_PRAGMA =
+            Pattern.compile(
+                    "(\\bpragma\\s+(?:\\w+\\s*\\.\\s*)?(?:hex|text)?(?:re)?key\\s*(?:=\\s*|\\(\\s*))"
+                            + "('(?:[^']++|'')*+'|\"(?:[^\"]++|\"\")*+\"|[^\\s;)]++)",
+                    Pattern.CASE_INSENSITIVE);
 
     /** SQLite connection handle. */
     private long pointer = 0;
@@ -95,11 +106,24 @@ public final class NativeDB extends DB {
                 () ->
                         MessageFormat.format(
                                 "DriverManager [{0}] [SQLite EXEC] {1}",
-                                Thread.currentThread().getName(), sql));
+                                Thread.currentThread().getName(), redactSecrets(sql)));
         return _exec_utf8(stringToUtf8ByteArray(sql));
     }
 
     synchronized native int _exec_utf8(byte[] sqlUtf8) throws SQLException;
+
+    /**
+     * Hides the value of encryption key pragmas so that it does not appear in trace logs.
+     *
+     * @param sql the SQL statement to log
+     * @return the statement with key values replaced by {@code '***'}
+     */
+    static String redactSecrets(String sql) {
+        if (sql == null) {
+            return null;
+        }
+        return SECRET_PRAGMA.matcher(sql).replaceAll("$1'***'");
+    }
 
     /** @see org.sqlite.core.DB#shared_cache(boolean) */
     @Override
@@ -131,7 +155,7 @@ public final class NativeDB extends DB {
                 () ->
                         MessageFormat.format(
                                 "DriverManager [{0}] [SQLite EXEC] {1}",
-                                Thread.currentThread().getName(), sql));
+                                Thread.currentThread().getName(), redactSecrets(sql)));
         return new SafeStmtPtr(this, prepare_utf8(stringToUtf8ByteArray(sql)));
     }
 
