@@ -132,6 +132,10 @@ public abstract class JDBC3Statement extends CoreStatement {
                         // execute extended command
                         ext.execute(db);
                     } else {
+                        if (this.conn instanceof JDBC3Connection) {
+                            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+                        }
+
                         try {
                             synchronized (db) {
                                 changes = db.total_changes();
@@ -234,6 +238,10 @@ public abstract class JDBC3Statement extends CoreStatement {
         // TODO: optimize
         internalClose();
         if (batch == null || batchPos == 0) return new long[] {};
+
+        if (this.conn instanceof JDBC3Connection) {
+            ((JDBC3Connection) this.conn).tryEnforceTransactionMode();
+        }
 
         long[] changes = new long[batchPos];
         DB db = conn.getDatabase();
