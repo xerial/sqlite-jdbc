@@ -204,6 +204,64 @@ public class JDBCTest {
     }
 
     @Test
+    public void cannotExecuteUpdateWithStatementWhenConnectionIsSetToReadOnly() throws Exception {
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            connection.setReadOnly(true);
+
+            // executeUpdate as the first statement of the transaction
+            try (Statement statement = connection.createStatement()) {
+                assertThatExceptionOfType(SQLException.class)
+                        .as("Managed to modify DB contents on a read-only connection!")
+                        .isThrownBy(
+                                () ->
+                                        statement.executeUpdate(
+                                                "CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))"));
+            }
+            connection.rollback();
+        }
+    }
+
+    @Test
+    public void cannotExecuteBatchWithStatementWhenConnectionIsSetToReadOnly() throws Exception {
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            connection.setReadOnly(true);
+
+            // executeBatch as the first statement of the transaction
+            try (Statement statement = connection.createStatement()) {
+                statement.addBatch("CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))");
+                assertThatExceptionOfType(SQLException.class)
+                        .as("Managed to modify DB contents on a read-only connection!")
+                        .isThrownBy(statement::executeBatch);
+            }
+            connection.rollback();
+        }
+    }
+
+    @Test
+    public void canExecuteUpdateWithStatementAfterReadOnlyTransaction() throws Exception {
+        SQLiteDataSource dataSource = createDatasourceWithExplicitReadonly();
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            connection.setReadOnly(true);
+            try (Statement statement = connection.createStatement()) {
+                assertThat(statement.execute("SELECT * FROM sqlite_schema")).isTrue();
+            }
+            connection.commit();
+
+            // the read-only transaction left PRAGMA query_only on
+            connection.setReadOnly(false);
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("CREATE TABLE TestTable(ID VARCHAR(255), PRIMARY KEY(ID))");
+            }
+            connection.commit();
+        }
+    }
+
+    @Test
     void name() {}
 
     @Test
