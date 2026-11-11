@@ -43,6 +43,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
         if (index != null) {
             return index;
         }
+        String[] cols = getColumnNames();
         for (int i = 0; i < cols.length; i++) {
             if (col.equalsIgnoreCase(cols[i])) {
                 return addColumnIndexInCache(col, i + 1);
@@ -572,8 +573,8 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     protected static final Pattern COLUMN_PRECISION =
             Pattern.compile("(?m)^(?:(?!\\().)*+\\((.*?)\\)");
 
-    // we do not need to check the RS is open, only that colsMeta
-    // is not null, done with checkCol(int).
+    // we do not need to check the RS is open, only that columnCount
+    // is set, done with checkCol(int).
 
     /** @see java.sql.ResultSet#getMetaData() */
     public ResultSetMetaData getMetaData() {
@@ -609,7 +610,7 @@ public abstract class JDBC3ResultSet extends CoreResultSet {
     /** @see java.sql.ResultSetMetaData#getColumnCount() */
     public int getColumnCount() throws SQLException {
         checkCol(1);
-        return colsMeta.length;
+        return columnCount;
     }
 
     /** @see java.sql.ResultSetMetaData#getColumnDisplaySize(int) */

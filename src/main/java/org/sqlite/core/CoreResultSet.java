@@ -31,10 +31,10 @@ public abstract class CoreResultSet implements Codes {
     public boolean open = false;
     /** Maximum number of rows as set by a Statement */
     public long maxRows;
-    /** if null, the RS is closed() */
+    /** Column names, read the first time they are needed. See {@link #getColumnNames()} */
     public String[] cols = null;
-    /** same as cols, but used by Meta interface */
-    public String[] colsMeta = null;
+    /** Number of columns, used by Meta interface. -1 if there is nothing to describe. */
+    public int columnCount = -1;
 
     protected boolean[][] meta = null;
 
@@ -93,11 +93,11 @@ public abstract class CoreResultSet implements Codes {
      * @throws SQLException
      */
     public int checkCol(int col) throws SQLException {
-        if (colsMeta == null) {
+        if (columnCount < 0) {
             throw new SQLException("SQLite JDBC: inconsistent internal state");
         }
-        if (col < 1 || col > colsMeta.length) {
-            throw new SQLException("column " + col + " out of bounds [1," + colsMeta.length + "]");
+        if (col < 1 || col > columnCount) {
+            throw new SQLException("column " + col + " out of bounds [1," + columnCount + "]");
         }
         return --col;
     }
@@ -125,7 +125,7 @@ public abstract class CoreResultSet implements Codes {
 
     public void close() throws SQLException {
         cols = null;
-        colsMeta = null;
+        columnCount = -1;
         meta = null;
         limitRows = 0;
         row = 0;
@@ -153,6 +153,20 @@ public abstract class CoreResultSet implements Codes {
         open = false;
     }
 
+    /**
+     * Reading the names costs a native call per column, so it is left until a column is looked up
+     * by name.
+     *
+     * @return The column names.
+     * @throws SQLException
+     */
+    protected String[] getColumnNames() throws SQLException {
+        if (cols == null) {
+            cols = stmt.pointer.safeRun(DB::column_names);
+        }
+        return cols;
+    }
+
     protected Integer findColumnIndexInCache(String col) {
         if (columnNameToIndex == null) {
             return null;
@@ -162,7 +176,7 @@ public abstract class CoreResultSet implements Codes {
 
     protected int addColumnIndexInCache(String col, int index) {
         if (columnNameToIndex == null) {
-            columnNameToIndex = new HashMap<String, Integer>(cols.length);
+            columnNameToIndex = new HashMap<String, Integer>(columnCount);
         }
         columnNameToIndex.put(col, index);
         return index;

@@ -170,15 +170,12 @@ public abstract class JDBC3Statement extends CoreStatement {
             throw new SQLException("ResultSet already requested");
         }
 
-        if (pointer.safeRunInt(DB::column_count) == 0) {
+        int columnCount = pointer.safeRunInt(DB::column_count);
+        if (columnCount == 0) {
             return null;
         }
 
-        if (rs.colsMeta == null) {
-            rs.colsMeta = pointer.safeRun(DB::column_names);
-        }
-
-        rs.cols = rs.colsMeta;
+        rs.columnCount = columnCount;
         rs.emptyResultSet = !resultsWaiting;
         rs.open = true;
         resultsWaiting = false;
