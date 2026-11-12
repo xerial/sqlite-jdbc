@@ -140,6 +140,31 @@ public class ExtensionTest {
         rs.close();
     }
 
+    @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    public void rightstrNegativeLength() throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+
+        // rightstr skips (length - n) characters before copying, so a negative n
+        // made it skip more characters than the value holds and step on past the
+        // terminating nul into adjacent heap. Small values failed with a bogus
+        // SQLITE_NOMEM, large ones crashed the JVM. A negative n now gives an
+        // empty string, the same as leftstr.
+        ResultSet rs = stat.executeQuery("select rightstr('abc', -1), leftstr('abc', -1)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("");
+        assertThat(rs.getString(2)).isEqualTo("");
+        rs.close();
+
+        // non-negative lengths behave as before
+        rs = stat.executeQuery("select rightstr('a£€', 2), rightstr('abc', 5), rightstr('abc', 0)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("£€");
+        assertThat(rs.getString(2)).isEqualTo("abc");
+        assertThat(rs.getString(3)).isEqualTo("");
+        rs.close();
+    }
+
     private void assertReturnsRow(String sql) throws Exception {
         try (ResultSet rs = stat.executeQuery(sql)) {
             assertThat(rs.next()).isTrue();
