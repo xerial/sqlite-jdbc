@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.sqlite.core.CoreResultSet;
 
 class ResultSetTest {
 
@@ -373,6 +374,37 @@ class ResultSetTest {
             ResultSetMetaData meta = rs.getMetaData();
             assertThat(meta).isNotNull();
             assertThat(meta.getColumnCount()).isEqualTo(1);
+        }
+    }
+
+    @Test
+    void columnNamesAreNotReadUntilLookedUpByName() throws SQLException {
+        try (PreparedStatement prep = conn.prepareStatement("select * from test where id = ?")) {
+            for (int i = 0; i < 2; i++) {
+                prep.setInt(1, 1);
+                try (ResultSet rs = prep.executeQuery()) {
+                    assertThat(rs.next()).isTrue();
+                    assertThat(rs.getInt(1)).isEqualTo(1);
+                    assertThat(rs.getMetaData().getColumnCount()).isEqualTo(3);
+                    assertThat(((CoreResultSet) rs).cols).isNull();
+
+                    assertThat(rs.getString("description")).isEqualTo("description");
+                    assertThat(rs.findColumn("FOO")).isEqualTo(3);
+                    assertThat(((CoreResultSet) rs).cols)
+                            .containsExactly("id", "DESCRIPTION", "fOo");
+                }
+            }
+        }
+    }
+
+    @Test
+    void columnOutOfBoundsWithoutReadingColumnNames() throws SQLException {
+        try (ResultSet rs = stat.executeQuery("select * from test")) {
+            assertThat(rs.next()).isTrue();
+            assertThatExceptionOfType(SQLException.class)
+                    .isThrownBy(() -> rs.getString(4))
+                    .withMessageContaining("column 4 out of bounds [1,3]");
+            assertThat(((CoreResultSet) rs).cols).isNull();
         }
     }
 }

@@ -44,8 +44,8 @@ public abstract class CorePreparedStatement extends JDBC4Statement {
         this.sql = sql;
         DB db = conn.getDatabase();
         db.prepare(this);
-        rs.colsMeta = pointer.safeRun(DB::column_names);
         columnCount = pointer.safeRunInt(DB::column_count);
+        rs.columnCount = columnCount;
         paramCount = pointer.safeRunInt(DB::bind_parameter_count);
         batchQueryCount = 0;
         batch = null;
