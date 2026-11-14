@@ -1478,7 +1478,7 @@ static void modeIterate(void* e, i64 c, void* pp){
   ModeCtx *p = (ModeCtx*)pp;
   
   if( 0==p->is_double ){
-    ei = *(int*)(e);
+    ei = *(i64*)(e);
 
 	if( p->mcnt==c ){
       ++p->mn;
@@ -1526,7 +1526,7 @@ static void medianIterate(void* e, i64 c, void* pp){
     if( ir >= iR ){
     ++p->mn;
       if( 0==p->is_double ){
-        ei = *(int*)(e);
+        ei = *(i64*)(e);
         p->riM += ei;
       }else{
         ed = *(double*)(e);
