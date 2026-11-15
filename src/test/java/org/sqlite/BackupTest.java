@@ -11,6 +11,7 @@ package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,6 +88,44 @@ public class BackupTest {
                                                         + "doesnotexist.sqlite"))
                         .isOfAnyClassIn(SQLiteException.class);
             }
+        }
+    }
+
+    @Test
+    void restoreIsRejectedOnReadOnlyConnection() throws Exception {
+        File dbFile = File.createTempFile("backup-test-target", ".sqlite", tempDir);
+        File srcFile = File.createTempFile("backup-test-source", ".sqlite", tempDir);
+
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbFile);
+                Statement stmt = conn.createStatement()) {
+            createTableAndInsertRows(stmt);
+        }
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + srcFile);
+                Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("create table sample(id, name)");
+        }
+
+        SQLiteConfig config = new SQLiteConfig();
+        config.setExplicitReadOnly(true);
+        try (Connection conn =
+                DriverManager.getConnection("jdbc:sqlite:" + dbFile, config.toProperties())) {
+            conn.setAutoCommit(false);
+            conn.setReadOnly(true);
+            try (Statement stmt = conn.createStatement()) {
+                assertThatThrownBy(() -> stmt.executeUpdate("restore from " + srcFile))
+                        .isInstanceOf(SQLiteException.class)
+                        .hasMessageContaining("SQLITE_READONLY");
+                assertThatThrownBy(() -> stmt.execute("restore from " + srcFile))
+                        .isInstanceOf(SQLiteException.class)
+                        .hasMessageContaining("SQLITE_READONLY");
+            }
+            conn.commit();
+        }
+
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbFile);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("select count(*) from sample")) {
+            assertThat(rs.getInt(1)).isEqualTo(2);
         }
     }
 
