@@ -45,6 +45,7 @@ public abstract class JDBC3Statement extends CoreStatement {
                 () -> {
                     SQLExtension ext = ExtendedCommand.parse(sql);
                     if (ext != null) {
+                        checkExtendedCommandAllowed(ext);
                         ext.execute(conn.getDatabase());
 
                         return false;
@@ -60,6 +61,16 @@ public abstract class JDBC3Statement extends CoreStatement {
                         return result;
                     }
                 });
+    }
+
+    /**
+     * Restore copies pages with the SQLite backup API, which does not honour PRAGMA query_only, so
+     * a read-only connection has to refuse it before it reaches the database.
+     */
+    private void checkExtendedCommandAllowed(SQLExtension ext) throws SQLException {
+        if (ext instanceof ExtendedCommand.RestoreCommand && conn.isReadOnly()) {
+            throw DB.newSQLException(SQLITE_READONLY, "Cannot restore into a read-only connection");
+        }
     }
 
     /** @see java.sql.Statement#execute(java.lang.String, int) */
@@ -130,6 +141,7 @@ public abstract class JDBC3Statement extends CoreStatement {
                     SQLExtension ext = ExtendedCommand.parse(sql);
                     if (ext != null) {
                         // execute extended command
+                        checkExtendedCommandAllowed(ext);
                         ext.execute(db);
                     } else {
                         if (this.conn instanceof JDBC3Connection) {
