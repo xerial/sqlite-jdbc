@@ -524,11 +524,16 @@ static void piFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
 static void squareFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
   i64 iVal = 0;
   double rVal = 0.0;
-  assert( argc==2 );
+  assert( argc==1 );
   switch( sqlite3_value_type(argv[0]) ){
     case SQLITE_INTEGER: {
       iVal = sqlite3_value_int64(argv[0]);
-      sqlite3_result_int64(context, iVal*iVal);
+      if( iVal >= -3037000499LL && iVal <= 3037000499LL ){
+        sqlite3_result_int64(context, iVal*iVal);
+      } else {
+        rVal = (double)iVal;
+        sqlite3_result_double(context, rVal*rVal);
+      }
       break;
     }
     case SQLITE_NULL: {
