@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.sqlite.Authorizer;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
 import org.sqlite.Function;
@@ -836,6 +837,13 @@ public abstract class DB implements Codes {
             throws SQLException;
 
     public abstract void clear_progress_handler() throws SQLException;
+
+    /**
+     * Sets or clears (when null) the authorizer of this connection.
+     *
+     * @see org.sqlite.Authorizer
+     */
+    public abstract void set_authorizer(Authorizer authorizer) throws SQLException;
 
     /**
      * Returns an array describing the attributes (not null, primary key and auto increment) of
