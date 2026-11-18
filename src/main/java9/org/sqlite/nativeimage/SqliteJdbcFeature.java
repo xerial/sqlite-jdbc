@@ -4,6 +4,7 @@ import org.graalvm.nativeimage.hosted.Feature;
 import org.graalvm.nativeimage.hosted.RuntimeClassInitialization;
 import org.graalvm.nativeimage.hosted.RuntimeJNIAccess;
 import org.graalvm.nativeimage.hosted.RuntimeResourceAccess;
+import org.sqlite.Authorizer;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
 import org.sqlite.Function;
@@ -84,7 +85,8 @@ public class SqliteJdbcFeature implements Feature {
                         "busyHandler",
                         "commitListener",
                         "updateListener",
-                        "progressHandler"));
+                        "progressHandler",
+                        "authorizer"));
         RuntimeJNIAccess.register(
                 method(DB.class, "onUpdate", int.class, String.class, String.class, long.class));
         RuntimeJNIAccess.register(method(DB.class, "onCommit", boolean.class));
@@ -121,6 +123,18 @@ public class SqliteJdbcFeature implements Feature {
         // ProgressHandler JNI calls
         RuntimeJNIAccess.register(ProgressHandler.class);
         RuntimeJNIAccess.register(method(ProgressHandler.class, "progress"));
+
+        // Authorizer JNI calls
+        RuntimeJNIAccess.register(Authorizer.class);
+        RuntimeJNIAccess.register(
+                method(
+                        Authorizer.class,
+                        "xAuthorize",
+                        int.class,
+                        byte[].class,
+                        byte[].class,
+                        byte[].class,
+                        byte[].class));
 
         // BusyHandler JNI calls
         RuntimeJNIAccess.register(BusyHandler.class);

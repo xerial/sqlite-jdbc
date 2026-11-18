@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.regex.Pattern;
+import org.sqlite.Authorizer;
 import org.sqlite.BusyHandler;
 import org.sqlite.Collation;
 import org.sqlite.Function;
@@ -551,6 +552,12 @@ public final class NativeDB extends DB {
 
     public synchronized native void clear_progress_handler() throws SQLException;
 
+    /** handler pointer to JNI global authorizer reference. */
+    private long authorizer;
+
+    @Override
+    public synchronized native void set_authorizer(Authorizer authorizer) throws SQLException;
+
     /**
      * Getter for native pointer to validate memory is properly cleaned up in unit tests
      *
@@ -585,6 +592,15 @@ public final class NativeDB extends DB {
      */
     long getProgressHandler() {
         return progressHandler;
+    }
+
+    /**
+     * Getter for native pointer to validate memory is properly cleaned up in unit tests
+     *
+     * @return a native pointer to validate memory is properly cleaned up in unit tests
+     */
+    long getAuthorizer() {
+        return authorizer;
     }
 
     @Override

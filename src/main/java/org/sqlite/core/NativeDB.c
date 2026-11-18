@@ -33,6 +33,7 @@ static jfieldID db_busyHandler = 0;
 static jfieldID db_commitListener = 0;
 static jfieldID db_updateListener = 0;
 static jfieldID db_progressHandler = 0;
+static jfieldID db_authorizer = 0;
 static jmethodID db_mth_onUpdate = 0;
 static jmethodID db_mth_onCommit = 0;
 static jmethodID mth_stringToUtf8ByteArray = 0;
@@ -63,6 +64,9 @@ static jmethodID pobserver_mth_progress = 0;
 
 static jclass phandleclass = 0;
 static jmethodID phandle_mth_progress = 0;
+
+static jclass authorizerclass = 0;
+static jmethodID authorizer_mth_authorize = 0;
 
 static jclass bhandleclass = 0;
 static jmethodID bhandle_mth_callback = 0;
@@ -448,6 +452,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     db_commitListener = (*env)->GetFieldID(env, dbclass, "commitListener", "J");
     db_updateListener = (*env)->GetFieldID(env, dbclass, "updateListener", "J");
     db_progressHandler = (*env)->GetFieldID(env, dbclass, "progressHandler", "J");
+    db_authorizer = (*env)->GetFieldID(env, dbclass, "authorizer", "J");
     db_mth_onUpdate = (*env)->GetMethodID(env, dbclass, "onUpdate", "(ILjava/lang/String;Ljava/lang/String;J)V");
     db_mth_onCommit = (*env)->GetMethodID(env, dbclass, "onCommit", "(Z)V");
     mth_stringToUtf8ByteArray = (*env)->GetStaticMethodID(
@@ -492,6 +497,11 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     phandleclass = (*env)->NewWeakGlobalRef(env, phandleclass);
     phandle_mth_progress = (*env)->GetMethodID(env, phandleclass, "progress", "()I");
 
+    authorizerclass = (*env)->FindClass(env, "org/sqlite/Authorizer");
+    if(!authorizerclass) return JNI_ERR;
+    authorizerclass = (*env)->NewWeakGlobalRef(env, authorizerclass);
+    authorizer_mth_authorize = (*env)->GetMethodID(env, authorizerclass, "xAuthorize", "(I[B[B[B[B)I");
+
     bhandleclass = (*env)->FindClass(env, "org/sqlite/BusyHandler");
     if(!bhandleclass) return JNI_ERR;
     bhandleclass = (*env)->NewWeakGlobalRef(env, bhandleclass);
@@ -533,6 +543,8 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved) {
     if (phandleclass) (*env)->DeleteWeakGlobalRef(env, phandleclass);
 
     if (bhandleclass) (*env)->DeleteWeakGlobalRef(env, bhandleclass);
+
+    if (authorizerclass) (*env)->DeleteWeakGlobalRef(env, authorizerclass);
 
     if (exclass) (*env)->DeleteWeakGlobalRef(env, exclass);
 
@@ -1753,6 +1765,98 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_clear_1progress_1handler(
     change_progress_handler(env, nativeDB, NULL, 0);
 }
 
+// Authorizer
+
+struct AuthorizerContext {
+    JavaVM *vm;
+    jobject authorizer;
+};
+
+static void free_authorizer(JNIEnv *env, void *toFree) {
+    struct AuthorizerContext* ctx = (struct AuthorizerContext*) toFree;
+    (*env)->DeleteGlobalRef(env, ctx->authorizer);
+    free(toFree);
+}
+
+/* Copies a standard UTF-8 C string into a Java byte[] (decoded on the Java side,
+ * since NewStringUTF expects modified UTF-8). Returns NULL for NULL input or on OOM. */
+static jbyteArray utf8_to_byte_array(JNIEnv *env, const char *str) {
+    if (!str) return NULL;
+    jsize len = (jsize) strlen(str);
+    jbyteArray arr = (*env)->NewByteArray(env, len);
+    if (arr) (*env)->SetByteArrayRegion(env, arr, 0, len, (const jbyte *) str);
+    return arr;
+}
+
+static int authorizer_function(void *context, int action, const char *arg1, const char *arg2,
+                               const char *database, const char *triggerOrView) {
+    JNIEnv *env = 0;
+    struct AuthorizerContext* ctx = (struct AuthorizerContext*) context;
+    (*ctx->vm)->AttachCurrentThread(ctx->vm, (void **)&env, 0);
+
+    jbyteArray jarg1 = utf8_to_byte_array(env, arg1);
+    jbyteArray jarg2 = utf8_to_byte_array(env, arg2);
+    jbyteArray jdatabase = utf8_to_byte_array(env, database);
+    jbyteArray jtrigger = utf8_to_byte_array(env, triggerOrView);
+
+    jint rv = SQLITE_DENY;
+    if (!(*env)->ExceptionCheck(env)) {
+        rv = (*env)->CallIntMethod(env, ctx->authorizer, authorizer_mth_authorize,
+                                   action, jarg1, jarg2, jdatabase, jtrigger);
+    }
+    // fail closed: if the authorizer threw (or an argument could not be allocated), deny
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        rv = SQLITE_DENY;
+    }
+
+    if (jarg1) (*env)->DeleteLocalRef(env, jarg1);
+    if (jarg2) (*env)->DeleteLocalRef(env, jarg2);
+    if (jdatabase) (*env)->DeleteLocalRef(env, jdatabase);
+    if (jtrigger) (*env)->DeleteLocalRef(env, jtrigger);
+    return rv;
+}
+
+static void change_authorizer(JNIEnv *env, jobject nativeDB, jobject authorizer)
+{
+    sqlite3 *db = gethandle(env, nativeDB);
+    if (!db) {
+        throwex_db_closed(env);
+        return;
+    }
+
+    struct AuthorizerContext* ctx = NULL;
+    if (authorizer) {
+        // on any failure, keep the previously installed authorizer untouched
+        ctx = (struct AuthorizerContext*) malloc(sizeof(struct AuthorizerContext));
+        if (!ctx) {
+            throwex_outofmemory(env);
+            return;
+        }
+        ctx->authorizer = (*env)->NewGlobalRef(env, authorizer);
+        if (!ctx->authorizer || (*env)->GetJavaVM(env, &ctx->vm) != JNI_OK) {
+            if (ctx->authorizer) (*env)->DeleteGlobalRef(env, ctx->authorizer);
+            free(ctx);
+            if (!(*env)->ExceptionCheck(env)) throwex_outofmemory(env);
+            return;
+        }
+        sqlite3_set_authorizer(db, &authorizer_function, ctx);
+    } else {
+        sqlite3_set_authorizer(db, NULL, NULL);
+    }
+
+    set_new_handler(env, nativeDB, db_authorizer, ctx, &free_authorizer);
+}
+
+JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_set_1authorizer(
+  JNIEnv *env,
+  jobject nativeDB,
+  jobject authorizer
+)
+{
+    change_authorizer(env, nativeDB, authorizer);
+}
+
 // Update hook
 
 struct UpdateHandlerContext {
@@ -1854,6 +1958,7 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1close(
     {
         change_progress_handler(env, nativeDB, NULL, 0);
         change_busy_handler(env, nativeDB, NULL);
+        change_authorizer(env, nativeDB, NULL);
         clear_commit_listener(env, nativeDB, db);
         clear_update_listener(env, nativeDB);
 
