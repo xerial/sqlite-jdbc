@@ -5,13 +5,18 @@ import static org.assertj.core.data.Offset.offset;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
 public class MathFunctionsTest {
@@ -309,6 +314,41 @@ public class MathFunctionsTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getDouble(1)).isCloseTo(16, offset(0.000000000000001));
         rs.close();
+    }
+
+    @ParameterizedTest
+    @MethodSource("squareValues")
+    public void squareMatchesMultiplication(Object value) throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+        String sql = "SELECT square(?), ? * ?, typeof(square(?)), typeof(? * ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            for (int i = 1; i <= 6; i++) {
+                stmt.setObject(i, value);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                assertThat(rs.next()).isTrue();
+                assertThat(rs.getObject(1)).isEqualTo(rs.getObject(2));
+                assertThat(rs.getObject(3)).isEqualTo(rs.getObject(4));
+            }
+        }
+    }
+
+    static Stream<Arguments> squareValues() {
+        return Stream.of(
+                Arguments.of(0L),
+                Arguments.of(1L),
+                Arguments.of(-1L),
+                Arguments.of(2147483647L),
+                Arguments.of(-2147483647L),
+                Arguments.of(3037000499L),
+                Arguments.of(-3037000499L),
+                Arguments.of(3037000500L),
+                Arguments.of(-3037000500L),
+                Arguments.of(Long.MAX_VALUE),
+                Arguments.of(Long.MIN_VALUE),
+                Arguments.of(0.5),
+                Arguments.of(-2.5),
+                Arguments.of((Object) null));
     }
 
     @Test
