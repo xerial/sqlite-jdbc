@@ -1669,7 +1669,7 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_restore(
       /* Release resources allocated by backup_init(). */
       (void)sqlite3_backup_finish(pBackup);
     }
-    rc = sqlite3_errcode(pFile);
+    rc = sqlite3_errcode(pDb);
   }
 
   /* Close the database connection opened on database file zFilename
