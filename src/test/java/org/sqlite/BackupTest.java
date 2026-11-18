@@ -91,6 +91,33 @@ public class BackupTest {
     }
 
     @Test
+    void restoreReportsErrorsFromTheTargetDatabase() throws Exception {
+        File source = File.createTempFile("backup-test", ".sqlite", tempDir);
+        File target = File.createTempFile("backup-test", ".sqlite", tempDir);
+
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + source);
+                Statement stmt = conn.createStatement()) {
+            createTableAndInsertRows(stmt);
+        }
+
+        try (SQLiteConnection conn =
+                        JDBC.createConnection("jdbc:sqlite:" + target, new Properties());
+                Connection locker = DriverManager.getConnection("jdbc:sqlite:" + target);
+                Statement lockStmt = locker.createStatement()) {
+            DB db = conn.getDatabase();
+
+            // the target schema does not exist
+            assertThat(db.restore("doesnotexist", source.getAbsolutePath(), null, 1, 1, 100))
+                    .isNotEqualTo(SQLiteErrorCode.SQLITE_OK.code);
+
+            // the target database is locked by another connection
+            lockStmt.execute("begin exclusive");
+            assertThat(db.restore("main", source.getAbsolutePath(), null, 1, 1, 100))
+                    .isEqualTo(SQLiteErrorCode.SQLITE_BUSY.code);
+        }
+    }
+
+    @Test
     public void memoryToDisk() throws Exception {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:");
                 Statement stmt = conn.createStatement()) {
