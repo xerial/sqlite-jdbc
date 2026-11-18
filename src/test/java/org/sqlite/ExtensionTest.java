@@ -2,15 +2,20 @@ package org.sqlite;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.assertj.core.data.Offset.offset;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class ExtensionTest {
     Connection conn;
@@ -138,6 +143,63 @@ public class ExtensionTest {
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString(1)).isEqualTo("£€");
         rs.close();
+    }
+
+    @ParameterizedTest
+    @MethodSource("undefinedAggregateCases")
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    public void stdevVarianceUndefinedReturnsNull(String function, String inputSql)
+            throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+        String sql = "SELECT " + function + "(a) FROM (" + inputSql + ") AS t";
+        try (ResultSet rs = stat.executeQuery(sql)) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getObject(1)).isNull();
+            assertThat(rs.wasNull()).isTrue();
+        }
+    }
+
+    static Stream<Arguments> undefinedAggregateCases() {
+        return Stream.of("stdev", "variance")
+                .flatMap(
+                        fn ->
+                                Stream.of(
+                                                "SELECT 1 AS a WHERE 0",
+                                                "SELECT NULL AS a",
+                                                "SELECT NULL AS a UNION ALL SELECT NULL",
+                                                "SELECT 1 AS a",
+                                                "SELECT 1.5 AS a",
+                                                "SELECT NULL AS a UNION ALL SELECT 2 AS a UNION ALL SELECT NULL")
+                                        .map(input -> Arguments.of(fn, input)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("definedAggregateCases")
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    public void stdevVarianceDefinedCalculates(String function, String inputSql, double expected)
+            throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+        String sql = "SELECT " + function + "(a) FROM (" + inputSql + ") AS t";
+        try (ResultSet rs = stat.executeQuery(sql)) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getObject(1)).isNotNull();
+            assertThat(rs.wasNull()).isFalse();
+            assertThat(rs.getDouble(1)).isCloseTo(expected, offset(1e-12));
+        }
+    }
+
+    static Stream<Arguments> definedAggregateCases() {
+        return Stream.of(
+                Arguments.of("stdev", "SELECT 1 AS a UNION ALL SELECT 2", Math.sqrt(0.5)),
+                Arguments.of("stdev", "SELECT 5 AS a UNION ALL SELECT 5", 0.0),
+                Arguments.of(
+                        "stdev",
+                        "SELECT 1 AS a UNION ALL SELECT NULL UNION ALL SELECT 2",
+                        Math.sqrt(0.5)),
+                Arguments.of("variance", "SELECT 1 AS a UNION ALL SELECT 2", 0.5),
+                Arguments.of("variance", "SELECT 5 AS a UNION ALL SELECT 5", 0.0),
+                Arguments.of(
+                        "variance", "SELECT 1 AS a UNION ALL SELECT NULL UNION ALL SELECT 2", 0.5));
     }
 
     private void assertReturnsRow(String sql) throws Exception {
