@@ -1710,7 +1710,10 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
         sql.append("    UNION ALL").append("\n");
         sql.append("    SELECT").append("\n");
         sql.append("      NAME,").append("\n");
-        sql.append("      UPPER(TYPE) AS TYPE").append("\n");
+        // Virtual tables have no root b-tree page; inspecting the schema does not load the module.
+        sql.append("      CASE WHEN TYPE = 'table' AND COALESCE(ROOTPAGE, 0) = 0")
+                .append(" THEN 'VIRTUAL TABLE' ELSE UPPER(TYPE) END AS TYPE")
+                .append("\n");
         sql.append("    FROM").append("\n");
         sql.append("      sqlite_schema").append("\n");
         sql.append("    WHERE").append("\n");
@@ -1762,7 +1765,9 @@ public abstract class JDBC3DatabaseMetaData extends CoreDatabaseMetaData {
                         + "UNION "
                         + "SELECT 'SYSTEM TABLE' AS TABLE_TYPE "
                         + "UNION "
-                        + "SELECT 'GLOBAL TEMPORARY' AS TABLE_TYPE;";
+                        + "SELECT 'GLOBAL TEMPORARY' AS TABLE_TYPE "
+                        + "UNION "
+                        + "SELECT 'VIRTUAL TABLE' AS TABLE_TYPE;";
 
         if (getTableTypes == null) {
             getTableTypes = conn.prepareStatement(sql);
