@@ -101,4 +101,10 @@ public interface Codes {
     public static final int SQLITE_TEXT = 3;
     public static final int SQLITE_BLOB = 4;
     public static final int SQLITE_NULL = 5;
+
+    // states returned by sqlite3_txn_state()
+
+    public static final int SQLITE_TXN_NONE = 0;
+    public static final int SQLITE_TXN_READ = 1;
+    public static final int SQLITE_TXN_WRITE = 2;
 }

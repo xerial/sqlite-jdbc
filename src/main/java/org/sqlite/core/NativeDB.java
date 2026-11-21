@@ -390,6 +390,10 @@ public final class NativeDB extends DB {
     @Override
     public synchronized native int limit(int id, int value) throws SQLException;
 
+    /** @see org.sqlite.core.DB#transactionState(String) */
+    @Override
+    public synchronized native int transactionState(String schema) throws SQLException;
+
     private byte[] nameToUtf8ByteArray(String nameType, String name) throws SQLException {
         final byte[] nameUtf8 = stringToUtf8ByteArray(name);
         if (name == null || "".equals(name) || nameUtf8.length > 255) {

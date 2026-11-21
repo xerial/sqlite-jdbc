@@ -1413,6 +1413,30 @@ JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_limit(JNIEnv *env, jobject 
     return sqlite3_limit(db, id, value);
 }
 
+JNIEXPORT jint JNICALL Java_org_sqlite_core_NativeDB_transactionState(
+        JNIEnv *env, jobject this, jstring schema)
+{
+    sqlite3 *db = gethandle(env, this);
+    char *schema_bytes = NULL;
+    int state;
+
+    if (!db)
+    {
+        throwex_db_closed(env);
+        return -1;
+    }
+
+    if (schema)
+    {
+        stringToUtf8Bytes(env, schema, &schema_bytes, NULL);
+        if (!schema_bytes) { return -1; }
+    }
+
+    state = sqlite3_txn_state(db, schema_bytes);
+    freeUtf8Bytes(schema_bytes);
+    return state;
+}
+
 // COMPOUND FUNCTIONS ///////////////////////////////////////////////
 
 JNIEXPORT jobjectArray JNICALL Java_org_sqlite_core_NativeDB_column_1metadata(
