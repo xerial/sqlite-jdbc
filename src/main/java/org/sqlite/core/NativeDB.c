@@ -230,6 +230,13 @@ static void sethandle(JNIEnv *env, jobject nativeDB, sqlite3 * ref)
     (*env)->SetLongField(env, nativeDB, dbpointer, fromref(ref));
 }
 
+// interrupt() does not take the NativeDB lock, so that it can stop a statement that is running.
+// This mutex keeps it from reading the handle while _close() takes it away to free it.
+static sqlite3_mutex * interrupt_mutex(void)
+{
+    return sqlite3_mutex_alloc(SQLITE_MUTEX_STATIC_APP1);
+}
+
 struct BusyHandlerContext {
     JavaVM * vm;
     jobject obj;
@@ -597,14 +604,20 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1open_1utf8(
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_interrupt(JNIEnv *env, jobject this)
 {
-    sqlite3 *db = gethandle(env, this);
+    sqlite3 *db;
+
+    sqlite3_mutex_enter(interrupt_mutex());
+    db = gethandle(env, this);
+    if (db)
+    {
+        sqlite3_interrupt(db);
+    }
+    sqlite3_mutex_leave(interrupt_mutex());
+
     if (!db)
     {
         throwex_db_closed(env);
-        return;
     }
-
-    sqlite3_interrupt(db);
 }
 
 JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB_busy_1timeout(
@@ -1857,11 +1870,19 @@ JNIEXPORT void JNICALL Java_org_sqlite_core_NativeDB__1close(
         clear_commit_listener(env, nativeDB, db);
         clear_update_listener(env, nativeDB);
 
+        // Clear the handle before sqlite3_close() frees the connection, so that a concurrent
+        // interrupt() is either done with it or no longer finds it
+        sqlite3_mutex_enter(interrupt_mutex());
+        sethandle(env, nativeDB, 0);
+        sqlite3_mutex_leave(interrupt_mutex());
+
         if (sqlite3_close(db) != SQLITE_OK)
         {
+            // The connection is still open, throwex() reads its error message through the handle
+            sethandle(env, nativeDB, db);
             throwex(env, nativeDB);
+            sethandle(env, nativeDB, 0);
         }
-        sethandle(env, nativeDB, 0);
     }
 }
 
