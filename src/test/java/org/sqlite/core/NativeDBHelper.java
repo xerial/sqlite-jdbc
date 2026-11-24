@@ -41,4 +41,14 @@ public class NativeDBHelper {
     public static long getUpdateListener(DB nativeDB) {
         return ((NativeDB) nativeDB).getUpdateListener();
     }
+
+    /**
+     * Get the native pointer of the authorizer
+     *
+     * @param nativeDB the native db object
+     * @return the pointer of the authorizer
+     */
+    public static long getAuthorizer(DB nativeDB) {
+        return ((NativeDB) nativeDB).getAuthorizer();
+    }
 }
