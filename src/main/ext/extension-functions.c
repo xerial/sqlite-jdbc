@@ -1136,6 +1136,16 @@ static void rightFunc(sqlite3_context *context, int argc, sqlite3_value **argv){
 
   z  = (char *)sqlite3_value_text(argv[0]);
   l  = sqlite3_value_int(argv[1]);
+
+  if( l<0 ){
+    /* A negative length means "start before the string": c-l exceeds the
+    ** character count, so the cursor below walks past the terminating nul
+    ** with no bound and eventually faults. Return the empty string that a
+    ** negative length has always produced, without the out-of-bounds walk. */
+    sqlite3_result_text(context, "", 0, SQLITE_STATIC);
+    return;
+  }
+
   zt = z;
 
   while( sqliteCharVal((unsigned char *)zt)!=0){

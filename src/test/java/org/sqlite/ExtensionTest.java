@@ -140,6 +140,32 @@ public class ExtensionTest {
         rs.close();
     }
 
+    @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    public void rightstrNegativeLength() throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+
+        // rightstr computed "characters to skip" as c - l. A negative length made
+        // that larger than the string, and the cursor walk past the terminating
+        // nul was unbounded: large magnitudes ran into an unmapped page and killed
+        // the JVM with SIGSEGV, which no JDBC exception can catch.
+        ResultSet rs = stat.executeQuery("select rightstr('abcdef', -1000000000)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEmpty();
+        rs.close();
+
+        rs = stat.executeQuery("select rightstr('abcdef', -1)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEmpty();
+        rs.close();
+
+        // positive lengths still select the tail
+        rs = stat.executeQuery("select rightstr('abcdef', 2)");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString(1)).isEqualTo("ef");
+        rs.close();
+    }
+
     private void assertReturnsRow(String sql) throws Exception {
         try (ResultSet rs = stat.executeQuery(sql)) {
             assertThat(rs.next()).isTrue();
