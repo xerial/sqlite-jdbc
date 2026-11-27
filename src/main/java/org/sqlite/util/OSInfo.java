@@ -30,7 +30,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -174,10 +176,23 @@ public class OSInfo {
     @AndroidSignatureIgnore(explanation = "Should not reach this code path")
     private static boolean isAlpineLinux() {
         try (Stream<String> osLines = Files.lines(Paths.get("/etc/os-release"))) {
-            return osLines.anyMatch(l -> l.startsWith("ID") && l.contains("alpine"));
+            return isMuslFromOsRelease(osLines);
         } catch (Exception ignored2) {
         }
         return false;
+    }
+
+    /**
+     * Decides whether the given /etc/os-release lines describe a musl based Alpine system. An
+     * Alpine-based image can ship glibc instead of musl, in which case it sets LIBC_TYPE=glibc. We
+     * must not report musl in that case, otherwise the wrong native library is selected.
+     */
+    static boolean isMuslFromOsRelease(Stream<String> osReleaseLines) {
+        List<String> lines = osReleaseLines.collect(Collectors.toList());
+        boolean alpine = lines.stream().anyMatch(l -> l.startsWith("ID") && l.contains("alpine"));
+        boolean glibc =
+                lines.stream().anyMatch(l -> l.startsWith("LIBC_TYPE") && l.contains("glibc"));
+        return alpine && !glibc;
     }
 
     static String getHardwareName() {
