@@ -149,6 +149,26 @@ public class ExtensionTest {
 
     @Test
     @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
+    public void modeAndQuartilesKeep64BitIntegers() throws Exception {
+        Utils.assumeJdbcExtensions(conn);
+
+        // mode, lower_quartile and upper_quartile store integer values as 64-bit
+        // but used to read them back as int when producing the result, so anything
+        // outside the 32-bit range came back truncated to its low 32 bits.
+        ResultSet rs =
+                stat.executeQuery(
+                        "with t(x) as (values (-6000000000), (-6000000000), (7),"
+                                + " (5000000000), (5000000000), (5000000000))"
+                                + " select mode(x), lower_quartile(x), upper_quartile(x) from t");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getLong(1)).isEqualTo(5000000000L);
+        assertThat(rs.getLong(2)).isEqualTo(-6000000000L);
+        assertThat(rs.getLong(3)).isEqualTo(5000000000L);
+        rs.close();
+    }
+
+    @Test
+    @DisabledInNativeImage // assertj Assumptions do not work in native-image tests
     public void dbstat() throws Exception {
         assumeThat(Utils.getCompileOptions(conn))
                 .as("SQLite has to be compiled with ENABLE_DBSTAT_VTAB")
