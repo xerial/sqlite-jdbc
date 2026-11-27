@@ -131,7 +131,59 @@ public class DBMetaDataTest {
         assertThat(rs.getString("TABLE_TYPE")).isEqualTo("TABLE");
         assertThat(rs.next()).isTrue();
         assertThat(rs.getString("TABLE_TYPE")).isEqualTo("VIEW");
+        assertThat(rs.next()).isTrue();
+        assertThat(rs.getString("TABLE_TYPE")).isEqualTo("VIRTUAL TABLE");
         assertThat(rs.next()).isFalse();
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "CREATE VIRTUAL TABLE searchdocs USING fts5(content)",
+                "create virtual table searchdocs using fts5(content)",
+                "CREATE /* comment */ VIRTUAL\nTABLE searchdocs USING fts5(content)"
+            })
+    public void getVirtualTables(String createSql) throws SQLException {
+        stat.execute(createSql);
+        stat.execute("insert into searchdocs values ('searchable text')");
+
+        try (ResultSet rs = meta.getTables(null, null, "searchdocs", null)) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("searchdocs");
+            assertThat(rs.getString("TABLE_TYPE")).isEqualTo("VIRTUAL TABLE");
+            assertThat(rs.next()).isFalse();
+        }
+        try (ResultSet rs =
+                meta.getTables(null, null, "searchdocs", new String[] {"virtual table"})) {
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString("TABLE_NAME")).isEqualTo("searchdocs");
+            assertThat(rs.next()).isFalse();
+        }
+        try (ResultSet rs = meta.getTables(null, null, "searchdocs", new String[] {"TABLE"})) {
+            assertThat(rs.next()).isFalse();
+        }
+    }
+
+    @Test
+    public void virtualTableMetadataPreservesOtherTypes() throws SQLException {
+        stat.execute("create virtual table searchdocs using fts5(content)");
+        stat.execute("create table withoutrowid (id integer primary key) without rowid");
+        stat.execute("create temp table temporarytable (id integer)");
+
+        Map<String, String> types = new HashMap<>();
+        try (ResultSet rs = meta.getTables(null, null, null, null)) {
+            while (rs.next()) {
+                types.put(rs.getString("TABLE_NAME"), rs.getString("TABLE_TYPE"));
+            }
+        }
+        assertThat(types)
+                .containsEntry("searchdocs", "VIRTUAL TABLE")
+                .containsEntry("searchdocs_data", "TABLE")
+                .containsEntry("withoutrowid", "TABLE")
+                .containsEntry("test", "TABLE")
+                .containsEntry("testView", "VIEW")
+                .containsEntry("temporarytable", "GLOBAL TEMPORARY")
+                .containsEntry("sqlite_schema", "SYSTEM TABLE");
     }
 
     @Test
