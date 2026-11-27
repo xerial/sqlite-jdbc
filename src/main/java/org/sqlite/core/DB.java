@@ -827,6 +827,17 @@ public abstract class DB implements Codes {
      */
     public abstract int limit(int id, int value) throws SQLException;
 
+    /**
+     * Returns the current transaction state of a schema without changing the transaction.
+     *
+     * @param schema The schema name, or null to return the highest state across all schemas.
+     * @return {@link Codes#SQLITE_TXN_NONE}, {@link Codes#SQLITE_TXN_READ}, or {@link
+     *     Codes#SQLITE_TXN_WRITE}; -1 if the schema name is not valid.
+     * @throws SQLException If the database has been closed.
+     * @see <a href="https://www.sqlite.org/c3ref/txn_state.html">sqlite3_txn_state</a>
+     */
+    public abstract int transactionState(String schema) throws SQLException;
+
     public interface ProgressObserver {
         void progress(int remaining, int pageCount);
     }
