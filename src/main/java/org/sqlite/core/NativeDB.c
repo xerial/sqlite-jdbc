@@ -355,8 +355,9 @@ static jobject* get_initialized_udf_context(sqlite3_context *context) {
         struct UDFData *udf = (struct UDFData*)sqlite3_user_data(context);
         (*udf->vm)->AttachCurrentThread(udf->vm, (void **)&env, 0);
 
-        *func = (*env)->CallObjectMethod(env, udf->func, aclone);
-        *func = (*env)->NewGlobalRef(env, *func);
+        jobject clone = (*env)->CallObjectMethod(env, udf->func, aclone);
+        *func = (*env)->NewGlobalRef(env, clone);
+        (*env)->DeleteLocalRef(env, clone);
     }
     return func;
 }
@@ -427,7 +428,13 @@ int xCompare(void* context, int len1, const void* str1, int len2, const void* st
     jstring jstr1 = (*env)->NewString(env, str1, len1 / 2);
     jstring jstr2 = (*env)->NewString(env, str2, len2 / 2);
 
-    return (*env)->CallIntMethod(env, coll->func, mth_compare, jstr1, jstr2);
+    // xCompare runs inside a native call such as step(), so local references are only released
+    // when that call returns. Delete them here, otherwise every compared string stays reachable
+    // until the whole sort is done.
+    int ret = (*env)->CallIntMethod(env, coll->func, mth_compare, jstr1, jstr2);
+    (*env)->DeleteLocalRef(env, jstr1);
+    (*env)->DeleteLocalRef(env, jstr2);
+    return ret;
 }
 
 
@@ -1475,6 +1482,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_sqlite_core_NativeDB_column_1metadata(
 
         (*env)->SetBooleanArrayRegion(env, colData, 0, 3, colDataRaw);
         (*env)->SetObjectArrayElement(env, array, i, colData);
+        (*env)->DeleteLocalRef(env, colData);
     }
 
     free(colDataRaw);
